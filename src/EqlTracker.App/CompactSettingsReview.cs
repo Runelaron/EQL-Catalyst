@@ -107,6 +107,10 @@ internal static class CompactSettingsReview
                 foreach(string token in new[]{"Surface","InnerSurface","DetailSurface","AlternateRow","ButtonFace"}){var color=UI.Brush(token).Color;Check(color.R==color.G&&color.G==color.B&&color.R<=0x25,"Shadowman uses neutral near-black surfaces: "+token);}
                 Check(UI.Brush("Spell").Color!=UI.Brush("Melee").Color&&UI.Brush("Mint").Color.G>UI.Brush("Mint").Color.R,"Shadowman preserves semantic combat colors");
             }
+            tracker.ShowView(TrackerTab.Exaltations);Flush(tracker);
+            var effect=Usability.Tree(tracker).OfType<DockPanel>().Single(d=>d.Children.OfType<TextBlock>().Any(t=>t.Text=="EFFECT"));
+            Check(effect.Margin.Left==0&&effect.Margin.Right==0,themeName+" Effect inspector has no redundant horizontal outer inset");
+            foreach(double scale in new[]{1d,1.5,2d,3d})Save(themeName.ToLowerInvariant()+"-exaltation-spacing-"+scale.ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+"x",(FrameworkElement)tracker.Content,1220,800,scale);
         }
         var inspector=(DockPanel)FocusedLayout.FloatingInspector("Item Details",UI.Text("Synthetic item"));
         Check(inspector.Margin.Left==0&&inspector.Margin.Right==0&&inspector.Children.OfType<Border>().Single().Padding==new Thickness(6),"Floating inspectors remove outer horizontal padding and retain internal padding");
