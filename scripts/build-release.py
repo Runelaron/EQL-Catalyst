@@ -12,7 +12,7 @@ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 HIDDEN=getattr(subprocess,'CREATE_NO_WINDOW',0)
 def run(args,**kw):
     if kw.get('capture_output'):return subprocess.run([str(a) for a in args],cwd=ROOT,check=True,creationflags=HIDDEN,**kw)
-    result=subprocess.run([str(a) for a in args],cwd=ROOT,capture_output=True,text=True,creationflags=HIDDEN,**kw)
+    result=subprocess.run([str(a) for a in args],cwd=ROOT,capture_output=True,text=True,encoding='utf-8',errors='replace',creationflags=HIDDEN,**kw)
     print(result.stdout+result.stderr,flush=True);result.check_returncode();return result
 def bootstrap():
     TOOLS.mkdir(parents=True,exist_ok=True); setup=TOOLS/'inno-setup.exe'
@@ -20,7 +20,9 @@ def bootstrap():
         with urllib.request.urlopen(URL,timeout=120) as response:setup.write_bytes(response.read())
     if sha(setup)!=PIN:raise RuntimeError('Inno Setup checksum mismatch')
     quoted=str(setup).replace("'","''")
-    run(['powershell','-NoProfile','-Command',f"$s=Get-AuthenticodeSignature -LiteralPath '{quoted}'; $s | Select-Object Status,StatusMessage,@{{n='Signer';e={{$_.SignerCertificate.Subject}}}},@{{n='Thumbprint';e={{$_.SignerCertificate.Thumbprint}}}} | ConvertTo-Json -Compress; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Pyrsys B.V.'){{exit 1}}"])
+    shell=shutil.which('pwsh') or shutil.which('powershell')
+    if not shell:raise RuntimeError('PowerShell is required for publisher verification')
+    run([shell,'-NoProfile','-Command',f"$ErrorActionPreference='Stop'; $s=Get-AuthenticodeSignature -LiteralPath '{quoted}'; $s | Select-Object Status,StatusMessage,@{{n='Signer';e={{$_.SignerCertificate.Subject}}}},@{{n='Thumbprint';e={{$_.SignerCertificate.Thumbprint}}}} | ConvertTo-Json -Compress; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Pyrsys B.V.'){{exit 1}}"])
     run([setup,'/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/NOICONS','/TASKS=',f'/DIR={TOOLS/"compiler"}'])
     return TOOLS/'compiler/ISCC.exe'
 def source_files():
