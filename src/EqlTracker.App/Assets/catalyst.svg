@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+ <title>EQL Catalyst — a blue elemental orb held by gold magician hands</title>
+ <defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.35" y2="1"><stop stop-color="#FFE6A0"/><stop offset="0.5" stop-color="#E9B94F"/><stop offset="1" stop-color="#A76E27"/></linearGradient>
+  <radialGradient id="orb" cx="0.32" cy="0.26" r="0.8"><stop stop-color="#DAFBFF"/><stop offset="0.3" stop-color="#69E1F2"/><stop offset="0.65" stop-color="#359DCD"/><stop offset="1" stop-color="#123D70"/></radialGradient>
+ </defs>
+ <circle cx="128" cy="128" r="122" fill="#081923" stroke="#497786" stroke-width="3"/>
+ <path fill="url(#gold)" d="M28 100 C26 77 41 54 66 40 C95 24 132 22 167 30 L201 41 Q215 48 211 60 Q207 70 195 67 L165 58 L143 57 L173 67 Q181 71 177 79 Q173 84 164 81 L127 70 L105 72 L144 83 Q154 86 150 95 Q147 101 137 97 L94 86 C77 87 63 99 52 113 Q43 122 34 115Z"/>
+ <path fill="url(#gold)" d="M228 156 C230 179 215 202 190 216 C161 232 124 234 89 226 L55 215 Q41 208 45 196 Q49 186 61 189 L91 198 L113 199 L83 189 Q75 185 79 177 Q83 172 92 175 L129 186 L151 184 L112 173 Q102 170 106 161 Q109 155 119 159 L162 170 C179 169 193 157 204 143 Q213 134 222 141Z"/>
+ <circle cx="128" cy="128" r="51" fill="url(#orb)" stroke="#9AEFFF" stroke-width="3"/>
+ <path fill="#ECFCFF" d="M128 97 L135 119 L154 128 L135 135 L128 157 L121 135 L102 128 L121 120Z"/>
+ <path fill="none" stroke="#C4F5FF" stroke-width="4" stroke-linecap="round" d="M94 116 Q101 95 120 92"/>
+</svg>

@@ -1,0 +1,15 @@
+[Tue Jan 06 12:00:00 2026] Cloudling told you, 'Attacking a fire beetle Master.'
+[Tue Jan 06 12:00:00 2026] Cloudling hits a fire beetle for 35 points of damage.
+[Tue Jan 06 12:00:08 2026] Cloudling hits a fire beetle for 17 points of damage.
+[Tue Jan 06 12:00:11 2026] You slash a fire beetle for 35 points of damage.
+[Tue Jan 06 12:00:11 2026] You have slain a fire beetle!
+[Tue Jan 06 12:00:11 2026] You looted a Fire Beetle Leg from a fire beetle's corpse and sold it for 1 copper.
+[Tue Jan 06 12:00:11 2026] You looted a Fire Beetle Leg from a fire beetle's corpse and sold it for 1 copper.
+[Tue Jan 06 12:00:11 2026] --You have looted a Fire Beetle Eye from a fire beetle's corpse.--
+[Tue Jan 06 12:00:40 2026] You shoot a decaying skeleton for 17 points of damage.
+[Tue Jan 06 12:00:43 2026] You slash a decaying skeleton for 17 points of damage.
+[Tue Jan 06 12:00:48 2026] You bash a decaying skeleton for 19 points of damage. (Critical)
+[Tue Jan 06 12:00:48 2026] You have slain a decaying skeleton!
+[Tue Jan 06 12:00:48 2026] You looted a Bone Chips from a decaying skeleton's corpse and sold it for 1 copper.
+[Tue Jan 06 12:00:48 2026] You looted a Bone Chips from a decaying skeleton's corpse and sold it for 1 copper.
+[Tue Jan 06 12:00:48 2026] You looted a Bone Chips from a decaying skeleton's corpse and sold it for 1 copper.

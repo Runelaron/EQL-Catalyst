@@ -1,0 +1,74 @@
+[
+  {
+    "Title": "Cloak of Flames",
+    "Revision": 198194,
+    "Timestamp": "2026-10-16T07:56:36Z",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|itemname       = Cloak of Flames\n|lucy_img_ID    = 658\n|statsblock     = \nAttunable<br>\nSlot: BACK<br>\nAC: 10<br>\nAGI: +9  DEX: +9  HP: +50<br>\nSV FIRE: +15<br>\nHaste: +36%<br>\nSize: MEDIUM  WT: 0.1<br>\nClass: ALL<br>\nRace: ALL<br>\n|merchant_value = 51p 4g 2s 9c\n|notes          = \n|dropsfrom      = \n\n[[Nagafen's Lair]]\n\n* [[Lord Nagafen]]\n\n}}</onlyinclude>\n\n[[Category:Bard Equipment]]\n[[Category:Beastlord Equipment]]\n[[Category:Berserker Equipment]]\n[[Category:Cleric Equipment]]\n[[Category:Druid Equipment]]\n[[Category:Enchanter Equipment]]\n[[Category:Magician Equipment]]\n[[Category:Monk Equipment]]\n[[Category:Necromancer Equipment]]\n[[Category:Paladin Equipment]]\n[[Category:Ranger Equipment]]\n[[Category:Rogue Equipment]]\n[[Category:Shadow Knight Equipment]]\n[[Category:Shaman Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Wizard Equipment]]\n\n[[Category:Back]]\n\n[[Category:Worn Effects]]\n\n[[Category:Nagafen's Lair]]\n[[Category:Worn Haste]]"
+  },
+  {
+    "Title": "Engineer's Ring",
+    "Revision": 193407,
+    "Timestamp": "2026-10-12T23:33:03Z",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|itemname       = Engineer's Ring\n|lucy_img_ID    = 616\n|statsblock     = \nLore Equipped, No Trade<br>\nSlot: FINGER<br>\nAC: 20<br>\nSTR: +5  STA: +5  INT: +5  WIS: +5  AGI: +5  DEX: +5  CHA: +5  HP: +5  MANA: +20  END: +20<br>\nSize: TINY  WT: 0.1<br>\nClass: WAR CLR PAL SHD ROG NEC WIZ MAG ENC<br>\nRace: ALL<br>\n|notes          = {{Item Lore|Ring of an engineer}}\n|dropsfrom      = \n\n[[Plane of Hate]]\n\n* [[Innoruuk_(God)|Innoruuk]]\n\n}}</onlyinclude>\n\n[[Category:Cleric Equipment]]\n[[Category:Enchanter Equipment]]\n[[Category:Magician Equipment]]\n[[Category:Necromancer Equipment]]\n[[Category:Paladin Equipment]]\n[[Category:Rogue Equipment]]\n[[Category:Shadow Knight Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Wizard Equipment]]\n\n[[Category:Fingers]]\n\n[[Category:Plane of Hate]]"
+  },
+  {
+    "Title": "Icebelt",
+    "Revision": 179769,
+    "Timestamp": "2026-09-29T23:06:18Z",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|itemname    = Icebelt\n|lucy_img_ID = 718\n|statsblock  = \nLore Equipped, No Trade<br>\nSlot: WAIST<br>\nAC: 10<br>\nSTR: +10  DEX: +10  WIS: +10  AGI: +10<br>\nSV FIRE: +5  SV DISEASE: +5  SV COLD: +5  SV MAGIC: +5  SV POISON: +5<br>\nSize: SMALL  WT: 2.0<br>\nClass: WAR ROG SHM BST BER<br>\nRace: ALL<br>\n|notes       = {{Item Lore|Belt made of ice}}\n|dropsfrom   = \n[[Plane of Hate]]\n\n* [[Innoruuk_(God)|Innoruuk]]\n}}</onlyinclude>\n\n[[Category:Rogue Equipment]]\n[[Category:Shaman Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Waist]]\n[[Category:Plane of Hate]]\n[[Category:Beastlord Equipment]]\n[[Category:Berserker Equipment]]"
+  },
+  {
+    "Title": "Indicolite Bracer",
+    "Revision": 193300,
+    "Timestamp": "2026-10-11T23:59:43Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|itemname       = Indicolite Bracer\n|lucy_img_ID    = 516\n|statsblock     = \nNo Trade, Quest<br>\nSlot: WRIST<br>\nAC: 12<br>\nSTR: +3  DEX: +3<br>\nSV FIRE: +7  SV COLD: +7  SV MAGIC: +7<br>\nSize: SMALL  WT: 3.0<br>\nClass: WAR<br>\nRace: ALL<br>\n|notes          = Part of the [[Indicolite Armor]] set.\n|dropsfrom      = \n\n[[Plane of Fear]]\n\n* [[a fetid fiend]]\n* [[a spinechiller spider]]\n* [[phoboplasm]]\n\n[[Plane of Hate]]\n\n* [[a kiraikuei]]\n* [[a loathling lich]]\n* [[a revultant rat]]\n* [[a haunted chest]]\n* [[Grandmaster R`Tal]]\n\n}}</onlyinclude>\n\n[[Category:Warrior Equipment]]\n\n[[Category:Wrist]]\n\n[[Category:Fashion: Plate]]\n[[Category:Fashion: Driftwood]]\n\n[[Category:Plane of Fear]]\n[[Category:Plane of Hate]]"
+  },
+  {
+    "Title": "Indicolite Breastplate",
+    "Revision": 193374,
+    "Timestamp": "2026-10-12T01:21:48Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|itemname       = Indicolite Breastplate\n|lucy_img_ID    = 624\n|statsblock     = \nLore Equipped, No Trade, Quest<br>\nSlot: CHEST<br>\nAC: 35<br>\nSTR: +15  STA: +15  DEX: +15<br>\nSize: LARGE  WT: 7.5<br>\nClass: WAR<br>\nRace: ALL<br>\n|notes          = Part of the [[Indicolite Armor]] set.\n|dropsfrom      = \n\n[[Plane of Fear]]\n\n* [[Amygdalan warrior]]\n* [[Amygdalan knight]]\n* [[phoboplasm]]\n\n[[Plane of Hate]]\n\n* [[a haunted chest]]\n* [[Innoruuk's Chosen]] (male) - Raid version only?\n* [[Grandmaster R`Tal]]\n\n}}</onlyinclude>\n\n[[Category:Warrior Equipment]]\n\n[[Category:Chest]]\n\n[[Category:Fashion: Plate]]\n[[Category:Fashion: Driftwood]]\n\n[[Category:Plane of Fear]]\n[[Category:Plane of Hate]]"
+  },
+  {
+    "Title": "Indicolite Greaves",
+    "Revision": 179886,
+    "Timestamp": "2026-09-30T02:32:01Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|itemname    = Indicolite Greaves\n|lucy_img_ID = 540\n|statsblock  = \nLore Equipped, No Trade, Quest<br>\nSlot: LEGS<br>\nAC: 20<br>\nSTR: +5  STA: +5  AGI: +5  END: +10<br>\nSize: LARGE  WT: 5.6<br>\nClass: WAR<br>\nRace: ALL<br>\n|notes       = Part of the [[Indicolite Armor]] set.\n|dropsfrom   = \n[[Plane of Fear]]\n\n* [[phoboplasm]]\n\n[[Plane of Hate]]\n\n* [[a Champion of Innoruuk]]\n* [[a Sage of Innoruuk]]\n* [[an elite dragoon]] (female)\n* [[Innoruuk's Chosen]] (female)\n* [[An Agent of Innoruuk]]\n* [[a haunted chest]]\n* [[Grandmaster R`Tal]]\n}}</onlyinclude>\n\n[[Category:Warrior Equipment]]\n[[Category:Legs]]\n[[Category:Plane of Fear]]\n[[Category:Plane of Hate]]\n[[Category:Fashion: Plate]]\n[[Category:Fashion: Driftwood]]"
+  },
+  {
+    "Title": "Indicolite Vambraces",
+    "Revision": 175260,
+    "Timestamp": "2026-08-31T12:37:31Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = Part of the [[Indicolite Armor]] set.\n|itemname    = Indicolite Vambraces\n|lucy_img_ID = 622\n|statsblock  = \nLore Equipped, No Trade, Quest<br>\nSlot: ARMS<br>\nAC: 20<br>\nSTR: +9  DEX: +5<br>\nWT: 4.9  Size: SMALL<br>\nClass: WAR<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Plane of Fear]]\n\n* [[phoboplasm]]\n\n[[Plane of Hate]]\n\n* [[a forsaken revenant]] (male)\n* [[an ashenbone drake]]\n* [[a haunted chest]]\n* [[Grandmaster R`Tal]]\n\n}}</onlyinclude>\n\n[[Category:Warrior Equipment]]\n[[Category:Arms]]\n[[Category:Plane of Fear]]\n[[Category:Plane of Hate]]\n[[Category:Fashion: Plate]]\n[[Category:Fashion: Driftwood]]"
+  },
+  {
+    "Title": "LarkTwitter Bow",
+    "Revision": 174927,
+    "Timestamp": "2026-08-30T16:17:04Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = LarkTwitter Bow\n|lucy_img_ID = 597\n|statsblock  = \nAttunable, Placeable<br>\nSlot: RANGE<br>\nSkill: Archery  Atk Delay: 42<br>\nDMG: 14<br>\nWT: 4.5  Range: 100  Size: LARGE<br>\nClass: WAR PAL RNG SHD ROG<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Lesser Faydark]]\n\n* [[Whimsy Larktwitter]]\n\n}}</onlyinclude>\n\n[[Category:Paladin Equipment]]\n[[Category:Ranger Equipment]]\n[[Category:Rogue Equipment]]\n[[Category:Shadow Knight Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Range]]\n[[Category:Archery]]\n[[Category:Lesser Faydark]]"
+  },
+  {
+    "Title": "Oakwynd",
+    "Revision": 196241,
+    "Timestamp": "2026-10-14T00:30:38Z",
+    "Text": "{{:Does Not Exist}}\n\n<onlyinclude>{{Itempage\n|notes       = {{Item Lore|Bow passed down by the Oakwynd family}}\n\nObtained during a GM event.\n|itemname    = Oakwynd\n|lucy_img_ID = 1104\n|statsblock  = \nMAGIC ITEM LORE ITEM ARTIFACT NO TRADE<br>\nSlot: RANGE<br>\nSkill: Archery Atk Delay: 20<br>\nDMG: 175<br>\nWT: 0.1 Range: 150 Size: MEDIUM<br>\nClass: RNG<br>\nRace: ALL<br>\n|gmitem = \n\n* Given out in a GM event.\n}}</onlyinclude>"
+  },
+  {
+    "Title": "Sunderfury",
+    "Revision": 161563,
+    "Timestamp": "2026-07-24T17:44:35Z",
+    "Text": "\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Sunderfury\n|lucy_img_ID = 736\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NO DROP<br>\nSlot: PRIMARY<br>\nSkill: 2H Slashing  Atk Delay: 36<br>\nDMG: 25 <br>\nHaste: +36%  <br>\nWT: 7.5  Size: LARGE<br>\nClass: WAR<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Plane of Hate]]\n\n* [[Grandmaster R`Tal]]\n\n}}</onlyinclude>\n\n[[Category:Warrior Equipment]]\n[[Category:Primary]]\n[[Category:2H Slashing]]\n[[Category:Plane of Hate]]"
+  },
+  {
+    "Title": "Barbarian Spiritist`s Hammer",
+    "Revision": 177152,
+    "Timestamp": "2026-09-08T05:22:51Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Barbarian Spiritist`s Hammer\n|lucy_img_ID = 581\n|statsblock  = \nAttunable, Placeable<br>\nSlot: PRIMARY<br>\nSkill: 2H Blunt  Atk Delay: 43<br>\nDMG: 22 <br>\nWIS: +13  INT: +13<br>\nEffect:  [[Winter's Roar|<span class='itemeff'>Winter's Roar</span>]] (Combat, Rate +64%) at Level 30<br>\nSize: LARGE  WT: 10.0<br>\nClass: SHM<br>\nRace: ALL<br>\n|merchant_value = 23p 8g 1s\n|dropsfrom = \n\n[[Plane of Fear]]<br>\n* [[Cazic Thule (God)]]<br/>\n* Unconfirmed:\n** [[Dread]]\n** [[Fright]]\n** [[Terror]]\n\n}}</onlyinclude>\n\n[[Category:Shaman Equipment]]\n[[Category:Primary]]\n[[Category:2H Blunt]]\n[[Category:Plane of Fear]]\n[[Category:Weapon Procs]]\n[[Category:Increased Proc Rate]]"
+  },
+  {
+    "Title": "Slime Blood of Cazic-Thule",
+    "Revision": 176844,
+    "Timestamp": "2026-09-07T04:46:18Z",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Slime Blood of Cazic-Thule\n|lucy_img_ID = 526\n|statsblock  = \nLore Equipped, Attunable, Quest<br>\nSlot: HANDS<br>\nAC: 16<br>\nSTR: +2  DEX: +2  STA: +2  CHA: +2  WIS: +2  INT: +2  AGI: +2  HP: +20  MANA: +20 END: +20<br>\nSV FIRE: +2  SV DISEASE: +2  SV COLD: +2  SV MAGIC: +2  SV POISON: +2<br>\nSize: SMALL  WT: 15.0<br>\nClass: ALL<br>\nRace: ALL<br>\n|merchant_value = 238p 9s 5c\n|dropsfrom = \n\n[[Plane of Fear]]<br>\n:* [[Fright]]\n:* [[Dread]]\n:* [[Terror]]\n:* [[Cazic Thule (God)]] (needs confirmation)\n\n|relatedquests = \n\n* [[Necromancer Epic Quest]]\n\n}}</onlyinclude>\n\n[[Category:Bard Equipment]]\n[[Category:Beastlord Equipment]]\n[[Category:Berserker Equipment]]\n[[Category:Cleric Equipment]]\n[[Category:Druid Equipment]]\n[[Category:Enchanter Equipment]]\n[[Category:Magician Equipment]]\n[[Category:Monk Equipment]]\n[[Category:Necromancer Equipment]]\n[[Category:Paladin Equipment]]\n[[Category:Ranger Equipment]]\n[[Category:Rogue Equipment]]\n[[Category:Shaman Equipment]]\n[[Category:Shadow Knight Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Wizard Equipment]]\n[[Category:Hands]]\n[[Category:Plane of Fear]]\n\n[[Category:Quest Items]]"
+  }
+]

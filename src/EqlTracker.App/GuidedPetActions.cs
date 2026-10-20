@@ -1,0 +1,50 @@
+using System.Windows;
+using EqlTracker.Core;
+
+namespace EqlTracker.App;
+
+public sealed partial class QuestWindow
+{
+    private void OpenPetComparisonPanel()
+    {
+        if (petResults.SelectedItem is not PetSearchRow row) { PetMessage("Select a candidate to compare.", true); return; }
+        var current = (petItems.SelectedItem as PetItemRow)?.Item;
+        var definition = current == null ? null : Controller.Catalog.FindKey(current.ItemKey) ?? Controller.Catalog.Find(current.Name);
+        var context = SelectedPetInventory is { } build ? GuidedPetBuilds.Context(Controller.Profile.ActiveLoadout, build) : Controller.Profile.ActiveLoadout;
+        var pair = ItemPairComparison.Create(definition, current?.Entry(), row.Item, PetInspectedRank(row), PetInspectedInstance(row), context, Controller.Catalog);
+        var panel = new FrostWindow(Controller, "Pet item comparison", "Ranked item differences · separate from upgrade recommendations", 720, 530) { Owner = this };
+        panel.Body.Children.Add(UI.Scroll(new PetPairComparisonView(pair))); Native.ShowPanel(panel);
+    }
+    private void CloneConfirmedPet()
+    {
+        if (!ConfirmPetWorkspaceExit()) return;
+        var source = PetInventoryEditing.Confirmed(Controller.Profile.ActiveLoadout, Controller.Catalog);
+        var draft = GuidedPetBuilds.Clone(source, "From current · " + DateTime.Now.ToString("HH:mm"));
+        Controller.Profile.ActiveLoadout.PetBuilds.Add(draft); RefreshBuildChoices(draft.Id); PetEdited();
+    }
+    private void DuplicatePetBuild()
+    {
+        if (petTheory != null) { SavePetTheorycraft(); return; }
+        if (SelectedPetInventory is not { } build) return;
+        var copy = GuidedPetBuilds.Clone(build, build.Name + " copy"); Controller.Profile.ActiveLoadout.PetBuilds.Add(copy); RefreshBuildChoices(copy.Id); PetEdited();
+    }
+    private void RenamePetBuild()
+    {
+        if (PetDestination != PetInventoryDestination.Planned || CurrentBuild is not { } build) { petNote.Text = "Choose a planned build to rename."; return; }
+        var form = new EntryDialog("Rename pet build", [("Build name", build.Name)], "Renaming affects only this saved plan.") { Owner = this };
+        if (form.ShowDialog() != true || form.Values[0].Length == 0) return; build.Name = form.Values[0]; RefreshBuildChoices(build.Id); PetEdited();
+    }
+    private void UndoPetBuild()
+    {
+        if (SelectedPetInventory is not { } build || !PetBuildEditing.Undo(build, out string reason)) { PetMessage("No previous edit to restore."); return; }
+        if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now);
+        LoadPetContext(); PetEdited(); PetMessage(reason + " undone.");
+    }
+    private void OpenPetStats()
+    {
+        if (SelectedPetInventory is not { } build) return;
+        var owner = Controller.Profile.ActiveLoadout; var context = GuidedPetBuilds.Context(owner, build);
+        var confirmed = PetInventoryEditing.Confirmed(owner, Controller.Catalog); var positions = GuidedPetBuilds.Positions(confirmed, owner, Controller.Catalog);
+        var dialog = new StatProfileDialog(Controller, context, true, positions, () => { if (petTheory != null) PetEdited(); else Changed(); }, build) { Owner = this }; Native.ShowPanel(dialog);
+    }
+}

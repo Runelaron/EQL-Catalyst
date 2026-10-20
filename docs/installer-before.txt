@@ -1,0 +1,9 @@
+EQL Catalyst Beta 1.0 - Windows x64
+
+Per-user installation is recommended. All-users installation requires elevation; the app itself runs unelevated.
+
+The application is self-contained and supports offline startup. Character profiles and caches are stored separately in LocalAppData\EQLTracker and retained by uninstall. Setup does not modify game files, create game hotkeys or enable automatic captures.
+
+This is an unsigned beta. Windows may warn or block it according to policy. Verify the release checksum and do not disable protections.
+
+Application code is GPL-3.0-only. Third-party data, fonts, runtimes and artwork retain separate notices supplied in the installation.

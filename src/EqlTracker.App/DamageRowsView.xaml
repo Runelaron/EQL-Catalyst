@@ -1,0 +1,51 @@
+<UserControl x:Class="EqlTracker.App.DamageRowsView"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="clr-namespace:EqlTracker.App">
+ <UserControl.Resources>
+  <local:DamageBrushConverter x:Key="DamageBrush"/>
+ </UserControl.Resources>
+ <ListBox x:Name="Rows" Background="Transparent" HorizontalContentAlignment="Stretch" ClipToBounds="True" Grid.IsSharedSizeScope="True"
+  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+  VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+  <ListBox.ItemContainerStyle><Style TargetType="ListBoxItem">
+   <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0,0,0,1"/>
+   <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem">
+    <Border x:Name="RowSurface" Background="Transparent" Padding="1,0"><ContentPresenter/></Border>
+    <ControlTemplate.Triggers>
+     <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowSurface" Property="Background" Value="#60406576"/></Trigger>
+     <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowSurface" Property="Background" Value="#302B354C"/></Trigger>
+    </ControlTemplate.Triggers>
+   </ControlTemplate></Setter.Value></Setter>
+  </Style></ListBox.ItemContainerStyle>
+  <ListBox.ItemTemplate><DataTemplate>
+   <Grid MouseLeave="LeaveAbility" ToolTipService.InitialShowDelay="650" ToolTipService.BetweenShowDelay="650" ToolTipService.ShowDuration="5000">
+    <Grid.ToolTip><ToolTip><TextBlock Text="{Binding Tooltip}" TextWrapping="Wrap" MaxWidth="410"/></ToolTip></Grid.ToolTip>
+    <Grid.ColumnDefinitions><ColumnDefinition x:Name="NamesColumn" Width="*"/><ColumnDefinition x:Name="MetricsColumn" Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto" SharedSizeGroup="DamageTotals"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <Grid.RowDefinitions><RowDefinition x:Name="NameLine" Height="16"/><RowDefinition x:Name="DetailsLine" Height="Auto"/></Grid.RowDefinitions>
+    <DockPanel Grid.Column="0" Margin="0,0,6,0">
+     <local:DamageGlyph Width="12" Height="12" Margin="0,0,4,0" Channel="{Binding Row.Channel}" Ability="{Binding Row.Ability}" MonkKick="{Binding Row.MonkKick}"/>
+     <TextBlock x:Name="AbilityName" Text="{Binding Label}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+    </DockPanel>
+    <TextBlock x:Name="LinkedHealing" Grid.Column="2" Text="{Binding HealingText}" Foreground="{DynamicResource Healing}" FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
+    <local:AnimatedNumber x:Name="DamageTotal" Grid.Column="3" Value="{Binding Row.Damage}" Smooth="{Binding Smooth}" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+    <TextBlock x:Name="Contribution" Grid.Column="4" Text="{Binding Row.Percent, StringFormat={}{0:0.0}%}" FontSize="11" Foreground="{DynamicResource Foreground}" MinWidth="42" TextAlignment="Right" Margin="5,0,0,0" VerticalAlignment="Center"/>
+    <Grid x:Name="DetailsBand" Grid.Row="1" Grid.ColumnSpan="5" VerticalAlignment="Center">
+     <local:DamageDetailWash Target="{Binding BarPercent}" Smooth="{Binding Smooth}" Fill="{Binding Row.Kind, Converter={StaticResource DamageBrush}}" IsHitTestVisible="False"/>
+     <local:AbilityMetricsText x:Name="Details" Row="{Binding Row}" FontSize="10" LineHeight="12" Foreground="{DynamicResource Foreground}" Margin="4,0"/>
+    </Grid>
+   </Grid>
+   <DataTemplate.Triggers><DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=local:DamageRowsView}, Path=ShowContribution}" Value="False"><Setter TargetName="Contribution" Property="Visibility" Value="Collapsed"/></DataTrigger><DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=local:DamageRowsView}, Path=HideHealing}" Value="True"><Setter TargetName="LinkedHealing" Property="Visibility" Value="Collapsed"/></DataTrigger><Trigger SourceName="AbilityName" Property="IsMouseOver" Value="True"><Setter TargetName="AbilityName" Property="Foreground" Value="{DynamicResource Accent}"/></Trigger><DataTrigger Binding="{Binding Inline}" Value="True">
+    <Setter TargetName="NamesColumn" Property="Width" Value="Auto"/><Setter TargetName="NamesColumn" Property="MaxWidth" Value="220"/><Setter TargetName="NamesColumn" Property="SharedSizeGroup" Value="AbilityNames"/><Setter TargetName="MetricsColumn" Property="Width" Value="*"/><Setter TargetName="DetailsLine" Property="Height" Value="0"/>
+    <Setter TargetName="DetailsBand" Property="Grid.Row" Value="0"/><Setter TargetName="DetailsBand" Property="Grid.Column" Value="1"/><Setter TargetName="DetailsBand" Property="Grid.ColumnSpan" Value="1"/><Setter TargetName="DetailsBand" Property="Margin" Value="6,0,10,0"/>
+   </DataTrigger><DataTrigger Binding="{Binding Compact}" Value="True">
+    <Setter TargetName="Details" Property="FontSize" Value="9"/>
+    <Setter TargetName="Details" Property="LineHeight" Value="11"/>
+    <Setter TargetName="NameLine" Property="Height" Value="14"/>
+    <Setter TargetName="AbilityName" Property="FontSize" Value="11"/>
+    <Setter TargetName="DamageTotal" Property="FontSize" Value="11"/>
+   </DataTrigger></DataTemplate.Triggers>
+  </DataTemplate></ListBox.ItemTemplate>
+ </ListBox>
+</UserControl>

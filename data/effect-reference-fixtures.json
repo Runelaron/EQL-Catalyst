@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Swarming Pain",
+    "revision": 104727,
+    "text": "{{Velious Era}}\n{{Spellpage|\n\n| spellname = Swarming Pain\n| spellicon = T\n| description = Summons a swarm of insects to attack your target, causing 50 damage every 6 seconds for up to 24 secs (1 ticks @L1 to 4 ticks @L8).\n\n| classes = \n\nThis spell is cast by NPCs only.\n\n| items_with_effect = \n\n<ul><li> {{:Blade of the Swarm}}\n</li><li> {{:Braid of Golden Hair}}\n</li></ul>\n\n| slots = \n\n{{SpellSlotRow | 4 | Decrease Hitpoints by 50 per tick }}\n\n| skill = \n| mana = 0\n| range = 200\n| casting_time = 0.00\n| fizzle_time = 0.00\n| recast_time = 0.00\n| duration = 1 ticks @L1 to 4 ticks @L8\n| target_type = Single\n| spell_type = Detrimental\n| resist = Magic (-100)\n\n| msg_cast_on_you = You feel the pain unbearable pain of a thousand stings.\n| msg_cast_on_other = Someone  is engulfed by a swarm of insects.\n| msg_wears_off = The swarm departs.\n}}\n\n[[Category:NPC Only Spells]]",
+    "verifiedAt": "2026-10-19T16:57:59.228697+00:00"
+  },
+  {
+    "name": "Siphon Strength",
+    "revision": 162851,
+    "text": "{{Classic Era}}\n{{Spellpagesmart|\n\n| spellname = Siphon Strength\n| spellicon = 7\n| description = Tears strength from your target and infuses your muscles for 6 min.\n\n| classes = \n\n* [[Necromancer]] - Level 1\n* [[Shadow Knight]] - Level 6\n\n| items_with_effect = \n\n<ul><li> {{:Disciple Symbol of Innoruuk}}\n</li></ul>\n\n| slots = \n\n{{SpellSlotRow | 3 | Decrease STR by 5 (L1) to 10 (L10) }}\n\n| skill = [[Skill Alteration | Alteration]]\n\n| mana = 5\n| range = 200\n| casting_time = 1.50\n| fizzle_time = 1.5\n| recast_time = 6.00\n| duration = 6 minutes\n| target_type = Single\n| spell_type = Detrimental\n| resist = Magic (0)\n\n| msg_cast_on_you = You feel your strength grow.\n| msg_cast_on_other = Someone  weakens.\n| msg_wears_off = Your strength returns.\n\n| where_to_obtain = \n\n<ul>\n<li>[[Necromancer#Spell Vendors|Necromancer Spell Vendors]]</li>\n<li>[[Shadow Knight#Spell Vendors|Shadow Knight Spell Vendors]]</li>\n</ul>\n}}",
+    "verifiedAt": "2026-10-19T16:57:59.228697+00:00"
+  },
+  {
+    "name": "Spirit Tap",
+    "revision": 162845,
+    "text": "{{Classic Era}}\n{{Spellpagesmart|\n\n| spellname = Spirit Tap\n| spellicon = 161\n| description = Drains your target of life energy, siphoning 210 hit points.\n\n| classes = \n\n* [[Necromancer]] - Level 26\n* [[Shadow Knight]] - Level 36\n\n| items_with_effect = \n\n<ul><li> {{:Ivandyr's Hoop}}\n</li><li>{{:The Scimitar of Lifestealing}}\n</li></ul>\n\n| slots = \n\n{{SpellSlotRow | 1 | Decrease Hitpoints by 132 (L29) to 150 (L35) }}\n\n| skill = [[Skill Alteration | Alteration]]\n\n| mana = 152\n| range = 200\n| casting_time = 3.00\n| fizzle_time = 2.50\n| recast_time = 1.50\n| duration = Instant\n| target_type = Lifetap\n| spell_type = Detrimental\n| resist = Magic (-200)\n\n| msg_cast_on_you = You feel your life force drain away.\n| msg_cast_on_other = Someone  staggers.\n| msg_wears_off =  \n\n| where_to_obtain = \n\n<ul>\n<li>[[Necromancer#Spell Vendors|Necromancer Spell Vendors]]</li>\n<li>[[Shadow Knight#Spell Vendors|Shadow Knight Spell Vendors]]</li>\n</ul>\n}}",
+    "verifiedAt": "2026-10-19T16:57:59.228697+00:00"
+  }
+]

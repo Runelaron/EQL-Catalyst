@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Spirit Tap",
+    "url": "https://eqlwiki.com/Spirit_Tap",
+    "revision": 162845,
+    "fetchedAt": "2026-10-17T17:57:48.339037+00:00",
+    "classes": "Necromancer - Level 26\nShadow Knight - Level 36",
+    "description": "Drains your target of life energy, siphoning 210 hit points.",
+    "effects": "Decrease Hitpoints by 132 (L29) to 150 (L35)",
+    "details": "mana: 152 · casting time: 3.00 · recast time: 1.50 · duration: Instant · target type: Lifetap · resist: Magic (-200)",
+    "limitation": "Conflicting source values: overview and effect table differ. Expected damage is unresolved. Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Cinder Bolt",
+    "url": "https://eqlwiki.com/Cinder_Bolt",
+    "revision": 159500,
+    "fetchedAt": "2026-10-17T17:57:49.477950+00:00",
+    "classes": "Magician - Level 33",
+    "description": "Burns your target's skin with a cinder bolt, causing 510 damage.",
+    "effects": "SpellSlotRowSmart | 1 | Decrease Hitpoints by 499 (L33) to 510 (L37) | simple = #ifeq:{Table|0}|0|0|1",
+    "details": "mana: 165 · casting time: 4.00 · recast time: 1.50 · duration: Instant · target type: Bolt · resist: Fire (0)",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Shock of Swords",
+    "url": "https://eqlwiki.com/Shock_of_Swords",
+    "revision": 157874,
+    "fetchedAt": "2026-10-17T17:57:50.621642+00:00",
+    "classes": "Magician - Level 41",
+    "description": "Conjures a shock of swords that assaults your target, causing 584 damage.",
+    "effects": "SpellSlotRowSmart | 1 | Decrease Hitpoints by 584 | simple = #ifeq:{Table|0}|0|0|1",
+    "details": "mana: 162 · casting time: 5.00 · recast time: 1.50 · duration: Instant · target type: Single · resist: Magic (0)",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Air Elemental Attack",
+    "url": "https://eqlwiki.com/Air_Elemental_Attack",
+    "revision": 157902,
+    "fetchedAt": "2026-10-17T17:57:51.770127+00:00",
+    "classes": "This spell is cast by NPCs only.",
+    "description": "Stuns your target with a gust of air.",
+    "effects": "Stun for 3.00s",
+    "details": "mana: 0 · casting time: 0.00 · recast time: 12.00 · duration: Instant · target type: Single · resist: Magic (0)",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Frost Strike",
+    "url": "https://eqlwiki.com/Frost_Strike",
+    "revision": 164164,
+    "fetchedAt": "2026-10-17T17:57:52.915761+00:00",
+    "classes": "Shaman - Level 23",
+    "description": "Creates a rift of bitter cold, causing 156 damage to your target.",
+    "effects": "Decrease Hitpoints by 137 (L24) to 149 (L30)",
+    "details": "mana: 78 · casting time: 3.00 · recast time: 1.50 · duration: Instant · target type: Single · resist: Cold (0)",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Greater Healing",
+    "url": "https://eqlwiki.com/Greater_Healing",
+    "revision": 164187,
+    "fetchedAt": "2026-10-17T17:57:54.065327+00:00",
+    "classes": "Cleric - Level 20 (Autogranted)\nPaladin - Level 30\nRanger - Level 38\nDruid - Level 29\nShaman - Level 29\nBeastlord - Level 34",
+    "description": "Mends major wounds, healing 350 hit points.",
+    "effects": "SpellSlotRowSmart | 1 | Increase Hitpoints by 280 (L20) to 350 (L30)| simple = #ifeq:{Table|0}|0|0|1",
+    "details": "mana: 115 · casting time: 3.00 · recast time: 1.50 · duration: Instant · target type: Single Friendly (or Self) · resist: Unresistable",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Regrowth",
+    "url": "https://eqlwiki.com/Regrowth",
+    "revision": 103939,
+    "fetchedAt": "2026-10-17T17:57:55.214159+00:00",
+    "classes": "Druid - Level 54\nShaman - Level 52",
+    "description": "Hastens your target's natural healing, regenerating 15 hit points every 6 seconds.  If the target regenerates lost health for the entire duration, it can be considered as a 2490 point heal at level 52, for a mana efficiency of 8.3 hp/m.\n\nThis effect does not stack with wort pot's effect, Calimony (see  Buff Lines for further info).\n\nThis spell follows the kunark level restrictions (minimum level 41 to receive).",
+    "effects": "SpellSlotRowSmart | 1 | Increase Hitpoints by 15 per tick | simple = #ifeq:{Table|0}|0|0|1",
+    "details": "mana: 300 · casting time: 6.00 · recast time: 2.25 · duration: 16.6 minutes @L52 to 19 minutes @L60 · target type: Single · resist: Unresistable",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  },
+  {
+    "name": "Spirit of Vermin Strike",
+    "url": "https://eqlwiki.com/Spirit_of_Vermin_Strike",
+    "revision": 151675,
+    "fetchedAt": "2026-10-17T17:57:57.519478+00:00",
+    "classes": "This is a proc from the Spirit of Vermin spell.",
+    "description": "Damages your target and inspires extra hatred in them.",
+    "effects": "Decrease Hit Points by 102 \nIncrease Hate by 50",
+    "details": "mana: 0 · casting time: Instant · recast time: n/a · duration: Instant · target type: Single · resist: Disease (-5)",
+    "limitation": "Base-spell reference; rank, focus, caster level and target modifiers are not an expected-damage formula."
+  }
+]

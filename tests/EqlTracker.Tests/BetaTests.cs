@@ -1,0 +1,36 @@
+using System.Text.Json;
+using EqlTracker.Core;
+
+internal static class BetaTests
+{
+    internal static void Register(Action<string, Action> test)
+    {
+        void Check(bool value) { if (!value) throw new Exception("Beta regression"); }
+        test("Raw model defaults contain no character identity path or known facts", () => { var p = new CharacterProfile(); Check(p.Character == "" && p.Server == "" && p.GameFolder == "" && p.CurrentClasses.Count == 0 && p.OptionalClasses.Count == 0 && p.ActiveLoadout.Classes.Count == 0 && p.ActiveLoadout.Level == 0 && p.ActiveLoadout.Race == "" && p.ActiveLoadout.PetType == "Unknown"); });
+        void InFolder(Action<string> body)
+        {
+            string folder = Path.Combine(Path.GetTempPath(), "eql-beta-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(folder);
+            try { body(folder); }
+            finally { Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); if (Path.GetFullPath(folder).StartsWith(Path.GetFullPath(Path.GetTempPath()), StringComparison.OrdinalIgnoreCase) && Path.GetFileName(folder).StartsWith("eql-beta-")) Directory.Delete(folder, true); }
+        }
+        test("Beta theme picker exposes exactly three stable branded identities and Auto", () => Check(ThemeCatalog.Choices.Select(t => t.Name).SequenceEqual(new[] { "Auto", "Coldain", "Sunstrider", "Shadowman" }) && ThemeCatalog.Choices.Select(t => t.Id).Distinct().Count() == 4));
+        test("Branded themes retain approved Frost and Vellum rendering recipes", () =>
+        {
+            Check("Rune4K_Frost_Clear".Equals(ThemeCatalog.Resolve("coldain").RenderKey));
+            Check("Rune4K_Vellum_Clear".Equals(ThemeCatalog.Resolve("Sunstrider").RenderKey));
+        });
+        test("All legacy theme recipes preserve their exact rendering keys", () => { foreach (string key in new[] { "Classic EQ", "Frost Blue", "Midnight", "Warm Amber", "Rune4K_Frost_Clear", "Rune4K_Frost", "Rune4K_Vellum_Clear", "Rune4K_Vellum", "Rune4K_Krome" }) Check(ThemeCatalog.Resolve(key).RenderKey == key); });
+        test("Auto follows recognized skins and unknown skins fall back to Coldain", () => Check(ThemeCatalog.Resolve("Auto", "Rune4K_Vellum").RenderKey == "Rune4K_Vellum" && ThemeCatalog.Resolve("Auto", "UnknownSkin").Id == "coldain" && ThemeCatalog.Resolve(null).Id == "coldain"));
+        test("Theme aliases ignore case without changing stored preferences", () => { var p = new CharacterProfile { Theme = "Rune4K_Vellum" }; TrackerPresentation.Migrate(p); Check(p.Theme == "Rune4K_Vellum" && ThemeCatalog.Resolve("SHADOWMAN").Id == "shadowman"); });
+        test("Theme helper migration retains custom family choices and adds neutral Shadowman", () => { var p = new CharacterProfile { SecondaryTextByTheme = new() { ["Frost"] = "Parchment Ivory", ["Vellum"] = "Candlelight Cream" } }; TrackerPresentation.Migrate(p); TrackerPresentation.Migrate(p); Check(TrackerPresentation.Secondary(p, "coldain") == "Parchment Ivory" && TrackerPresentation.Secondary(p, "sunstrider") == "Candlelight Cream" && TrackerPresentation.Secondary(p, "shadowman") == "Ash Silver"); });
+        test("Legacy Midnight retains its previous helper preference", () => { var p = new CharacterProfile { Theme = "Midnight", SecondaryTextByTheme = new() { ["Frost"] = "Warm Gold" } }; TrackerPresentation.Migrate(p); Check(TrackerPresentation.Secondary(p, "Midnight") == "Warm Gold" && p.Theme == "Midnight"); });
+        test("New production profiles never seed developer classes levels or race", () => { foreach (string name in new[] { "ExampleHero", "NewPlayer" }) { var p = LauncherPreferences.NewProfile(new(name, "example", "")); Check(p.Character == name && p.CurrentClasses.Count == 0 && p.OptionalClasses.Count == 0 && p.ActiveLoadout.Classes.Count == 0 && p.ActiveLoadout.Level == 0 && p.ActiveLoadout.Race == "" && p.ActiveLoadout.PetType == "Unknown" && p.GameFolder == ""); } });
+        test("First launch never enables automatic captures or creates equipment ownership", () => { var p = LauncherPreferences.NewProfile(new("Player", "server", "")); Check(!p.NativeSync.Login && !p.NativeSync.Periodic && !p.NativeSync.Verified && p.ActiveLoadout.Equipment.Count == 0 && p.ActiveLoadout.PetEquipment.Count == 0 && p.Loadouts.Count == 1); });
+        test("Launcher rejects unsafe or incomplete profile identifiers", () => { foreach (string name in new[] { "", "../Other", "A/B", "x y", "1test", new string('A', 62) }) Check(!LauncherPreferences.ValidName(name)); Check(LauncherPreferences.ValidName("Player-One_2")); });
+        test("Launcher preferences round trip and last successful selection replaces earlier selection", () => InFolder(folder => { var preferences = LauncherPreferences.Read(folder); Check(preferences.LastProfile == null); preferences.Remember(folder, new("First", "test", "")); preferences.Remember(folder, new("Second", "test", "C:\\Example")); var copy = LauncherPreferences.Read(folder); Check(copy.LastProfile == new LaunchProfile("Second", "test", "C:\\Example") && Directory.GetFiles(folder, "*.tmp").Length == 0); }));
+        test("Corrupt launcher metadata does not erase profiles or overwrite the invalid file on read", () => InFolder(folder => { var path = Path.Combine(folder, "launcher.json"); File.WriteAllText(path, "{invalid"); Check(LauncherPreferences.Read(folder).LastProfile == null && File.ReadAllText(path) == "{invalid"); }));
+        test("Existing profile discovery is read only and validates directory identity", () => InFolder(folder => { var p = new CharacterProfile { Character = "Saved", Server = "test", GameFolder = "C:\\Old game", CurrentClasses = ["WAR"] }; string file = Path.Combine(folder, "Saved_test", "tracker.db"); using (var store = new TrackerStore(file)) store.Set("profile", p); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); var before = File.ReadAllBytes(file); var found = LauncherPreferences.Existing(folder); Check(found.Single() == new LaunchProfile("Saved", "test", "C:\\Old game") && File.ReadAllBytes(file).SequenceEqual(before)); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools(); Directory.Move(Path.Combine(folder, "Saved_test"), Path.Combine(folder, "Wrong_test")); Check(LauncherPreferences.Existing(folder).Count == 0); }));
+        test("Game filename discovery deduplicates without reading combat logs or importing inventory", () => InFolder(folder => { Directory.CreateDirectory(Path.Combine(folder, "Logs")); File.WriteAllText(Path.Combine(folder, "UI_Player_example_LO1.ini"), ""); File.WriteAllText(Path.Combine(folder, "Logs", "eqlog_Player_example.txt"), "not read"); File.WriteAllText(Path.Combine(folder, "Player_example-Inventory.txt"), "not imported"); var found = LauncherPreferences.FromGame(folder); Check(found.Count == 1 && found[0].Character == "Player" && found[0].Server == "example" && !File.Exists(Path.Combine(folder, "tracker.db"))); }));
+        test("Saved launcher and character theme preferences survive independent serialization", () => { var p = new CharacterProfile { Theme = "shadowman" }; TrackerPresentation.Migrate(p); var copy = JsonSerializer.Deserialize<CharacterProfile>(JsonSerializer.Serialize(p))!; Check(copy.Theme == "shadowman" && copy.SecondaryTextByTheme["Shadowman"] == "Ash Silver"); });
+    }
+}

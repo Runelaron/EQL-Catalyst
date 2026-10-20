@@ -1,0 +1,837 @@
+[
+  {
+    "Zone": "Qeynos",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Oggok",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Grobb",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Freeport",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "New Sebilis Expedition",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kaladim",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kelethin",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Felwithe",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Ak'Anon",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Neriak",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Rivervale",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Halas",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Surefall Glade",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Erudin",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kerra Island",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Paineel",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Erud's Crossing",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Hole",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Toxxulia Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Stonebrunt Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Warrens",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Qeynos Hills",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "West Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "North Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "East Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "South Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Splitpaw Lair",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Qeynos Aqueducts",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Rathe Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Arena",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lake Rathetear",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Feerrott",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane of Fear",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Cazic Thule",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Jaggedpine Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kithicor Woods",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Nektulos Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Misty Thicket",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Estate of Unrest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Everfrost Peaks",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Permafrost",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Runnyeye",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Gorge of King Xorbb",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Blackburrow",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Innothule Swamp",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lower Guk",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Upper Guk",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "South Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Oasis of Marr",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "North Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Befallen",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "West Commonlands",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "East Commonlands",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "High Keep",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Highpass Hold",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Najena",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lavastorm Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Solusek's Eye",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Nagafen's Lair",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Temple of Solusek Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Ocean of Tears",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Butcherblock Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Dagnor's Cauldron",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kedge Keep",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Greater Faydark",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lesser Faydark",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Mistmoore Castle",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Steamfont Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Crushbone",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kerra_Island",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Erud%27s_Crossing",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Stonebrunt_Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Hole",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Warrens",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Toxxulia_Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane_of_Fear",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane_of_Hate",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane_of_Sky",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "New_Sebilis_Expedition",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Surefall_Glade",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Cazic_Thule",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "East_Commonlands",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "West_Commonlands",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Everfrost_Peaks",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Feerrott",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Beholder%27s_Maze",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Highpass_Hold",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "High_Keep",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Innothule_Swamp",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Eastern_Plains_of_Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Northern_Plains_of_Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Western_Plains_of_Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Southern_Karana",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kithicor_Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lake_Rathetear",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lavastorm_Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Upper_Guk",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lower_Guk",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Misty_Thicket",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Nagafen%27s_Lair",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Solusek%27s_Eye",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Nektulos_Forest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Ocean_of_Tears",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Qeynos_Aqueducts",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Qeynos_Hills",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Rathe_Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Northern_Desert_of_Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Oasis_of_Marr",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Southern_Desert_of_Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Runnyeye_Citadel",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Splitpaw_Lair",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Temple_of_Solusek_Ro",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Arena",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Tutorial_Zone",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Ak%27Anon",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Butcherblock_Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Dagnor%27s_Cauldron",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Greater_Faydark",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kedge_Keep",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lesser_Faydark",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Mistmoore_Castle",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Steamfont_Mountains",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The_Estate_of_Unrest",
+    "Expansion": "Classic",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Burning Wood",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Dreadlands",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Emerald Jungle",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Field of Bone",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Firiona Vie",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Frontier Mountains",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Lake of Ill Omen",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Overthere",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Skyfire Mountains",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Swamp of No Hope",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Timorous Deep",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Trakanon's Teeth",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Warsliks Woods",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Cabilis",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Chardok",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "City of Mist",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Dalnir",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Howling Stones",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kaesora",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Karnor's Castle",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kurn's Tower",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Mines of Nurga",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Old Sebilis",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Temple of Droga",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Veeshan's Peak",
+    "Expansion": "Kunark",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Cobalt Scar",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Eastern Wastes",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "The Great Divide",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Iceclad Ocean",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Wakening Land",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Western Wastes",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Icewell Keep",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Kael Drakkal",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Skyshrine",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Thurgadin",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane of Growth",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Plane of Mischief",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Crystal Caverns",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Dragon Necropolis",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Siren's Grotto",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Sleeper's Tomb",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Temple of Veeshan",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Tower of Frozen Shadow",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  },
+  {
+    "Zone": "Velketor's Labyrinth",
+    "Expansion": "Velious",
+    "Source": "https://eqlwiki.com/Zones revision 178021"
+  }
+]

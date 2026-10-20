@@ -1,0 +1,34 @@
+{
+  "version": "EQL-2026-10-13/preference-v2",
+  "purpose": "Transparent loadout preferences; not a combat simulator",
+  "bundledUniversalAttributeCaps": {},
+  "numericProcOrAvoidanceFormula": null,
+  "sources": [
+    {
+      "url": "https://www.everquestlegends.com/patch-notes/eql-update-notes-10-13-2026",
+      "status": "Official",
+      "claims": [
+        "Pet weapon ratio matters more than base damage; exact damage/delay formula not published",
+        "Upgraded pet level cannot exceed owner level"
+      ]
+    },
+    {
+      "url": "https://eqlwiki.com/Statistics",
+      "status": "Explicitly unreliable / disputed",
+      "policy": "Do not assume universal 255 or 510 caps; accept context-specific confirmed limits or user overrides"
+    },
+    {
+      "url": "https://eqlwiki.com/Weapon_Procs",
+      "status": "Inherited legacy formula; EQL applicability unverified",
+      "policy": "Never predict EQL proc rates from the legacy formula"
+    },
+    {
+      "url": "https://eqlwiki.com/Alternate_Advancement",
+      "status": "Documented AA descriptions, not proof of a character rank or full formula",
+      "policy": "Unknown rank differs from zero; numerical effects require confirmation; observed totals include AAs only once"
+    }
+  ],
+  "hasteAggregation": "Strongest listed worn item used as an explicit preference estimate; buff/overhaste category formulas remain unverified",
+  "rankEstimates": "Tier floor; fractional item XP unavailable",
+  "confirmedLimits": "Per build and context, with source and AA-inclusion flag"
+}

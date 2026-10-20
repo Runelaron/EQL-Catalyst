@@ -1,0 +1,7 @@
+[Tue Jan 06 12:00:00 2026] Mistling told you, 'Attacking orc centurion Master.'
+[Tue Jan 06 12:00:01 2026] You have entered Clan Crushbone.
+[Tue Jan 06 12:00:02 2026] You shoot orc centurion for 200 points of damage.
+[Tue Jan 06 12:00:04 2026] You slash orc centurion for 200 points of damage.
+[Tue Jan 06 12:00:06 2026] You bash orc centurion for 199 points of damage.
+[Tue Jan 06 12:00:08 2026] Mistling slashes orc centurion for 153 points of damage.
+[Tue Jan 06 12:00:08 2026] Orc centurion has been slain by Mistling!

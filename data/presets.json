@@ -1,0 +1,38 @@
+{
+  "Tank": {
+    "AC": 3,
+    "HP": 0.1,
+    "STA": 0.5
+  },
+  "Melee": {
+    "Ratio": 100,
+    "ATK": 1,
+    "STR": 0.5,
+    "DEX": 0.5,
+    "Haste": 3
+  },
+  "Pet damage": {
+    "Ratio": 100,
+    "ATK": 1,
+    "STR": 0.5,
+    "DEX": 0.5,
+    "Haste": 3
+  },
+  "Caster": {
+    "Mana": 0.1,
+    "INT": 0.5,
+    "HP": 0.05
+  },
+  "Balanced Tank": {
+    "AC": 3,
+    "HP": 0.1,
+    "STA": 0.5,
+    "DEX": 0.5,
+    "AGI": 0.5
+  },
+  "Legacy Tank": {
+    "AC": 3,
+    "HP": 0.1,
+    "STA": 0.5
+  }
+}

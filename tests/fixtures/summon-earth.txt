@@ -1,0 +1,4 @@
+[Tue Jan 06 12:00:00 2026] You begin casting Greater Conjuration: Earth X.
+[Tue Jan 06 12:00:06 2026] You begin casting Burnout III I.
+[Tue Jan 06 12:00:06 2026] Cloudling begins casting Skin like Steel.
+[Tue Jan 06 12:00:42 2026] Cloudling told you, 'Attacking a large rat Master.'

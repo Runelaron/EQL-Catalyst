@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.webp binary
+*.ttf binary
+src/EqlTracker.App/Assets/** -text
+site/fonts/** -text

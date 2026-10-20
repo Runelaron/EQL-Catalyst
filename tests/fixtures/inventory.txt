@@ -1,0 +1,8 @@
+Location	Name	ID	Count	Slots
+General 1	Black Sapphire	10036	4	0
+General 2	Example Blade +4	900001	1	1
+General 2-Slot1	Example Proc (Exaltation)	900002	1	0
+SharedBank1	Empty	0	0	0
+
+KeyRing	Name	ID	
+Equipment	Hand of the Maestro +6	20662

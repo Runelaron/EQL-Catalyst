@@ -1,0 +1,13 @@
+.tools/
+**/bin/
+**/obj/
+dist/
+artifacts/
+*.user
+*.db*
+*.log
+__pycache__/
+data/wiki-cache/
+.env
+.env.*
+!*.example

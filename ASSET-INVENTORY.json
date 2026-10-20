@@ -1,0 +1,1526 @@
+{
+  "Version": 1,
+  "Assets": [
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-128.png",
+      "Sha256": "04214225b1178205ee2258b4fe3d6c96ba90a29af63d362dccd7e63ea9f89685",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-16.png",
+      "Sha256": "801a888eaab6330f908f3544f496179dd543303a9e5805494a1b0ee45b7c8da9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-20.png",
+      "Sha256": "e9fdac053dcdcbca0d388e751e0e3fd6d64be8d29d18be2cdbf59e8294f8d6c4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-24.png",
+      "Sha256": "1290a0c0cc565e21b5654a1020aed70815b2622c7c3ee7c8f99cb23fbfd554b4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-256.png",
+      "Sha256": "bd12098963d74dd232eef55895c4be8d75f8e5cef4916fb53eba8f8823f7cf28",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-32.png",
+      "Sha256": "ca0bf9cac697ff7e9c0b8791a50c24b20c290dabacb1dbb9e661f73de8f8f092",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-40.png",
+      "Sha256": "e8ad08178140742238cbd1f3bca834ee3d974846e0fd43e586c4b6b140f6ff68",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-48.png",
+      "Sha256": "19a2aebb6eb1c1e3e09271153e718519f27d419e5fd4ac22983aafcee2f257d0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-64.png",
+      "Sha256": "dbaddb341f400f06cc8ca282aeb148c15d8f2530b00981c943bb9b9415924c12",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst-orb-master.png",
+      "Sha256": "fd4b1c5549740d8c42aaea1303f36de098197085af8e0af3a202e8925ca433a9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst.ico",
+      "Sha256": "be68c01ba7358f3e070316f3bb2507f0a08e7d1c0702d6f5194e24ee23268fa5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/catalyst.svg",
+      "Sha256": "9231f4f7514252220ab75483e96a080846b4d100ad47b14694134f0a5ff6c50a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-128.png",
+      "Sha256": "a75de911db421e1e97ac0deabff30084cc18230293e02f1b651db462a8d0d16c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-16.png",
+      "Sha256": "a6adab04dfbd385428281996e321f4ae0100c3b7ebd9393b78409b5c0dfd24c0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-20.png",
+      "Sha256": "28b5d624613bf6de9b26bdb1bf244931e8724c002de3082329f2200afea24a70",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-24.png",
+      "Sha256": "193218220d9b8f363e42c4dfcc115f664d0358035bb658111034d25aa84eca94",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-256.png",
+      "Sha256": "51178c3a7c36f984a04fd99d70838f489655b68971248defe45d1d4aa3fea670",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-32.png",
+      "Sha256": "74d68a539a5be664f687d1deb60219eed77d58d6e82fa11c40fe38708101633b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-40.png",
+      "Sha256": "7c4e893b5b6d83724cb031f65f058a9bc177da60e6fd4f0f9a3878a80095cc63",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-48.png",
+      "Sha256": "78ecd970d558acf9821f82f917f34411a53de1894280387d269ba4b8a69b3af2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-64.png",
+      "Sha256": "4db4dd572ac7f129c27c973bfa8b27f51f772924ffc6cd765659167a816ba0f8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber-master.png",
+      "Sha256": "14481a2e7c46e9393016ed3e3286b1b4eb7ec801ed9c6a50c9f7833a427a0b83",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-ber.ico",
+      "Sha256": "6d6864e3b526006ef2958719f39288ae92e33f6cc078e311119b825f58db8afd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-128.png",
+      "Sha256": "bcd49cd7477cde02ca084199d11983b6f22e80489f35569aa07e6a213b85ff3f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-16.png",
+      "Sha256": "9f6455fff9a6f800d0156bae9cf577ae89ddac98f0978fbe355144cf40a4581a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-20.png",
+      "Sha256": "3debdf6a4f1a7667b086c34e5d3d8d73c49bb138b8f85580d3eb31f632790c95",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-24.png",
+      "Sha256": "4564caff25356928b75dc8da5f8f506921f516f9bdbf69e0e8cdb6dd7106d14c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-256.png",
+      "Sha256": "a78bf7859123d792e61733e5c9cb7b6097226d17e9167cbfbef61fc00e98a9a3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-32.png",
+      "Sha256": "946eefd8289e4e5b9f3b8a114c55cc80cbcfe0fa92806dd0199374272f8d5cc1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-40.png",
+      "Sha256": "5681117fe6df4605fcefbf8ff47c4ffe7f7efbb0410e625fec9987156d05b900",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-48.png",
+      "Sha256": "092ddc8a790d4e123b187ed4c5b0b76a6f99923f426c1bd0ddb788e44ac34ad1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-64.png",
+      "Sha256": "a42be16aa00e087256eccb9cd8d2cceaabce055ac2ca482038213b5ce4eea9c2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd-master.png",
+      "Sha256": "03f91658e8294a35c281b4aa8f3eb2a5bbd40e6c45e64b71eaf9171b5d4e5d70",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-brd.ico",
+      "Sha256": "6a49e933d1ba12a3d4125db86cb5b33f0bb6787da1a3f585f5cc0823a2b1edd7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-128.png",
+      "Sha256": "e527cd460d24178a220062778ec182bd8e1243a1c4d28e8932606182ba8018f7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-16.png",
+      "Sha256": "814c56152bfccdfb6f425d09616c18c974f14f599f1f66c80316e04d084346d4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-20.png",
+      "Sha256": "1965de123a1a8f558c7f68b1afe06f1bdccd977bd1d7b2ddf75c3193b0243c1d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-24.png",
+      "Sha256": "02a065a0eb546938d6734ecd89389fd41a393cb67b07eb61d6e0f0ba832b8cdd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-256.png",
+      "Sha256": "45d10c10f9bf59afbd4c8ada1e6a6e25127a64a6821bcb30d150af3fc2c14246",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-32.png",
+      "Sha256": "4a4d263bcbca0b04aeac3204e896673ea4c49df6b6c58f04927a6c0ab3d8121c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-40.png",
+      "Sha256": "d70b7d27c86c119a10b0ef6a08416754c45cc9510649ae219ff050dba287584a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-48.png",
+      "Sha256": "41bf4c4506279e4f05dd8006dbf9227db2f5833edc11915f4b20368443cf9ce8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-64.png",
+      "Sha256": "d160c941c43567a988709e0484c245d47a573a61b05de4b423cfb90541698633",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst-master.png",
+      "Sha256": "a1181e36b68db671c37500d88bd29b36ccc9e8f0b43d29e9d433cd5a48e602a5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-bst.ico",
+      "Sha256": "7750cff356b6e9771fd0004746dfb908ac7cb9513bd987041ed62c623db0be3e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-128.png",
+      "Sha256": "a134c6211e4d4727151c4af8384f4657a4f3386db0e9f2d656237e233058978c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-16.png",
+      "Sha256": "c2c710b45942beab757723431a476486a5120fdb6dbc375c7e8983946ecb2193",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-20.png",
+      "Sha256": "b62313f49c4381dc0b8d3c74e9f8d9e8a7d98bb687542fe0079d6f67fa27b864",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-24.png",
+      "Sha256": "0f33320fc5207354e67436f7b844bbdbb7f6125831b1060324d5a4727ad63b9a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-256.png",
+      "Sha256": "1cbc5b7c2ba14ad7823a47c04932d7b4361fb1493aac87cbf451e61e1df7104b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-32.png",
+      "Sha256": "3e3b189ea76b1b0b0ae6fd78fc770d08bd16bb48a47c7be5b51eb49f9507da3e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-40.png",
+      "Sha256": "a6d52bf36167cb6fc7d53daaacf2b5e5d5d942334b0518b5081a86ff00a544d3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-48.png",
+      "Sha256": "1354317ff39bc65dc13676340c4e09ec12f488cea0fb2f0d08b174a2d4f35fde",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-64.png",
+      "Sha256": "faf44183ac1d5db4e93341abb2df41f058c54d93e2a48a0c0c0cb6d374417889",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr-master.png",
+      "Sha256": "6faa9bcb254dee3e68248146e4f90eddaecca603d844518a1e7ae9d850a53d08",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-clr.ico",
+      "Sha256": "9450c814e8934e616b299702bccbebe2ae38bfc4135329e028ea0010edb4e7de",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-128.png",
+      "Sha256": "a8def006f3981bb561751bbabb888be4d6444752eb9ceff771f25f57fc0cf60a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-16.png",
+      "Sha256": "2a7e37bace0ee476325e01f8bc6d34dbeb2cdab2b6d1f42bc210f6c70e0dfe86",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-20.png",
+      "Sha256": "850af4bcbc00b18684da7c6a3e900c88bafc5597edb76f1ba7ab4defd12d65d0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-24.png",
+      "Sha256": "a488b4e489fd5e41db3a61fa0ce07b129828323ead49e6346fbad56eafef5fef",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-256.png",
+      "Sha256": "ddf79dadf7d94aab3ccbd777ab66d4d05fa23deae682191c970ab4dbd2980d28",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-32.png",
+      "Sha256": "6df6ea8fcca5bd6ebcb7e599ee4fc6c7faac2b2e6649d21233356babf3453e07",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-40.png",
+      "Sha256": "91bae825db3f18e97af35cf483cad98b83a94bda2f704b27e0110d7bf39286f9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-48.png",
+      "Sha256": "45635b65b480390049b539c7d504ab0e43c19257375613a95ec4fc205c133692",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-64.png",
+      "Sha256": "bcc79e19455e91d3ccf377bc371ff101044601c5daf57d91fd63be9b11478706",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru-master.png",
+      "Sha256": "dceaa9708d2de14284c5101cd821fe875afcd6e0e51a6095852c2e06fabc9678",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-dru.ico",
+      "Sha256": "5a7bd554ad39618b9222409d4cc94c79a72ac8fd9a07413bf748382fa29d17f5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-128.png",
+      "Sha256": "289673253709d59664e687d29454d4b00a3a549e24b3c95aeeda748ba1f94288",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-16.png",
+      "Sha256": "3cbf7e679c71e585ffaef57c7f5c592fe26264b6521916e398cabf87ba799760",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-20.png",
+      "Sha256": "db0325dd77e7ad4d0bb905924aef3ce09188f53cfcbe0e72b2b0551a32adf833",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-24.png",
+      "Sha256": "1090e7169addf76d91b297b81afca4737e33d32f19babb520b15a8647ddc1ae2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-256.png",
+      "Sha256": "2a98aa73b40c892d8a5f2f4c921b0b594abd5d482d7e4076dc986c8ca57c612b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-32.png",
+      "Sha256": "197d2b812f09e8867ac0882d72bc8b2b8935715b56d547929c7842b142cdf86b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-40.png",
+      "Sha256": "8af7782b14ae9f70e237444c3a19bf62fd025a7f734d018a5228f01d9b3b6ec5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-48.png",
+      "Sha256": "330663cb920b4fcb76fe39fcdb27de7ef995d08508c2c6f64821c88855fa2bea",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-64.png",
+      "Sha256": "0a803d57bb06b88355d061700aff10648fa6daac7165eca3bedf9e973cd6c956",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc-master.png",
+      "Sha256": "a20a953c1cd4aab106933421bd57fb575a49353c1cd45218f4d39f39ea76206f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-enc.ico",
+      "Sha256": "1d394b665e7bbf83450502a183dfc20736a124d7a43c958c3f1e029b4f2f2369",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-128.png",
+      "Sha256": "785727b9421f81dbf898109bd5bdf287eb633caf08b42079e6caea3130debd52",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-16.png",
+      "Sha256": "7898d988d1b001b8df69597c195ec85042574dbc68716cdf04bee8d26e9711a2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-20.png",
+      "Sha256": "ae96017fe8cfaac02e723a6d254c89acb8681b01d853f31cf2af384a70dffc29",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-24.png",
+      "Sha256": "f6dccddd23341826cf96dc6d1211954f28b029cb56b2300ec8a65acffeba70e6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-256.png",
+      "Sha256": "f010023f71e255fca8ca4862a9709b566d970748040ec4fed68aad9c3a3a9ce8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-32.png",
+      "Sha256": "daebc18c0da456cf232bd905b7a71b8e1d0f2e6f556bf9c399a58d984672f0e7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-40.png",
+      "Sha256": "1a7010f111406a4d7e3ee0de2a2e380e4cd5c2d03845fa4682aecf6b072f6f62",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-48.png",
+      "Sha256": "fce12fc807a77f0ccd81a72bad05b34cfd0c5c8c5f103023e6d0cdc1a62bc6bc",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-64.png",
+      "Sha256": "b67c173cf922ab8d4b68f4d1b8a0befd9bcaaafa1c329226f01fbcd9e1ebdb22",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag-master.png",
+      "Sha256": "8d689559e251500264d8b731e6c37bf2d8b2470891566e5b77dbc6b8344634c0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mag.ico",
+      "Sha256": "f6ec714fae057c6ba24ae437e0bf123faba16774245f0174c3fcff422d0ae66f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-128.png",
+      "Sha256": "a589c656957779f31c34d554e6dabe1ced416d0b0f3f1f593ca5c1c85d1f8add",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-16.png",
+      "Sha256": "c8cf4ae59e0d5f12eab9304b1b25cf20ddae03dd19c75a450d995f94742bf257",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-20.png",
+      "Sha256": "4d2f1fb4d7b6f6eedfcacb7ca2d6f6ac3d4f520584d973218ab7b90946e730df",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-24.png",
+      "Sha256": "07b5d991683191355e206095e1fe103b49392b1c447daac755b21fa4f141d196",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-256.png",
+      "Sha256": "a3d7ea2a040181750a298edf9286c0467c731f84500b3bd4ebfb08b099411af0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-32.png",
+      "Sha256": "12359b10669f596f496932cc98ac544991ced7c485ecd51fc682fe73f6d6d5f6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-40.png",
+      "Sha256": "bd6d9e47f0980154b7a2a3333ef48ab4518f9a1de0b0f202d29fc3c6fe908fb3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-48.png",
+      "Sha256": "276011358823718db20169a584cd309e9eb5b09e671eb0df7f664ee442cea24e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-64.png",
+      "Sha256": "80e40ff11a6f65dd4750f823398361467e02deb835fdf9bc05081f660b7e12f8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk-master.png",
+      "Sha256": "58d0f828d57eefe7559e57106860d94534481c03e3ff6b799d00a1c74a3a5444",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-mnk.ico",
+      "Sha256": "7c59ea2d3fa480464cd2dc3cd2b2eab568e66f15a2b2cd92e8d2592ed36bc8ec",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-128.png",
+      "Sha256": "0a9153023e6c2224586c848d5fe78e1e752486ea648d186a44d7cb3dc6e4afb7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-16.png",
+      "Sha256": "4ab9f85101ee13864b65eca1957e2165aad683c42dff0971dc626bf5214f4723",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-20.png",
+      "Sha256": "9c6672e7f4d9219eb7e538ef983fa85b0e797813255bd69a84c891e462625080",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-24.png",
+      "Sha256": "3e880940852d6a987b7b5c9c08cec8228aa36e71d8eda7f5ac686cfa317cfb16",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-256.png",
+      "Sha256": "07e9b708f457e4f7c18664fe40227c996277ce3c19de7f83eec23045601b9f9c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-32.png",
+      "Sha256": "5242db1b03d6709230bbdde0c14928b00774bcc54b4edd570c6cf11e1ef61722",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-40.png",
+      "Sha256": "6e573a038893d919c47293857cc89c338e42e690c414ea536b1420d395901eaa",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-48.png",
+      "Sha256": "1e54dd6915d7b5b57c5b6f62ee27a2f624bfae1ec2ded5432e4a62d1758f51c8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-64.png",
+      "Sha256": "d85170d13108189414b26cd01f73396bc6d334497cd9c39170e9aa2f8975d411",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec-master.png",
+      "Sha256": "ddf53bd9728ea79871bdba44fb5ea64560338b3c538731e533fd0a8eac2b2ca6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-nec.ico",
+      "Sha256": "976427b46fd7e11a8b452fad871df325cac1dcc0a0e13d4d0448db7a17b226a2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-128.png",
+      "Sha256": "f9afdd927cabe8372baa3a3566d1481004d54bdce989d04d3ace98d22222d52d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-16.png",
+      "Sha256": "ae452319c41311d4512ff6eb6027acba43e699345bfa4bca8e6f13b630ac781c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-20.png",
+      "Sha256": "63f49dd742006cddb6838a86588f694e069818c7e681b800ef80f7cc6aec32b4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-24.png",
+      "Sha256": "7998d4a602d7b5ecb1e3a9595c6977c0916615502ad9ea0dcb4d29f5636e075c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-256.png",
+      "Sha256": "e6a90f3f336d6f7187d7b308b4564287acc2227cc3429ea8fee7bd2baff0393a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-32.png",
+      "Sha256": "36ae653ad9180734cd26e66986f5291f8d5902e3d93dabba9c095d532677bf37",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-40.png",
+      "Sha256": "13736b9ae5119753da442c8f0b641e9a127b1570c37b36ffa60e296ae178e7ea",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-48.png",
+      "Sha256": "e8726ef359a8932ab3202cf6a7100a888e9a66ddf291e1529c2dbae66949758e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-64.png",
+      "Sha256": "4bb6548734f18e0cd21bea0feb663a572dc84040a1dcc40608c16da4cc55fdaa",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal-master.png",
+      "Sha256": "f57e9d12c14394ba0aeafd9b7d1b2ae2d7748092208564dfb46e2e0c3d0f39cf",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-pal.ico",
+      "Sha256": "061ddec79f292093d6f531849ff45c16c40a23e9e39b524e6dc53d3efef9e4be",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-128.png",
+      "Sha256": "e87b1f3fee97bd52f03313d2b99bc5418fd24ec74711574f81a2d4fc7cf65075",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-16.png",
+      "Sha256": "b23f591980a78ff2684f3ef3bbf98da4a02fce80d362f3741599d12c5cda0565",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-20.png",
+      "Sha256": "10493669670918efcb6db6b21489eae3fe861393167a3c4dc4fe15048dd2c27d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-24.png",
+      "Sha256": "91b7ca89278f87173efac3c260997b245457a284fb3ffd4decd354f82109d46c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-256.png",
+      "Sha256": "fd2df9291ced4dde1ad4041338e5dba99ebc27605342a974cef16d247557c015",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-32.png",
+      "Sha256": "06ad31263618b7c4bd1e2f126684d7ec104b163e04db2f03fbeda4249e4d1406",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-40.png",
+      "Sha256": "c322c0d5a2c9e4abe385830ee26e6fcb0a91767c59975ce51a2e946eda8e04a2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-48.png",
+      "Sha256": "77cacfbb0c5d631ba5fc05d01c4ae1bee9f1f88e829d2e1955eb2e9d0424248a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-64.png",
+      "Sha256": "3fb1c2da785ab7e4bacd7193604f512112fa9d5f79de43e64f94b6fd76e9d8f6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng-master.png",
+      "Sha256": "e6bdbb1926cfca65e511fc4dc14360d8d05d5dbf855e6b90adb1a819e1215606",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rng.ico",
+      "Sha256": "d6c6f186ee7071bd96495d1810fb21a1fc16c0d949b5e42227fa6bfc71abc019",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-128.png",
+      "Sha256": "8d250afc891757ced1001b006684f6d18b067b668e6ccde8ed8666d3cb88c658",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-16.png",
+      "Sha256": "1876926a1bab8294d17688bc309ec2b8a4f7d8ffb6f406f11998eaaaf9841de9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-20.png",
+      "Sha256": "92a4f56e9a0430992123d1aafac0b35ec225cd446cc70e5959da188a71ff95f2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-24.png",
+      "Sha256": "e7b8a8ae4a543dae5d7fe01d11da2da48a1e118f446088740d3cb4fb3b08bf4d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-256.png",
+      "Sha256": "3d920a074b68aee3bacc1430f0fc35e4ce8d2c5251842fb763cfab15ff24323c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-32.png",
+      "Sha256": "7959db8c253a9a7605cd86bfaff4ed2b17bb26a99a3bc947e8d599487a0cfdf8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-40.png",
+      "Sha256": "594a557db59dc17877e3594bbfed2ac1fcced5fae0d0bb2a6339b271763ba662",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-48.png",
+      "Sha256": "e54d684e805e91aabe46cbb79ce6530eefbfad5eb27f3c5263ccc460f101e08f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-64.png",
+      "Sha256": "f5d9cb86dee848d3b7297d5dafecbec8581c7f797832b94a794f7458d5873464",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog-master.png",
+      "Sha256": "16428537a7caa447e0dbb468e1c543fb464ea85c61ec3df8a9ac57284cb5446b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-rog.ico",
+      "Sha256": "ff9fefff1ab90183fdc8382e69cbea04763268c93c723b292e407f1476dba3d4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-128.png",
+      "Sha256": "d653775d5d8e53da413f77cbf4488a6d7ae1be1a540a3762f1c7161e5235ebfd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-16.png",
+      "Sha256": "2b3c851469923a2c2dea79b9bbab87b4093069a85399223ccee9ac43ff889cf3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-20.png",
+      "Sha256": "bc53ba88dbef130a443c876e7ed06da0cec1e4086e22ecb48de69f22ea76f361",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-24.png",
+      "Sha256": "0ac4878a0d94917ce218fa371ba047aef4436c06c5cc3b19d462e94b832f4f8a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-256.png",
+      "Sha256": "af62f21787cb4428872e2ba0e48ad304c0691b7713938a281286f73a2ff98275",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-32.png",
+      "Sha256": "70bba516d8356048da4c32d2b33eba3bd84d28212859fc528abd67cde463a3e4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-40.png",
+      "Sha256": "277e43e2e3894979f9a2d28e32ce22e173656af56005f6e309dc799e1a124596",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-48.png",
+      "Sha256": "f601d6b8f5a780056d0c65b8d02ec51bc01cd756941960bd08c5618781112367",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-64.png",
+      "Sha256": "3f2ea8fb8cb2c406475f31449dfeed369a11fc587b3372bcb5b904933092e879",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd-master.png",
+      "Sha256": "420110a16f8b885200f7c354439fca80e17addc93f9273c19f971b98d5b3adb3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shd.ico",
+      "Sha256": "ac5b5f6db59b66435844cf61ae0ddb7f46ce7aecccd876c2fea556933d41950b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-128.png",
+      "Sha256": "5ca792daf8eb3d567b27e304d33f7653fd1ad0ddac202af7a95b59c3cc8e34d7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-16.png",
+      "Sha256": "f7a900403229608cfe6c41507b29fcd25ab02092b5c51d226723e9803bba1189",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-20.png",
+      "Sha256": "cc91a08093c040a2abba65dd06d7f70e86246e954679d144829ef8b2ef3fb485",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-24.png",
+      "Sha256": "6bcad1e3362a8b7b6a62841369b00f1f0b068ef0fc7b91cf800e7098f832cd6a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-256.png",
+      "Sha256": "faeba316ba9d24b2ec7e984c9dfdf18684879915aa8524fddff3c5854ffe72ca",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-32.png",
+      "Sha256": "234e347feec581b7608b3919a066cb9c0bce3ee0b93d7609383c42839ffe9d3f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-40.png",
+      "Sha256": "371fdff07f95507970e34af6c863e30a6f808c4c97b945c497f209ae0b9f47cd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-48.png",
+      "Sha256": "3b056fb88840faefb389d5e71791e236160073a11864a74d2ff86613ddeb01f7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-64.png",
+      "Sha256": "09214dd344fc00d798af406214ecb180692f335d6c666cf320ec19765fc2a4f7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm-master.png",
+      "Sha256": "123958980217e517c55de8ac1105791e4a8eb11ef739f1631679ee99ea5cc747",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-shm.ico",
+      "Sha256": "ec69c5d0d550a64d0e6e1a638fc17e9040dd7325921adf1940853e54722dc574",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-128.png",
+      "Sha256": "64ddc948a95bdd59ab8aceda9e630e223a051c7603fb93b54d412be246ca33be",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-16.png",
+      "Sha256": "f284664a02c29b7451c346aa5dacb7e15c2754bcd495e07aa90da878383aff90",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-20.png",
+      "Sha256": "530d91bebc8f9d98be234aea0e242f72e265e68dd0f63ff8c9f58761ffb6662f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-24.png",
+      "Sha256": "a72ea11ac9c66507af0bac52ed4ade3b28ccb0a1d7ab6670b347827fefc06cc6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-256.png",
+      "Sha256": "9726819fce17031023720a4ac7d59a4c37fa282234f502bb4e3e0af37d8a9e57",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-32.png",
+      "Sha256": "7b8c7369da591886f2d57e2f54f258c6c109d2678fb8588107cf7c79078ed79e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-40.png",
+      "Sha256": "3de777e02e3f8e01056ad297966100e0d0ea910d66e95361364826733b3a1e94",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-48.png",
+      "Sha256": "97a6c5c72d9f8e36f1d79836027026b2220dd57103e857fdc60bc25b01235ef4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-64.png",
+      "Sha256": "fa9fa1b92c438eb31096148ba0f8ae6679714be783e9dcf4fbce588a2c38dd76",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war-master.png",
+      "Sha256": "64a226d82399ee84bb2bbaa0d499ae46eda5a748002f9b61e21aed7effd5d4f5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-war.ico",
+      "Sha256": "f0599d2cb2e152d28eaf5ab0ad21dcc3652bd066c38b19a6322fa3e2edaa685a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-128.png",
+      "Sha256": "7ec71954d8afeb3f99a4e26c1c979355d57703f14175f7e40e390e5b1fbc5d96",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-16.png",
+      "Sha256": "5fdc659422d2601dec7589a0e05470d58978481fd52b74b94170547c8e276980",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-20.png",
+      "Sha256": "4aa8cd0adcc275eb0e77579978885a121fe49218ecaa6c56ce5db3a5f8fc99a1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-24.png",
+      "Sha256": "db4768914b636a8ea584613472ef6ff4cf7c5fadf72dee8923e68a9a88c057cd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-256.png",
+      "Sha256": "3f9742434e5b747b0ad5eaa844e964525a7a5af67202adbce752edc679451e5a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-32.png",
+      "Sha256": "e535a3911bac1ce6ea586102c562238a1c27dcc0c830d9f8d9545e5ea44e8cbe",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-40.png",
+      "Sha256": "ce0cc114a41dfe6ed6ac0697582f8507b6556e7b573ade9725da655630cf3886",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-48.png",
+      "Sha256": "e0ebfb2ceae9d3ee7d92433feaf13c51dfc7c66ed2d4beae3b4e11cdabfb41b3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-64.png",
+      "Sha256": "3ddf14bac4db47d1f42b5775faf0faba96525560a542fc287ee40f5db6e9b89e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz-master.png",
+      "Sha256": "2325150ae6def60e47e35934e01ddb79f91019abf6a8432e95f178c654919e6f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/class-wiz.ico",
+      "Sha256": "ee781e5efc620d49d2faea8bc7d4d6ee4999b2855bd4af7459f330c58e288f40",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-128.png",
+      "Sha256": "d937bf098a1add6b374d250de0685330c872dbe2915caba87bde8a1b18b9eeab",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-16.png",
+      "Sha256": "57cee1f8915d083284ed2010f9ce9f2a074a29a8b712979cc78def1167563b65",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-20.png",
+      "Sha256": "e384a1582bbaf2b6f3b960d7a654b03e5c7be1ae189d00106e0fce0cc2d9e48b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-24.png",
+      "Sha256": "73b16e1e44dd85a3442a69ca238a54cb8d62f4d838938b6c68f840625c2d0925",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-256.png",
+      "Sha256": "d96d4beed5e443543e088118aae1d1fc1646798c316012f9a2a4d8eb8e9bedd3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-32.png",
+      "Sha256": "d52abb175b08413ccee8ab9f3b12460b61f10906b6801a4607df2813053267e3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-40.png",
+      "Sha256": "2d53f19430c290e5d7dec6288f58c41929ba10a553e68eb1c624c1f31214a22d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-48.png",
+      "Sha256": "96be4e3e206634dee6f0f85ed1fa9574c2ccf55350b63d77acb5ae9097d7d492",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-64.png",
+      "Sha256": "4217a8eb61b8d008175392956feefba11f688c1eb3eaa967a72e751c30ac05f1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements-master.png",
+      "Sha256": "009c0d748dfd59442765fa9bde0e5c3fee82ba77b8dfaba40d661a53b99fe7b4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/gold-elements.ico",
+      "Sha256": "b14b47b03a9be5b716b76541bbc152ac50524796c5922f7e7c65604874fdbc9b",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/README.md",
+      "Sha256": "0840783d126f0745927b2b9e2a0385d086d8f1f6d2b05cd02b02256d991cc5b0",
+      "Provenance": "Upstream font; see accompanying OFL"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Fonts/CinzelDecorative-Bold.ttf",
+      "Sha256": "e854e68a388aa50d742a4415c1ae5c17a617ef7956c95a70021d0a4a44f20518",
+      "Provenance": "Upstream font; see accompanying OFL"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Fonts/OFL.txt",
+      "Sha256": "1e5d6660366ddcfca4f2fc10e2acfba9fa4d97d40aec80d7dbfd41d730a420ae",
+      "Provenance": "Upstream font; see accompanying OFL"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/actor-self-256.png",
+      "Sha256": "1ab915f4ee13d9f676556e8a64ea43a467193fdc2a5242b5d695c41ee7a75b04",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/actor-total-256.png",
+      "Sha256": "b8a2ce83a9cde48eecb2d0610f49752d5f3e47e0acba9f130b820cab2fd48446",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/brand-blue-orb-256.png",
+      "Sha256": "56f5f08e183eba2faae222b3aac199bb1c90d21671f185a403e92dab71690d0c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/brand-blue-orb.ico",
+      "Sha256": "a4a7276541d891ab90aa2a9019282fea4e85d42a6c6b2378043d912d26ec0cf0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/brand-gold-elements-256.png",
+      "Sha256": "9f9822a37f454b2ff5135cec46b863142d44518bd6581364d0cb5435af5ebb88",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/brand-gold-elements.ico",
+      "Sha256": "82fbf30b4d073602391caade5f93d51b46ae389b89be47b40f1df1c51ba0c778",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-ber-256.png",
+      "Sha256": "39346fecdd35434f31c260a87df8947160c8f8954dfb05c028379d61376c0b82",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-ber.ico",
+      "Sha256": "1b2c87c3c8cffed19de18466589611c93f84a5dbafcab0f124a2a67392fa3ce3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-brd-256.png",
+      "Sha256": "f7df7f86bfe18a08b6d5425eb46dd1054b9d42096ab01042dadd91219a9ddff2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-brd.ico",
+      "Sha256": "3b6eecfa1188f836a4c2932284ce40061475f0f66c05e47b0266d540f2700a02",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-bst-256.png",
+      "Sha256": "32acd02a12494bdda4798a67c87a3a11339a43655a3680b6c9eb03640587bff4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-bst.ico",
+      "Sha256": "11468ccaada3575ee7d98e7261ec46918956b0ea293fb16fc4c26c4475450d02",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-clr-256.png",
+      "Sha256": "1c3e4f6f3cccdb986bcd42e852634f26649adb143530aefc0db55a6d25fd72fd",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-clr.ico",
+      "Sha256": "9071fb7f3e839c01964b20067fbf80ff7b336d0d91f88633b5d0bcf55fd0bf79",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-dru-256.png",
+      "Sha256": "0cd5f89290735d8bd5d95733a433aea819a752d5464a5fa1ae49473d037a3892",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-dru.ico",
+      "Sha256": "ba072e90908c037200014f45061a1e08be278e3fce6f688f3038ffd0bf9fb58a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-enc-256.png",
+      "Sha256": "53af8390515609797653bb123fb74406aee5f5d07cb8da5d6c2f05959f4527ca",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-enc.ico",
+      "Sha256": "9831cddef0a69b5a95adda0056181dd84b9ec5323004ab27db7452b3cd359a80",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-mag-256.png",
+      "Sha256": "421e3083b78d06003d853c216cf0fb03dc4574abc8a48117b997e471fa65eb1c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-mag.ico",
+      "Sha256": "e5dc82975282b9f7823444485b4fc89518406bed45497b5319c44fc6dd7d51b4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-mnk-256.png",
+      "Sha256": "dfb2c1d121cac5e22014d2fa0fca2b73d59ac12b9755e31c35913df64830f80e",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-mnk.ico",
+      "Sha256": "a605dc4d83448ee00d380a9a1333b3058ac87235a9a4a592dc2a4e30ae1a36be",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-nec-256.png",
+      "Sha256": "77e82dd6e3207c61cef3ff5e2bb48d5430f4cb120800cc7190f114b431e752f6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-nec.ico",
+      "Sha256": "bd2436453c46aa950d5eebd0c97a2f4e77a3be3d6bccd0f5cedf0ea9f9968584",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-pal-256.png",
+      "Sha256": "87c523b46bebe4bcf2e047077fd5de32c1131113ad94e7f4277c890a061c2e48",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-pal.ico",
+      "Sha256": "ea159707bbbb708132fbe9a3e50b9241e1023a14899602a66ec014618d440611",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-rng-256.png",
+      "Sha256": "13ee8e8efb6031c7bcc789f89010269bf6989d577d9d034dfee82df7df66a840",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-rng.ico",
+      "Sha256": "1b1a0d2cc8269db20071703c256a241ab3e11265a58d3f7ac059560c4104e7ce",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-rog-256.png",
+      "Sha256": "84933a221611b1ac60208980b5cf9bd9ca1656d0f25f01c0697d8dcdf62fbaac",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-rog.ico",
+      "Sha256": "5dcf4af2363709c3ef2a73596c33d56db1989fdada818fb8cd25f2d215be587a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-shd-256.png",
+      "Sha256": "01a5b41a3a268d6713af5158db5acbb5e4120b01c8a39d7f852890a4dd67ff11",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-shd.ico",
+      "Sha256": "7b989e7415d8af866e4c33ab7c17287b3320d2339b52ca5929483c8853f133d0",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-shm-256.png",
+      "Sha256": "8006426fb266fb5804f5054e7b80db68841f3465d3b2ad1006fc0c94ec8d04a6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-shm.ico",
+      "Sha256": "17a34a3dfedf75706f787c89bf24e64ed80eef9d60878d72cddb6fc79be2e403",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-war-256.png",
+      "Sha256": "cb55004579af68055106362831bfc5a4156a1430c7a5450ab559c5032268f3d7",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-war.ico",
+      "Sha256": "25c7daa1a3539b6a1ca3457274db49207e072cbba8948524df86f15ddcede158",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-wiz-256.png",
+      "Sha256": "17195da8117d274a08b52646a6664968c384c174bdbdbf0defdf72e719973b1d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/class-wiz.ico",
+      "Sha256": "931a9cff0c4038e22399dc46f69d7fe66479f8cf9d80917d35ac983d2c9dc28a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/combat-max-hit-256.png",
+      "Sha256": "4a4273a82fd03d88a422db7b088b47c58b3b5595ecea1f99270a9753a79bf019",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-arcane-orb-256.png",
+      "Sha256": "92131b5d896599a2de464be6cbb357dccdd4225dd4fa380f3748164191e26191",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-arcane-sigil-256.png",
+      "Sha256": "acf84efa41a9e0b2e59a5b3b295f74ee994b406cbfc3c3e3ebfabd057b3e4531",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-elemental-vortex-256.png",
+      "Sha256": "8d08d2300db170d543c0bc002794a68d1d940eca59ed831a3f4d5f9678373a41",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-lightning-256.png",
+      "Sha256": "8a01cb7a650c0363c148b9694dd2377e118290d5ad2ffdd7369311622a5461d4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-magic-missiles-256.png",
+      "Sha256": "0180cd0333517d28eb77479d3ab996331306365aacddddce973ebea9d38885be",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/damage-sword-spell-256.png",
+      "Sha256": "04cc3446e9e546c3ea971b5b4a0f5ca462593b6f1eaf99422548bd2f6b4dfb03",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-axe-256.png",
+      "Sha256": "d37d438bd498c902f14953ee4429e9e4fbafa737be9a24db2107b50c5ce85ef3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-bow-256.png",
+      "Sha256": "b64fdb6f256bc6b059ce5264eeba2fbd95898290c940082e4fb2e09b08aa0023",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-claw-256.png",
+      "Sha256": "44fd0835ace5d4f294b445c598827b535fccaf34010afec7e017e18039f544c6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-cold-256.png",
+      "Sha256": "fa73be4390abfbdad8ad96e5d659bd6d1eb67cde62ebb15b282a6a5128267d24",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-corruption-256.png",
+      "Sha256": "06a3a5b556d896b700592c359c728a5d0bc14145e907b318c49a0b5bed4aaf24",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-dagger-256.png",
+      "Sha256": "49238aece9b31163a3c7dd91949cf4b244251221180668b9df6170adcb514b40",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-disease-256.png",
+      "Sha256": "4bb71d53f2f4daa58bed9bf7b895afcd5e0e49d3b7e5bb39158d7484baad965f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-fang-256.png",
+      "Sha256": "72fbf6481f01b41804e5763ebb337f9731cbdb36b2cd62e298dd909d70576778",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-fire-256.png",
+      "Sha256": "70589654aaab8df822ce9562ab18ce9d9bfba9e9f3ef487f8103bcd80eff6387",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-fist-256.png",
+      "Sha256": "6141d7599b72897bc97ec1e57f565172ae2a7e2826924aedf158a9ec18071cb9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-healing-256.png",
+      "Sha256": "704744cee5280663998e488e21546413c8d5ad84b76c079df13cec2a98294015",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-kick-256.png",
+      "Sha256": "d61da39239fd7387f5af1e2a25d8a4f729c30ae1d2426534382f1fd1f59f63e4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-mace-256.png",
+      "Sha256": "65ab19dd6c291731dda915ed0a806edb4cfba94e44d12d112673c06ea5b7957a",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-magic-256.png",
+      "Sha256": "7fbf871c779732df22f75fd982b22f196e64b8ded460190ffa01f42d87e6aa02",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-martialkick-256.png",
+      "Sha256": "6256e2d1966a50e9961f299c46da30a45c5d6209036e13198f4f087c7be0bc65",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-physical-256.png",
+      "Sha256": "8c34c75e1d745a22c86e17e0dbf9833bbd21a771ceabfd4a00fe67a6fb340558",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-poison-256.png",
+      "Sha256": "12c1663bcb382924aaa6528c9ff2d34e2a6ed2a471d9623f0f8c71955b8b9868",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-shield-256.png",
+      "Sha256": "b3f518799459eaf81982d7a535f0237ee5ec23bc65c39137767a90f89f6892d9",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-spear-256.png",
+      "Sha256": "fb63ad3ca6959f77777200d1771ebda5301ecbcf7bde0f4eb925a4ff6446ba8f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-sword-256.png",
+      "Sha256": "c9dfa9d35fdf6ab9e14454d1182d7709b21d771cc0bc9a5e967d4a49bc6b309c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/glyph-unknown-256.png",
+      "Sha256": "67e338a96934b9b72c056ea1d8a555fe0a5d41199cd579631ae609e2595991f6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/inventory-chest-256.png",
+      "Sha256": "ea8d70d839e0742aac46ce3b760cc20f243b7872fc8cbdb98d2380101e5ea0bc",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/inventory-mimic-frieren-256.png",
+      "Sha256": "2d2de9e2a599429047b15c052adfd0362c9c105004ce3af11345e348d592e163",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-ammunition-256.png",
+      "Sha256": "2edccc3890727b1da0d42439195944598fa1d42d86f5f04d3aa6256afef78b50",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-armor-256.png",
+      "Sha256": "5c60b8fde8b4e5658c6246c92c2c06ce3f5b94ec016610b77ff06b907ddc160d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-arms-256.png",
+      "Sha256": "bb44cb4594e53f809ae3aa21ffb2d6c3b3e5d892138ee305d32277030c07becf",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-arrow-256.png",
+      "Sha256": "567de57fedd1bc13f335091cf8eae8d0ae708436047c593de18abbc520599857",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-axe-1h-256.png",
+      "Sha256": "c2acc7b2d34dfb18abf233756c15f2fa18e5d5ca3f1964f035f16ef85a3a2b02",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-axe-2h-256.png",
+      "Sha256": "66c7a1bfc161fffab6f1c3adbc699697cb4eb9b56e9c5bebc9e1d01fac7a0367",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-bag-256.png",
+      "Sha256": "83284ccb745e88a85c62a44a1fa55542e2804e876ba2205dff2ab6e4559c18ce",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-belt-256.png",
+      "Sha256": "0f09bfb2874b8c669c0f01bddeec5f7391b6818802787790d6fb014cab41e8b1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-boots-256.png",
+      "Sha256": "9c70ead828cd62669a2d1655b2972a200f10b2a10609a7d18cb82e0023c50ae6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-cloak-256.png",
+      "Sha256": "eb368bebbee5fa73eb6eecf34f85acd77853c6a853fbef7b564bda4afc5935b3",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-earring-256.png",
+      "Sha256": "0ed6e939ff2c5546e7659cfebc5ce7c8e3be4c475c392b7b86d757ed549717e4",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-face-256.png",
+      "Sha256": "2844dc5db6f711896acff7cd57d7fe62f3095409d70228ba6b95d08d87eae973",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-gloves-256.png",
+      "Sha256": "c67f4ba1152c8846f30e74ee20e5cfce4244d45d0c29f7120ed9fada74f8ed34",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-greatsword-256.png",
+      "Sha256": "dfa5c2dd3590bd01d3ceeb6b772cc3251a880c1b5861d8f9a2f3096e007aac25",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-hammer-1h-256.png",
+      "Sha256": "ee948274d1109d3faf818dd52d2c28bbe46cb0fc53657e91c1de108b36667445",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-hammer-2h-256.png",
+      "Sha256": "f0dd98e2aee2b48ad97b7cf9f95da736a15b8789e781382186331ff9684d94bc",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-head-256.png",
+      "Sha256": "1dbf60a5ec7cb8716b3d213b57315f67082a986767bbd012160cbe0e5fde4cc5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-held-256.png",
+      "Sha256": "4a2e6c4dd39ab5c9cf083d5d8ff85ee99693397c535562b7e818c48e4e724d7f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-legs-256.png",
+      "Sha256": "c642cdc57bfa2e93e90ec17f6d304b02efe64631178fbec9fada76779b4d6a20",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-mace-1h-256.png",
+      "Sha256": "804a9c3ba556dacba2aa66e0e5c80e571ada54c282a7a07fcc36655eb1189a0d",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-mace-2h-256.png",
+      "Sha256": "51138f821eb2d298a0d5410407258a81773dcab7f20e54cc8b2fd453d67a898f",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-necklace-256.png",
+      "Sha256": "4d68c656929cce696b62091c207e190d1741723657fb2b56c755762be2637a9c",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-potion-256.png",
+      "Sha256": "517bc684279ca26ca30cde878c407853e457e128fdbe59eaa2a4a5cb6e886fe1",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-ring-256.png",
+      "Sha256": "ef175873baebb33ff7ef66778bc8f6f627e98fa171cd1f3febabdc07cc94fd25",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-scroll-256.png",
+      "Sha256": "e8448e9efa17649b6114905e444cceabea998a9a87e5449e5f775b5cd4dbbbd2",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-shoulders-256.png",
+      "Sha256": "79b39acaff53925f6ae334c26db762b6a0c82af946c2997c74cae66999a517b5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-staff-256.png",
+      "Sha256": "93f5e2dec2e949a22ba8fc9e2803eb0968b1c091ff63ee0a1f66792ac4fdb2e6",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/item-wrists-256.png",
+      "Sha256": "b2c333aa759b58f772889ae925b052f98953bd7fad6d259c2dea68f450f48a47",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/manifest.json",
+      "Sha256": "0bbb6b819a4e7222cd00a6d9ba872ed26b022469423b5bf0be729bf736042914",
+      "Provenance": "Upstream font; see accompanying OFL"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-air-256.png",
+      "Sha256": "a0119c73003894ea97e0adaed883a4c8edd453ef28a8866263a099b57fd61084",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-earth-256.png",
+      "Sha256": "9f3394bb6c9ea1dbf27d0632a9ae9b2ecb665b0541772ced5551196c3d5a7476",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-fire-256.png",
+      "Sha256": "752d1fc00f024a6244ba51e9e2b4f9ad089ee1d1d276a8fcfd1cc4a8152c9aa5",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-generic-256.png",
+      "Sha256": "1a970d61de3fcc4d2cbec91eb51342af56883d7731f71113545bba754f54b0c8",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-water-256.png",
+      "Sha256": "399f5d7a2a7d17f048e72ec471fb5878faaa29a0f5a06ff04b55a9630ec1ba37",
+      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+    }
+  ],
+  "PrivateReferencesIncluded": false
+}

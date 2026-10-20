@@ -1,0 +1,1 @@
+These fixtures are hand-authored synthetic parser scenarios. They contain no player captures, chat history or inventory snapshots from a real profile. Numeric expectations exercise attribution, interruption gaps, ranked items and collection evidence.

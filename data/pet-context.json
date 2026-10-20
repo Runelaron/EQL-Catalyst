@@ -1,0 +1,1188 @@
+{
+  "Version": "2026-10-18.2",
+  "Spells": [
+    {
+      "PetType": "Warder",
+      "Name": "Wild Spirit",
+      "CasterClass": "BST",
+      "RequiredLevel": 1,
+      "Url": "https://eqlwiki.com/Wild_Spirit",
+      "Revision": 168313,
+      "Aliases": [
+        "Wild Spirit Summon"
+      ],
+      "BasePetLevel": 1,
+      "LevelEvidence": "https://eqlwiki.com/Wild_Spirit revision 168313"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Tame Spirit",
+      "CasterClass": "BST",
+      "RequiredLevel": 4,
+      "Url": "https://eqlwiki.com/Tame_Spirit",
+      "Revision": 168314,
+      "Aliases": [
+        "Tame Spirit Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Tame_Spirit revision 168314"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Sharik",
+      "CasterClass": "BST",
+      "RequiredLevel": 8,
+      "Url": "https://eqlwiki.com/Spirit_of_Sharik",
+      "Revision": 168315,
+      "Aliases": [
+        "Spirit of Sharik Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Sharik revision 168315"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Khaliz",
+      "CasterClass": "BST",
+      "RequiredLevel": 15,
+      "Url": "https://eqlwiki.com/Spirit_of_Khaliz",
+      "Revision": 168316,
+      "Aliases": [
+        "Spirit of Khaliz Summon"
+      ],
+      "BasePetLevel": 16,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Khaliz revision 168316"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Keshuval",
+      "CasterClass": "BST",
+      "RequiredLevel": 23,
+      "Url": "https://eqlwiki.com/Spirit_of_Keshuval",
+      "Revision": 168318,
+      "Aliases": [
+        "Spirit of Keshuval Summon"
+      ],
+      "BasePetLevel": 22,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Keshuval revision 168318"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Herikol",
+      "CasterClass": "BST",
+      "RequiredLevel": 30,
+      "Url": "https://eqlwiki.com/Spirit_of_Herikol",
+      "Revision": 168319,
+      "Aliases": [
+        "Spirit of Herikol Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Herikol revision 168319"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Yekan",
+      "CasterClass": "BST",
+      "RequiredLevel": 39,
+      "Url": "https://eqlwiki.com/Spirit_of_Yekan",
+      "Revision": 168320,
+      "Aliases": [
+        "Spirit of Yekan Summon"
+      ],
+      "BasePetLevel": 31,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Yekan revision 168320"
+    },
+    {
+      "PetType": "Warder",
+      "Name": "Spirit of Kashek",
+      "CasterClass": "BST",
+      "RequiredLevel": 46,
+      "Url": "https://eqlwiki.com/Spirit_of_Kashek",
+      "Revision": 168321,
+      "Aliases": [
+        "Spirit of Kashek Summon"
+      ],
+      "BasePetLevel": 39,
+      "LevelEvidence": "https://eqlwiki.com/Spirit_of_Kashek revision 168321"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Pendril's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 1,
+      "Url": "https://eqlwiki.com/Pendril%27s_Animation",
+      "Revision": 168335,
+      "Aliases": [
+        "Pendril's Animation Summon"
+      ],
+      "BasePetLevel": 1,
+      "LevelEvidence": "https://eqlwiki.com/Pendril%27s_Animation revision 168335"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Juli's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 2,
+      "Url": "https://eqlwiki.com/Juli%27s_Animation",
+      "Revision": 168334,
+      "Aliases": [
+        "Juli's Animation Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Juli%27s_Animation revision 168334"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Mircyl's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 7,
+      "Url": "https://eqlwiki.com/Mircyl%27s_Animation",
+      "Revision": 168333,
+      "Aliases": [
+        "Mircyl's Animation Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Mircyl%27s_Animation revision 168333"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Kilan's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 9,
+      "Url": "https://eqlwiki.com/Kilan%27s_Animation",
+      "Revision": 168332,
+      "Aliases": [
+        "Kilan's Animation Summon"
+      ],
+      "BasePetLevel": 11,
+      "LevelEvidence": "https://eqlwiki.com/Kilan%27s_Animation revision 168332"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Shalee's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 14,
+      "Url": "https://eqlwiki.com/Shalee%27s_Animation",
+      "Revision": 168331,
+      "Aliases": [
+        "Shalee's Animation Summon"
+      ],
+      "BasePetLevel": 16,
+      "LevelEvidence": "https://eqlwiki.com/Shalee%27s_Animation revision 168331"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Sisna's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 17,
+      "Url": "https://eqlwiki.com/Sisna%27s_Animation",
+      "Revision": 168632,
+      "Aliases": [
+        "Sisna's Animation Summon"
+      ],
+      "BasePetLevel": 19,
+      "LevelEvidence": "https://eqlwiki.com/Sisna%27s_Animation revision 168632"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Sagar's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 22,
+      "Url": "https://eqlwiki.com/Sagar%27s_Animation",
+      "Revision": 168329,
+      "Aliases": [
+        "Sagar's Animation Summon"
+      ],
+      "BasePetLevel": 22,
+      "LevelEvidence": "https://eqlwiki.com/Sagar%27s_Animation revision 168329"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Uleen's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 29,
+      "Url": "https://eqlwiki.com/Uleen%27s_Animation",
+      "Revision": 168328,
+      "Aliases": [
+        "Uleen's Animation Summon"
+      ],
+      "BasePetLevel": 25,
+      "LevelEvidence": "https://eqlwiki.com/Uleen%27s_Animation revision 168328"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Boltran's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 31,
+      "Url": "https://eqlwiki.com/Boltran%27s_Animation",
+      "Revision": 168327,
+      "Aliases": [
+        "Boltran's Animation Summon"
+      ],
+      "BasePetLevel": 28,
+      "LevelEvidence": "https://eqlwiki.com/Boltran%27s_Animation revision 168327"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Aanya's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 37,
+      "Url": "https://eqlwiki.com/Aanya%27s_Animation",
+      "Revision": 168325,
+      "Aliases": [
+        "Aanya's Animation Summon"
+      ],
+      "BasePetLevel": 31,
+      "LevelEvidence": "https://eqlwiki.com/Aanya%27s_Animation revision 168325"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Yegoreff's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 41,
+      "Url": "https://eqlwiki.com/Yegoreff%27s_Animation",
+      "Revision": 168324,
+      "Aliases": [
+        "Yegoreff's Animation Summon"
+      ],
+      "BasePetLevel": 34,
+      "LevelEvidence": "https://eqlwiki.com/Yegoreff%27s_Animation revision 168324"
+    },
+    {
+      "PetType": "Animation",
+      "Name": "Kintaz's Animation",
+      "CasterClass": "ENC",
+      "RequiredLevel": 48,
+      "Url": "https://eqlwiki.com/Kintaz%27s_Animation",
+      "Revision": 168323,
+      "Aliases": [
+        "Kintaz's Animation Summon"
+      ],
+      "BasePetLevel": 39,
+      "LevelEvidence": "https://eqlwiki.com/Kintaz%27s_Animation revision 168323"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Elementalkin: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 2,
+      "Url": "https://eqlwiki.com/Elementalkin:_Water",
+      "Revision": 168389,
+      "Aliases": [
+        "Elementalkin: Water Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Elementalkin:_Water revision 168389"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Elementalkin: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 3,
+      "Url": "https://eqlwiki.com/Elementalkin:_Fire",
+      "Revision": 168446,
+      "Aliases": [
+        "Elementalkin: Fire Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Elementalkin:_Fire revision 168446"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Elementalkin: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 4,
+      "Url": "https://eqlwiki.com/Elementalkin:_Air",
+      "Revision": 168432,
+      "Aliases": [
+        "Elementalkin: Air Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Elementalkin:_Air revision 168432"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Elementalkin: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 5,
+      "Url": "https://eqlwiki.com/Elementalkin:_Earth",
+      "Revision": 168438,
+      "Aliases": [
+        "Elementalkin: Earth Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Elementalkin:_Earth revision 168438"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Elementaling: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 6,
+      "Url": "https://eqlwiki.com/Elementaling:_Water",
+      "Revision": 168387,
+      "Aliases": [
+        "Elementaling: Water Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Elementaling:_Water revision 168387"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Elementaling: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 7,
+      "Url": "https://eqlwiki.com/Elementaling:_Fire",
+      "Revision": 168447,
+      "Aliases": [
+        "Elementaling: Fire Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Elementaling:_Fire revision 168447"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Elementaling: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 8,
+      "Url": "https://eqlwiki.com/Elementaling:_Air",
+      "Revision": 168431,
+      "Aliases": [
+        "Elementaling: Air Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Elementaling:_Air revision 168431"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Elementaling: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 9,
+      "Url": "https://eqlwiki.com/Elementaling:_Earth",
+      "Revision": 168439,
+      "Aliases": [
+        "Elementaling: Earth Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Elementaling:_Earth revision 168439"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Elemental: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 10,
+      "Url": "https://eqlwiki.com/Elemental:_Water",
+      "Revision": 168386,
+      "Aliases": [
+        "Elemental: Water Summon"
+      ],
+      "BasePetLevel": 12,
+      "LevelEvidence": "https://eqlwiki.com/Elemental:_Water revision 168386"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Elemental: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 11,
+      "Url": "https://eqlwiki.com/Elemental:_Fire",
+      "Revision": 168448,
+      "Aliases": [
+        "Elemental: Fire Summon"
+      ],
+      "BasePetLevel": 12,
+      "LevelEvidence": "https://eqlwiki.com/Elemental:_Fire revision 168448"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Elemental: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 12,
+      "Url": "https://eqlwiki.com/Elemental:_Air",
+      "Revision": 168430,
+      "Aliases": [
+        "Elemental: Air Summon"
+      ],
+      "BasePetLevel": 12,
+      "LevelEvidence": "https://eqlwiki.com/Elemental:_Air revision 168430"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Elemental: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 13,
+      "Url": "https://eqlwiki.com/Elemental:_Earth",
+      "Revision": 168441,
+      "Aliases": [
+        "Elemental: Earth Summon"
+      ],
+      "BasePetLevel": 12,
+      "LevelEvidence": "https://eqlwiki.com/Elemental:_Earth revision 168441"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Minor Summoning: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 14,
+      "Url": "https://eqlwiki.com/Minor_Summoning:_Water",
+      "Revision": 168385,
+      "Aliases": [
+        "Minor Summoning: Water Summon"
+      ],
+      "BasePetLevel": 17,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Summoning:_Water revision 168385"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Minor Summoning: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 15,
+      "Url": "https://eqlwiki.com/Minor_Summoning:_Fire",
+      "Revision": 168449,
+      "Aliases": [
+        "Minor Summoning: Fire Summon"
+      ],
+      "BasePetLevel": 17,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Summoning:_Fire revision 168449"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Minor Summoning: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 16,
+      "Url": "https://eqlwiki.com/Minor_Summoning:_Air",
+      "Revision": 168429,
+      "Aliases": [
+        "Minor Summoning: Air Summon"
+      ],
+      "BasePetLevel": 17,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Summoning:_Air revision 168429"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Minor Summoning: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 17,
+      "Url": "https://eqlwiki.com/Minor_Summoning:_Earth",
+      "Revision": 168442,
+      "Aliases": [
+        "Minor Summoning: Earth Summon"
+      ],
+      "BasePetLevel": 17,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Summoning:_Earth revision 168442"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Lesser Summoning: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 18,
+      "Url": "https://eqlwiki.com/Lesser_Summoning:_Water",
+      "Revision": 168384,
+      "Aliases": [
+        "Lesser Summoning: Water Summon"
+      ],
+      "BasePetLevel": 20,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Summoning:_Water revision 168384"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Lesser Summoning: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 19,
+      "Url": "https://eqlwiki.com/Lesser_Summoning:_Fire",
+      "Revision": 168450,
+      "Aliases": [
+        "Lesser Summoning: Fire Summon"
+      ],
+      "BasePetLevel": 20,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Summoning:_Fire revision 168450"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Lesser Summoning: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 20,
+      "Url": "https://eqlwiki.com/Lesser_Summoning:_Air",
+      "Revision": 168428,
+      "Aliases": [
+        "Lesser Summoning: Air Summon"
+      ],
+      "BasePetLevel": 20,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Summoning:_Air revision 168428"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Lesser Summoning: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 21,
+      "Url": "https://eqlwiki.com/Lesser_Summoning:_Earth",
+      "Revision": 168443,
+      "Aliases": [
+        "Lesser Summoning: Earth Summon"
+      ],
+      "BasePetLevel": 20,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Summoning:_Earth revision 168443"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Summoning: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 22,
+      "Url": "https://eqlwiki.com/Summoning:_Water",
+      "Revision": 168383,
+      "Aliases": [
+        "Summoning: Water Summon"
+      ],
+      "BasePetLevel": 23,
+      "LevelEvidence": "https://eqlwiki.com/Summoning:_Water revision 168383"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Summoning: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 23,
+      "Url": "https://eqlwiki.com/Summoning:_Fire",
+      "Revision": 168451,
+      "Aliases": [
+        "Summoning: Fire Summon"
+      ],
+      "BasePetLevel": 23,
+      "LevelEvidence": "https://eqlwiki.com/Summoning:_Fire revision 168451"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Summoning: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 24,
+      "Url": "https://eqlwiki.com/Summoning:_Air",
+      "Revision": 168427,
+      "Aliases": [
+        "Summoning: Air Summon"
+      ],
+      "BasePetLevel": 23,
+      "LevelEvidence": "https://eqlwiki.com/Summoning:_Air revision 168427"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Summoning: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 25,
+      "Url": "https://eqlwiki.com/Summoning:_Earth",
+      "Revision": 168444,
+      "Aliases": [
+        "Summoning: Earth Summon"
+      ],
+      "BasePetLevel": 23,
+      "LevelEvidence": "https://eqlwiki.com/Summoning:_Earth revision 168444"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Greater Summoning: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 26,
+      "Url": "https://eqlwiki.com/Greater_Summoning:_Water",
+      "Revision": 168382,
+      "Aliases": [
+        "Greater Summoning: Water Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Summoning:_Water revision 168382"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Greater Summoning: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 27,
+      "Url": "https://eqlwiki.com/Greater_Summoning:_Fire",
+      "Revision": 168452,
+      "Aliases": [
+        "Greater Summoning: Fire Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Summoning:_Fire revision 168452"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Greater Summoning: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 28,
+      "Url": "https://eqlwiki.com/Greater_Summoning:_Air",
+      "Revision": 168426,
+      "Aliases": [
+        "Greater Summoning: Air Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Summoning:_Air revision 168426"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Greater Summoning: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 29,
+      "Url": "https://eqlwiki.com/Greater_Summoning:_Earth",
+      "Revision": 168437,
+      "Aliases": [
+        "Greater Summoning: Earth Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Summoning:_Earth revision 168437"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Minor Conjuration: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 31,
+      "Url": "https://eqlwiki.com/Minor_Conjuration:_Water",
+      "Revision": 168381,
+      "Aliases": [
+        "Minor Conjuration: Water Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Conjuration:_Water revision 168381"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Minor Conjuration: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 32,
+      "Url": "https://eqlwiki.com/Minor_Conjuration:_Fire",
+      "Revision": 168453,
+      "Aliases": [
+        "Minor Conjuration: Fire Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Conjuration:_Fire revision 168453"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Minor Conjuration: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 33,
+      "Url": "https://eqlwiki.com/Minor_Conjuration:_Air",
+      "Revision": 168425,
+      "Aliases": [
+        "Minor Conjuration: Air Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Conjuration:_Air revision 168425"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Minor Conjuration: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 34,
+      "Url": "https://eqlwiki.com/Minor_Conjuration:_Earth",
+      "Revision": 168436,
+      "Aliases": [
+        "Minor Conjuration: Earth Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Minor_Conjuration:_Earth revision 168436"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Lesser Conjuration: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 36,
+      "Url": "https://eqlwiki.com/Lesser_Conjuration:_Water",
+      "Revision": 168380,
+      "Aliases": [
+        "Lesser Conjuration: Water Summon"
+      ],
+      "BasePetLevel": 33,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Conjuration:_Water revision 168380"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Lesser Conjuration: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 37,
+      "Url": "https://eqlwiki.com/Lesser_Conjuration:_Fire",
+      "Revision": 168454,
+      "Aliases": [
+        "Lesser Conjuration: Fire Summon"
+      ],
+      "BasePetLevel": 33,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Conjuration:_Fire revision 168454"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Lesser Conjuration: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 38,
+      "Url": "https://eqlwiki.com/Lesser_Conjuration:_Air",
+      "Revision": 168424,
+      "Aliases": [
+        "Lesser Conjuration: Air Summon"
+      ],
+      "BasePetLevel": 33,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Conjuration:_Air revision 168424"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Lesser Conjuration: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 39,
+      "Url": "https://eqlwiki.com/Lesser_Conjuration:_Earth",
+      "Revision": 168435,
+      "Aliases": [
+        "Lesser Conjuration: Earth Summon"
+      ],
+      "BasePetLevel": 33,
+      "LevelEvidence": "https://eqlwiki.com/Lesser_Conjuration:_Earth revision 168435"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Conjuration: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 41,
+      "Url": "https://eqlwiki.com/Conjuration:_Water",
+      "Revision": 168379,
+      "Aliases": [
+        "Conjuration: Water Summon"
+      ],
+      "BasePetLevel": 37,
+      "LevelEvidence": "https://eqlwiki.com/Conjuration:_Water revision 168379"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Conjuration: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 42,
+      "Url": "https://eqlwiki.com/Conjuration:_Fire",
+      "Revision": 168455,
+      "Aliases": [
+        "Conjuration: Fire Summon"
+      ],
+      "BasePetLevel": 37,
+      "LevelEvidence": "https://eqlwiki.com/Conjuration:_Fire revision 168455"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Conjuration: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 43,
+      "Url": "https://eqlwiki.com/Conjuration:_Air",
+      "Revision": 168423,
+      "Aliases": [
+        "Conjuration: Air Summon"
+      ],
+      "BasePetLevel": 37,
+      "LevelEvidence": "https://eqlwiki.com/Conjuration:_Air revision 168423"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Conjuration: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 44,
+      "Url": "https://eqlwiki.com/Conjuration:_Earth",
+      "Revision": 168433,
+      "Aliases": [
+        "Conjuration: Earth Summon"
+      ],
+      "BasePetLevel": 37,
+      "LevelEvidence": "https://eqlwiki.com/Conjuration:_Earth revision 168433"
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Greater Conjuration: Earth",
+      "CasterClass": "MAG",
+      "RequiredLevel": 46,
+      "Url": "https://eqlwiki.com/Greater_Conjuration:_Earth",
+      "Revision": 168434,
+      "Aliases": [
+        "Greater Conjuration: Earth Summon"
+      ],
+      "BasePetLevel": 41,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Conjuration:_Earth revision 168434"
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Greater Conjuration: Fire",
+      "CasterClass": "MAG",
+      "RequiredLevel": 47,
+      "Url": "https://eqlwiki.com/Greater_Conjuration:_Fire",
+      "Revision": 168445,
+      "Aliases": [
+        "Greater Conjuration: Fire Summon"
+      ],
+      "BasePetLevel": 41,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Conjuration:_Fire revision 168445"
+    },
+    {
+      "PetType": "Air",
+      "Name": "Greater Conjuration: Air",
+      "CasterClass": "MAG",
+      "RequiredLevel": 48,
+      "Url": "https://eqlwiki.com/Greater_Conjuration:_Air",
+      "Revision": 168420,
+      "Aliases": [
+        "Greater Conjuration: Air Summon"
+      ],
+      "BasePetLevel": 41,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Conjuration:_Air revision 168420"
+    },
+    {
+      "PetType": "Water",
+      "Name": "Greater Conjuration: Water",
+      "CasterClass": "MAG",
+      "RequiredLevel": 49,
+      "Url": "https://eqlwiki.com/Greater_Conjuration:_Water",
+      "Revision": 168351,
+      "Aliases": [
+        "Greater Conjuration: Water Summon"
+      ],
+      "BasePetLevel": 41,
+      "LevelEvidence": "https://eqlwiki.com/Greater_Conjuration:_Water revision 168351"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Cavorting Bones",
+      "CasterClass": "NEC",
+      "RequiredLevel": 1,
+      "Url": "https://eqlwiki.com/Cavorting_Bones",
+      "Revision": 168294,
+      "Aliases": [
+        "Cavorting Bones Summon"
+      ],
+      "BasePetLevel": 1,
+      "LevelEvidence": "https://eqlwiki.com/Cavorting_Bones revision 168294"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Leering Corpse",
+      "CasterClass": "NEC",
+      "RequiredLevel": 4,
+      "Url": "https://eqlwiki.com/Leering_Corpse",
+      "Revision": 168295,
+      "Aliases": [
+        "Leering Corpse Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Leering_Corpse revision 168295"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Bone Walk",
+      "CasterClass": "NEC",
+      "RequiredLevel": 8,
+      "Url": "https://eqlwiki.com/Bone_Walk",
+      "Revision": 168296,
+      "Aliases": [
+        "Bone Walk Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Bone_Walk revision 168296"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Convoke Shadow",
+      "CasterClass": "NEC",
+      "RequiredLevel": 12,
+      "Url": "https://eqlwiki.com/Convoke_Shadow",
+      "Revision": 168297,
+      "Aliases": [
+        "Convoke Shadow Summon"
+      ],
+      "BasePetLevel": 11,
+      "LevelEvidence": "https://eqlwiki.com/Convoke_Shadow revision 168297"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Restless Bones",
+      "CasterClass": "NEC",
+      "RequiredLevel": 16,
+      "Url": "https://eqlwiki.com/Restless_Bones",
+      "Revision": 168298,
+      "Aliases": [
+        "Restless Bones Summon"
+      ],
+      "BasePetLevel": 16,
+      "LevelEvidence": "https://eqlwiki.com/Restless_Bones revision 168298"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Animate Dead",
+      "CasterClass": "NEC",
+      "RequiredLevel": 20,
+      "Url": "https://eqlwiki.com/Animate_Dead",
+      "Revision": 168299,
+      "Aliases": [
+        "Animate Dead Summon"
+      ],
+      "BasePetLevel": 19,
+      "LevelEvidence": "https://eqlwiki.com/Animate_Dead revision 168299"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Haunting Corpse",
+      "CasterClass": "NEC",
+      "RequiredLevel": 24,
+      "Url": "https://eqlwiki.com/Haunting_Corpse",
+      "Revision": 168300,
+      "Aliases": [
+        "Haunting Corpse Summon"
+      ],
+      "BasePetLevel": 22,
+      "LevelEvidence": "https://eqlwiki.com/Haunting_Corpse revision 168300"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Summon Dead",
+      "CasterClass": "NEC",
+      "RequiredLevel": 29,
+      "Url": "https://eqlwiki.com/Summon_Dead",
+      "Revision": 168301,
+      "Aliases": [
+        "Summon Dead Summon"
+      ],
+      "BasePetLevel": 25,
+      "LevelEvidence": "https://eqlwiki.com/Summon_Dead revision 168301"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Invoke Shadow",
+      "CasterClass": "NEC",
+      "RequiredLevel": 34,
+      "Url": "https://eqlwiki.com/Invoke_Shadow",
+      "Revision": 168303,
+      "Aliases": [
+        "Invoke Shadow Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Invoke_Shadow revision 168303"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Malignant Dead",
+      "CasterClass": "NEC",
+      "RequiredLevel": 39,
+      "Url": "https://eqlwiki.com/Malignant_Dead",
+      "Revision": 168304,
+      "Aliases": [
+        "Malignant Dead Summon"
+      ],
+      "BasePetLevel": 33,
+      "LevelEvidence": "https://eqlwiki.com/Malignant_Dead revision 168304"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Cackling Bones",
+      "CasterClass": "NEC",
+      "RequiredLevel": 44,
+      "Url": "https://eqlwiki.com/Cackling_Bones",
+      "Revision": 168305,
+      "Aliases": [
+        "Cackling Bones Summon"
+      ],
+      "BasePetLevel": 37,
+      "LevelEvidence": "https://eqlwiki.com/Cackling_Bones revision 168305"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Invoke Death",
+      "CasterClass": "NEC",
+      "RequiredLevel": 49,
+      "Url": "https://eqlwiki.com/Invoke_Death",
+      "Revision": 168306,
+      "Aliases": [
+        "Invoke Death Summon"
+      ],
+      "BasePetLevel": 41,
+      "LevelEvidence": "https://eqlwiki.com/Invoke_Death revision 168306"
+    },
+    {
+      "PetType": "Spirit",
+      "Name": "Companion Spirit",
+      "CasterClass": "SHM",
+      "RequiredLevel": 32,
+      "Url": "https://eqlwiki.com/Companion_Spirit",
+      "Revision": 179041,
+      "Aliases": [
+        "Companion Spirit Summon"
+      ],
+      "BasePetLevel": 26,
+      "LevelEvidence": "https://eqlwiki.com/Companion_Spirit revision 179041"
+    },
+    {
+      "PetType": "Spirit",
+      "Name": "Vigilant Spirit",
+      "CasterClass": "SHM",
+      "RequiredLevel": 37,
+      "Url": "https://eqlwiki.com/Vigilant_Spirit",
+      "Revision": 168308,
+      "Aliases": [
+        "Vigilant Spirit Summon"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "https://eqlwiki.com/Vigilant_Spirit revision 168308"
+    },
+    {
+      "PetType": "Spirit",
+      "Name": "Guardian Spirit",
+      "CasterClass": "SHM",
+      "RequiredLevel": 41,
+      "Url": "https://eqlwiki.com/Guardian_Spirit",
+      "Revision": 168309,
+      "Aliases": [
+        "Guardian Spirit Summon"
+      ],
+      "BasePetLevel": 32,
+      "LevelEvidence": "https://eqlwiki.com/Guardian_Spirit revision 168309"
+    },
+    {
+      "PetType": "Spirit",
+      "Name": "Frenzied Spirit",
+      "CasterClass": "SHM",
+      "RequiredLevel": 45,
+      "Url": "https://eqlwiki.com/Frenzied_Spirit",
+      "Revision": 168307,
+      "Aliases": [
+        "Frenzied Spirit Summon"
+      ],
+      "BasePetLevel": 36,
+      "LevelEvidence": "https://eqlwiki.com/Frenzied_Spirit revision 168307"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Leering Corpse",
+      "CasterClass": "SHD",
+      "RequiredLevel": 9,
+      "Url": "https://eqlwiki.com/Leering_Corpse",
+      "Revision": 168295,
+      "Aliases": [
+        "Leering Corpse Summon"
+      ],
+      "BasePetLevel": 5,
+      "LevelEvidence": "https://eqlwiki.com/Leering_Corpse revision 168295"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Bone Walk",
+      "CasterClass": "SHD",
+      "RequiredLevel": 15,
+      "Url": "https://eqlwiki.com/Bone_Walk",
+      "Revision": 168296,
+      "Aliases": [
+        "Bone Walk Summon"
+      ],
+      "BasePetLevel": 9,
+      "LevelEvidence": "https://eqlwiki.com/Bone_Walk revision 168296"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Convoke Shadow",
+      "CasterClass": "SHD",
+      "RequiredLevel": 22,
+      "Url": "https://eqlwiki.com/Convoke_Shadow",
+      "Revision": 168297,
+      "Aliases": [
+        "Convoke Shadow Summon"
+      ],
+      "BasePetLevel": 11,
+      "LevelEvidence": "https://eqlwiki.com/Convoke_Shadow revision 168297"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Restless Bones",
+      "CasterClass": "SHD",
+      "RequiredLevel": 30,
+      "Url": "https://eqlwiki.com/Restless_Bones",
+      "Revision": 168298,
+      "Aliases": [
+        "Restless Bones Summon"
+      ],
+      "BasePetLevel": 16,
+      "LevelEvidence": "https://eqlwiki.com/Restless_Bones revision 168298"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Animate Dead",
+      "CasterClass": "SHD",
+      "RequiredLevel": 39,
+      "Url": "https://eqlwiki.com/Animate_Dead",
+      "Revision": 168299,
+      "Aliases": [
+        "Animate Dead Summon"
+      ],
+      "BasePetLevel": 19,
+      "LevelEvidence": "https://eqlwiki.com/Animate_Dead revision 168299"
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Summon Dead",
+      "CasterClass": "SHD",
+      "RequiredLevel": 49,
+      "Url": "https://eqlwiki.com/Summon_Dead",
+      "Revision": 168301,
+      "Aliases": [
+        "Summon Dead Summon"
+      ],
+      "BasePetLevel": 25,
+      "LevelEvidence": "https://eqlwiki.com/Summon_Dead revision 168301"
+    }
+  ],
+  "Focuses": [
+    {
+      "PetType": "Earth",
+      "Name": "Shovel of Ponz",
+      "Kind": "Lesser",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Earth",
+      "Name": "Staff of Elemental Mastery: Earth",
+      "Kind": "Greater",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Air",
+      "Name": "Broom of Trilon",
+      "Kind": "Lesser",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Air",
+      "Name": "Staff of Elemental Mastery: Air",
+      "Kind": "Greater",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Torch of Alna",
+      "Kind": "Lesser",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Fire",
+      "Name": "Staff of Elemental Mastery: Fire",
+      "Kind": "Greater",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Water",
+      "Name": "Stein of Ulissa",
+      "Kind": "Lesser",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Water",
+      "Name": "Staff of Elemental Mastery: Water",
+      "Kind": "Greater",
+      "Url": "https://eqlwiki.com/Magician_Focus_Items",
+      "Revision": 31745
+    },
+    {
+      "PetType": "Undead",
+      "Name": "Encyclopedia Necrotheurgia",
+      "Kind": "Unverified",
+      "Url": "https://eqlwiki.com/Pet_Guide#Focus_Items",
+      "Revision": 198219
+    }
+  ]
+}
