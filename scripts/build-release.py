@@ -11,14 +11,16 @@ PIN='0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f'
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 HIDDEN=getattr(subprocess,'CREATE_NO_WINDOW',0)
 def run(args,**kw):
-    return subprocess.run([str(a) for a in args],cwd=ROOT,check=True,creationflags=HIDDEN,**kw)
+    if kw.get('capture_output'):return subprocess.run([str(a) for a in args],cwd=ROOT,check=True,creationflags=HIDDEN,**kw)
+    result=subprocess.run([str(a) for a in args],cwd=ROOT,capture_output=True,text=True,creationflags=HIDDEN,**kw)
+    print(result.stdout+result.stderr,flush=True);result.check_returncode();return result
 def bootstrap():
     TOOLS.mkdir(parents=True,exist_ok=True); setup=TOOLS/'inno-setup.exe'
     if not setup.exists():
         with urllib.request.urlopen(URL,timeout=120) as response:setup.write_bytes(response.read())
     if sha(setup)!=PIN:raise RuntimeError('Inno Setup checksum mismatch')
     quoted=str(setup).replace("'","''")
-    run(['powershell','-NoProfile','-Command',f"$s=Get-AuthenticodeSignature -LiteralPath '{quoted}'; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Pyrsys B.V.'){{exit 1}}"])
+    run(['powershell','-NoProfile','-Command',f"$s=Get-AuthenticodeSignature -LiteralPath '{quoted}'; $s | Select-Object Status,StatusMessage,@{{n='Signer';e={{$_.SignerCertificate.Subject}}}},@{{n='Thumbprint';e={{$_.SignerCertificate.Thumbprint}}}} | ConvertTo-Json -Compress; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch 'Pyrsys B.V.'){{exit 1}}"])
     run([setup,'/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CURRENTUSER','/NOICONS','/TASKS=',f'/DIR={TOOLS/"compiler"}'])
     return TOOLS/'compiler/ISCC.exe'
 def source_files():
