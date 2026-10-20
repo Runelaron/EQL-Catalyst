@@ -106,16 +106,37 @@ public static partial class Native
     }
     public sealed class Hotkeys : IDisposable
     {
-        private readonly HwndSource source;
+        private readonly HwndSource? source;
         private readonly Action<int> callback;
+        private readonly Func<int,GlobalShortcut,bool> register;
+        private readonly Action<int> unregister;
+        private Dictionary<GlobalShortcut,(int Id,OverlayShortcutAction Action)> active=[];
+        private int nextId=100;
         public List<string> Failed { get; } = [];
-        public Hotkeys(Action<int> handler)
+        public Hotkeys(Action<int> handler,CharacterProfile profile)
         {
             callback = handler; source = new HwndSource(new HwndSourceParameters("EQLTracker hotkeys") { Width = 0, Height = 0, WindowStyle = 0 }); source.AddHook(Hook);
-            foreach (var (id, key, name) in new[] { (1, 0x51u, "Ctrl+Alt+Q"), (2, 0x44u, "Ctrl+Alt+D"), (3, 0x54u, "Ctrl+Alt+T") })
-                if (!RegisterHotKey(source.Handle, id, 0x0001 | 0x0002 | 0x4000, key)) Failed.Add(name);
+            register=(id,key)=>RegisterHotKey(source.Handle,id,(uint)key.Modifiers|0x4000,(uint)key.VirtualKey);unregister=id=>UnregisterHotKey(source.Handle,id);
+            foreach(var (action,key) in OverlayShortcuts.Effective(profile))
+            {int id=nextId++;if(register(id,key))active[key]=(id,action);else Failed.Add(key.Label);}
         }
-        private IntPtr Hook(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled) { if (message == 0x0312) { callback(wParam.ToInt32()); handled = true; } return IntPtr.Zero; }
-        public void Dispose() { foreach (int id in new[] { 1, 2, 3 }) UnregisterHotKey(source.Handle, id); source.RemoveHook(Hook); source.Dispose(); }
+        internal Hotkeys(Action<int> handler,Func<int,GlobalShortcut,bool> register,Action<int> unregister){callback=handler;this.register=register;this.unregister=unregister;}
+        internal bool TryApply(IReadOnlyDictionary<OverlayShortcutAction,GlobalShortcut> requested,out string error)
+        {
+            if(!OverlayShortcuts.Validate(requested,out error))return false;
+            var next=new Dictionary<GlobalShortcut,(int Id,OverlayShortcutAction Action)>();var created=new List<int>();
+            foreach(var (action,key) in requested)
+            {
+                if(active.TryGetValue(key,out var existing)){next[key]=(existing.Id,action);continue;}
+                int id=nextId++;
+                if(!register(id,key)){foreach(int made in created)unregister(made);error=key.Label+" is unavailable or reserved by Windows. Your previous shortcuts remain active.";return false;}
+                created.Add(id);next[key]=(id,action);
+            }
+            foreach(var (key,value) in active)if(!next.ContainsKey(key))unregister(value.Id);
+            active=next;Failed.Clear();error="";return true;
+        }
+        internal void Dispatch(int id){var registration=active.Values.FirstOrDefault(v=>v.Id==id);if(registration.Id!=0&&!ShortcutSettings.SuppressGlobal)callback((int)registration.Action);}
+        private IntPtr Hook(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled) { if(message==0x0312){Dispatch(wParam.ToInt32());handled=true;}return IntPtr.Zero; }
+        public void Dispose(){foreach(var value in active.Values)unregister(value.Id);active.Clear();if(source!=null){source.RemoveHook(Hook);source.Dispose();}}
     }
 }

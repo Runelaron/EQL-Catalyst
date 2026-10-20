@@ -71,7 +71,7 @@ public sealed partial class QuestWindow
                 if(tab==TrackerTab.Exaltations)
                 {
                     Check(exaltTarget.SelectedItem?.ToString()=="Any" && exaltTable.Columns.Any(c=>c.Header?.ToString()=="Unlock Rank"),"Exaltations default to Any and expose Unlock Rank");
-                    TableLayout.Reset(exaltTable); Flush(); var next=exaltTable.Columns[1]; double neighbor=next.ActualWidth; var name=exaltTable.Columns[0]; TableLayout.Prefer(exaltTable,name,name.ActualWidth+35); UpdateLayout(); Check(Math.Abs(neighbor-next.ActualWidth)<1,"Header width changes shift subsequent columns without resizing neighbors");
+                    TableLayout.Reset(exaltTable); Flush(); var next=exaltTable.Columns[1]; double neighbor=next.ActualWidth; var name=exaltTable.Columns[0]; double total=exaltTable.Columns.Sum(c=>c.ActualWidth); TableLayout.ResizeColumn(exaltTable,name,name.ActualWidth+35); UpdateLayout(); Check(next.ActualWidth<=neighbor+.5&&Math.Abs(total-exaltTable.Columns.Sum(c=>c.ActualWidth))<1,"Header resizing cascades through neighbors without expanding the table");
                     var pane=(Grid)exaltTable.Parent; double before=name.ActualWidth; pane.ColumnDefinitions[0].Width=new(.42,GridUnitType.Star);pane.ColumnDefinitions[2].Width=new(.58,GridUnitType.Star);Flush(); Check(Math.Abs(before-name.ActualWidth)>1,"Saved text-column preferences reflow when the Exaltations splitter moves"); TableLayout.Reset(exaltTable); Flush();
                 }
                 var grids=Usability.Tree(this).OfType<DataGrid>().Where(g=>g.IsVisible && g.ActualWidth>1).ToList();

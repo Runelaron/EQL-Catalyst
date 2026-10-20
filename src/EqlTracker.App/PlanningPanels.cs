@@ -164,18 +164,18 @@ public sealed partial class QuestWindow
     }
     private void ConfigureGearControls(WrapPanel controls)
     {
-        var menu = new ContextMenu(); var button = OverlayMenus.Button(menu, "Exact expansion selections include clearly marked zone-based assumptions; unresolved metadata stays Unknown.", "Expansion Filter ▾"); button.Width = double.NaN; button.Padding = new(6, 1, 6, 1);
+        var menu = new ContextMenu(); var button = OverlayMenus.Button(menu, "Exact expansion selections include clearly marked zone-based assumptions; unresolved metadata stays Unknown.", "All ▾"); button.Width = 180;button.Height=28;button.Margin=new(0);button.Tag="gear-expansion-filter";
         void Update()
         {
-            var selected = Controller.Profile.GearExpansions; var names = new[] { "Classic", "Kunark", "Velious", "Unknown" };
-            string shortNames = selected.Count == 4 ? "All" : selected.Count == 0 ? "None" : string.Join(" / ", names.Where(selected.Contains).Select(n => n == "Unknown" ? "?" : n[..1]));
-            button.Content = "Expansion Filter · " + shortNames + " ▾"; button.ToolTip = "Item introduction expansions: " + (selected.Count == 0 ? "None" : string.Join(", ", selected)) + ". Zone-based assumptions are marked in Item Details; missing evidence remains Unknown. Independent of Pet filters.";
+            var selected = ItemExpansionFilter.Choices.Where(Controller.Profile.GearExpansions.Contains).ToArray();
+            string shortNames = selected.Length == 4 ? "All" : selected.Length == 0 ? "None" : selected.Length==1?selected[0]:string.Join(" / ", selected.Select(n => n == "Unknown" ? "?" : n[..1]));
+            button.Content = shortNames + " ▾"; button.ToolTip = "Item introduction expansions: " + (selected.Length == 0 ? "None" : string.Join(", ", selected)) + ". Zone-based assumptions are marked in Item Details; missing evidence remains Unknown. Independent of Pet filters.";
         }
         foreach (string name in new[] { "Classic", "Kunark", "Velious", "Unknown" }) {
             var choice = new MenuItem { Header = name, IsCheckable = true, IsChecked = Controller.Profile.GearExpansions.Contains(name), StaysOpenOnClick = true };
             choice.Click += (_, _) => { if (choice.IsChecked) { if (!Controller.Profile.GearExpansions.Contains(name)) Controller.Profile.GearExpansions.Add(name); } else Controller.Profile.GearExpansions.Remove(name); Update(); GearEdited(); }; menu.Items.Add(choice);
         }
-        Update(); controls.Children.Add(button);
+        Update(); controls.Children.Add(UI.Field("Expansion",button));
     }
     private void LayoutQuestColumns()
     {

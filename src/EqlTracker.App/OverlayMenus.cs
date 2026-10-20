@@ -48,7 +48,7 @@ public static class OverlayMenus
         { bool menuContent=source!=null&&!ReferenceEquals(source,menu)&&Within(source,menu);if(Within(source,anchor)||!menuContent&&AnchorContains(anchor)){closingAnchor=new(anchor);CloseMenu(menu);e.Handled=true;return true;} }
         return false;
     }
-    public static object ClickThroughHeader() => UI.Stack(UI.Text("Click-through", 12), UI.Text("(Ctrl+Alt+T to restore)", 10, "Muted"));
+    public static object ClickThroughHeader(){var hint=UI.Text("",10,"Muted");hint.SetResourceReference(TextBlock.TextProperty,"ClickThroughShortcutHint");return UI.Stack(UI.Text("Click-through",12),hint);}
     internal static bool DismissForForegroundChange(bool timed,bool changed,bool gameOrCompanion)=>changed&&(!timed||!gameOrCompanion);
     public static MenuItem Choice(ItemsControl parent, object header, Func<bool> selected, Action action)
     {

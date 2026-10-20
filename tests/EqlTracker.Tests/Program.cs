@@ -7,6 +7,9 @@ if (args.Length == 2 && args[0] == "--refresh-item-display") { await ItemDisplay
 if (args.Length == 2 && args[0] == "--audit-item-display") { await ItemDisplayRefresh.Run(args[1], false); return; }
 
 var tests = new List<(string Name, Action Run)>();
+CompactSettingsTests.Register((name,run)=>tests.Add((name,run)));
+CascadeWidthTests.Register((name,run)=>tests.Add((name,run)));
+CharacterSelectionTests.Register((name,run)=>tests.Add((name,run)));
 BetaTests.Register((name,run)=>tests.Add((name,run)));
 GroupingTests.Register((name,run)=>tests.Add((name,run)));
 TrackerPolishTests.Register((name,run)=>tests.Add((name,run)));

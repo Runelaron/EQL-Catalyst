@@ -23,8 +23,14 @@ jobs:
           New-Item -ItemType Directory artifacts -Force | Out-Null
           python scripts/privacy-audit.py . --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-source.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/privacy-audit.py dist/EQL-Catalyst-1.0.0-beta.1-win-x64 --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-payload.json
+          [xml]$versionXml=Get-Content Version.props
+          $releaseVersion=$versionXml.Project.PropertyGroup.VersionPrefix+'-'+$versionXml.Project.PropertyGroup.VersionSuffix
+          python scripts/privacy-audit.py "dist/EQL-Catalyst-$releaseVersion-win-x64" --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-payload.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($package in Get-ChildItem dist/*.zip,dist/*-setup.exe) {
+            python scripts/privacy-audit.py $package.FullName --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report ("artifacts/privacy-"+$package.Name+".json")
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Disposable-runner installer checks
         shell: pwsh
         run: ./scripts/windows-smoke.ps1 -Installer (Resolve-Path dist/*-setup.exe)

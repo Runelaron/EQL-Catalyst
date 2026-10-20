@@ -44,18 +44,21 @@ public sealed class ResponsiveCombatSplit : Grid
     }
     private void ArrangePanels()
     {
-        bool next = ActualWidth > 0 && ActualWidth < 760; if (narrow == next) return; narrow = next;
+        bool next = ActualWidth > 0 && ActualWidth < 760; if (narrow == next) return; PaneLayout.Cancel(this); narrow = next;
         ColumnDefinitions.Clear(); RowDefinitions.Clear();
         double fraction = Math.Clamp(profile.PanelSplits.GetValueOrDefault(key + (next ? ":stack" : ""), next ? .52 : .42), .2, .75);
         if (next)
         {
             RowDefinitions.Add(new() { Height = new(1 - fraction, GridUnitType.Star) }); RowDefinitions.Add(new() { Height = new(5) }); RowDefinitions.Add(new() { Height = new(fraction, GridUnitType.Star) });
             Grid.SetColumn(left, 0); Grid.SetColumn(grip, 0); Grid.SetColumn(right, 0); Grid.SetRow(left, 0); Grid.SetRow(grip, 1); Grid.SetRow(right, 2); grip.ResizeDirection = GridResizeDirection.Rows; grip.Cursor = System.Windows.Input.Cursors.SizeNS;
+            PaneLayout.Register(this, [], [], []);
         }
         else
         {
             ColumnDefinitions.Add(new() { Width = new(1 - fraction, GridUnitType.Star) }); ColumnDefinitions.Add(new() { Width = new(5) }); ColumnDefinitions.Add(new() { Width = new(fraction, GridUnitType.Star) });
             Grid.SetRow(left, 0); Grid.SetRow(grip, 0); Grid.SetRow(right, 0); Grid.SetColumn(left, 0); Grid.SetColumn(grip, 1); Grid.SetColumn(right, 2); grip.ResizeDirection = GridResizeDirection.Columns; grip.Cursor = System.Windows.Input.Cursors.SizeWE;
+            ColumnDefinitions[0].MinWidth = 230; ColumnDefinitions[2].MinWidth = 180;
+            PaneLayout.Register(this, [left,right], [ColumnDefinitions[0],ColumnDefinitions[2]], [grip], profile, key);
         }
     }
 }

@@ -1,4 +1,4 @@
-EQL Catalyst Beta 1.0 - Windows x64
+EQL Catalyst Beta 1.1 - Windows x64
 
 Per-user installation is recommended. All-users installation requires elevation; the app itself runs unelevated.
 

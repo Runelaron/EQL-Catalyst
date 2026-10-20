@@ -31,6 +31,8 @@ public static class TableLayout
         public ScrollContentPresenter? ContentViewport;
         public double Viewport = -1;
         public DataGridColumn? DragColumn;
+        public CascadingDrag? Input;
+        public readonly Dictionary<DataGridTextColumn, Style> CellStyles = [];
         public readonly Dictionary<string, double> TypeWidths = [];
     }
     private static readonly ConditionalWeakTable<DataGrid, State> states = new();
@@ -46,32 +48,23 @@ public static class TableLayout
         void AttachColumns()
         { foreach (var column in table.Columns.Where(c => state.Attached.Add(c)))
         {
-            if (column is DataGridTextColumn textColumn)
-            {
-                var style = new Style(typeof(TextBlock)); style.Setters.Add(new Setter(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis));
-                if (noCellTooltip.TryGetValue(column, out _)) style.Setters.Add(new Setter(ToolTipService.IsEnabledProperty, false));
-                else if (textColumn.Binding is System.Windows.Data.Binding binding) style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, new System.Windows.Data.Binding(binding.Path.Path)));
-                textColumn.ElementStyle = style;
-            }
-            DependencyPropertyDescriptor.FromProperty(DataGridColumn.WidthProperty, typeof(DataGridColumn)).AddValueChanged(column, (_, _) =>
-            {
-                if (state.Applying || state.Window == null || !table.IsMouseCaptureWithin || Mouse.LeftButton != MouseButtonState.Pressed) return;
-                string key = Key(state, column); state.Manual.Add(key); state.Window.LayoutProfile.ColumnWidths[key] = column.Width.IsAbsolute ? column.Width.Value : column.ActualWidth;
-                state.Preferred[column] = column.Width.IsAbsolute ? column.Width.Value : column.ActualWidth;
-                if (state.DragColumn == column) ResizeColumn(table, column, state.Preferred[column]);
-            });
-            DependencyPropertyDescriptor.FromProperty(DataGridColumn.VisibilityProperty, typeof(DataGridColumn)).AddValueChanged(column, (_, _) => { state.Viewport = -1; QueueFit(table, state); });
+            DependencyPropertyDescriptor.FromProperty(DataGridColumn.VisibilityProperty, typeof(DataGridColumn)).AddValueChanged(column, (_, _) => { state.Input?.Cancel(); state.Viewport = -1; QueueFit(table, state); });
+            foreach (var property in new[] { DataGridColumn.MinWidthProperty, DataGridColumn.MaxWidthProperty })
+                DependencyPropertyDescriptor.FromProperty(property, typeof(DataGridColumn)).AddValueChanged(column, (_, _) => { if (state.Applying) return; state.Input?.Cancel(); state.Viewport = -1; QueueFit(table, state); });
         } }
-        AttachColumns(); table.Columns.CollectionChanged += (_, _) => { AttachColumns(); state.Viewport = -1; QueueFit(table, state); };
-        table.AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler((_, e) =>
+        AttachColumns(); table.Columns.CollectionChanged += (_, _) => { state.Input?.Cancel(); AttachColumns(); state.Viewport = -1; QueueFit(table, state); };
+        table.ColumnDisplayIndexChanged += (_, _) => { state.Input?.Cancel(); state.Viewport = -1; QueueFit(table, state); };
+        state.Input = new CascadingDrag(table, thumb =>
         {
-            var node = e.OriginalSource as DependencyObject;
+            if (thumb.Name is not ("PART_LeftHeaderGripper" or "PART_RightHeaderGripper")) return null;
+            DependencyObject? node = thumb;
             while (node != null && node is not DataGridColumnHeader) node = VisualTreeHelper.GetParent(node);
-            state.DragColumn = (node as DataGridColumnHeader)?.Column;
-            if (e.OriginalSource is FrameworkElement { Name: "PART_LeftHeaderGripper" } && state.DragColumn is { DisplayIndex: > 0 } current)
-                state.DragColumn = table.Columns.Where(c => c.Visibility == Visibility.Visible && c.DisplayIndex < current.DisplayIndex).OrderByDescending(c => c.DisplayIndex).FirstOrDefault();
-        }), true);
-        table.AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler((_, _) => { state.DragColumn = null; state.Window?.SaveLayout(); }), true);
+            if (node is not DataGridColumnHeader { Column: { } current }) return null;
+            var columns = Visible(table); int index = Array.IndexOf(columns, current);
+            int boundary = index - (thumb.Name == "PART_LeftHeaderGripper" ? 1 : 0);
+            state.DragColumn = boundary >= 0 && boundary < columns.Length - 1 ? columns[boundary] : null;
+            return CreateResize(table, state, columns, table.CanUserResizeColumns ? boundary : -1);
+        });
         table.Loaded += (_, _) =>
         {
             var owner = Window.GetWindow(table) as FrostWindow; if (state.Window == null && owner != null) { state.Fitted = state.Sampled = false; } state.Window = owner;
@@ -79,6 +72,7 @@ public static class TableLayout
             string legacy = (state.Window?.Title ?? "table") + ":" + string.Join('|', table.Columns.Select(c => c.SortMemberPath));
             if (state.Window != null && legacy != state.Key) foreach (var column in table.Columns) { string old = legacy + ":" + Path(column), key = Key(state, column); if (!state.Window.LayoutProfile.ColumnWidths.ContainsKey(key) && state.Window.LayoutProfile.ColumnWidths.TryGetValue(old, out double width)) state.Window.LayoutProfile.ColumnWidths[key] = width; }
             state.ContentViewport = Usability.Tree(table).OfType<ScrollContentPresenter>().FirstOrDefault(p => p.Name == "PART_ScrollContentPresenter");
+            foreach (var column in table.Columns.OfType<DataGridTextColumn>()) ApplyCellStyle(state, column);
             Fit(table, state, false);
             foreach (var bar in Usability.Tree(table).OfType<ScrollBar>().Where(state.Scrollbars.Add))
                 bar.IsVisibleChanged += (_, _) => QueueFit(table, state);
@@ -86,14 +80,14 @@ public static class TableLayout
         };
         table.SizeChanged += (_, _) => QueueFit(table, state);
         table.AddHandler(ScrollViewer.ScrollChangedEvent, new ScrollChangedEventHandler((_, e) => { if (e.ViewportWidthChange != 0) QueueFit(table, state); }));
-        table.PreviewMouseLeftButtonUp += (_, _) => { if (state.Manual.Count > 0) state.Window?.SaveLayout(); if (state.DeferredResize) { state.DeferredResize = false; QueueFit(table, state); } };
+        table.Unloaded += (_, _) => state.Input?.Cancel();
     }
     private static string Path(DataGridColumn column) => column.SortMemberPath.Length > 0 ? column.SortMemberPath : (column as DataGridBoundColumn)?.Binding is Binding b ? b.Path?.Path ?? column.Header?.ToString() ?? "" : column.Header?.ToString() ?? "";
     private static string Key(State state, DataGridColumn column) => state.Key + ":" + Path(column);
     private static void QueueFit(DataGrid table, State state)
     {
         if (state.Queued || !table.IsLoaded) return; state.Queued = true;
-        table.Dispatcher.BeginInvoke(() => { state.Queued = false; if (!state.Applying && !table.IsMouseCaptureWithin) Fit(table, state, true); else if (table.IsMouseCaptureWithin && Math.Abs(table.ActualWidth - state.Viewport) > 24) state.DeferredResize = true; }, System.Windows.Threading.DispatcherPriority.Render);
+        table.Dispatcher.BeginInvoke(() => { state.Queued = false; if (!state.Applying && state.Input?.IsDragging != true && !table.IsMouseCaptureWithin) Fit(table, state, true); else state.DeferredResize = true; }, System.Windows.Threading.DispatcherPriority.Render);
     }
     internal static void Prefer(DataGrid table, DataGridColumn column, double width)
     {
@@ -102,23 +96,48 @@ public static class TableLayout
         state.Applying = true; column.Width = width; state.Applying = false;
     }
     private static bool Flexible(DataGridColumn column) => Path(column) is "Item" or "Name" or "Ability" or "Target" or "Targets" or "Zone" or "Label" or "SourceName" or "Source" or "Effect" or "Description" or "Details" or "Instructions" or "Quest" or "Replaces" or "Weapons" or "Loadout";
+    private static DataGridColumn[] Visible(DataGrid table) => table.Columns.Where(c => c.Visibility == Visibility.Visible).OrderBy(c => c.DisplayIndex).ToArray();
+    private static bool HasTooltip(Style? style) => style != null && (style.Setters.OfType<Setter>().Any(s => s.Property == FrameworkElement.ToolTipProperty) || HasTooltip(style.BasedOn));
+    private static void ApplyCellStyle(State state, DataGridTextColumn column)
+    {
+        if (state.CellStyles.TryGetValue(column, out var installed) && ReferenceEquals(column.ElementStyle, installed)) return;
+        var style = new Style(typeof(TextBlock), column.ElementStyle);
+        style.Setters.Add(new Setter(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis));
+        style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.NoWrap));
+        if (noCellTooltip.TryGetValue(column, out _)) style.Setters.Add(new Setter(ToolTipService.IsEnabledProperty, false));
+        else if (!HasTooltip(column.ElementStyle) && column.Binding is Binding binding) style.Setters.Add(new Setter(FrameworkElement.ToolTipProperty, new Binding(binding.Path.Path)));
+        column.ElementStyle = style; state.CellStyles[column] = style;
+    }
+    private static CascadingDrag.Session CreateResize(DataGrid table, State state, DataGridColumn[] columns, int boundary)
+    {
+        var tracks = columns.Select(c => new WidthTrack(c.ActualWidth, c.CanUserResize ? c.MinWidth : c.ActualWidth, c.CanUserResize ? c.MaxWidth : c.ActualWidth)).ToArray();
+        return new(tracks, boundary, widths =>
+        {
+            state.Applying = true;
+            try { for (int i = 0; i < columns.Length; i++) columns[i].Width = widths[i]; }
+            finally { state.Applying = false; }
+        }, canceled =>
+        {
+            state.DragColumn = null;
+            if (!canceled) foreach (var column in columns)
+            {
+                double width = column.Width.Value; string key = Key(state, column);
+                state.Preferred[column] = width; state.Manual.Add(key);
+                if (state.Window != null) state.Window.LayoutProfile.ColumnWidths[key] = width;
+            }
+            if (!canceled) state.Window?.SaveLayout();
+            if (state.DeferredResize) { state.DeferredResize = false; QueueFit(table, state); }
+        });
+    }
     internal static void ResizeColumn(DataGrid table, DataGridColumn column, double requested)
     {
         var state = states.GetOrCreateValue(table); if (state.Applying) return;
-        var visible = table.Columns.Where(c => c.Visibility == Visibility.Visible).ToArray();
-        var widths = visible.ToDictionary(c => c, c => c == column ? Math.Max(c.MinWidth, requested) : c.ActualWidth);
-        double available = state.Viewport > 0 ? state.Viewport : table.ActualWidth;
-        double extra = available - widths.Values.Sum(); var others = visible.Where(c => c != column && Flexible(c)).ToList();
-        if (others.Count == 0) others = visible.Where(c => c != column && Path(c) is "Type" or "Ownership").ToList();
-        if (extra >= 0 && others.Count > 0) foreach (var other in others) widths[other] += extra / others.Count;
-        else if (extra < 0)
-        {
-            double capacity = others.Sum(c => Math.Max(0, widths[c] - c.MinWidth));
-            if (capacity > 0) foreach (var other in others) widths[other] -= Math.Min(-extra, capacity) * Math.Max(0, widths[other] - other.MinWidth) / capacity;
-        }
-        state.Applying = true;
-        try { foreach (var (c, width) in widths) { c.Width = width; state.Preferred[c] = width; state.Manual.Add(Key(state, c)); if (state.Window != null) state.Window.LayoutProfile.ColumnWidths[Key(state, c)] = width; } }
-        finally { state.Applying = false; }
+        var columns = Visible(table); int index = Array.IndexOf(columns, column); if (index < 0 || !column.CanUserResize) return;
+        bool last = index == columns.Length - 1;
+        var session = CreateResize(table, state, columns, last ? index - 1 : index);
+        double delta = Math.Clamp(requested, column.MinWidth, column.MaxWidth) - column.ActualWidth;
+        CascadeWidths.Resize(session.Tracks, session.Boundary, last ? -delta : delta, session.Widths);
+        session.Apply(session.Widths); session.Finish(false);
     }
     public static void SampleChanged(DataGrid table)
     {
@@ -131,7 +150,7 @@ public static class TableLayout
             if (property != null) foreach (string text in values.Select(x => property.GetValue(x)?.ToString() ?? "").Distinct())
             {
                 if (!state.TypeWidths.TryGetValue(text, out double width)) state.TypeWidths[text] = width = TypeWidth(table, text);
-                if (typeColumn.MinWidth + .25 < width) { typeColumn.MinWidth = width; state.Viewport = -1; QueueFit(table, state); }
+                if (typeColumn.MinWidth + .25 < width) { typeColumn.MinWidth = Math.Min(typeColumn.MaxWidth, width); state.Viewport = -1; QueueFit(table, state); }
             }
         }
         if (!state.Sampled && table.Items.Count > 0) Fit(table, state, false);
@@ -139,6 +158,7 @@ public static class TableLayout
     public static void Reset(DataGrid table)
     {
         var state = states.GetOrCreateValue(table);
+        state.Input?.Cancel();
         foreach (var c in table.Columns) state.Window?.LayoutProfile.ColumnWidths.Remove(Key(state, c));
         state.Manual.Clear(); state.Preferred.Clear(); state.Viewport = -1; state.Fitted = state.Sampled = false; Fit(table, state, false); state.Window?.SaveLayout();
     }
@@ -168,27 +188,29 @@ public static class TableLayout
                 if (!state.Headers.TryGetValue(column, out var measuredHeader) || measuredHeader.Caption != caption)
                     state.Headers[column] = measuredHeader = (caption, Math.Ceiling(TextWidth(table, caption) + (column.CanUserSort ? 30 : 16)));
                 double header = measuredHeader.Width;
-                column.MaxWidth = double.PositiveInfinity; column.MinWidth = Math.Max(column.MinWidth, header);
-                if (saved != null && saved.TryGetValue(key, out double user) && double.IsFinite(user) && user >= header && user < 10000) { widths[column] = user; state.Manual.Add(key); continue; }
+                column.MinWidth = Math.Min(column.MaxWidth, Math.Max(column.MinWidth, header));
+                if (saved != null && saved.TryGetValue(key, out double user) && double.IsFinite(user) && user > 0 && user < 10000) { widths[column] = Math.Clamp(user, column.MinWidth, column.MaxWidth); state.Manual.Add(key); continue; }
                 bool name = Path(column) is "Item" or "Name" or "Ability" or "Target" or "SourceName" or "Source" or "Effect";
                 if (state.Fitted && resized && state.Preferred.TryGetValue(column, out double preferred)) { widths[column] = preferred; continue; }
                 var property = values.FirstOrDefault()?.GetType().GetProperty(Path(column));
                 var measured = property == null ? [] : values.Select(x => Path(column)=="Type" ? TypeWidth(table,Format(property.GetValue(x),column))-18 : TextWidth(table, Format(property.GetValue(x), column))).ToArray();
-                if (Path(column) == "Type" && measured.Length > 0) column.MinWidth = Math.Max(column.MinWidth, measured.Max() + 18);
+                if (Path(column) == "Type" && measured.Length > 0) column.MinWidth = Math.Min(column.MaxWidth, Math.Max(column.MinWidth, measured.Max() + 18));
                 double typical = measured.Length > 0 ? measured.Average() + 20 : name ? 160 : header;
                 widths[column] = Math.Max(header, Math.Min(name ? 310 : 200, typical));
             }
-            foreach (var column in table.Columns) widths[column] = Math.Max(column.MinWidth, widths[column]);
+            foreach (var column in table.Columns) widths[column] = Math.Clamp(widths[column], column.MinWidth, column.MaxWidth);
             foreach (var (column, width) in widths) state.Preferred[column] = width;
-            // Pane resizes redistribute text space using cached preferences. Header dragging does not refit neighbors.
-            if (!state.Fitted || resized || state.Manual.Count == 0)
+            var visible = Visible(table); bool anyFlexible = visible.Any(Flexible);
+            var tracks = visible.Select(c =>
             {
-                double extra = available - widths.Where(p => p.Key.Visibility == Visibility.Visible).Sum(p => p.Value);
-                var flexible = table.Columns.Where(c => c.Visibility == Visibility.Visible && Flexible(c)).ToList();
-                if (extra > 0 && flexible.Count > 0) foreach (var column in flexible) widths[column] += extra / flexible.Count;
-                else if (extra < 0) foreach (var column in flexible.OrderByDescending(c => widths[c])) { double reduction = Math.Min(-extra, Math.Max(0, widths[column] - column.MinWidth)); widths[column] -= reduction; extra += reduction; }
-            }
-            foreach (var (column, width) in widths) column.Width = new(Math.Max(column.MinWidth, state.AutoMaximum.TryGetValue(column, out double limit) && !state.Manual.Contains(Key(state, column)) ? Math.Min(width, limit) : width));
+                double maximum = state.AutoMaximum.TryGetValue(c, out double limit) && !state.Manual.Contains(Key(state, c)) ? Math.Max(c.MinWidth, Math.Min(c.MaxWidth, limit)) : c.MaxWidth;
+                double preferred = Math.Clamp(widths[c], c.MinWidth, maximum);
+                return Flexible(c) || !anyFlexible ? new WidthTrack(preferred, c.MinWidth, maximum) : new WidthTrack(preferred, preferred, preferred);
+            }).ToArray();
+            if (tracks.Sum(t => t.Minimum) > available) for (int i = 0; i < tracks.Length; i++)
+                tracks[i] = tracks[i] with { Minimum = visible[i].MinWidth };
+            var fitted = new double[tracks.Length]; CascadeWidths.Fit(tracks, available, fitted);
+            for (int i = 0; i < visible.Length; i++) visible[i].Width = fitted[i];
             state.Viewport = available; state.Fitted = true; state.Sampled |= values.Length > 0;
         }
         finally { state.Applying = false; }

@@ -31,7 +31,7 @@ public sealed partial class SettingsWindow : FrostWindow
         loadout = UI.Select(profile.Loadouts.Select(x => x.Name), profile.SelectedLoadout, 220);
         hide = new() { Content = "Hide overlays outside EverQuest and this companion", IsChecked = profile.HideWhenUnfocused };
         sounds = new() { Content = "Play a sound for needed-item alerts", IsChecked = profile.Sounds };
-        click = new() { Content = "Click-through overlays (Ctrl+Alt+T toggles)", IsChecked = profile.Objectives.ClickThrough && profile.Dps.ClickThrough };
+        click = new() { Content = "Click-through overlays", IsChecked = profile.Objectives.ClickThrough && profile.Dps.ClickThrough };
         locked = new() { Content = "Lock overlay positions and sizes", IsChecked = profile.Objectives.Locked && profile.Dps.Locked };
         smoothMotion = new() { Content = "Smooth motion", IsChecked = profile.SmoothMeterMotion, ToolTip = "Animate damage totals, bars and row movement. DPS/HPS readings remain exact on their two-second cadence." };
         borderless = new() { Content = "Fit windowed EverQuest borderlessly to its monitor", IsChecked = profile.BorderlessEnabled };
@@ -57,6 +57,7 @@ public sealed partial class SettingsWindow : FrostWindow
     }
     public void UpdateStatus()
     {
+        click.ToolTip="Send mouse input through the overlays. "+OverlayShortcuts.Label(Controller.Profile,OverlayShortcutAction.ClickThrough)+" restores interaction.";
         captures?.Refresh();
         lock (Controller.Sync)
         {
@@ -69,18 +70,19 @@ public sealed partial class SettingsWindow : FrostWindow
     }
     private void Save()
     {
-        if (!Directory.Exists(folder.Text)) { Invalid(SettingsSection.Sync, "Choose an existing EverQuest Legends folder."); return; }
+        if (!string.IsNullOrWhiteSpace(folder.Text)&&!Directory.Exists(folder.Text)) { Invalid(SettingsSection.Sync, "Choose an existing EverQuest Legends folder, or leave it blank for offline use."); return; }
         var valid = Controller.Catalog.Quests.Select(x => x.Class).ToHashSet();
         List<string> Parse(string text) => text.ToUpperInvariant().Split([',', '/', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct().ToList();
         var current = Parse(currentClasses.Text); var fifty = Parse(reached50.Text); var order = Parse(priority.Text);
         if (current.Count > 3 || current.Concat(fifty).Any(c => !valid.Contains(c))) { Invalid(SettingsSection.Character, "Use up to three valid current class codes; leave blank while unknown."); return; }
         if (order.Any(c => !valid.Contains(c))) { Invalid(SettingsSection.Objectives, "Goal priority requires valid class codes."); return; }
-        if (!int.TryParse(timeout.Text, out int seconds) || seconds is < 2 or > 120) { Invalid(SettingsSection.Combat, "Encounter timeout must be 2–120 seconds."); return; }
-        if (!int.TryParse(resume.Text, out int resumeSeconds) || resumeSeconds is < 0 or > 300 || resumeSeconds != 0 && resumeSeconds < seconds) { Invalid(SettingsSection.Combat, "Resume window must be 0 or at least the idle timeout, up to 300 seconds."); return; }
+        if(!timingInputs.TryRead(out int seconds,out int resumeSeconds)){Invalid(SettingsSection.Combat,timingInputs.Error.Text);return;}
         if (loadout.SelectedItem?.ToString() != Controller.Profile.SelectedLoadout && !((App)Application.Current).CanChangeEquipmentContext()) return;
+        if(!((App)Application.Current).TryApplyShortcuts(shortcutSettings.Draft,out string shortcutError)){shortcutSettings.Failed(shortcutError);Invalid(SettingsSection.Advanced,shortcutError);return;}
         lock (Controller.Sync)
         {
-            var p = Controller.Profile; p.EncounterResumeSeconds = resumeSeconds; p.GameFolder = Path.GetFullPath(folder.Text); p.CurrentClasses = current; p.Level50Classes = fifty.ToHashSet(); p.GoalPriority = order; p.EncounterTimeoutSeconds = seconds;
+            var p = Controller.Profile; p.EncounterResumeSeconds = resumeSeconds; p.GameFolder = string.IsNullOrWhiteSpace(folder.Text)?"":Path.GetFullPath(folder.Text); p.CurrentClasses = current; p.Level50Classes = fifty.ToHashSet(); p.GoalPriority = order; p.EncounterTimeoutSeconds = seconds;
+            p.OverlayShortcuts=new(shortcutSettings.Draft);
             p.HideWhenUnfocused = hide.IsChecked == true; p.Sounds = sounds.IsChecked == true;
             p.SmoothMeterMotion = smoothMotion.IsChecked == true; p.MeterStyle = meterStyle.SelectedItem?.ToString() ?? "Frost";
             p.SelectedLoadout = loadout.SelectedItem?.ToString() ?? "Current"; p.ActiveLoadout.Classes = current;

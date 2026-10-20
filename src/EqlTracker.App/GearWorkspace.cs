@@ -63,7 +63,7 @@ public sealed partial class QuestWindow
         gearUpdateCurrent.Click += (_, _) => { Controller.Profile.UpdateCurrentBuildFromInventory = gearUpdateCurrent.IsChecked == true; if (gearUpdateCurrent.IsChecked == true) { lock (Controller.Sync) GearBuildEditing.ApplyExport(Controller.Profile, Controller.Inventory); } GearEdited(); };
         var header = UI.Stack(controls, gearUpdateCurrent, gearTheoryNote);
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
-        var search = new WrapPanel(); search.Children.Add(FocusedLayout.Search(gearSearch, "Find a replacement…")); ConfigureGearControls(search); search.Children.Add(gearTheoryCheck); search.Children.Add(gearPosition);
+        var search = new WrapPanel(); var searchField=(FrameworkElement)FocusedLayout.Search(gearSearch, "Find a replacement…");searchField.VerticalAlignment=VerticalAlignment.Bottom;gearSearch.Height=28;search.Children.Add(searchField); ConfigureGearControls(search); search.Children.Add(gearTheoryCheck); search.Children.Add(gearPosition);
         var filters = new WrapPanel(); foreach (var child in new UIElement[] { UI.Field("Items", gearOwnership), UI.Field("Compatibility", gearEligibility), UI.Field("Rank", gearRankChoice), UI.Field("Rating", gearPositive) }) filters.Children.Add(child);
         var candidatePane = new DockPanel();
         var candidateHeader = UI.Stack(gearFindLabel, search, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter candidates without editing inventory or other saved builds."), gearSearchStatus);
@@ -94,6 +94,7 @@ public sealed partial class QuestWindow
             else if (!lastDetails) { double fraction = Controller.Profile.PanelSplits.GetValueOrDefault("gear-candidates", .373); gearInnerSplit.ColumnDefinitions[0].MinWidth = 260; gearInnerSplit.ColumnDefinitions[0].Width = new(1-fraction, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[2].MinWidth = 230; gearInnerSplit.ColumnDefinitions[2].Width = new(fraction, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[1].Width = new(5); }
             gearFindLabel.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
             gearSearch.Width = ActualWidth < 800 ? 140 : 220;
+            gearPosition.Width=ActualWidth<800?175:210;gearPosition.VerticalAlignment=VerticalAlignment.Bottom;gearPosition.Height=28;gearPosition.Margin=new(12,0,0,0);
             lastDetails = details; lastWide = wide; UpdateGearBuildControls();
         };
         root.Children.Add(gearOuterSplit);

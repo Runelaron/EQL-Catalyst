@@ -12,7 +12,7 @@ internal sealed class FirstRunDialog : FrostDialog
     private readonly TextBlock status = UI.Text("", 12, "Mint");
     private readonly List<LaunchProfile> saved;
     internal LaunchProfile? Selection { get; private set; }
-    internal FirstRunDialog(IReadOnlyList<LaunchProfile> existing) : base("Welcome · Beta 1.0", 610, 475)
+    internal FirstRunDialog(IReadOnlyList<LaunchProfile> existing) : base("Welcome · "+ReleaseInfo.Label, 610, 475)
     {
         saved = existing.ToList(); ShowInTaskbar = true; WindowStartupLocation = WindowStartupLocation.CenterScreen;
         folder.MinWidth = 220; folder.Width = double.NaN; folder.ToolTip = "Choose the folder containing eqgame.exe and Logs, or leave blank to use saved/offline data.";

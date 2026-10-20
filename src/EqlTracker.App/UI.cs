@@ -109,12 +109,13 @@ public static class UI
     public static Grid Split(UIElement left, UIElement right, double rightWidth = 320, CharacterProfile? profile = null, string key = "", double leftMin = 0, double rightMin = 0)
     {
         var grid = new Grid(); double fraction = profile?.PanelSplits.GetValueOrDefault(key, .3) ?? .3;
+        fraction = double.IsFinite(fraction) ? Math.Clamp(fraction, .01, .99) : .3;
         grid.ColumnDefinitions.Add(new() { Width = new(1 - fraction, GridUnitType.Star), MinWidth = leftMin });
         grid.ColumnDefinitions.Add(new() { Width = new(5) });
         grid.ColumnDefinitions.Add(new() { Width = profile != null ? new(fraction, GridUnitType.Star) : new(rightWidth), MinWidth = rightMin });
-        var grip = new GridSplitter { Width = 5, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, ResizeDirection = GridResizeDirection.Columns, ResizeBehavior = GridResizeBehavior.PreviousAndNext, Background = Brushes.Transparent, Cursor = Cursors.SizeWE, ToolTip = "Drag to resize panels" };
-        grip.DragCompleted += (_, _) => { if (profile != null && key.Length > 0) profile.PanelSplits[key] = grid.ColumnDefinitions[2].ActualWidth / Math.Max(1, grid.ActualWidth - 5); };
-        Grid.SetColumn(grip, 1); Grid.SetColumn(right, 2); grid.Children.Add(left); grid.Children.Add(grip); grid.Children.Add(right); return grid;
+        var grip = new GridSplitter { Width = 5, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, ResizeDirection = GridResizeDirection.Columns, ResizeBehavior = GridResizeBehavior.PreviousAndNext, Background = Brushes.Transparent, Cursor = Cursors.SizeWE, ToolTip = "Drag to resize panels. The nearest neighbor shrinks first; dragging stops at minimum widths." };
+        Grid.SetColumn(grip, 1); Grid.SetColumn(right, 2); grid.Children.Add(left); grid.Children.Add(grip); grid.Children.Add(right);
+        PaneLayout.Register(grid, [left, right], [grid.ColumnDefinitions[0], grid.ColumnDefinitions[2]], [grip], profile, key); return grid;
     }
 }
 public enum WindowSurface { Theme, Solid }
@@ -210,7 +211,7 @@ public class FrostWindow : Window
     }
     private bool locked;
     public bool IsLocked { get => locked; set { locked = value; Header.Cursor = value ? Cursors.Arrow : Cursors.SizeAll; dragGrip.Text = value ? "▣" : "⠿"; dragGrip.ToolTip = value ? "Position locked · unlock from menu" : "Drag window"; } }
-    public void ShowInteractionState(bool clickThrough) { if (clickThrough) { dragGrip.Text = "⇥"; dragGrip.ToolTip = "Click-through enabled · Ctrl+Alt+T restores input"; } else IsLocked = locked; }
+    public void ShowInteractionState(bool clickThrough) { if (clickThrough) { dragGrip.Text = "⇥"; dragGrip.ToolTip = "Click-through enabled · "+((App)Application.Current).ShortcutLabel(OverlayShortcutAction.ClickThrough)+" restores input"; } else IsLocked = locked; }
     public void CancelInteraction()
     {
         dragStart = null; if (Header.IsMouseCaptured) Header.ReleaseMouseCapture();

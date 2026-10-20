@@ -28,14 +28,8 @@ internal static class IconStyleUiChecks
             check(IconArtwork.Painted("missing-artwork-test")==null,"Missing painted resource permits the matching Clean fallback");
             foreach(var choice in IconArtwork.DamageChoices)foreach(double scale in new[]{1d,1.5,2d,3d}){var a=IconArtwork.Painted(choice.Role,14*scale);check(a!=null&&a.PixelWidth>=14*scale&&ReferenceEquals(a,IconArtwork.Painted(choice.Role,14*scale)),choice.Label+" uses a cached DPI-sized image at "+scale);}
             check(IconArtwork.DamageChoices.Select(c=>c.Number).SequenceEqual(new[]{1,3,5,7,9,11}),"Only the six crossing-diagonal Damage emblems are selectable");
-            var gallery=Usability.Tree(settings).OfType<Expander>().Single(e=>e.Header?.ToString()?.StartsWith("Damage emblem")==true);gallery.IsExpanded=true;Flush();
-            var buttons=Usability.Tree(gallery).OfType<Button>().Where(b=>b.Tag is DamageEmblem).ToArray();
-            check(buttons.Length==6,"Settings exposes six visual Damage-emblem tiles");
-            foreach(var button in buttons)
-            {
-                var choice=IconArtwork.DamageChoices.Single(c=>c.Id==(DamageEmblem)button.Tag);
-                check(Usability.Tree(button).OfType<DamageEmblemPreview>().Count()==2&&Usability.Tree(button).OfType<TextBlock>().Any(t=>t.Text==choice.Label),choice.Label+" renders artwork and its readable label inside the raised button");
-            }
+            var selector=Usability.Tree(settings).OfType<ComboBox>().Single(b=>Equals(b.Tag,"damage-emblem-selector"));Flush();
+            check(selector.Items.Count==6&&selector.Items.Cast<DamageAppearanceChoice>().Select(c=>c.Name).SequenceEqual(selector.Items.Cast<DamageAppearanceChoice>().Select(c=>c.Name).Order(StringComparer.OrdinalIgnoreCase)),"Settings exposes six alphabetical named visual Damage choices");
             settings.SelectSection(SettingsSection.Sync);Flush();
             var folderInput=Usability.Tree(settings).OfType<TextBox>().Single(t=>t.Text==p.GameFolder);folderInput.Text="Z:\\missing-unrelated-game-folder";
             settings.SelectSection(SettingsSection.Appearance);Flush();
@@ -47,15 +41,16 @@ internal static class IconStyleUiChecks
                 var digests=new List<string>();
                 foreach(var choice in IconArtwork.DamageChoices)
                 {
-                    var button=buttons.Single(b=>b.Tag is DamageEmblem id&&id==choice.Id);button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));Flush();
-                    check(p.DamageEmblem==choice.Id&&IconArtwork.Emblem==choice.Id&&Usability.GetIsPressed(button),choice.Label+" applies and stays selected in "+value);
+                    selector.SelectedValue=choice.Id;Flush();
+                    check(p.DamageEmblem==choice.Id&&IconArtwork.Emblem==choice.Id&&Equals(selector.SelectedValue,choice.Id),choice.Name+" applies and stays selected in "+value);
                     digests.Add(Digest(new DamageEmblemPreview()));
                 }
                 check(digests.Distinct().Count()==6,"All six "+value+" Damage compositions render distinctly");
-                p.DamageEmblem=DamageEmblem.Fire;IconArtwork.Apply(p);settings.RefreshIconPresentation();gallery.IsExpanded=false;Flush();
+                p.DamageEmblem=DamageEmblem.Fire;IconArtwork.Apply(p);settings.RefreshIconPresentation();Flush();
                 foreach(double scale in new[]{1d,1.5,2d,3d})Save($"icon-settings-{value.ToString().ToLowerInvariant()}-{scale:0.0}x.png",(FrameworkElement)settings.Content,940,610,scale);
-                gallery.IsExpanded=true;gallery.BringIntoView();Flush();
+                selector.IsDropDownOpen=true;selector.BringIntoView();Flush();
                 foreach(double scale in new[]{1d,1.5,2d,3d})Save($"icon-emblems-{value.ToString().ToLowerInvariant()}-{scale:0.0}x.png",(FrameworkElement)settings.Content,940,610,scale);
+                selector.IsDropDownOpen=false;
             }
             var sheet=UI.Stack(UI.Text("Clean / Vibrant · six crossing-diagonal Damage emblems",18,"Melee",true));sheet.Background=UI.Brush("SolidSurface");
             foreach(var choice in IconArtwork.DamageChoices){var row=UI.Row(UI.Text(choice.Label,12),new DamageEmblemPreview{StyleOverride=IconArtworkStyle.Clean,Emblem=choice.Id,Width=48,Height=48},new DamageEmblemPreview{StyleOverride=IconArtworkStyle.Vibrant,Emblem=choice.Id,Width=48,Height=48});row.Margin=new(8);sheet.Children.Add(row);}

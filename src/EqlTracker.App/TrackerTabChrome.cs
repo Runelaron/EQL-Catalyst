@@ -10,6 +10,12 @@ namespace EqlTracker.App;
 /// <summary>Tracker-only chrome owns its gaps; TabPanel subtracts external TabItem margins.</summary>
 public sealed class TrackerTabChrome : Decorator
 {
+    public static readonly DependencyProperty HeaderAccessoryProperty=DependencyProperty.RegisterAttached("HeaderAccessory",typeof(UIElement),typeof(TrackerTabChrome),new FrameworkPropertyMetadata(null));
+    public static UIElement? GetHeaderAccessory(DependencyObject value)=>(UIElement?)value.GetValue(HeaderAccessoryProperty);
+    public static void SetHeaderAccessory(DependencyObject value,UIElement accessory)=>value.SetValue(HeaderAccessoryProperty,accessory);
+    public static readonly DependencyProperty CompactHeadersProperty=DependencyProperty.RegisterAttached("CompactHeaders",typeof(bool),typeof(TrackerTabChrome),new FrameworkPropertyMetadata(false,FrameworkPropertyMetadataOptions.Inherits|FrameworkPropertyMetadataOptions.AffectsMeasure));
+    public static bool GetCompactHeaders(DependencyObject value)=>(bool)value.GetValue(CompactHeadersProperty);
+    public static void SetCompactHeaders(DependencyObject value,bool compact)=>value.SetValue(CompactHeadersProperty,compact);
     public static readonly DependencyProperty StyleIdProperty = DependencyProperty.Register(nameof(StyleId), typeof(TrackerTabStyle), typeof(TrackerTabChrome), new FrameworkPropertyMetadata(TrackerTabStyle.Dwarf, FrameworkPropertyMetadataOptions.AffectsRender));
     public TrackerTabStyle StyleId { get => (TrackerTabStyle)GetValue(StyleIdProperty); set => SetValue(StyleIdProperty,value); }
     public static readonly DependencyProperty SelectedProperty = State(nameof(Selected));
@@ -23,19 +29,27 @@ public sealed class TrackerTabChrome : Decorator
     private string labelColor="";
     private const double RightGap=6,BottomGap=2,Inset=.75,VerticalBand=5;
     internal Rect OutlineBounds => new(Inset,VerticalBand+Inset,Math.Max(0,ActualWidth-RightGap-2*Inset),Math.Max(0,ActualHeight-BottomGap-2*VerticalBand-2*Inset));
-    internal bool ShowInsideMarks => Hovered||Focused;
+    internal bool ShowInsideMarks => !Selected && (Hovered||Focused);
     public TrackerTabChrome()
     {
         SetResourceReference(StyleIdProperty,"TrackerTabStyle");
         label = new() { FontSize=14, FontWeight=FontWeights.SemiBold, HorizontalAlignment=HorizontalAlignment.Center, VerticalAlignment=VerticalAlignment.Center };
         label.SetBinding(TextBlock.TextProperty,new Binding("Header") { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
         Child=label;
-        foreach (var (property,path) in new[] { (SelectedProperty,"IsSelected"),(HoveredProperty,"IsMouseOver"),(FocusedProperty,"IsKeyboardFocused") }) SetBinding(property,new Binding(path) { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
+        SetBinding(SelectedProperty,new Binding("IsSelected") { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
+        // TabItem.IsMouseOver includes the selected page's content. Only this header chrome owns hover.
+        SetBinding(HoveredProperty,new Binding(nameof(IsMouseOver)) { RelativeSource=new RelativeSource(RelativeSourceMode.Self) });
+        SetBinding(FocusedProperty,new Binding("IsKeyboardFocused") { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
+    }
+    internal TrackerTabChrome(string title,TrackerTabStyle style,bool selected) : this()
+    {
+        label.Text=title;StyleId=style;Selected=selected;Hovered=Focused=false;
+        IsHitTestVisible=false;
     }
     protected override Size MeasureOverride(Size available)
-    { Child!.Measure(new(Math.Max(0,available.Width-32-RightGap-2*Inset),Math.Max(0,available.Height-20-BottomGap-2*Inset))); return new(Math.Max(64,Child.DesiredSize.Width+32)+RightGap+2*Inset,Math.Max(38,Child.DesiredSize.Height+20)+BottomGap+2*Inset); }
+    { double padding=GetCompactHeaders(this)?16:32;Child!.Measure(new(Math.Max(0,available.Width-padding-RightGap-2*Inset),Math.Max(0,available.Height-20-BottomGap-2*Inset))); return new(Math.Max(GetCompactHeaders(this)?40:64,Child.DesiredSize.Width+padding)+RightGap+2*Inset,Math.Max(38,Child.DesiredSize.Height+20)+BottomGap+2*Inset); }
     protected override Size ArrangeOverride(Size final)
-    { Child!.Arrange(new Rect(16+Inset,VerticalBand+Inset,Math.Max(0,final.Width-32-RightGap-2*Inset),Math.Max(0,final.Height-BottomGap-2*VerticalBand-2*Inset))); return final; }
+    {double padding=GetCompactHeaders(this)?8:16;Child!.Arrange(new Rect(padding+Inset,VerticalBand+Inset,Math.Max(0,final.Width-padding*2-RightGap-2*Inset),Math.Max(0,final.Height-BottomGap-2*VerticalBand-2*Inset))); return final; }
     internal static Geometry Shape(TrackerTabStyle style,double w,double h)
     {
         string path=style switch {
@@ -65,7 +79,7 @@ public sealed class TrackerTabChrome : Decorator
     {
         var bounds=OutlineBounds;double w=bounds.Width,h=bounds.Height;if(w<32||h<20)return;
         dc.PushTransform(new TranslateTransform(bounds.X,bounds.Y));
-        var edge=new Pen(UI.Brush(Hovered?"Accent":Selected?"Melee":"Edge"),1);
+        var edge=new Pen(UI.Brush(Selected?"Melee":Hovered?"Accent":"Edge"),1);
         dc.DrawGeometry(UI.Brush(Selected?"Selection":"InnerSurface"),edge,Shape(StyleId,w,h));
         var ornament=new Pen(UI.Brush("Muted"),.8);
         void L(params Point[] ps) { for(int i=1;i<ps.Length;i++)dc.DrawLine(ornament,ps[i-1],ps[i]); }

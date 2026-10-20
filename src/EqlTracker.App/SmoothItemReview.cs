@@ -51,11 +51,11 @@ public sealed partial class QuestWindow
             Check(gearTable.Items.Count == 1 && gearTable.SelectedItem is GearRow { Rank: 6 }, $"Gear All items shows one representative owned copy at its actual rank (rows={gearTable.Items.Count}; ranks={string.Join(',', gearTable.Items.OfType<GearRow>().Select(r => r.Rank))}; position={GearSelectedPosition}; stock={Controller.Inventory.Evidence(Controller.Catalog.Find("Red Dragonscale Armor")!).Count()})");
             var gripperHeaders = Usability.Tree(gearTable).OfType<DataGridColumnHeader>().Where(h => h.Column != null).OrderBy(h => h.Column.DisplayIndex).Take(2).ToArray();
             var rightGrip = (Thumb)gripperHeaders[0].Template.FindName("PART_RightHeaderGripper", gripperHeaders[0]);
-            rightGrip.RaiseEvent(new DragStartedEventArgs(0,0) { RoutedEvent = Thumb.DragStartedEvent, Handled = true }); Check(TableLayout.ResizingColumn(gearTable) == gripperHeaders[0].Column, "Shared sizing receives header drag events even when WPF marks them handled");
-            rightGrip.RaiseEvent(new DragCompletedEventArgs(0,0,false) { RoutedEvent = Thumb.DragCompletedEvent, Handled = true });
+            double initialTotal=gearTable.Columns.Where(c=>c.Visibility==Visibility.Visible).Sum(c=>c.ActualWidth);
+            TableLayout.ResizeColumn(gearTable,gripperHeaders[0].Column,gripperHeaders[0].Column.ActualWidth+20);Flush();
+            Check(Math.Abs(initialTotal-gearTable.Columns.Where(c=>c.Visibility==Visibility.Visible).Sum(c=>c.ActualWidth))<1,"Header resize preserves the occupied table width");
             var leftGrip = (Thumb)gripperHeaders[1].Template.FindName("PART_LeftHeaderGripper", gripperHeaders[1]);
-            leftGrip.RaiseEvent(new DragStartedEventArgs(0,0) { RoutedEvent = Thumb.DragStartedEvent, Handled = true }); Check(TableLayout.ResizingColumn(gearTable) == gripperHeaders[0].Column, "Left-edge grippers resize the preceding displayed column consistently");
-            leftGrip.RaiseEvent(new DragCompletedEventArgs(0,0,false) { RoutedEvent = Thumb.DragCompletedEvent, Handled = true });
+            Check(rightGrip.ActualWidth>0&&leftGrip.ActualWidth>0,"Both header edges retain usable pointer grippers; routed input is covered by the dedicated cascade review");
             Check(Usability.Tree(gearInspector).OfType<ClassicItemCard>().Count() == 1 && Usability.Tree(gearInspector).OfType<Slider>().Count() == 1, "Gear uses the shared classic card and selected-item rank slider");
             Check(gearDisplayedComparison?.Evaluation?.Unbuffed.Delta.HasValue == true && gearDisplayedComparison.Evaluation.Buffed.Delta.HasValue, "Gear displays independent Unbuffed and Usual buffs results");
             var gearRows = gearTable.ItemsSource; var gearFacts = Usability.Tree(gearInspector).OfType<ClassicItemCard>().Single(); var gearView = Usability.Tree(gearInspector).OfType<BuildComparisonView>().Single();

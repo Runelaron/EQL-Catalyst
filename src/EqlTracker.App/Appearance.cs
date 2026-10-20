@@ -52,11 +52,11 @@ public static class Appearance
         {
             foreach (var pair in new Dictionary<string, string>
             {
-                ["Surface"]="#BE090909", ["InnerSurface"]="#BF181818", ["DetailSurface"]="#BF202020",
+                ["Surface"]="#BE090909", ["InnerSurface"]="#BF121212", ["DetailSurface"]="#BF171717",
                 ["Foreground"]="#F4F4F4", ["Muted"]="#BDBDBD", ["ReadableNote"]="#EBEBEB",
-                ["Accent"]="#D5D5D5", ["Selection"]="#80545454", ["Edge"]="#90777777",
-                ["ButtonFace"]="#393939", ["ButtonText"]="#F4F4F4", ["ButtonLight"]="#858585", ["ButtonShadow"]="#FF101010",
-                ["PressedSurface"]="#4A4A4A", ["AlternateRow"]="#252525", ["CellSelection"]="#454545"
+                ["Accent"]="#D5D5D5", ["Selection"]="#80424242", ["Edge"]="#90545454",
+                ["ButtonFace"]="#252525", ["ButtonText"]="#F4F4F4", ["ButtonLight"]="#626262", ["ButtonShadow"]="#FF080808",
+                ["PressedSurface"]="#343434", ["AlternateRow"]="#1C1C1C", ["CellSelection"]="#333333"
             }) palette[pair.Key] = pair.Value;
         }
         foreach (string name in new[] { "InnerSurface", "DetailSurface" }) palette[name] = "#BF" + palette[name][^6..];
@@ -116,6 +116,7 @@ public sealed class MeterPreview : Border
         Width = 190; Padding = new(5); Margin = new(8, 0, 0, 4); CornerRadius = new(3); BorderThickness = new(1); IsHitTestVisible = false;
         SetResourceReference(BackgroundProperty, "Surface"); SetResourceReference(BorderBrushProperty, "Accent");
         Child = UI.Stack(label, rows, UI.Text("12,850 Dmg · 450 Max", 10, "Muted"));
+        ToolTip="Illustrative meter example. Follows Meter style, opacity, Smooth motion and the selected icon style.";
     }
     public void Apply(CharacterProfile profile)
     {

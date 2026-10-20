@@ -2,8 +2,11 @@
 # Local scanners only. Does not install tools, scan a distro, or change services.
 set -euo pipefail
 source_root="$(cd "${1:-.}" && pwd)"
-output_root="$source_root/artifacts/security"
-payload="$source_root/dist/EQL-Catalyst-1.0.0-beta.1-win-x64"
+version="$(python3 -c 'import xml.etree.ElementTree as E,sys;p=E.parse(sys.argv[1]).getroot().find("PropertyGroup");print(p.findtext("VersionPrefix")+"-"+p.findtext("VersionSuffix"))' "$source_root/Version.props")"
+output_root="${2:?Specify a private scanner output directory outside the staged source tree}"
+output_root="$(realpath -m "$output_root")"
+case "$output_root/" in "$source_root/"*) printf '%s\n' 'Scanner outputs and caches must stay outside the staged release input.' >&2; exit 2;; esac
+payload="$source_root/dist/EQL-Catalyst-$version-win-x64"
 test -f "$source_root/Version.props" && test -f "$payload/EQLTracker.deps.json"
 mkdir -p "$output_root/cache"
 export GOMAXPROCS=2

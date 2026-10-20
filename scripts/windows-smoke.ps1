@@ -22,6 +22,12 @@ foreach ($scope in @('CURRENTUSER','ALLUSERS')) {
   foreach ($file in $manifest.Files.PSObject.Properties) {
     Check (((Get-FileHash -LiteralPath (Join-Path $app $file.Name)).Hash).ToLowerInvariant() -eq $file.Value) ('Installed payload hash: ' + $file.Name)
   }
+  # Inspect released files read back from the installation. Generated uninstall
+  # bookkeeping intentionally contains the disposable user's install path.
+  $expanded=Join-Path $root ('expanded-'+$scope)
+  foreach($file in $manifest.Files.PSObject.Properties){$target=Join-Path $expanded $file.Name;New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null;Copy-Item -LiteralPath (Join-Path $app $file.Name) -Destination $target}
+  python (Join-Path $PSScriptRoot 'privacy-audit.py') $expanded --private-root "$pwd" --private-root "$env:RUNNER_TEMP" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report (Join-Path $root ("installed-privacy-"+$scope+".json"))
+  Check ($LASTEXITCODE -eq 0) "$scope expanded installer payload passes privacy audit"
   Check ((Run "$app\EQLTracker.exe" @('--data-root',$data,'--character','ExampleHero','--server','example','--launch-audit')) -eq 0) 'Offline first profile starts'
   $audit=Get-Content "$data\ExampleHero_example\launch-audit.json" -Raw | ConvertFrom-Json
   Check (!$audit.GameFolder -and $audit.Level -eq 0 -and !$audit.Race -and $audit.CurrentClasses.Count -eq 0) 'New facts remain unknown'
@@ -38,7 +44,9 @@ foreach ($scope in @('CURRENTUSER','ALLUSERS')) {
 }
 $firstRoot=Join-Path $root 'cancelled-first-run'
 $cancel=Join-Path $root 'cancel.json'
-Check ((Run (Join-Path $PSScriptRoot '../dist/EQL-Catalyst-1.0.0-beta.1-win-x64/EQLTracker.exe') @('--data-root',$firstRoot,'--first-run-cancel-audit',$cancel)) -eq 0) 'First-run cancellation audit succeeds'
+[xml]$versionXml=Get-Content (Join-Path $PSScriptRoot '../Version.props')
+$releaseVersion=$versionXml.Project.PropertyGroup.VersionPrefix+'-'+$versionXml.Project.PropertyGroup.VersionSuffix
+Check ((Run (Join-Path $PSScriptRoot "../dist/EQL-Catalyst-$releaseVersion-win-x64/EQLTracker.exe") @('--data-root',$firstRoot,'--first-run-cancel-audit',$cancel)) -eq 0) 'First-run cancellation audit succeeds'
 Check (!(Test-Path $firstRoot) -and (Get-Content $cancel -Raw | ConvertFrom-Json).Cancelled) 'Cancelling first run writes no profile or launcher'
 $result=@{Passed=$true;Count=$checks.Count;Checks=$checks;InstallerSha256=(Get-FileHash -LiteralPath $Installer).Hash;Scope='GitHub-hosted Windows; custom-path installs; no claim of fresh OS without .NET'}
 New-Item -ItemType Directory artifacts -Force | Out-Null

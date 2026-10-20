@@ -63,7 +63,7 @@ public sealed partial class DpsWindow
                 var clip=LayoutInformation.GetLayoutClip(item);var bounds=chrome.OutlineBounds;
                 Check(item.Margin==new Thickness(0)&&(clip==null||clip.Bounds.Width>=chrome.ActualWidth-.01),$"Complete tab layout bounds · {chrome.StyleId} · {item.Header} · {suffix}");
                 Check(bounds.Left>=.5&&bounds.Right+.5<chrome.ActualWidth&&bounds.Top>=.5&&bounds.Bottom+.5<chrome.ActualHeight,$"Stroke and gaps inside layout · {chrome.StyleId} · {item.Header} · {suffix}");
-                Check(chrome.ShowInsideMarks==(chrome.Hovered||chrome.Focused),$"Hover/keyboard marks without selection trigger · {chrome.StyleId} · {item.Header} · {suffix}");
+                Check(chrome.ShowInsideMarks==(!chrome.Selected&&(chrome.Hovered||chrome.Focused)),$"Header-only hover/keyboard marks exclude selected tabs · {chrome.StyleId} · {item.Header} · {suffix}");
             }
             Capture("all-styles-"+suffix,sheet,1100,1050);
             foreach(var chrome in Usability.Tree(sheet).OfType<TrackerTabChrome>())

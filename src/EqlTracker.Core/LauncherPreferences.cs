@@ -13,8 +13,18 @@ public sealed record LaunchProfile(string Character, string Server, string GameF
 
 public sealed class LauncherPreferences
 {
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = 2;
     public LaunchProfile? LastProfile { get; set; }
+    public List<LaunchProfile> KnownProfiles { get; set; } = [];
+    internal static bool SameIdentity(LaunchProfile a, LaunchProfile b) => a.Character.Equals(b.Character,StringComparison.OrdinalIgnoreCase) && a.Server.Equals(b.Server,StringComparison.OrdinalIgnoreCase);
+    internal static List<LaunchProfile> Merge(IEnumerable<LaunchProfile> preferred, IEnumerable<LaunchProfile> discovered)
+        => preferred.Concat(discovered).Where(p=>p.Valid).DistinctBy(p=>(p.Character.ToLowerInvariant(),p.Server.ToLowerInvariant())).OrderBy(p=>p.Character,StringComparer.OrdinalIgnoreCase).ThenBy(p=>p.Server,StringComparer.OrdinalIgnoreCase).ToList();
+    internal bool Register(string root, IEnumerable<LaunchProfile> profiles)
+    {
+        var next=Merge(profiles,KnownProfiles);
+        if(KnownProfiles.SequenceEqual(next))return false;
+        KnownProfiles=next;Save(root);return true;
+    }
     public static bool ValidName(string? value) => value != null && Regex.IsMatch(value, @"\A[A-Za-z][A-Za-z0-9_-]{0,60}\z");
     public static LauncherPreferences Read(string root)
     {
@@ -24,7 +34,11 @@ public sealed class LauncherPreferences
     public void Remember(string root, LaunchProfile profile)
     {
         if (!profile.Valid) throw new InvalidDataException("Invalid profile identity.");
-        LastProfile = profile;
+        LastProfile = profile; KnownProfiles=Merge([profile],KnownProfiles); Save(root);
+    }
+    private void Save(string root)
+    {
+        Version=2;
         Directory.CreateDirectory(root);
         string destination = Path.Combine(root, "launcher.json"), temp = destination + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try { File.WriteAllText(temp, JsonSerializer.Serialize(this, Json.Options)); File.Move(temp, destination, true); }

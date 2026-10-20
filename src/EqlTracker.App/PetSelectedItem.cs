@@ -84,6 +84,7 @@ public sealed partial class QuestWindow
     }
     private void ResetPetPanels()
     {
+        if (petOuterSplit != null) PaneLayout.Cancel(petOuterSplit);
         Controller.Profile.PanelSplits["pet-focused-items"] = .56; Controller.Profile.PanelSplits["pet-focused-comparison"] = .25;
         if (petInnerSplit != null) { petInnerSplit.ColumnDefinitions[0].Width = new(.44, GridUnitType.Star); petInnerSplit.ColumnDefinitions[2].Width = new(.56, GridUnitType.Star); }
         if (petOuterSplit != null && ActualWidth >= 1080) { petOuterSplit.ColumnDefinitions[0].Width = new(.75, GridUnitType.Star); petOuterSplit.ColumnDefinitions[2].Width = new(.25, GridUnitType.Star); }

@@ -1,8 +1,8 @@
-# EQL Catalyst — Beta 1.0
+# EQL Catalyst — Beta 1.1
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.0**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.0.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.1**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.1.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
@@ -18,6 +18,8 @@ An independent Windows companion for **EverQuest Legends**: follow combat, organ
 - **Appearance:** Coldain, Sunstrider, Shadowman, Auto, Clean/Vibrant icons, selectable damage emblems, race-inspired tabs, transparency, and menu density.
 
 Scores are preference points, **not predicted DPS**. Missing or disputed mechanics stay labeled. Class Loadout comparison is in development. Live-game interaction and physical-monitor DPI acceptance remain separate from automated tests.
+
+Beta 1.1 adds cascading panel/column resizing, visible handles, whole-app character switching, clearer visual appearance selectors, customizable overlay shortcuts, and a deeper Shadowman theme. See [release notes](CHANGELOG.md), [appearance and shortcuts](docs/compact-settings.md), and [character/layout controls](docs/cascading-controls.md).
 
 ## Install
 

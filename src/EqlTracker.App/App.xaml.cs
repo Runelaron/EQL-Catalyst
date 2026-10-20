@@ -37,6 +37,12 @@ public partial class App : Application
         bool diagnostic = benchmark != null || preview != null || smoke != null;
         bool firstSetup = false;
         DataRoot = Path.GetFullPath(Value("--data-root") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EQLTracker"));
+        if(int.TryParse(Value("--wait-for-parent"),out int parentId)&&parentId>0&&parentId!=Environment.ProcessId)
+        {
+            try{using var parent=System.Diagnostics.Process.GetProcessById(parentId);await parent.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(45));}
+            catch(ArgumentException){ /* Previous process has already finished. */ }
+            catch(TimeoutException){MessageBox.Show("The previous character is still saving. Reopen EQL Catalyst after it closes.");Shutdown(1);return;}
+        }
         if (Value("--first-run-cancel-audit") is string cancelAudit)
         {
             if (Directory.Exists(DataRoot)) { Shutdown(1); return; }
@@ -112,6 +118,7 @@ public partial class App : Application
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or Microsoft.Data.Sqlite.SqliteException or System.Text.Json.JsonException)
         { MessageBox.Show("Unable to open this profile. Existing data was not replaced.\n\n" + error.Message, "EQL Catalyst"); Shutdown(1); return; }
         IconArtwork.Apply(Controller.Profile);
+        RefreshShortcutHints();
         CatalystBranding.SelectedId = CatalystBranding.Resolve(Controller.Profile.AppIconId).Id;
         CatalystBranding.SelectedStyle = IconArtwork.Style;
         DispatcherUnhandledException += (_, args) => { File.AppendAllText(Path.Combine(Controller.DataFolder, "errors.log"), args.Exception + Environment.NewLine); args.Handled = true; if (preview != null) { Json.Write(Path.Combine(preview, "validation-failure.json"), new { Error = args.Exception.ToString() }); Shutdown(1); } else MessageBox.Show("Tracker error: " + args.Exception.Message); };
@@ -142,6 +149,13 @@ public partial class App : Application
             ExitTracker(); return;
         }
         ApplyTheme();
+        if(Value("--character-switch-audit") is { } auditServer)
+        {
+            if(Value("--data-root")==null||!Path.GetFileName(DataRoot).StartsWith("eql-switch-review-",StringComparison.Ordinal)||Controller.Profile.GameFolder.Length!=0||!LauncherPreferences.ValidName(auditServer))throw new InvalidDataException("Dedicated offline switch-audit folder required.");
+            characterSwitchAudit=true;var target=new LaunchProfile(Controller.Profile.Character,auditServer,"");characterChoices=[ActiveCharacter,target];
+            Json.Write(Path.Combine(DataRoot,"handoff.json"),new{From=ActiveCharacter,Target=target,WholeApplication=true});
+            if(!SwitchCharacter(target,TrackerTab.Gear))throw new InvalidOperationException("Profile handoff failed.");return;
+        }
         if (e.Args.Contains("--launch-audit"))
         {
             Controller.Save();
@@ -165,6 +179,9 @@ public partial class App : Application
             quests = new(Controller); dps = new(Controller); quests.SetZoneFilter("Current zone");
             try
             {
+                if (e.Args.Contains("--cascade-pointer")) { CascadingResizeReview.OpenPointer(preview,Controller); return; }
+                if(e.Args.Contains("--compact-settings-only")){CompactSettingsReview.Run(preview,Controller,quests);ExitTracker();return;}
+                if (e.Args.Contains("--cascade-only")) { CascadingResizeReview.Run(preview,Controller,quests,dps,e.Args.Contains("--gear-capture-only"),e.Args.Contains("--lab-panels-only")); ExitTracker(); return; }
                 if (e.Args.Contains("--public-screens")) { PublicScreens.Run(preview, Controller, quests, dps, DpsOverlay); ExitTracker(); return; }
                 if (e.Args.Contains("--beta-only")) { BetaReview.Run(preview, Controller, quests, dps, DpsOverlay); ExitTracker(); return; }
                 if(e.Args.Contains("--menu-display-only"))
@@ -253,8 +270,10 @@ public partial class App : Application
         tray = new System.Windows.Forms.NotifyIcon { Icon = trayIcon, Text = CatalystBranding.Name, Visible = true };
         iconRefresh.Tick += (_, _) => { iconRefresh.Stop(); ApplyIcon(true); };
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += DisplayChanged;
-        var menu = new System.Windows.Forms.ContextMenuStrip(); menu.Items.Add(CatalystBranding.Name).Enabled = false; menu.Items.Add(new System.Windows.Forms.ToolStripSeparator()); menu.Items.Add("Quest && Gear Tracker", null, (_, _) => OpenQuests()); menu.Items.Add("Combat lab", null, (_, _) => OpenDps()); menu.Items.Add("Toggle objectives  (Ctrl+Alt+Q)", null, (_, _) => Toggle(1)); menu.Items.Add("Toggle pet DPS  (Ctrl+Alt+D)", null, (_, _) => Toggle(2)); menu.Items.Add("Toggle click-through  (Ctrl+Alt+T)", null, (_, _) => Toggle(3)); menu.Items.Add("Native game controls", null, (_, _) => OpenNativeControls()); menu.Items.Add("Settings", null, (_, _) => OpenSettings()); menu.Items.Add("Exit tracker", null, (_, _) => ExitTracker()); tray.ContextMenuStrip = menu; tray.DoubleClick += (_, _) => OpenQuests();
-        hotkeys = new(Toggle); if (hotkeys.Failed.Count > 0) tray.ShowBalloonTip(7000, "Some hotkeys are already in use", string.Join(", ", hotkeys.Failed) + ". Use the tray menu.", System.Windows.Forms.ToolTipIcon.Info);
+        var menu = new System.Windows.Forms.ContextMenuStrip();menu.Items.Add(CatalystBranding.Name).Enabled=false;menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());menu.Items.Add("Quest && Gear Tracker",null,(_,_)=>OpenQuests());menu.Items.Add("Combat lab",null,(_,_)=>OpenDps());
+        foreach(var action in Enum.GetValues<OverlayShortcutAction>()){var item=menu.Items.Add(ShortcutActionName(action),null,(_,_)=>Toggle((int)action));item.Tag=action;}
+        menu.Items.Add("Native game controls",null,(_,_)=>OpenNativeControls());menu.Items.Add("Settings",null,(_,_)=>OpenSettings());menu.Items.Add("Exit tracker",null,(_,_)=>ExitTracker());tray.ContextMenuStrip=menu;tray.DoubleClick+=(_,_)=>OpenQuests();RefreshShortcutHints();
+        hotkeys = new(Toggle,Controller.Profile); if (hotkeys.Failed.Count > 0) tray.ShowBalloonTip(7000, "Some hotkeys are already in use", string.Join(", ", hotkeys.Failed) + ". Use the tray menu.", System.Windows.Forms.ToolTipIcon.Info);
         menu.Items.Insert(3, new System.Windows.Forms.ToolStripMenuItem("Sync now", null, async (_, _) => await GameSync.Request()));
         timer.Tick += (_, _) =>
         {
@@ -281,7 +300,8 @@ public partial class App : Application
         };
         wheelRouter = new();
         wheelRouter.ForegroundChanged += allowed => { if (!allowed) foreach (var panel in Panels()) { panel.CancelInteraction(); if (Controller.Profile.HideWhenUnfocused) panel.Hide(); } };
-        timer.Start(); Controller.Start(); if (firstSetup) OpenQuests();
+        timer.Start(); Controller.Start(); StartCharacterDiscovery();
+        if (firstSetup || e.Args.Contains("--open-tracker")) { OpenQuests(); if(Enum.TryParse<TrackerTab>(Value("--tracker-tab"),out var requested))quests?.ShowView(requested); }
     }
     private readonly List<double> uiSamples = [];
     private IEnumerable<FrostWindow> Panels() => new FrostWindow?[] { ObjectivesOverlay, DpsOverlay, quests, dps, settings, nativeControls, iconGallery }.OfType<FrostWindow>();
@@ -312,7 +332,16 @@ public partial class App : Application
         if (id == 2) DpsOverlay.RequestedVisible = !DpsOverlay.RequestedVisible;
         if (id == 3) { bool enabled = !Controller.Profile.Objectives.ClickThrough; Controller.Profile.Objectives.ClickThrough = Controller.Profile.Dps.ClickThrough = enabled; ApplySettings(); Controller.Save(); }
     }
-    public void ApplySettings() { IconArtwork.Apply(Controller.Profile); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
+    public void ApplySettings() { IconArtwork.Apply(Controller.Profile);RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
+    internal string ShortcutLabel(OverlayShortcutAction action)=>OverlayShortcuts.Label(Controller.Profile,action);
+    private static string ShortcutActionName(OverlayShortcutAction action)=>action switch{OverlayShortcutAction.Objectives=>"Toggle objectives",OverlayShortcutAction.Dps=>"Toggle DPS",_=>"Toggle click-through"};
+    private void RefreshShortcutHints()
+    {
+        Resources["ClickThroughShortcutHint"]="("+ShortcutLabel(OverlayShortcutAction.ClickThrough)+" to restore)";
+        if(tray?.ContextMenuStrip is {} menu)foreach(System.Windows.Forms.ToolStripItem item in menu.Items)if(item.Tag is OverlayShortcutAction action)item.Text=ShortcutActionName(action)+"  ("+ShortcutLabel(action)+")";
+    }
+    internal bool TryApplyShortcuts(IReadOnlyDictionary<OverlayShortcutAction,GlobalShortcut> requested,out string error)
+    {if(!OverlayShortcuts.Validate(requested,out error))return false;return Controller.Demo||hotkeys==null||hotkeys.TryApply(requested,out error);}
     private void DisplayChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(RefreshIconForDisplay);
     public void RefreshIconForDisplay() { iconRefresh.Stop(); iconRefresh.Start(); }
     public void ApplyIcon(bool force = false)
@@ -337,6 +366,6 @@ public partial class App : Application
     public void ExitTracker()
     {
         if (!Exiting && !Controller.Demo && (quests?.ConfirmGearWorkspaceExit() == false || quests?.ConfirmPetWorkspaceExit() == false)) return;
-        if (Exiting) return; Exiting = true; timer.Stop(); iconRefresh.Stop(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
+        if (Exiting) return; Exiting = true; timer.Stop(); iconRefresh.Stop(); StopCharacterDiscovery(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
     }
 }

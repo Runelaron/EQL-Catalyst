@@ -327,6 +327,7 @@ public sealed class CharacterProfile
     public Dictionary<string, Dictionary<string, double>> Weights { get; set; } = [];
     public int EncounterTimeoutSeconds { get; set; } = 12;
     public int EncounterResumeSeconds { get; set; } = 30;
+    public Dictionary<OverlayShortcutAction,GlobalShortcut> OverlayShortcuts { get; set; } = [];
     public int ContinuityVersion { get; set; }
     public bool HideWhenUnfocused { get; set; } = true;
     public bool Sounds { get; set; }

@@ -33,7 +33,7 @@ public static class FocusedLayout
     }
     internal static UIElement FloatingInspector(string title,UIElement content)
     {
-        var root=new DockPanel{Margin=new(5,0,3,5)};var label=UI.Label(title);label.Margin=new(2,0,0,5);DockPanel.SetDock(label,Dock.Top);root.Children.Add(label);
+        var root=new DockPanel{Margin=new(0,0,0,5)};var label=UI.Label(title);label.Margin=new(2,0,0,5);DockPanel.SetDock(label,Dock.Top);root.Children.Add(label);
         var card=UI.Card(UI.Scroll(content));card.Margin=new(0);card.SetResourceReference(Border.BackgroundProperty,"DetailSurface");root.Children.Add(card);return root;
     }
     internal static TextBlock Purpose(string text)

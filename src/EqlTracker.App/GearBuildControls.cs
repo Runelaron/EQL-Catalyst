@@ -127,6 +127,7 @@ public sealed partial class QuestWindow
     }
     private void ResetGearPanels()
     {
+        if (gearOuterSplit != null) PaneLayout.Cancel(gearOuterSplit);
         Controller.Profile.PanelSplits.Remove("gear-workspace"); Controller.Profile.PanelSplits.Remove("gear-candidates");
         if (gearOuterSplit != null) { gearOuterSplit.ColumnDefinitions[0].Width = new(.33, GridUnitType.Star); gearOuterSplit.ColumnDefinitions[2].Width = new(.67, GridUnitType.Star); }
         if (gearInnerSplit != null) { gearInnerSplit.ColumnDefinitions[0].Width = new(.627, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[2].Width = new(.373, GridUnitType.Star); } Controller.Save();

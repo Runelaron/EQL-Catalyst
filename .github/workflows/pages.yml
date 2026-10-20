@@ -1,15 +1,10 @@
 name: Landing page
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ['Windows release checks']
-    types: [completed]
-    branches: [main]
 permissions:
   contents: read
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == 'Runelaron/EQL-Catalyst')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -21,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
