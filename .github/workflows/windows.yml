@@ -34,6 +34,16 @@ jobs:
       - name: Disposable-runner installer checks
         shell: pwsh
         run: ./scripts/windows-smoke.ps1 -Installer (Resolve-Path dist/*-setup.exe)
+      - name: Progress and update interface checks
+        shell: pwsh
+        run: |
+          [xml]$v=Get-Content Version.props
+          $version=$v.Project.PropertyGroup.VersionPrefix+'-'+$v.Project.PropertyGroup.VersionSuffix
+          $output=Join-Path $env:RUNNER_TEMP 'eql-beta14-review'
+          $p=Start-Process -FilePath "dist/EQL-Catalyst-$version-win-x64/EQLTracker.exe" -ArgumentList @('--preview',$output,'--beta14-review','--offline','--checks-only') -WindowStyle Hidden -PassThru
+          if (!$p.WaitForExit(120000)) { throw 'UI checks did not finish' }
+          if ($p.ExitCode -ne 0 -or !(Test-Path "$output/beta14-checks.json") -or (Test-Path "$output/validation-failure.json")) { throw 'UI checks failed' }
+          Copy-Item "$output/beta14-checks.json" artifacts/beta14-checks.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-release

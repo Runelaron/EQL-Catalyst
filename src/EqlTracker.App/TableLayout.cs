@@ -28,7 +28,9 @@ public static class TableLayout
         public readonly HashSet<ScrollBar> Scrollbars = [];
         public readonly Dictionary<DataGridColumn, double> AutoMaximum = [];
         public bool Queued, DeferredResize;
-        public ScrollContentPresenter? ContentViewport;
+        public ScrollViewer? Scroll;
+        public readonly Dictionary<DataGridColumn,double> DefaultScales = [];
+        public readonly Dictionary<DataGridColumn,string> DefaultSamples = [];
         public double Viewport = -1;
         public DataGridColumn? DragColumn;
         public CascadingDrag? Input;
@@ -39,6 +41,13 @@ public static class TableLayout
     private static readonly ConditionalWeakTable<DataGridColumn, object> noCellTooltip = new();
     public static void SuppressCellTooltip(DataGridColumn column) => noCellTooltip.GetOrCreateValue(column);
     public static void SetAutoMaximum(DataGrid table, DataGridColumn column, double width) => states.GetOrCreateValue(table).AutoMaximum[column] = width;
+    public static void SetDefaultScale(DataGrid table, DataGridColumn column, double scale) => states.GetOrCreateValue(table).DefaultScales[column] = scale;
+    public static void SetDefaultSample(DataGrid table, DataGridColumn column, string sample)
+    {
+        var state=states.GetOrCreateValue(table);
+        if(state.DefaultSamples.GetValueOrDefault(column)==sample) return;
+        state.DefaultSamples[column]=sample;state.Fitted=false;state.Viewport=-1;QueueFit(table,state);
+    }
     public static void SetKey(DataGrid table, string key) => states.GetOrCreateValue(table).Key = key;
     internal static DataGridColumn? ResizingColumn(DataGrid table) => states.GetOrCreateValue(table).DragColumn;
     public static void Attach(DataGrid table)
@@ -70,8 +79,8 @@ public static class TableLayout
             var owner = Window.GetWindow(table) as FrostWindow; if (state.Window == null && owner != null) { state.Fitted = state.Sampled = false; } state.Window = owner;
             if (state.Key.Length == 0) state.Key = (state.Window?.Title ?? "table") + ":" + string.Join('|', table.Columns.Select(c => c.SortMemberPath));
             string legacy = (state.Window?.Title ?? "table") + ":" + string.Join('|', table.Columns.Select(c => c.SortMemberPath));
-            if (state.Window != null && legacy != state.Key) foreach (var column in table.Columns) { string old = legacy + ":" + Path(column), key = Key(state, column); if (!state.Window.LayoutProfile.ColumnWidths.ContainsKey(key) && state.Window.LayoutProfile.ColumnWidths.TryGetValue(old, out double width)) state.Window.LayoutProfile.ColumnWidths[key] = width; }
-            state.ContentViewport = Usability.Tree(table).OfType<ScrollContentPresenter>().FirstOrDefault(p => p.Name == "PART_ScrollContentPresenter");
+            if (state.Window != null && legacy != state.Key && !state.Key.StartsWith("tracker.pet.",StringComparison.Ordinal)) foreach (var column in table.Columns) { string old = legacy + ":" + Path(column), key = Key(state, column); if (!state.Window.LayoutProfile.ColumnWidths.ContainsKey(key) && state.Window.LayoutProfile.ColumnWidths.TryGetValue(old, out double width)) state.Window.LayoutProfile.ColumnWidths[key] = width; }
+            state.Scroll = Usability.Tree(table).OfType<ScrollViewer>().FirstOrDefault(p => ReferenceEquals(p.TemplatedParent,table));
             foreach (var column in table.Columns.OfType<DataGridTextColumn>()) ApplyCellStyle(state, column);
             Fit(table, state, false);
             foreach (var bar in Usability.Tree(table).OfType<ScrollBar>().Where(state.Scrollbars.Add))
@@ -143,17 +152,17 @@ public static class TableLayout
     {
         if (!table.IsLoaded) return; var state = states.GetOrCreateValue(table);
         var typeColumn = table.Columns.FirstOrDefault(c => Path(c) == "Type");
+        bool changed=false;
         if (typeColumn != null && table.Items.Count > 0)
         {
-            var values = table.Items.Cast<object>().Where(x => x != CollectionView.NewItemPlaceholder).Take(200).ToArray();
-            var property = values.FirstOrDefault()?.GetType().GetProperty("Type");
-            if (property != null) foreach (string text in values.Select(x => property.GetValue(x)?.ToString() ?? "").Distinct())
-            {
-                if (!state.TypeWidths.TryGetValue(text, out double width)) state.TypeWidths[text] = width = TypeWidth(table, text);
-                if (typeColumn.MinWidth + .25 < width) { typeColumn.MinWidth = Math.Min(typeColumn.MaxWidth, width); state.Viewport = -1; QueueFit(table, state); }
-            }
+            var values=table.Items.Cast<object>().Where(x=>x!=CollectionView.NewItemPlaceholder).Take(200).ToArray();
+            var property=values.FirstOrDefault()?.GetType().GetProperty("Type");
+            if(property!=null) foreach(string text in values.Select(x=>property.GetValue(x)?.ToString()??"").Distinct())
+                if(!state.TypeWidths.ContainsKey(text)) { state.TypeWidths[text]=TypeWidth(table,text); changed=true; }
+            // Content affects defaults, never a permanent minimum or a manually chosen width.
+            if(changed && !state.Manual.Contains(Key(state,typeColumn))) { state.Preferred.Remove(typeColumn);state.Fitted=false;state.Sampled=false;state.Viewport=-1;QueueFit(table,state); }
         }
-        if (!state.Sampled && table.Items.Count > 0) Fit(table, state, false);
+        if (!state.Sampled && table.Items.Count > 0) QueueFit(table,state);
     }
     public static void Reset(DataGrid table)
     {
@@ -166,17 +175,18 @@ public static class TableLayout
     // A compound armor label retains its full cell tooltip without forcing every
     // future filtered view to reserve space for an entire list of body slots.
     private static double TypeWidth(DataGrid table,string text) => text.Split(" / ",StringSplitOptions.RemoveEmptyEntries).Select(part=>TextWidth(table,part)).DefaultIfEmpty(0).Max()+18;
-    private static void Fit(DataGrid table, State state, bool resized)
+    internal static void FitSnapshot(DataGrid table) => Fit(table,states.GetOrCreateValue(table),true,true);
+    private static void Fit(DataGrid table, State state, bool resized, bool snapshot=false)
     {
-        if (state.Applying || !table.IsLoaded || table.ActualWidth < 1 || table.IsMouseCaptureWithin) return;
+        if (state.Applying || !snapshot && !table.IsLoaded || table.ActualWidth < 1 || table.IsMouseCaptureWithin) return;
         string metrics = $"{table.FontFamily.Source}|{table.FontSize}|{table.FontStyle}|{table.FontWeight}|{table.FontStretch}|{VisualTreeHelper.GetDpi(table).PixelsPerDip}";
-        if (state.Metrics != metrics) { state.Metrics = metrics; state.Headers.Clear(); state.Viewport = -1; state.Fitted = state.Sampled = false; }
+        if (state.Metrics != metrics) { state.Metrics = metrics; state.Headers.Clear(); state.TypeWidths.Clear(); state.Viewport = -1; state.Fitted = state.Sampled = false; }
         if (state.Fitted && !resized && (state.Sampled || table.Items.Count == 0)) return;
         state.Applying = true;
         try
         {
             double gutter = Usability.Tree(table).OfType<ScrollBar>().Where(b => b.Orientation == Orientation.Vertical && b.IsVisible).Select(b => b.ActualWidth).DefaultIfEmpty(0).Max();
-            double available = state.ContentViewport is { ActualWidth: > 0 } viewport ? viewport.ActualWidth : Math.Max(0, table.ActualWidth - gutter - table.BorderThickness.Left - table.BorderThickness.Right);
+            double available = state.Scroll is { ViewportWidth: > 0 } viewport ? viewport.ViewportWidth : Math.Max(0, table.ActualWidth - gutter - table.BorderThickness.Left - table.BorderThickness.Right);
             if (table.HeadersVisibility.HasFlag(DataGridHeadersVisibility.Row)) available -= table.RowHeaderActualWidth;
             if (resized && state.Fitted && Math.Abs(state.Viewport - available) < .25 && table.Columns.All(state.Preferred.ContainsKey)) return;
             var values = resized && state.Fitted && table.Columns.All(state.Preferred.ContainsKey) ? [] : table.Items.Cast<object>().Where(x => x is not CollectionViewGroup && x != CollectionView.NewItemPlaceholder).Take(200).ToArray();
@@ -194,9 +204,10 @@ public static class TableLayout
                 if (state.Fitted && resized && state.Preferred.TryGetValue(column, out double preferred)) { widths[column] = preferred; continue; }
                 var property = values.FirstOrDefault()?.GetType().GetProperty(Path(column));
                 var measured = property == null ? [] : values.Select(x => Path(column)=="Type" ? TypeWidth(table,Format(property.GetValue(x),column))-18 : TextWidth(table, Format(property.GetValue(x), column))).ToArray();
-                if (Path(column) == "Type" && measured.Length > 0) column.MinWidth = Math.Min(column.MaxWidth, Math.Max(column.MinWidth, measured.Max() + 18));
-                double typical = measured.Length > 0 ? measured.Average() + 20 : name ? 160 : header;
-                widths[column] = Math.Max(header, Math.Min(name ? 310 : 200, typical));
+
+                double typical = measured.Length > 0 ? (Path(column)=="Type" ? measured.Max() : measured.Average()) + 20 : name ? 160 : header;
+                if(state.DefaultSamples.TryGetValue(column,out string? sample)) typical=TextWidth(table,sample)+20;
+                widths[column] = Math.Max(header, Math.Min(name ? 310 : 200, typical) * state.DefaultScales.GetValueOrDefault(column,1));
             }
             foreach (var column in table.Columns) widths[column] = Math.Clamp(widths[column], column.MinWidth, column.MaxWidth);
             foreach (var (column, width) in widths) state.Preferred[column] = width;

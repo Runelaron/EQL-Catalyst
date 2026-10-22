@@ -63,10 +63,10 @@ public sealed partial class QuestWindow
         gearUpdateCurrent.Click += (_, _) => { Controller.Profile.UpdateCurrentBuildFromInventory = gearUpdateCurrent.IsChecked == true; if (gearUpdateCurrent.IsChecked == true) { lock (Controller.Sync) GearBuildEditing.ApplyExport(Controller.Profile, Controller.Inventory); } GearEdited(); };
         var header = UI.Stack(controls, gearUpdateCurrent, gearTheoryNote);
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
-        var search = new WrapPanel(); var searchField=(FrameworkElement)FocusedLayout.Search(gearSearch, "Find a replacement…");searchField.VerticalAlignment=VerticalAlignment.Bottom;gearSearch.Height=28;search.Children.Add(searchField); ConfigureGearControls(search); search.Children.Add(gearTheoryCheck); search.Children.Add(gearPosition);
+        var search = GearSearchControls();
         var filters = new WrapPanel(); foreach (var child in new UIElement[] { UI.Field("Items", gearOwnership), UI.Field("Compatibility", gearEligibility), UI.Field("Rank", gearRankChoice), UI.Field("Rating", gearPositive) }) filters.Children.Add(child);
         var candidatePane = new DockPanel();
-        var candidateHeader = UI.Stack(gearFindLabel, search, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter candidates without editing inventory or other saved builds."), gearSearchStatus);
+        var candidateHeader = UI.Stack(search, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter candidates without editing inventory or other saved builds."), gearSearchStatus);
         DockPanel.SetDock(candidateHeader, Dock.Top); candidatePane.Children.Add(candidateHeader);
         DockPanel.SetDock(gearChanges, Dock.Bottom); candidatePane.Children.Add(gearChanges);
         var actions = new WrapPanel(); gearAddToBuild = UI.Button("Add to build", () => TryGearDraft());
@@ -77,32 +77,17 @@ public sealed partial class QuestWindow
         DockPanel.SetDock(future, Dock.Bottom); candidatePane.Children.Add(future); candidatePane.Children.Add(gearTable);
         SizeChanged += (_, _) => future.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
         var detailCard = FloatingInspector("Item Details", UI.Stack(gearInspector, gearBreakEven, new Expander { Header = "Sources & ownership", Content = gearDetails }));
-        gearInnerSplit = UI.Split(candidatePane, detailCard, 400, Controller.Profile, "gear-candidates", 260, 230);
+        gearInnerSplit = UI.Split(candidatePane, detailCard, 400, Controller.Profile, "gear-candidates", 210, 220);
         if (!Controller.Profile.PanelSplits.ContainsKey("gear-candidates")) { gearInnerSplit.ColumnDefinitions[0].Width = new(.627, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[2].Width = new(.373, GridUnitType.Star); }
         var equipmentPane = new DockPanel(); var title = gearEquipmentTitle; DockPanel.SetDock(title, Dock.Top); equipmentPane.Children.Add(title); equipmentPane.Children.Add(gearEquipment);
-        gearOuterSplit = UI.Split(TrackerLeftPane(equipmentPane), gearInnerSplit, 300, Controller.Profile, "gear-workspace", 170, 495);
+        gearOuterSplit = UI.Split(TrackerLeftPane(equipmentPane), gearInnerSplit, 300, Controller.Profile, "gear-workspace", 180, 435);
         if (!Controller.Profile.PanelSplits.ContainsKey("gear-workspace")) { gearOuterSplit.ColumnDefinitions[0].Width = new(.33, GridUnitType.Star); gearOuterSplit.ColumnDefinitions[2].Width = new(.67, GridUnitType.Star); }
-        bool lastWide = true, lastDetails = true;
-        gearOuterSplit.SizeChanged += (_, _) => {
-            bool wide = ActualWidth >= 980; equipmentPane.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-            gearOuterSplit.Children.OfType<GridSplitter>().First().Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-            if (!wide) { gearOuterSplit.ColumnDefinitions[0].MinWidth = 0; gearOuterSplit.ColumnDefinitions[0].Width = new(0); gearOuterSplit.ColumnDefinitions[1].Width = new(0); }
-            else if (!lastWide) { double fraction = Controller.Profile.PanelSplits.GetValueOrDefault("gear-workspace", .67); gearOuterSplit.ColumnDefinitions[0].MinWidth = 170; gearOuterSplit.ColumnDefinitions[0].Width = new(1-fraction, GridUnitType.Star); gearOuterSplit.ColumnDefinitions[2].Width = new(fraction, GridUnitType.Star); gearOuterSplit.ColumnDefinitions[1].Width = new(5); }
-            bool details = ActualWidth >= 1080 && ActualHeight >= 540;
-            detailCard.Visibility = details ? Visibility.Visible : Visibility.Collapsed; gearInnerSplit.Children.OfType<GridSplitter>().First().Visibility = details ? Visibility.Visible : Visibility.Collapsed;
-            if (!details) { gearInnerSplit.ColumnDefinitions[2].MinWidth = 0; gearInnerSplit.ColumnDefinitions[2].Width = new(0); gearInnerSplit.ColumnDefinitions[1].Width = new(0); gearInnerSplit.ColumnDefinitions[0].MinWidth = 0; }
-            else if (!lastDetails) { double fraction = Controller.Profile.PanelSplits.GetValueOrDefault("gear-candidates", .373); gearInnerSplit.ColumnDefinitions[0].MinWidth = 260; gearInnerSplit.ColumnDefinitions[0].Width = new(1-fraction, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[2].MinWidth = 230; gearInnerSplit.ColumnDefinitions[2].Width = new(fraction, GridUnitType.Star); gearInnerSplit.ColumnDefinitions[1].Width = new(5); }
-            gearFindLabel.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
-            gearSearch.Width = ActualWidth < 800 ? 140 : 220;
-            gearPosition.Width=ActualWidth<800?175:210;gearPosition.VerticalAlignment=VerticalAlignment.Bottom;gearPosition.Height=28;gearPosition.Margin=new(12,0,0,0);
-            lastDetails = details; lastWide = wide; UpdateGearBuildControls();
-        };
-        root.Children.Add(gearOuterSplit);
+        root.Children.Add(UI.HorizontalWorkspace(gearOuterSplit, 620));
         gearEquipment.SelectionChanged += (_, _) => { if (!gearSelecting && gearEquipment.SelectedItem is EquipmentPosition position) { GearSelectedPosition = position.Id; gearFingerprint = null; RefreshGear(); } };
         gearPosition.SelectionChanged += (_, _) => { if (!gearSelecting && !initializing && gearPosition.SelectedItem is EquipmentPosition position) { GearSelectedPosition = position.Id; gearFingerprint = null; RefreshGear(); } };
         foreach (var control in new[] { gearOwnership, gearEligibility, gearPositive, gearRankChoice }) control.SelectionChanged += (_, _) => { if (!initializing) { gearFingerprint = null; RefreshGear(); } };
         gearPosition.ToolTip = "Choose a replacement slot. Paired and Any Slot positions stay separate. Unknown equipment differs from a known-empty slot.";
-        gearRankChoice.ToolTip = "Default uses recorded physical ranks, or +0 for catalog items. A selected +0–10 previews unowned candidates only. Saved item ranks stay unchanged.";
+        gearRankChoice.ToolTip = "Default uses recorded physical ranks, or +0 for catalog items. A selected +0–10 previews every candidate, including owned copies; inventory stays unchanged. Saved item ranks stay unchanged.";
         gearOwnership.ToolTip = "All groups copies; Inventory Only lists physical copies. Have Drops shows quest rewards with some components owned; Have Ingredients shows sourced crafted outputs with some ingredients owned.";
         ConfigureGearDrag();
         InitializeGearBuilds(); return root;
@@ -125,7 +110,8 @@ public sealed partial class QuestWindow
         }
         long sourceRevision = Controller.EquipmentRevision; string id = GearSelectedPosition;
         var selected = SelectedGearBuild; bool theory = gearTheory != null;
-        string signature = $"{sourceRevision}|{Controller.Catalog.Items.Count}|{Controller.Inventory.Revision}|{gearWorkspaceRevision}|{gearSearch.Text}|{preset.SelectedItem}|{gearBuildChoice.SelectedValue}|{gearRankChoice.SelectedIndex}|{gearOwnership.SelectedIndex}|{gearEligibility.SelectedIndex}|{gearPositive.SelectedIndex}|{gearWithoutAa.IsChecked}|{id}|{string.Join(',',Controller.Profile.GearExpansions)}|{theory}";
+        var resolvedRole = SelfRoleRatings.Resolve(Controller.Profile, Controller.Profile.ActiveLoadout, preset.SelectedItem?.ToString());
+        string signature = $"{RankedItemStats.Version}|{resolvedRole.Identity}|{sourceRevision}|{Controller.Catalog.Items.Count}|{Controller.Inventory.Revision}|{gearWorkspaceRevision}|{gearSearch.Text}|{preset.SelectedItem}|{gearBuildChoice.SelectedValue}|{gearRankChoice.SelectedIndex}|{gearOwnership.SelectedIndex}|{gearEligibility.SelectedIndex}|{gearPositive.SelectedIndex}|{gearWithoutAa.IsChecked}|{id}|{string.Join(',',Controller.Profile.GearExpansions)}|{theory}";
         if (gearFingerprint == signature) return; gearFingerprint = signature; gearViewCancel?.Cancel(); gearViewCancel?.Dispose(); gearViewCancel = new(); var token = gearViewCancel.Token;
         wishlist.DisplayMemberPath = "Display"; wishlist.ItemsSource = Controller.Profile.Wishlist.Select(x => new WishlistRow(x)).ToList();
         var loadout = EquipmentPositions.Copy(Controller.EquipmentView?.Profile.ActiveLoadout ?? Controller.Profile.ActiveLoadout); loadout.EquipmentPositions = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout.EquipmentPositions); loadout.Equipment = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout.Equipment);
@@ -139,14 +125,14 @@ public sealed partial class QuestWindow
             foreach (var p in positions) p.Type = p.Item == null ? "" : (Controller.Catalog.FindKey(p.Item.ConfirmedItemKey) ?? Controller.Catalog.Find(p.Item.Name)) is { } definition ? PetItemRules.Type(definition) : "Unknown";
             UI.SetRows(gearEquipment, positions); gearPosition.ItemsSource = new[] { new EquipmentPosition { Id = "*", Slot = "All slots" } }.Concat(positions).ToList(); gearEquipment.SelectedItem = gearEquipment.Items.OfType<EquipmentPosition>().FirstOrDefault(p => p.Id == id); gearPosition.SelectedValue = id; gearSelecting = false;
         }
-        var weights = new Dictionary<string,double>(Controller.Profile.Weights.GetValueOrDefault(preset.SelectedItem?.ToString() ?? "Balanced Tank", GearScorer.Defaults["Balanced Tank"]));
+        var weights = new Dictionary<string,double>(resolvedRole.Weights);
         var catalog = Controller.EquipmentView?.Catalog ?? new Catalog { Items = Controller.Catalog.Items.ToList(), Quests = Controller.Catalog.Quests.ToList() }; var inventory = Controller.EquipmentView?.Inventory ?? Controller.Inventory;
         string query = gearSearch.Text.Trim(); int ownedFilter = gearOwnership.SelectedIndex, eligibleFilter = gearEligibility.SelectedIndex, positiveFilter = gearPositive.SelectedIndex, rankOverride = gearRankChoice.SelectedIndex - 1; bool aa = gearWithoutAa.IsChecked != true;
         var expansions = Controller.Profile.GearExpansions.ToHashSet(); var pending = Controller.PendingGear(query).ToList(); var profile = new CharacterProfile { Routes = new(Controller.Profile.Routes), CompletedSteps = new(Controller.Profile.CompletedSteps) };
         (List<GearRow> Rows, LoadoutComparison Draft, BuildChangesPanel.Snapshot Changes) Build()
         {
-            var session = new LoadoutEvaluationSession(catalog, loadout, false, weights, positions, reference, theory);
-            var referenceSession = new LoadoutEvaluationSession(catalog, loadout, false, weights, reference, reference, theory);
+            var session = new LoadoutEvaluationSession(catalog, loadout, false, weights, positions, reference, theory, resolvedRole);
+            var referenceSession = new LoadoutEvaluationSession(catalog, loadout, false, weights, reference, reference, theory, resolvedRole);
             var materials = ownedFilter is 2 or 3 ? new MaterialIndex(catalog, inventory, profile) : null;
             var questRewards = catalog.Quests.Select(q => q.RewardKey).ToHashSet();
             var candidates = catalog.Items.Where(i => expansions.Contains(ItemPresentation.Expansion(i)) && (i.Slots.Count > 0 || query.Length >= 3) && (i.Name.Contains(query, StringComparison.OrdinalIgnoreCase) || i.Aliases.Any(a => a.Contains(query, StringComparison.OrdinalIgnoreCase)))).ToList();
@@ -160,7 +146,7 @@ public sealed partial class QuestWindow
                 foreach (var position in positions.Where(p => (id == "*" ? p.Slot != "Any Slot" : p.Id == id) && (item.Slots.Count == 0 || EquipmentPositions.Fits(item, p, false))))
                 foreach (var instance in PhysicalItemChoices.Rows(physical, ownedFilter == 1))
                 {
-                    int rank = instance?.Rank ?? (rankOverride >= 0 ? rankOverride : 0); var result = session.Present(item, rank, position.Id, instance, aa); var evaluation = result.Evaluation!;
+                    int rank = CandidateRanks.Resolve(instance, rankOverride >= 0 ? rankOverride : null); var result = session.Present(item, rank, position.Id, instance, aa); var evaluation = result.Evaluation!;
                     bool eligible = result.Eligibility == "Eligible" && evaluation.Status != "Eligibility unconfirmed";
                     bool incompatible = !eligible && !result.Eligibility.Contains("nknown", StringComparison.OrdinalIgnoreCase) && !result.Eligibility.Contains("pending", StringComparison.OrdinalIgnoreCase) && !result.Eligibility.StartsWith("Confirm");
                     if (eligibleFilter == 1 && !eligible || eligibleFilter == 2 && !incompatible || positiveFilter == 1 && !(evaluation.Unbuffed.Delta > 0 || evaluation.Buffed.Delta > 0) || positiveFilter == 2 && evaluation.Group != "Positive in both") continue;
@@ -202,7 +188,7 @@ public sealed partial class QuestWindow
         GearEdited(); gearBreakEven.Text = row.Item.Name + " +" + row.Rank + " added to " + (build?.Name ?? "Current build") + " · Undo available.";
     }
     private IReadOnlyList<GearPlacementResult> PrepareGearPlacement(GearRow row)
-    {var owner=Controller.Profile.ActiveLoadout;var positions=SelectedGearBuild?.Positions??EquipmentPositions.For(owner,false);return new GearPlacementSession(Controller.Catalog,owner,new(Controller.Profile.Weights.GetValueOrDefault(preset.SelectedItem?.ToString()??"Balanced Tank",GearScorer.Defaults["Balanced Tank"])),positions,GearReference(owner,false),gearTheory!=null).Prepare(row.Item,row.Rank,row.Instance);}
+    {var owner=Controller.Profile.ActiveLoadout;var positions=SelectedGearBuild?.Positions??EquipmentPositions.For(owner,false);return new GearPlacementSession(Controller.Catalog,owner,new(SelfRoleRatings.Resolve(Controller.Profile,owner,preset.SelectedItem?.ToString()).Weights),positions,GearReference(owner,false),gearTheory!=null).Prepare(row.Item,row.Rank,row.Instance);}
     private void UndoGearDraft()
     {
         if (gearRemovedBuild != null) { Controller.Profile.ActiveLoadout.GearBuilds.Add(gearRemovedBuild); string id = gearRemovedBuild.Id; gearRemovedBuild = null; RefreshGearBuildChoices(id); GearEdited(); return; }
@@ -219,8 +205,8 @@ public sealed partial class QuestWindow
     private async void CalculateBreakEven()
     {
         if (gearTable.SelectedItem is not GearRow row) return; gearBreakEven.Text = "Checking preference break-even +0…+10…";
-        var token = gearViewCancel?.Token ?? CancellationToken.None; var owner = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout); var positions = EquipmentPositions.Copy(visibleGearPositions); var catalog = Controller.EquipmentView?.Catalog ?? Controller.Catalog; var weights = new Dictionary<string,double>(Controller.Profile.Weights.GetValueOrDefault(preset.SelectedItem?.ToString() ?? "Balanced Tank", GearScorer.Defaults["Balanced Tank"])); bool theory = gearTheory != null; bool aa = gearWithoutAa.IsChecked != true;
-        try { int? rank = await Task.Run(() => { var session = new LoadoutEvaluationSession(catalog, owner, false, weights, positions, GearReference(owner, false), theory); for (int r = 0; r <= 10; r++) { token.ThrowIfCancellationRequested(); var c = session.Compare(row.Item, r, row.PositionId, GearInspectedInstance(row), aa); if (c.Unbuffed.Delta > 0 && c.Buffed.Delta > 0) return (int?)r; } return null; }, token);
+        var token = gearViewCancel?.Token ?? CancellationToken.None; var owner = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout); var positions = EquipmentPositions.Copy(visibleGearPositions); var catalog = Controller.EquipmentView?.Catalog ?? Controller.Catalog; var resolvedRole = SelfRoleRatings.Resolve(Controller.Profile, owner, preset.SelectedItem?.ToString()); var weights = new Dictionary<string,double>(resolvedRole.Weights); bool theory = gearTheory != null; bool aa = gearWithoutAa.IsChecked != true;
+        try { int? rank = await Task.Run(() => { var session = new LoadoutEvaluationSession(catalog, owner, false, weights, positions, GearReference(owner, false), theory, resolvedRole); for (int r = 0; r <= 10; r++) { token.ThrowIfCancellationRequested(); var c = session.Compare(row.Item, r, row.PositionId, GearInspectedInstance(row), aa); if (c.Unbuffed.Delta > 0 && c.Buffed.Delta > 0) return (int?)r; } return null; }, token);
             if (!token.IsCancellationRequested && ReferenceEquals(row, gearTable.SelectedItem)) gearBreakEven.Text = rank.HasValue ? $"Estimated preference break-even: +{rank}." : "No positive result in both contexts through +10; check eligibility and profile evidence.";
         } catch (OperationCanceledException) { }
     }

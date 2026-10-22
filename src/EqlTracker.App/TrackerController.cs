@@ -69,7 +69,9 @@ public sealed partial class TrackerController : IDisposable
                 equipmentCatalog.Counts(EquipmentSync); equipmentCatalog.SaveState(EquipmentSync);
             }
         }
+        CatalogSlotEvidence.Apply(Catalog, Path.Combine(AppContext.BaseDirectory,"data","catalog-slot-repairs.json"));
         PetItemRules.ApplyDisplayEvidence(Catalog, Path.Combine(AppContext.BaseDirectory, "data", "pet-item-fixtures.json"));
+        QuestStartEvidence.Apply(Catalog,Path.Combine(AppContext.BaseDirectory,"data","quest-starts.json"));
         ItemEffects.Apply(Catalog);
         ItemEvidenceFixtures.Apply(Catalog);
         Profile = store.Get<CharacterProfile>("profile") ?? (demo ? new CharacterProfile { Character = character, Server = server, GameFolder = gameFolder ?? "" } : LauncherPreferences.NewProfile(launch));
@@ -99,7 +101,7 @@ public sealed partial class TrackerController : IDisposable
         checkpoint = store.Get<FileCheckpoint>("checkpoint"); historyUndo = store.Get<EncounterEditUndo>("encounterEditUndo");
         latestExport = store.Get<ExportEvidence>("inventoryExportEvidence");
         Combat = new(Profile) { RosterKnown = store.Get<bool>("rosterKnown") };
-        Combat.ProfileChanged += () => { inspectionIdentityRevision++; planningRevision++; equipmentRevision++; profileNeedsPersistence = true; saveRequested = true; };
+        Combat.ProfileChanged += () => { AcquiredQuestTracking.Apply(Catalog, Profile, Inventory); inspectionIdentityRevision++; planningRevision++; equipmentRevision++; profileNeedsPersistence = true; saveRequested = true; };
         var saved = store.LoadEncounters(); var current = store.Get<Encounter>("liveEncounter");
         if (current != null && saved.FirstOrDefault(x => x.Id == current.Id) is { } detailed) { current.Events = detailed.Events; current.Heals = detailed.Heals; current.HealingSummaries = detailed.HealingSummaries; current.HealingCoverage = detailed.HealingCoverage; current.HealingDetailAvailable = detailed.HealingDetailAvailable; }
         Combat.Restore(saved, current); InitializeSessions(); InitializeGroups();
@@ -119,6 +121,7 @@ public sealed partial class TrackerController : IDisposable
     {
         var batch = items.ToList(); if (batch.Count == 0) return;
         CatalogItemMerge.Apply(Catalog, batch); catalogRevision++; catalogDirty = !Demo;
+        if (Profile != null && Inventory != null && AcquiredQuestTracking.Apply(Catalog, Profile, Inventory) > 0) { planningRevision++; saveRequested = profileNeedsPersistence = true; }
     }
     public async Task SearchGearAsync(string text, CancellationToken token)
     {
@@ -152,12 +155,12 @@ public sealed partial class TrackerController : IDisposable
                     } while (EquipmentSync.Continuation.Length > 0);
                 }
                 List<string> priorities;
-                lock (Sync) priorities = gearMetadataPriority.Keys.Concat(metadataQueue).Concat(Profile.ActiveLoadout.ConfirmedPetInventory?.Items.Select(i => i.Name) ?? []).Concat(Inventory.Entries.Where(e => !e.IsAugment).Select(e => Identity.Canonical(e.Name))).Distinct().Where(n => Catalog.Find(n)?.MetadataVersion is not >= PetItemRules.MetadataVersion).Take(20).ToList();
+                lock (Sync) priorities = gearMetadataPriority.Keys.Concat(metadataQueue).Concat(Profile.ActiveLoadout.ConfirmedPetInventory?.Items.Select(i => i.Name) ?? []).Concat(Inventory.Entries.Where(e => !e.IsAugment).Select(e => Identity.Canonical(e.Name))).Concat(Catalog.Items.Where(i=>!i.MetadataComplete).Select(i=>i.Name)).Distinct().Where(n => Catalog.Find(n) is not { MetadataVersion: >= PetItemRules.MetadataVersion, MetadataComplete: true }).Take(20).ToList();
                 var names = equipmentCatalog.Pending(DateTime.UtcNow.AddDays(-1), 50, priorities);
                 if (names.Count == 0) { EquipmentSync.Status = "Full local catalog up to date"; equipmentCatalog.Counts(EquipmentSync); equipmentCatalog.SaveState(EquipmentSync); await equipmentWake.WaitAsync(TimeSpan.FromMinutes(30), cancel.Token); continue; }
                 Dictionary<string, long> revisions; lock (Sync) revisions = Catalog.Items.Where(i => i.Revision > 0 && i.MetadataVersion >= PetItemRules.MetadataVersion).GroupBy(i => Identity.Key(i.Name)).ToDictionary(g => g.Key, g => g.First().Revision);
                 var items = await wiki.FetchItemsAsync(names, cancel.Token, revisions);
-                equipmentCatalog.Store(items.Where(i => i.Slots.Count > 0), names);
+                equipmentCatalog.Store(items, names);
                 lock (Sync) { MergeItems(items); foreach (string name in names) { metadataQueue.Remove(name); gearMetadataPriority.TryRemove(name, out _); } }
                 equipmentCatalog.Counts(EquipmentSync); EquipmentSync.Status = $"Catalog sync · {EquipmentSync.Checked:N0}/{EquipmentSync.Discovered:N0} pages checked"; equipmentCatalog.SaveState(EquipmentSync);
                 Updated?.Invoke();
@@ -174,8 +177,8 @@ public sealed partial class TrackerController : IDisposable
     public void Save()
     {
         lock (Sync) {
-            string equipment = System.Text.Json.JsonSerializer.Serialize(new { Profile.SelectedLoadout, Profile.ActiveLoadout.Equipment, Profile.ActiveLoadout.EquipmentPositions, Profile.ActiveLoadout.EquipmentDraft, Profile.ActiveLoadout.GearBuilds, Profile.ActiveLoadout.SelectedGearBuildId, Profile.UpdateCurrentBuildFromInventory, Profile.Weights, Profile.ActiveLoadout.Preset });
-            string pets = System.Text.Json.JsonSerializer.Serialize(new { Profile.ActiveLoadout.Classes, Profile.ActiveLoadout.PetPreset, Profile.ActiveLoadout.ConfirmedPetInventory, Profile.ActiveLoadout.PetBuilds, Profile.ActiveLoadout.PetLevel });
+            string equipment = System.Text.Json.JsonSerializer.Serialize(new { Profile.SelectedLoadout, Profile.ActiveLoadout.Equipment, Profile.ActiveLoadout.EquipmentPositions, Profile.ActiveLoadout.EquipmentDraft, Profile.ActiveLoadout.GearBuilds, Profile.ActiveLoadout.SelectedGearBuildId, Profile.UpdateCurrentBuildFromInventory, Profile.SelfRoleVersion, Profile.SelfRoleOverrides, Profile.ActiveLoadout.Classes, Profile.ActiveLoadout.Level, Profile.ActiveLoadout.Deity, Profile.ActiveLoadout.Race, Profile.Weights, Profile.ActiveLoadout.Preset });
+            string pets = System.Text.Json.JsonSerializer.Serialize(new { Profile.PetComparison, Profile.PetGoalWeights, Profile.ActiveLoadout.Level, Profile.ActiveLoadout.Classes, Profile.ActiveLoadout.PetPreset, Profile.ActiveLoadout.ConfirmedPetInventory, Profile.ActiveLoadout.PetBuilds, Profile.ActiveLoadout.PetLevel });
             string stats = System.Text.Json.JsonSerializer.Serialize(new { Profile.ActiveLoadout.StatProfiles, Profile.ActiveLoadout.PetStatProfiles });
             if (equipment != savedEquipmentSettings) { savedEquipmentSettings = equipment; equipmentRevision++; }
             if (pets != savedPetSettings) { savedPetSettings = pets; petRevision++; }
@@ -207,7 +210,7 @@ public sealed partial class TrackerController : IDisposable
             {
                 try
                 {
-                    ReadSessions(parser); ReadGroups(); EnsureSessionLoaded(); BackfillElements(parser); ReadStatEvidence(); if (following) { BackfillHealing(parser); BackfillAbilityOutcomes(); } LastReaderPoll = DateTime.Now;
+                    ReadSessions(parser); ReadGroups(); EnsureSessionLoaded(); BackfillElements(parser); BackfillItemRanks(parser); ReadStatEvidence(); if (following) { BackfillHealing(parser); BackfillAbilityOutcomes(); } LastReaderPoll = DateTime.Now;
                     var log = GameLogPath;
                     if (!File.Exists(log))
                     {
@@ -237,8 +240,9 @@ public sealed partial class TrackerController : IDisposable
                                         var definition = Catalog.Find(item.Name);
                                         var prior = historical ? [] : Objectives.Where(x => x.Remaining > 0 && (Identity.Key(x.Item) == Identity.Key(item.Name) || definition?.Key == x.Key)).ToList();
                                         observations.Add((line.Id, item)); recentObservationEvidence.Add((line.Id, item)); recentObservationEvidence.RemoveAll(e => e.Item.Time < DateTime.Now.AddMinutes(-10)); InventoryParser.Apply(Inventory, item, line.Id); planningRevision++;
+                                        if (item.Action is "Looted" or "Received" or "Created") { if (AcquiredQuestTracking.Apply(Catalog, Profile, Inventory, [item.Name]) > 0) saveRequested = profileNeedsPersistence = true; }
                                         LearnDrop(item);
-                                        if (Catalog.Find(item.Name)?.MetadataComplete != true) metadataQueue.Add(Identity.Canonical(item.Name));
+                                        if (Catalog.Find(item.Name)?.MetadataComplete != true) { metadataQueue.Add(Identity.Canonical(item.Name)); RequestGearMetadata(item.Name); }
                                         if (!historical) HandleAlert(item, prior);
                                         if (!historical) liveObservations[Identity.Key(item.Name)] = item;
                                     }
@@ -316,7 +320,7 @@ public sealed partial class TrackerController : IDisposable
             if (after.Length != size || after.LastWriteTimeUtc != updated || !snapshot.Complete) { Status = "Inventory export incomplete; previous snapshot retained."; return; }
             if (latestExport is { } evidence && Math.Abs((evidence.Time - captured).TotalSeconds) < 10) snapshot.ExportLogId = evidence.Id;
             foreach (var (id, item) in store.ObservationRecordsAfter(captured.AddSeconds(-10)).Concat(recentObservationEvidence.Where(e => e.Item.Time >= captured.AddSeconds(-10))).DistinctBy(e => e.Id)) InventoryParser.Apply(snapshot, item, id);
-            Inventory = snapshot; QuestRecipes.ApplyIdentities(Profile, Inventory); planningRevision++; GearBuildEditing.ApplyExport(Profile, Inventory);
+            Inventory = snapshot; QuestRecipes.ApplyIdentities(Profile, Inventory); if (AcquiredQuestTracking.Apply(Catalog, Profile, Inventory) > 0) profileNeedsPersistence = true; planningRevision++; GearBuildEditing.ApplyExport(Profile, Inventory);
             if (SyncRequest.Active && SyncRequest.Export && updated > SyncRequest.InventoryWriteUtc && snapshot.ExportLogId.Length > 0 && LogPosition.After(snapshot.ExportLogId, SyncRequest.Generation + ":" + (SyncRequest.BaselineLength - 1))) SyncRequest.Imported = true;
             foreach (var e in Inventory.Entries.Where(x => !x.IsAugment && Catalog.Find(x.Name, x.GameId == 0 ? null : x.GameId) == null)) metadataQueue.Add(Identity.Canonical(e.Name));
             saveRequested = true;
@@ -348,8 +352,10 @@ public sealed partial class TrackerController : IDisposable
             foreach (bool pet in new[] { false, true })
             {
                 var preset = pet ? Profile.ActiveLoadout.PetPreset : Profile.ActiveLoadout.Preset;
-                var weights = Profile.Weights.GetValueOrDefault(preset, GearScorer.Defaults[pet ? "Pet damage" : "Tank"]);
-                var candidate = GearRecommendations.For(definition, Identity.Rank(item.Name), Catalog, Profile.ActiveLoadout, pet, weights).FirstOrDefault(x => x.Evaluation is { } e && (e.Unbuffed.Delta > 0 || e.Buffed.Delta > 0));
+                var role = pet ? null : SelfRoleRatings.Resolve(Profile, Profile.ActiveLoadout, preset);
+                var weights = pet ? PetRoleRatings.Weights(Profile,preset) : role?.Weights ?? Profile.Weights.GetValueOrDefault(preset, GearScorer.Defaults["Pet damage"]);
+                var candidate = GearRecommendations.For(definition, Identity.Rank(item.Name), Catalog, Profile.ActiveLoadout, pet, weights, role).FirstOrDefault(x => x.Evaluation is { } e && (e.Unbuffed.Delta > 0 || e.Buffed.Delta > 0));
+                if(pet && PetRoleRatings.Normalize(preset)=="Balanced") continue;
                 if (candidate != null) { Alert = $"POTENTIAL {(pet ? "PET" : "PLAYER")} UPGRADE · {item.Name} · {item.Action} · +{candidate.Delta:N1} {preset} points ({candidate.Confidence})"; break; }
             }
         }
@@ -439,6 +445,9 @@ public sealed partial class TrackerController : IDisposable
             if (!onlyPending)
             {
                 var revisions = await wiki.CheckRevisionsAsync(Catalog.Quests.Select(x => x.Name), cancel.Token);
+                List<string> changedStarts;lock(Sync)changedStarts=revisions.Where(r=>Catalog.Quests.Any(q=>q.Name==r.Title&&q.StartRevision!=r.Revision)).Select(r=>r.Title).ToList();
+                var starts=await wiki.QuestStartsAsync(changedStarts,cancel.Token);
+                lock(Sync)foreach(var start in starts){var q=Catalog.Quests.FirstOrDefault(q=>q.Name==start.Name);if(q==null)continue;var updated=EquipmentPositions.Copy(q);updated.StartRevision=start.Revision;updated.StartZone=start.StartZone;updated.StartNpc=start.StartNpc;updated.StartEvidence=start.Source;Catalog.Quests=Catalog.Quests.Select(q=>q.Id==updated.Id?updated:q).ToList();catalogRevision++;planningRevision++;}
                 lock (Sync)
                 {
                     foreach (var document in revisions)

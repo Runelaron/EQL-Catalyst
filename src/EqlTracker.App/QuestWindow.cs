@@ -38,7 +38,8 @@ public sealed partial class QuestWindow : FrostWindow
     private readonly ListBox wishlist = new() { Height = 130 };
     private readonly ComboBox questSelection;
     private readonly TextBox progressSearch = UI.Input("", 165);
-    private readonly CheckBox progressTracked = new() { Content = "Tracked only", IsChecked = false };
+    private readonly CheckBox progressAll = new() { Content = "All" };
+    private readonly CheckBox progressTracked = new() { Content = "Tracked", IsChecked = true };
     private string progressQuestFilter = "";
     private readonly ComboBox route = UI.Select(["Default", "Include optional steps"], "Default", 180);
     private readonly TreeView progressTree = new() { Background = System.Windows.Media.Brushes.Transparent, BorderThickness = new(0) };
@@ -46,6 +47,7 @@ public sealed partial class QuestWindow : FrostWindow
     private string? progressDetailNodeId;
     private readonly ObservableCollection<QuestProgressNode> progressNodes = [];
     private readonly StackPanel howTo = new();
+    private readonly StackPanel progressReward = new();
     private readonly TextBlock questEmpty = UI.Text("No goals match these filters", 12, "Muted");
     private readonly TextBlock breadcrumb = UI.Text("", 11, "SecondaryText"), gearSearchStatus = UI.Text("", 11, "Muted");
     private readonly WrapPanel chips = new();
@@ -67,7 +69,7 @@ public sealed partial class QuestWindow : FrostWindow
         Appearance.RaisedButtons(Body);
         CatalystHeading.Apply(HeadingTitle, "Quest & Gear Tracker");
         era = UI.Select(ExpansionRules.Names, ExpansionRules.Current(controller.Profile), 100);
-        search.Margin = new(0, 0, 0, 4);
+        search.Margin = new(0, 0, 0, 4); search.Height = progressSearch.Height = 28;
         planThrough = UI.Select(ExpansionRules.Names, controller.Profile.PlanThrough, 100);
         preset = UI.Select(controller.Profile.Weights.Keys, "Pet damage", 165);
         zone = UI.Select(new[] { "All zones", "Current zone" }.Concat(controller.Catalog.Zones.Order()), "Current zone", 215);
@@ -92,38 +94,49 @@ public sealed partial class QuestWindow : FrostWindow
         var split = questSplit = UI.Split(TrackerLeftPane(listPane), ItemFloatingInspector(UI.Stack(breadcrumb, detail)), 295, controller.Profile, "quest", 280, 180); Grid.SetRow(split, 1); questGrid.Children.Add(split);
         AddTab(TrackerTab.Items, "ITEMS", questGrid);
         gearTarget.SelectedItem = "Self";
-        preset.ItemsSource = controller.Profile.Weights.Keys.Where(k => !k.StartsWith("Pet", StringComparison.OrdinalIgnoreCase)).ToList(); preset.SelectedItem = controller.Profile.ActiveLoadout.Preset;
+        preset.ItemsSource = SelfRoleRatings.Names(controller.Profile).ToList(); preset.SelectedItem = controller.Profile.ActiveLoadout.Preset;
         gearTable = CreateGearTable();
         AddTab(TrackerTab.Gear, "GEAR", BuildGearWorkspace());
         questSelection = UI.Select(controller.Catalog.Quests.Select(x => x.Name), "Warrior Epic Quest", 200);
         questSelection.ToolTip = "Choose a quest. Select an ingredient for sources, an intermediate reward for its process, or the quest root for all steps.";
         VirtualizingPanel.SetIsVirtualizing(progressTree, true); VirtualizingPanel.SetScrollUnit(progressTree, ScrollUnit.Pixel); ScrollViewer.SetCanContentScroll(progressTree, true);
         ConfigureProgressTree();
-        progressTree.SelectedItemChanged += (_, e) => { selectedStep = (e.NewValue as QuestProgressNode)?.Node; ShowProgressDetails(); };
+        progressTree.SelectedItemChanged += (_, e) => { if(progressSyncing)return; selectedStep = (e.NewValue as QuestProgressNode)?.Node; Browse.Node=selectedStep?.Id??""; ShowProgressDetails(); };
         var stepsGrid = new Grid(); stepsGrid.RowDefinitions.Add(new() { Height = GridLength.Auto }); stepsGrid.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) }); stepsGrid.RowDefinitions.Add(new() { Height = GridLength.Auto });
-        Button ProgressButton(string label, Action action, string tooltip) { var button = UI.Button(label, action); button.ToolTip = tooltip; return button; }
+        progressOpen=UI.Button("Open walkthrough",OpenQuest);
+        progressMore=FocusedLayout.Menu("More ▾", ("Complete / reopen step", ToggleStep, "Complete or reopen the selected step"), ("Complete / reopen quest", ToggleQuest, "Complete or reopen the selected quest"));
+        progressCompleteStep=(MenuItem)progressMore.ContextMenu.Items[0];progressCompleteQuest=(MenuItem)progressMore.ContextMenu.Items[1];
+        progressOptional=new MenuItem{Header="Include optional steps",IsCheckable=true};progressOptional.Click+=(_,_)=>SetProgressOptional(progressOptional.IsChecked);progressMore.ContextMenu.Items.Add(new Separator());progressMore.ContextMenu.Items.Add(progressOptional);
+        ConfigureProgressBrowse();
+        progressCollapse=UI.Button("Collapse all",()=>ExpandProgress(!ProgressHasExpandedBranches()));progressCollapse.Height=28;progressCollapse.Margin=new(0);
         var stepControls = new WrapPanel();
-        foreach (var control in new UIElement[] { UI.Field("Find quest / reward", progressSearch), UI.Field("Quest", questSelection), UI.ActionField(progressTracked), UI.ActionField(ProgressButton("Open walkthrough", OpenQuest, "Open the source wiki walkthrough for this quest.")), UI.ActionField(FocusedLayout.Menu("More ▾", ("Expand all", () => ExpandProgress(true), "Expand every step and ingredient."), ("Collapse all", () => ExpandProgress(false), "Collapse the quest branches."), ("Complete / reopen step", ToggleStep, "Reversible correction; does not create inventory."), ("Complete / reopen quest", ToggleQuest, "Reversible manual completion of this quest."))) }) stepControls.Children.Add(control);
-        progressSearch.ToolTip = "Search quest names and reward names in the cached library."; progressTracked.ToolTip = "Limit the selector to tracked quests. Turn off to browse every available quest.";
-        progressSearch.TextChanged += (_, _) => { FilterProgressQuests(); RefreshSteps(); }; progressTracked.Checked += (_, _) => { FilterProgressQuests(); RefreshSteps(); }; progressTracked.Unchecked += (_, _) => { FilterProgressQuests(); RefreshSteps(); };
+        foreach(var control in new UIElement[]{ProgressField(progressSearchLabel,progressSearch),BuildProgressSelector(),UI.ActionField(UI.Row(progressCollapse,progressMore))})stepControls.Children.Add(control);
+        progressSearch.ToolTip="Search quests and rewards";progressTracked.ToolTip="Filter Tracked Quests";progressAll.ToolTip="Show all documented quests";
 
-        stepsGrid.Children.Add(UI.Stack(stepControls, FocusedLayout.Disclosure("Routes & checklist coverage", UI.Stack(route, coverage), "Alternative routes and source coverage; leaves the main checklist unchanged until you choose a route.")));
-        var howPanel = UI.Card(UI.Scroll(UI.Stack(UI.Text("How to obtain", 13, "Melee", true), howTo))); howPanel.SetResourceReference(Border.BackgroundProperty, "DetailSurface");
+        stepsGrid.Children.Add(stepControls);
+        var howPanel = UI.Card(UI.Scroll(howTo)); howPanel.SetResourceReference(Border.BackgroundProperty, "DetailSurface");
+        progressRewardSlide = new RewardSlideOver(Controller,howPanel); InstallRewardDismissal();
         var statusCard = UI.Card(UI.Stack(UI.Label("STEP STATUS"), stepDetails)); statusCard.SetResourceReference(Border.BackgroundProperty, "DetailSurface"); stepDetails.SetResourceReference(TextBlock.ForegroundProperty, "Foreground");
-        statusCard.MaxHeight = 120; statusCard.Child = UI.Scroll(statusCard.Child); statusCard.Margin = new(0, 4, 0, 0);
-        var progressLeft = new DockPanel(); DockPanel.SetDock(statusCard, Dock.Bottom); progressLeft.Children.Add(statusCard); progressLeft.Children.Add(progressTree);
-        var progressSplit = UI.Split(TrackerLeftPane(progressLeft), howPanel, 320, Controller.Profile, "progress-details", 240, 180); Grid.SetRow(progressSplit, 1); Grid.SetRowSpan(progressSplit, 2); stepsGrid.Children.Add(progressSplit);
+        route.HorizontalAlignment = HorizontalAlignment.Left;
+        statusCard.Child = UI.Scroll(statusCard.Child); statusCard.Margin = new(0);
+        var rewardCard=UI.Card(UI.Stack(UI.Label("Reward"),UI.Scroll(progressReward)));rewardCard.Margin=new(0);
+        progressFooter=new Grid{MaxHeight=96,MinHeight=60,Margin=new(0,4,0,0)};
+        progressFooter.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});progressFooter.ColumnDefinitions.Add(new(){Width=new(5)});progressFooter.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});
+        progressFooter.Children.Add(statusCard);Grid.SetColumn(rewardCard,2);progressFooter.Children.Add(rewardCard);
+        var progressLeft=new DockPanel();DockPanel.SetDock(progressFooter,Dock.Bottom);progressLeft.Children.Add(progressFooter);
+        progressLeft.Children.Add(progressTree);
+        var progressSplit = UI.Split(TrackerLeftPane(progressLeft), progressRewardSlide, 320, Controller.Profile, "progress-details", 240, 180); Grid.SetRow(progressSplit, 1); Grid.SetRowSpan(progressSplit, 2); stepsGrid.Children.Add(progressSplit);
         AddTab(TrackerTab.Progress, "PROGRESS", stepsGrid);
         AddTab(TrackerTab.Queue, "QUEUE", BuildFocusedQueue()); ConfigureQueueDrag();
         ConfigurePlanningTabs();
         TrackerTabChrome.Install(tabs); InstallCharacterSelector(); Body.Children.Add(tabs);
-        foreach (var control in new[] { zone, status, era, planThrough, gearTarget, questSelection }) control.SelectionChanged += (_, _) => { if (!initializing) { lock (Controller.Sync) { if (control == era || control == planThrough) { Controller.Profile.Era = Controller.Profile.CurrentExpansion = era.SelectedItem?.ToString() ?? "Classic"; Controller.Profile.PlanThrough = planThrough.SelectedItem?.ToString() ?? "Velious"; } if (control == gearTarget) preset.SelectedItem = gearTarget.SelectedItem?.ToString() == "Pet" ? Controller.Profile.ActiveLoadout.PetPreset : Controller.Profile.ActiveLoadout.Preset; if (control == preset) { if (gearTarget.SelectedItem?.ToString() == "Pet") Controller.Profile.ActiveLoadout.PetPreset = preset.SelectedItem?.ToString() ?? "Pet damage"; else Controller.Profile.ActiveLoadout.Preset = preset.SelectedItem?.ToString() ?? "Tank"; } fingerprint = stepFingerprint = gearFingerprint = null; if (control == era || control == planThrough || control == preset) Controller.Save(); Refresh(); } } };
+        foreach (var control in new[] { zone, status, era, planThrough, gearTarget }) control.SelectionChanged += (_, _) => { if (!initializing) { lock (Controller.Sync) { if (control == era || control == planThrough) { Controller.Profile.Era = Controller.Profile.CurrentExpansion = era.SelectedItem?.ToString() ?? "Classic"; Controller.Profile.PlanThrough = planThrough.SelectedItem?.ToString() ?? "Velious"; } if (control == gearTarget) preset.SelectedItem = gearTarget.SelectedItem?.ToString() == "Pet" ? Controller.Profile.ActiveLoadout.PetPreset : Controller.Profile.ActiveLoadout.Preset; if (control == preset) { if (gearTarget.SelectedItem?.ToString() == "Pet") Controller.Profile.ActiveLoadout.PetPreset = preset.SelectedItem?.ToString() ?? "Pet damage"; else Controller.Profile.ActiveLoadout.Preset = preset.SelectedItem?.ToString() ?? "Tank"; } fingerprint = stepFingerprint = gearFingerprint = null; if (control == era || control == planThrough || control == preset) Controller.Save(); Refresh(); } } };
         preset.SelectionChanged += (_, _) => { if (initializing) return; lock (Controller.Sync) Controller.Profile.ActiveLoadout.Preset = preset.SelectedItem?.ToString() ?? "Balanced Tank"; fingerprint = stepFingerprint = gearFingerprint = null; Controller.Save(); Refresh(); };
         search.TextChanged += (_, _) => { fingerprint = null; if (!initializing) Refresh(); };
         gearSearch.TextChanged += (_, _) => { gearFingerprint = null; if (!initializing) { Refresh(); ScheduleGearSearch(); } };
         tabs.SelectionChanged += (_, e) => { if (e.Source == tabs && !initializing) { if (SelectedTab != TrackerTab.Gear && gearTheory != null && !ConfirmGearWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Gear]; initializing = previous; return; } if (SelectedTab != TrackerTab.Pet && petTheory != null) { if (!ConfirmPetWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Pet]; initializing = previous; return; } RefreshBuildChoices("current"); } if (SelectedTab != TrackerTab.Gear) { gearViewCancel?.Cancel(); gearFingerprint = null; } if (SelectedTab != TrackerTab.Pet) { petViewCancel?.Cancel(); petPreviewCancel?.Cancel(); petKey = ""; } if (SelectedTab != TrackerTab.Quests) { libraryViewCancel?.Cancel(); libraryKey = ""; } if (SelectedTab != TrackerTab.Items) { questFilterKey = ""; fingerprint = null; } Refresh(); } };
         Body.IsVisibleChanged += (_, _) => { if (!Body.IsVisible) { gearViewCancel?.Cancel(); petViewCancel?.Cancel(); libraryViewCancel?.Cancel(); petKey = libraryKey = ""; gearFingerprint = null; questFilterKey = ""; fingerprint = null; } };
-        route.SelectionChanged += (_, _) => { if (initializing) return; lock (Controller.Sync) { var q = Controller.Catalog.Quests.FirstOrDefault(x => x.Name == questSelection.SelectedItem?.ToString()); if (q == null) return; Controller.Profile.Routes[q.Id] = route.SelectedIndex == 1 ? "Alternative" : "Default"; Controller.Save(); stepFingerprint = fingerprint = null; Refresh(); } };
+        route.SelectionChanged += (_, _) => { if (initializing) return; lock (Controller.Sync) { var q = ProgressQuest; if (q == null) return; Controller.Profile.Routes[q.Id] = route.SelectedIndex == 1 ? "Alternative" : "Default"; Controller.Save(); stepFingerprint = fingerprint = null; Refresh(); } };
         initializing = false; Refresh();
     }
     public void Refresh()
@@ -132,6 +145,7 @@ public sealed partial class QuestWindow : FrostWindow
         using (UpdateDiagnostics.Measure("QuestWindow refresh"))
         {
             var profile = Controller.Profile;
+            RefreshQueueActions();
             Subtitle.Text = $"{profile.Character} · {profile.Zone} · {(Controller.Inventory.CapturedAt == default ? "Inventory not imported" : "Updated " + Controller.Inventory.CapturedAt.ToString("MMM/dd HH:mm"))}";
             string classState = string.Join(',', profile.EnabledClasses) + string.Join(',', profile.CurrentClasses) + string.Join(',', profile.Level50Classes);
             if (classFingerprint != classState)
@@ -193,10 +207,13 @@ public sealed partial class QuestWindow : FrostWindow
         detail.Children.Clear(); if (table.SelectedItem is not ObjectiveRow row) return;
         breadcrumb.Text = row.Class + " › " + row.Quest + (row.ParentReward.Length > 0 ? " › " + row.ParentReward : "") + " › " + row.Item;
         detail.Children.Add(UI.Card(UI.Stack(UI.Label(row.Class + " / " + row.Quest), UI.Text(row.Item, 20, "Accent", true), UI.Text(row.Quantity + " allocated · " + row.TotalOwned + " known owned", 13, "Mint"), UI.Text(row.Eligibility, 12, "Violet"))));
-        detail.Children.Add(UI.CommitButton("Add to queue", () => Pin(row)));
+        detail.Children.Add(QueueAction(Controller.Catalog.Quests.FirstOrDefault(q=>q.Id==row.QuestId),row.Key));
         detail.Children.Add(UI.Label("WHERE TO GET IT"));
-        foreach (var source in row.Sources.OrderByDescending(x => Identity.ZoneKey(x.Zone) == Identity.ZoneKey(Controller.Profile.Zone)).ThenBy(x => x.Era != "Classic"))
-            detail.Children.Add(UI.Card(UI.Stack(UI.Text(source.Zone, 14, "Foreground", true), UI.Text(source.Mob, 13), UI.Text(source.Method + " · " + (ExpansionRules.Names.Contains(source.Era) ? source.Era : "Expansion unknown (" + source.Era + ")") + " · " + source.Availability, 11, source.Availability == "Unavailable" ? "Violet" : "Muted"), UI.Text(source.Coordinates, 12, "Mint"))));
+        if(Controller.Catalog.FindKey(row.Key) is {} sourced)
+        {
+            var scoped=new Catalog{Items=[new(){Key=sourced.Key,Name=sourced.Name,Aliases=sourced.Aliases.ToList(),Sources=row.Sources.ToList()}]};
+            foreach(var card in QuestPresentationView.Sources(ProgressPresentation.SourcesFor([sourced.Key],scoped)))detail.Children.Add(card);
+        }
         detail.Children.Add(FocusedLayout.Disclosure("Quest context & prerequisites", UI.Text(row.Instructions, 12), "Collection sources are independent of later turn-ins unless a prerequisite explicitly says otherwise."));
         detail.Children.Add(UI.Label("OWNERSHIP EVIDENCE")); detail.Children.Add(UI.Text((Controller.Catalog.Find(row.Item) is { } ownedItem ? Controller.Inventory.Ownership(ownedItem) : row.Location) + "\n" + row.Evidence, 12, "Muted"));
         detail.Children.Add(UI.Button("Open wiki item", () => UI.OpenUrl(row.WikiUrl), true));
@@ -238,6 +255,7 @@ public sealed partial class QuestWindow : FrostWindow
         var row = new FrameworkElementFactory(typeof(StackPanel)); row.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
         var name = new FrameworkElementFactory(typeof(TextBlock)); name.SetBinding(TextBlock.TextProperty, new Binding("Title")); name.SetValue(TextBlock.FontSizeProperty, 12d);
         var style = new Style(typeof(TextBlock)); style.Setters.Add(new Setter(TextBlock.ForegroundProperty, new DynamicResourceExtension("Foreground")));
+        var matched = new DataTrigger { Binding = new Binding("IsItemMatch"), Value = true }; matched.Setters.Add(new Setter(TextBlock.FontWeightProperty, FontWeights.SemiBold)); matched.Setters.Add(new Setter(TextBlock.ForegroundProperty,new DynamicResourceExtension("Accent"))); style.Triggers.Add(matched);
         var completed = new DataTrigger { Binding = new Binding("Fulfilled"), Value = true }; completed.Setters.Add(new Setter(TextBlock.TextDecorationsProperty, TextDecorations.Strikethrough)); completed.Setters.Add(new Setter(TextBlock.ForegroundProperty, new DynamicResourceExtension("Muted"))); style.Triggers.Add(completed); name.SetValue(StyleProperty, style);
         var state = new FrameworkElementFactory(typeof(TextBlock)); state.SetBinding(TextBlock.TextProperty, new Binding("Status")); state.SetValue(TextBlock.FontSizeProperty, 10d); state.SetValue(MarginProperty, new Thickness(5, 0, 0, 0)); state.SetResourceReference(TextBlock.ForegroundProperty, "Muted");
         row.AppendChild(name); row.AppendChild(state); template.VisualTree = row; progressTree.ItemTemplate = template;
@@ -250,64 +268,74 @@ public sealed partial class QuestWindow : FrostWindow
     private void RefreshSteps()
     {
         FilterProgressQuests();
-        var quest = Controller.Catalog.Quests.FirstOrDefault(x => x.Name == questSelection.SelectedItem?.ToString());
-        if (quest == null) { selectedStep = null; progressNodes.Clear(); howTo.Children.Clear(); howTo.Children.Add(UI.Text("No quests match. Clear search or turn off Tracked only.", 13, "Accent", true)); stepDetails.Text = "No matching quest"; coverage.Text = ""; stepFingerprint = null; return; }
-        coverage.Text = quest.Coverage + $" · wiki revision {quest.Revision}";
-        initializing = true; route.SelectedIndex = Controller.Profile.Routes.GetValueOrDefault(quest.Id, "Default") == "Alternative" ? 1 : 0; initializing = false;
-        string sig = quest.Id + "|" + Controller.QuestRevision + "|" + Controller.Inventory.Revision + "|" + string.Join(',', Controller.Profile.CompletedSteps) + string.Join(',', Controller.Profile.CompletedQuests) + route.SelectedIndex;
-        if (sig == stepFingerprint) return; stepFingerprint = sig;
-        var nodes = Controller.Hierarchy(quest);
-        var root = new QuestNode { Kind = QuestNodeKind.Quest, Id = quest.Id, QuestId = quest.Id, Name = quest.Class + " / " + quest.Name, Detail = quest.Coverage, Status = Controller.Profile.CompletedQuests.Contains(quest.Id) ? "Completed" : "Incomplete", Children = nodes };
-        QuestProgressNode.Sync(progressNodes, [root], Controller);
-        var selected = progressNodes.SelectMany(x => x.Descendants()).FirstOrDefault(x => x.IsSelected) ?? progressNodes.FirstOrDefault();
-        if (selected != null) { selected.IsSelected = true; selectedStep = selected.Node; }
+        var choice=ProgressChoice;
+        if(choice==null)
+        {
+            progressSyncing=true;selectedStep=null;progressNodes.Clear();progressSyncing=false;howTo.Children.Clear();
+            howTo.Children.Add(UI.Text(progressMode==ProgressBrowseMode.Item?"No quest-related inventory items match. Clear search or select All.":"No quests match. Clear search or select All.",13,"Accent",true));
+            stepDetails.Text="No matching "+(progressMode==ProgressBrowseMode.Item?"item":"quest");progressRewardSlide?.Dismiss(true);UpdateProgressQuestContext();stepFingerprint=null;return;
+        }
+        string treeChoice=progressMode+"|"+choice.Key;
+        string sig=treeChoice+"|"+Controller.QuestRevision+"|"+Controller.CatalogRevision+"|"+Controller.Inventory.Revision+"|"+string.Join(',',choice.Quests.Select(q=>q.Id))+"|"+string.Join(',',Controller.Profile.CompletedSteps)+"|"+string.Join(',',Controller.Profile.CompletedQuests)+"|"+string.Join(',',Controller.Profile.Routes.OrderBy(p=>p.Key));
+        if(sig==stepFingerprint){UpdateProgressQuestContext();return;}
+        bool newChoice=progressTreeChoice!=treeChoice;
+        if(!newChoice)RememberProgressBrowse();
+        else if(progressTreeChoice.Length>0){Browse.Node="";}
+        stepFingerprint=sig;progressTreeChoice=treeChoice;
+        var roots=choice.Quests.Select(quest=>new QuestNode{Kind=QuestNodeKind.Quest,Id=quest.Id,QuestId=quest.Id,Name=quest.Class+" / "+quest.Name,Detail=quest.Coverage,Status=Controller.Profile.CompletedQuests.Contains(quest.Id)?"Completed":"Incomplete",Children=Controller.Hierarchy(quest)}).ToList();
+        progressSyncing=true;QuestProgressNode.Sync(progressNodes,roots,Controller);
+        bool Reveal(QuestProgressNode node)
+        {
+            node.IsItemMatch=choice.ItemKey.Length>0&&progressIndex!.IsItem(node.Node,choice.ItemKey);
+            bool child=false;foreach(var n in node.Children)child=Reveal(n)||child;
+            if(Browse.Expanded.TryGetValue(node.Node.Id,out bool expanded))node.ExpandForBrowse(expanded);
+            else if(newChoice&&child)node.ExpandForBrowse(true);
+            return node.IsItemMatch||child;
+        }
+        foreach(var root in progressNodes)Reveal(root);
+        var nodes=progressNodes.SelectMany(n=>n.Descendants()).ToList();
+        var selected=nodes.FirstOrDefault(n=>n.Node.Id==Browse.Node)??(newChoice?nodes.FirstOrDefault(n=>n.IsItemMatch):nodes.FirstOrDefault(n=>n.IsSelected))??progressNodes.FirstOrDefault();
+        foreach(var node in nodes)node.IsSelected=node==selected;
+        selectedStep=selected?.Node;Browse.Node=selectedStep?.Id??"";progressSyncing=false;
         ShowProgressDetails();
     }
     private void ShowProgressDetails()
     {
-        howTo.Children.Clear();
-        if (selectedStep is not { } node) { stepDetails.Text = "Select a quest step"; return; }
-        bool selectionChanged = progressDetailNodeId != node.Id; progressDetailNodeId = node.Id;
-        stepDetails.Text = node.Status + " · " + node.Name + "\n" + (node.Status switch { "Covered by reward" => "An owned intermediate satisfies these ingredients.", "Owned" => "Ownership is supported by inventory evidence.", "Completed" => "Manual completion is reversible.", _ => "This requirement is incomplete." });
+        if (selectedStep is not { } node) { howTo.Children.Clear(); stepDetails.Text = "Select a quest step"; UpdateProgressQuestContext(); return; }
+        stepDetails.Text = node.Status + "\n" + (node.Status switch { "Covered by reward" => "An owned intermediate satisfies these ingredients.", "Owned" => "Ownership is supported by inventory evidence.", "Completed" => "Manual completion is reversible.", _ => "This requirement is incomplete." });
+        bool selectionChanged = progressDetailNodeId != node.Id;
+        if(selectionChanged)progressRewardSlide?.Dismiss();
+        UpdateProgressQuestContext();
+        if(progressRewardSlide?.IsOpen==true){progressRewardSlide.Refresh();return;}
+        howTo.Children.Clear(); progressDetailNodeId = node.Id;
         var quest = Controller.Catalog.Quests.FirstOrDefault(q => q.Id == node.QuestId);
         var detail = QuestAcquisition.Describe(node, quest, Controller.Profile);
         var step = detail.Steps.FirstOrDefault();
         howTo.Children.Add(UI.Text(node.Name, 17, "Accent", true));
-        var pin = UI.CommitButton("Add to queue", () => { if (node.ItemKeys.FirstOrDefault() is { } key) PinItem(quest, key); else if (quest != null) PinQuest(quest); });
-        pin.ToolTip = node.Kind == QuestNodeKind.Quest ? "Queue this quest and its remaining requirements." : "Queue this item; owned intermediates still cover their ingredients.";
-        howTo.Children.Add(pin);
-        // Collection locations lead on every sub-item, including owned/covered nodes.
-        if (node.Kind != QuestNodeKind.Quest) AddProgressSources(detail.ItemKeys, detail.Steps);
-        if (node.Kind == QuestNodeKind.Quest) howTo.Children.Add(UI.Label("QUEST PROGRESSION"));
-        else if (detail.Steps.Count > 0) howTo.Children.Add(UI.Label(step?.Outputs.Count > 0 ? "MAKE / OBTAIN THIS ITEM" : "ACQUISITION NOTES"));
-        foreach (var instruction in detail.Steps)
+        var actions=new WrapPanel();actions.Children.Add(QueueAction(quest,node.Kind==QuestNodeKind.Quest?null:node.ItemKeys.FirstOrDefault()));
+        if(quest!=null){string url=step?.WikiUrl.Length>0&&node.Kind!=QuestNodeKind.Quest?step.WikiUrl:quest.WikiUrl;var walkthrough=UI.Button("Open walkthrough",()=>UI.OpenUrl(url));walkthrough.ToolTip="Open this quest's source walkthrough";actions.Children.Add(walkthrough);}
+        howTo.Children.Add(actions);
+        var presentation=ProgressPresentation.Build(node,quest,Controller.Profile,Controller.Catalog);
+        if(node.Kind==QuestNodeKind.Quest)howTo.Children.Add(UI.Label("Quest progression"));
+        else howTo.Children.Add(UI.Label("How to obtain"));
+        if(node.Kind!=QuestNodeKind.Quest)AddProgressSourceBlocks(presentation.Sources,detail.ItemKeys);
+        bool prerequisites=false;
+        foreach(var instruction in presentation.Instructions)
         {
-            if (node.Kind == QuestNodeKind.Quest) howTo.Children.Add(UI.Text(instruction.Name, 12, "Foreground", true));
-            if (instruction.Instructions.Length > 0) howTo.Children.Add(UI.Text(instruction.Instructions, 12));
-            if (instruction.Outputs.Count > 0 && instruction.Inputs.Count > 0)
+            if(instruction.Prerequisite&&!prerequisites){howTo.Children.Add(UI.Label("Prerequisites for this step"));prerequisites=true;}
+            var content=QuestPresentationView.Instruction(instruction,Controller.Catalog);howTo.Children.Add(content);
+            if(instruction.Step.RouteGroup.Length>0&&quest!=null)
             {
-                howTo.Children.Add(UI.Text("Requires: " + string.Join(" · ", instruction.Inputs.Select(i => $"{i.Count} × {Controller.Catalog.FindKey(i.ItemKey)?.Name ?? i.ItemKey}" + (!i.Consumed ? " (retained tool)" : ""))), 11, "Muted"));
+                var stepRoute=instruction.Step;var choices=quest.Steps.Where(s=>s.RouteGroup==stepRoute.RouteGroup).Select(s=>s.Route).Distinct().ToArray();
+                var selection=UI.Select(choices,Controller.Profile.Routes.GetValueOrDefault(quest.Id+"|"+stepRoute.RouteGroup,"Default"),200);
+                selection.ToolTip="Choose a recipe route";
+                selection.SelectionChanged+=(_,_)=>{Controller.Profile.Routes[quest.Id+"|"+stepRoute.RouteGroup]=selection.SelectedItem?.ToString()??"Default";Controller.Save();stepFingerprint=fingerprint=null;Refresh();};
+                content.Children.Add(UI.Label("Recipe route"));content.Children.Add(selection);
             }
-            if (instruction.RouteGroup.Length > 0 && quest != null)
-            {
-                var choices = quest.Steps.Where(s => s.RouteGroup == instruction.RouteGroup).Select(s => s.Route).Distinct().ToArray();
-                var selection = UI.Select(choices, Controller.Profile.Routes.GetValueOrDefault(quest.Id + "|" + instruction.RouteGroup, "Default"), 200);
-                selection.ToolTip = "Choose one recipe route. Ingredients from the other routes are excluded.";
-                selection.SelectionChanged += (_, _) => { Controller.Profile.Routes[quest.Id + "|" + instruction.RouteGroup] = selection.SelectedItem?.ToString() ?? "Default"; Controller.Save(); stepFingerprint = fingerprint = null; Refresh(); };
-                howTo.Children.Add(UI.Label("RECIPE ROUTE")); howTo.Children.Add(selection);
-            }
-            if (instruction.RandomReward) howTo.Children.Add(UI.Text("Random reward · ingredients per attempt; obtaining the desired reward completes this goal.", 12, "Melee"));
-            if (instruction.Container.Length > 0) howTo.Children.Add(UI.Text("Container: " + instruction.Container, 12));
-            foreach (var condition in instruction.Conditions) howTo.Children.Add(UI.Text(condition.ToString(), 12, "Mint"));
         }
-        if (detail.Prerequisites.Count > 0)
-        {
-            howTo.Children.Add(UI.Label("PREREQUISITES FOR THIS STEP"));
-            foreach (var prerequisite in detail.Prerequisites) howTo.Children.Add(UI.Text(prerequisite.Name + "\n" + prerequisite.Instructions, 11));
-        }
-        if (node.Kind == QuestNodeKind.Quest) AddProgressSources(detail.ItemKeys, detail.Steps);
-        AddProgressItemEvidence(detail.ItemKeys);
-        if (quest != null) howTo.Children.Add(UI.Button("Open walkthrough", () => UI.OpenUrl(step?.WikiUrl.Length > 0 && node.Kind != QuestNodeKind.Quest ? step.WikiUrl : quest.WikiUrl)));
+        if(node.Kind==QuestNodeKind.Quest)AddProgressSourceBlocks(presentation.Sources,detail.ItemKeys);
+        AddProgressItemEvidence(detail.ItemKeys,detail.ItemKeys.Distinct().Count()==1&&(node.Kind!=QuestNodeKind.Quest||quest!=null&&QuestPresentation.RewardKeys(quest).Count()==1));
+        if(quest!=null)howTo.Children.Add(FocusedLayout.Disclosure("Quest evidence",UI.Text(coverage.Text,11,"SecondaryText"),"Coverage, source revision and route context"));
         Usability.Tooltips(howTo);
         // Each new selection starts at its own sources, rather than an old quest scroll offset.
         if (selectionChanged)
@@ -331,34 +359,31 @@ public sealed partial class QuestWindow : FrostWindow
     internal StackPanel ProgressAcquisitionPane => howTo;
     private void AddProgressSources(IReadOnlyList<string> keys, IReadOnlyList<QuestStep> instructions)
     {
-        foreach (var key in keys)
+        AddProgressSourceBlocks(ProgressPresentation.SourcesFor(keys,Controller.Catalog),keys);
+    }
+    private void AddProgressSourceBlocks(IReadOnlyList<QuestSourceBlock> sources,IReadOnlyList<string> keys)
+    {
+        foreach(string key in keys)
         {
-            var item = Controller.Catalog.FindKey(key); if (item == null) { howTo.Children.Add(UI.Text("Item metadata pending", 12, "Muted")); continue; }
-            if (keys.Count > 1) howTo.Children.Add(UI.Label(item.Name));
-            if (item.Sources.Count == 0) howTo.Children.Add(UI.Text("Source not documented · see item wiki or walkthrough.", 11, "Muted"));
-            foreach (var source in item.Sources)
-            {
-                string notes = instructions.Any(s => s.Instructions == source.Notes) ? "" : source.Notes;
-                var card = UI.Card(UI.Stack(UI.Text(source.Zone.Length > 0 ? source.Zone : source.Method == "Crafting" ? "Crafting recipe" : "Zone unknown", 12, "Foreground", true), UI.Text(source.Mob + (source.Coordinates.Length > 0 ? " · " + source.Coordinates : ""), 12), UI.Text(source.Method + " · " + source.Era + " · " + source.Availability + (notes.Length > 0 ? "\n" + notes : ""), 11, "Muted")));
-                card.Tag = source;
-                card.ToolTip = source.WikiUrl.Length > 0 ? source.WikiUrl + " · revision " + source.Revision : item.WikiUrl;
-                howTo.Children.Add(card);
-            }
+            var item=Controller.Catalog.FindKey(key);
+            if(keys.Count>1)howTo.Children.Add(UI.Label(item?.Name??key));
+            var matching=sources.Where(s=>s.Item.Key==key).ToList();
+            if(matching.Count==0)howTo.Children.Add(UI.Text(item==null?"Item metadata pending":"Source not documented · see item wiki or walkthrough.",11,"Muted"));
+            foreach(var card in QuestPresentationView.Sources(matching))howTo.Children.Add(card);
         }
     }
-    private void AddProgressItemEvidence(IReadOnlyList<string> keys)
+    private void AddProgressItemEvidence(IReadOnlyList<string> keys,bool itemLinks=true)
     {
         foreach (var key in keys)
         {
             var item = Controller.Catalog.FindKey(key); if (item == null) continue;
             howTo.Children.Add(UI.Text(Controller.Inventory.Ownership(item), 11, "Mint"));
             if (item.RequiresSourceIdentity) howTo.Children.Add(UI.Button("Confirm fragment identity…", () => ConfirmFragment(item)));
-            foreach (var source in item.Sources.Where(s => s.WikiUrl.Length > 0).DistinctBy(s => s.WikiUrl)) howTo.Children.Add(UI.Button("Source · revision " + source.Revision, () => UI.OpenUrl(source.WikiUrl)));
-            if (item.WikiUrl.Length > 0) howTo.Children.Add(UI.Button("Open item wiki", () => UI.OpenUrl(item.WikiUrl)));
+            if (itemLinks && item.WikiUrl.Length > 0) howTo.Children.Add(UI.Button("Open item wiki", () => UI.OpenUrl(item.WikiUrl)));
         }
     }
     private void ExpandProgress(bool expand)
-    { foreach (var node in progressNodes.SelectMany(x => x.Descendants())) node.IsExpanded = expand; }
+    { foreach (var node in progressNodes.SelectMany(x => x.Descendants()).Where(n=>n.Children.Count>0)) node.IsExpanded = expand; RememberProgressBrowse(); UpdateProgressExpansionAction(); }
     private void ConfirmFragment(ItemDefinition item)
     {
         var candidates = Controller.Inventory.Entries.Where(e => e.Count == 1 && item.Aliases.Prepend(item.Name).Any(n => Identity.Key(n) == Identity.Key(e.Name))).ToList();
@@ -376,8 +401,8 @@ public sealed partial class QuestWindow : FrostWindow
         Native.ShowPanel(panel);
     }
     private void ToggleStep() { if (selectedStep is not { StepId.Length: > 0 } node) return; lock (Controller.Sync) { if (!Controller.Profile.CompletedSteps.Add(node.StepId)) Controller.Profile.CompletedSteps.Remove(node.StepId); Controller.Save(); stepFingerprint = fingerprint = null; Refresh(); } }
-    private void ToggleQuest() { lock (Controller.Sync) { var q = Controller.Catalog.Quests.FirstOrDefault(x => x.Name == questSelection.SelectedItem?.ToString()); if (q == null) return; if (!Controller.Profile.CompletedQuests.Add(q.Id)) Controller.Profile.CompletedQuests.Remove(q.Id); Controller.Save(); fingerprint = stepFingerprint = null; Refresh(); } }
-    private void OpenQuest() { var q = Controller.Catalog.Quests.FirstOrDefault(x => x.Name == questSelection.SelectedItem?.ToString()); if (q != null) UI.OpenUrl(q.WikiUrl); }
+    private void ToggleQuest() { lock (Controller.Sync) { var q = ProgressQuest; if (q == null) return; if (!Controller.Profile.CompletedQuests.Add(q.Id)) Controller.Profile.CompletedQuests.Remove(q.Id); Controller.Save(); fingerprint = stepFingerprint = null; Refresh(); } }
+    private void OpenQuest() { var q = ProgressQuest; if (q != null) UI.OpenUrl(q.WikiUrl); }
     private void Pin(ObjectiveRow row)
     {
         var goal = new QueuedGoal { QuestId = row.QuestId, ItemKey = row.Key, Name = row.Item };
@@ -434,12 +459,20 @@ public sealed partial class QuestWindow : FrostWindow
     private void RemoveWishlist() { lock (Controller.Sync) { int i = wishlist.SelectedIndex; if (i < 0 || i >= Controller.Profile.Wishlist.Count) return; Controller.Profile.Wishlist.RemoveAt(i); Controller.Save(); gearFingerprint = fingerprint = null; Refresh(); } }
     private void EditWeights()
     {
-        var key = preset.SelectedItem?.ToString() ?? "Pet damage"; var weights = Controller.Profile.Weights[key];
-        var form = new EntryDialog("Edit " + key + " weights", [("Stat=weight, comma separated (use INT or WIS for caster)", string.Join(", ", weights.Select(x => x.Key + "=" + x.Value.ToString(System.Globalization.CultureInfo.InvariantCulture))))]) { Owner = this };
-        if (form.ShowDialog() != true) return;
-        var parsed = new Dictionary<string, double>();
-        foreach (var pair in form.Values[0].Split(',', StringSplitOptions.RemoveEmptyEntries)) { var parts = pair.Trim().Split('='); if (parts.Length != 2 || !double.TryParse(parts[1], System.Globalization.CultureInfo.InvariantCulture, out var value) || !double.IsFinite(value)) { MessageBox.Show("Use entries such as AC=3, HP=0.1, Ratio=100."); return; } parsed[parts[0].Trim()] = value; }
-        lock (Controller.Sync) { Controller.Profile.Weights[key] = parsed; Controller.Save(); gearFingerprint = null; Refresh(); }
+        var key = preset.SelectedItem?.ToString() ?? "Balanced";
+        CharacterProfile working; lock (Controller.Sync) working = EquipmentPositions.Copy(Controller.Profile);
+        if (new RoleWeightsDialog(working, key) { Owner = this }.ShowDialog() != true) return;
+        lock (Controller.Sync) { if (working.SelfRoleOverrides.TryGetValue(key, out var values)) Controller.Profile.SelfRoleOverrides[key] = new(values); else Controller.Profile.SelfRoleOverrides.Remove(key); }
+        Controller.Save(); fingerprint = gearFingerprint = null; Refresh();
+    }
+    private void AddRole()
+    {
+        CharacterProfile working; lock (Controller.Sync) working = EquipmentPositions.Copy(Controller.Profile);
+        var dialog = new RoleWeightsDialog(working, preset.SelectedItem?.ToString() ?? "Balanced", true) { Owner = this };
+        if (dialog.ShowDialog() != true) return;
+        lock (Controller.Sync) { Controller.Profile.SelfRoleOverrides[dialog.SavedName] = new(working.SelfRoleOverrides[dialog.SavedName]); Controller.Profile.ActiveLoadout.Preset = dialog.SavedName; }
+        initializing = true; try { preset.ItemsSource = SelfRoleRatings.Names(Controller.Profile).ToList(); preset.SelectedItem = dialog.SavedName; } finally { initializing = false; }
+        Controller.Save(); fingerprint = gearFingerprint = null; Refresh();
     }
     private void EditEquipment()
     {

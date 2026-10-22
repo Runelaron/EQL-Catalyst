@@ -10,8 +10,8 @@ static class GearBuildTests
         static GearStatProfile Profile(LoadoutProfile p, List<EquipmentPosition> positions, string name, double dex) => new() { Name = name, ConfirmedAt = DateTime.Now, Level = p.Level, Classes = p.Classes.ToList(), EquipmentFingerprint = EquipmentPositions.Fingerprint(positions), Stats = new() { ["DEX"] = new() { Value = dex } }, Limits = [new() { Stat = "DEX", Value = 510, Confirmed = true, Source = "Test-confirmed cap" }] };
         test("Gear migration adds DEX/AGI without changing custom weights or old score reproducibility", () => {
             var p = new CharacterProfile { Weights = new() { ["Tank"] = new(GearScorer.Defaults["Tank"]) } }; GearRatingMigration.Apply(p);
-            Check(p.ActiveLoadout.Preset == "Balanced Tank" && p.Weights["Balanced Tank"]["DEX"] == .5 && p.Weights["Balanced Tank"]["AGI"] == .5 && p.Weights["Legacy Tank"].Count == 3);
-            var custom = new CharacterProfile { Weights = new() { ["Tank"] = new() { ["DEX"] = 7 } } }; GearRatingMigration.Apply(custom); GearRatingMigration.Apply(custom); Check(custom.ActiveLoadout.Preset == "Tank" && custom.Weights["Tank"]["DEX"] == 7);
+            Check(p.ActiveLoadout.Preset == "Balanced" && p.ActiveLoadout.PreviousSelfRole == "Balanced Tank" && p.Weights["Balanced Tank"]["DEX"] == .5 && p.Weights["Balanced Tank"]["AGI"] == .5 && p.Weights["Legacy Tank"].Count == 3);
+            var custom = new CharacterProfile { Weights = new() { ["Tank"] = new() { ["DEX"] = 7 } } }; GearRatingMigration.Apply(custom); GearRatingMigration.Apply(custom); Check(custom.ActiveLoadout.Preset == "Custom Balanced" && custom.Weights["Tank"]["DEX"] == 7 && SelfRoleRatings.Resolve(custom, custom.ActiveLoadout).Weights["DEX"] == 7);
         });
         test("Inventory preserves Finger aliases, both Any positions and explicit empty slots", () => {
             var inventory = InventoryParser.Parse("Location\tName\tID\tCount\tSlots\nFingers\tRing\t123\t1\t0\nFingers\tEmpty\t0\t0\t0\nAny Slot\tShield\t124\t1\t0\nAny Slot\tEmpty\t0\t0\t0\nGeneral1\tEmpty\t0\t0\t0\nKeyRing\tName\tID\n", DateTime.Now);
@@ -58,7 +58,7 @@ static class GearBuildTests
             var item=Item("next",new() { ["HP"]=20 },"FINGER"); var c=new Catalog { Items=[item] }; var p=new LoadoutProfile { EquipmentPositions=[Slot("Finger")] }; var session=new LoadoutEvaluationSession(c,p,false,new() { ["HP"]=1 }); Check(session.Compare(item,0,"FINGER:1").Unbuffed.Delta==20); Check(session.Compare(item,0,"FINGER:2").Unbuffed.Delta==null);
         });
         test("Two-handed and Any Slot replacements use physical positions without weapon ratio leakage", () => {
-            var main=Item("main",new() { ["Ratio"]=.5 },"PRIMARY"); var off=Item("off",new() { ["Ratio"]=.4 },"SECONDARY"); var two=Item("two",new() { ["Ratio"]=1.1 },"PRIMARY"); two.TwoHanded=true; var c=new Catalog { Items=[main,off,two] }; var p=new LoadoutProfile { EquipmentPositions=[Slot("Primary",main),Slot("Secondary",off),Slot("Any Slot")] };
+            var main=Item("main",new() { ["Damage"]=10,["Delay"]=20 },"PRIMARY"); var off=Item("off",new() { ["Damage"]=8,["Delay"]=20 },"SECONDARY"); var two=Item("two",new() { ["Damage"]=22,["Delay"]=20 },"PRIMARY"); two.TwoHanded=true; var c=new Catalog { Items=[main,off,two] }; var p=new LoadoutProfile { EquipmentPositions=[Slot("Primary",main),Slot("Secondary",off),Slot("Any Slot")] };
             var session=new LoadoutEvaluationSession(c,p,false,new() { ["Ratio"]=100 }); var r=session.Compare(two,0,"PRIMARY:1"); Check(Math.Abs(r.Unbuffed.Delta!.Value-20)<.001 && r.Replaced.Count==2); Check(session.Compare(two,0,"ANY SLOT:1").Unbuffed.Delta==0);
         });
         test("Stacking haste compares strongest equipment rather than adding both item values", () => {

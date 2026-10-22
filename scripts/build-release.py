@@ -39,6 +39,7 @@ def main():
         if not args.skip_tests:run([args.dotnet,'run','--project','tests/EqlTracker.Tests','-c','Release','--no-launch-profile'])
         temp=DIST/('.publish-'+uuid.uuid4().hex)
         run([args.dotnet,'publish','src/EqlTracker.App','-c','Release','-r','win-x64','--self-contained','true','-o',temp,'--nologo','-p:RestorePackagesWithLockFile=true'])
+        run([args.dotnet,'publish','src/EqlTracker.Updater','-c','Release','-r','win-x64','--self-contained','true','-o',temp,'--nologo','-p:RestorePackagesWithLockFile=true'])
         if payload.exists():
             if not payload.resolve().is_relative_to(DIST.resolve()):raise RuntimeError('Unsafe payload path')
             shutil.rmtree(payload)
@@ -46,6 +47,10 @@ def main():
         for p in payload.rglob('*.pdb'):p.unlink()
         for name in ['LICENSE','THIRD-PARTY-NOTICES.md','ASSET-NOTICES.md']:shutil.copy2(ROOT/name,payload/name)
         shutil.copy2(ROOT/'docs/installation.md',payload/'README.md')
+        shutil.copy2(ROOT/'docs/role-ratings.md',payload/'ROLE-RATINGS.md')
+        shutil.copy2(ROOT/'docs/pet-comparison.md',payload/'PET-COMPARISON.md')
+        shutil.copy2(ROOT/'docs/application-updates.md',payload/'APPLICATION-UPDATES.md')
+        shutil.copy2(ROOT/'docs/progress-rewards.md',payload/'PROGRESS-REWARDS.md')
         (payload/'licenses').mkdir(exist_ok=True)
         sdks=run([args.dotnet,'--list-sdks'],capture_output=True,text=True).stdout
         sdkroot=Path(re.findall(r'\[([^\]]+)\]',sdks)[-1]).parent

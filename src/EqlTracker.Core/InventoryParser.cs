@@ -54,10 +54,22 @@ public static class InventoryParser
     {
         bool comparable = snapshot.ExportLogId.LastIndexOf(':') is var a && a > 0 && logId.StartsWith(snapshot.ExportLogId[..(a + 1)], StringComparison.Ordinal);
         if (comparable ? !LogPosition.After(logId, snapshot.ExportLogId) : item.Time <= snapshot.CapturedAt) return;
+        if(logId.Length>0){if(snapshot.AppliedItemObservations.Contains(logId))return;snapshot.AppliedItemObservations.Add(logId);if(snapshot.AppliedItemObservations.Count>4096)snapshot.AppliedItemObservations.RemoveRange(0,snapshot.AppliedItemObservations.Count-4096);}
         snapshot.Invalidate();
-        if (item.Action is "Looted" or "Created" or "Received" or "Destroyed" or "Merged" or "Turned in") snapshot.LastObservedChangeAt = snapshot.LastObservedChangeAt > item.Time ? snapshot.LastObservedChangeAt : item.Time;
+        if (item.Action is "Looted" or "Created" or "Received" or "Destroyed" or "Merged" or "Turned in" or "Upgraded") snapshot.LastObservedChangeAt = snapshot.LastObservedChangeAt > item.Time ? snapshot.LastObservedChangeAt : item.Time;
         var canonical = Identity.Key(item.Name);
         var rows = snapshot.Entries.Where(e => !e.IsAugment && Identity.Key(e.Name) == canonical).ToList();
+        if (item.Action == "Upgraded")
+        {
+            if (logId.Length > 0 && snapshot.RankObservations.Any(o => o.Id == logId)) return;
+            var evidence = new ItemRankObservation { Id = logId, Time = item.Time, Name = item.Name, Result = item.Result };
+            var physical = rows.Where(x => !x.IsCollection && x.Count > 0).ToList();
+            if (physical.Count == 1 && physical[0].Count == 1 && physical[0].Rank <= Identity.Rank(item.Result))
+            { physical[0].Name = item.Result; physical[0].Estimated = true; physical[0].RankEvidence = "Observed merge; physical placement unverified"; evidence.Status = "Unique recorded copy updated"; }
+            snapshot.RankObservations.Add(evidence);
+            if (snapshot.RankObservations.Count > 500) snapshot.RankObservations.RemoveRange(0, snapshot.RankObservations.Count - 500);
+            snapshot.Invalidate(); return;
+        }
         if (item.Action == "Sold") return;
         if (item.Action == "Merged")
         {
@@ -68,13 +80,22 @@ public static class InventoryParser
         }
         if (item.Action is "Destroyed" or "Turned in")
         {
+            var physical=rows.Where(e=>!e.IsCollection&&e.Count>0).ToList();
+            if(Identity.Rank(item.Name)>0)physical=physical.Where(e=>e.Rank==Identity.Rank(item.Name)).ToList();
+            if(physical.Select(e=>e.Rank).Distinct().Count()>1&&physical.Sum(e=>e.Count??0)!=item.Count)
+            {
+                snapshot.Warning=$"{item.Action}: {item.Count} {Identity.Canonical(item.Name)}. Matching ranks are ambiguous; reconcile with a complete inventory capture.";
+                foreach(var row in physical){row.Estimated=true;row.RankEvidence="Removal observed; remaining physical copies unresolved";}
+                return;
+            }
             var remaining = item.Count;
-            foreach (var e in rows.Where(x => x.Count.HasValue).OrderBy(x => x.Rank))
+            foreach (var e in physical.OrderByDescending(x=>x.Location=="Observed loot"))
             {
                 int take = Math.Min(remaining, e.Count ?? 0); e.Count -= take; remaining -= take; e.Estimated = true;
                 if (remaining == 0) break;
             }
             // Collection presence is not a reliable quantity; do not guess deletion.
+            if(remaining>0)snapshot.Warning=$"{item.Action}: quantity exceeds recorded physical stock. Reconcile with a complete inventory capture.";
             return;
         }
         if (item.Action is "Looted" or "Created" or "Received")

@@ -18,7 +18,7 @@ public static partial class Usability
     {
         foreach (var element in TooltipTree(root).OfType<FrameworkElement>().Distinct())
         {
-            ToolTipService.SetInitialShowDelay(element, 650); ToolTipService.SetBetweenShowDelay(element, 650); ToolTipService.SetShowDuration(element, 5000); ToolTipService.SetShowOnDisabled(element, true);
+            TooltipPolicy(element); ToolTipService.SetShowDuration(element, 5000); ToolTipService.SetShowOnDisabled(element, true);
             if (element is DataGridColumnHeader { ToolTip: null, Content: string caption } header)
                 header.ToolTip = (caption switch { "+Rank" or "Rank" => "Recorded item upgrade rank. Catalog previews offer +0–10; existing physical-instance ranks are retained. Enter or focus loss saves editable values; Escape cancels.", "Ability" => "Logged ability name. Select to inspect measured results and available sourced spell information.", "DPS" => DisplayCadence.DpsHelp, "HPS" => "HP actually restored divided by the shared combat duration. Healing does not extend fights.", "Hits" => "Landed damage records; misses and full resists are separate outcomes, not added to this count.", "Average" or "Avg" => "Mean amount per landed damage or healing record in the selected scope.", "Crit %" => "Logged critical records as a percentage of landed records; not a cast success rate.", "Type"=>"Sourced equipment classification. Unknown types remain unverified; wearable slots do not establish a weapon subtype.","Upgrade rating"=>"Whole-loadout preference-point change for the selected role. Conditional and unavailable results are not verified upgrade recommendations.","Slot"=>"Equipment or recorded inventory position. Unknown positions retain their evidence state.", _ => caption })
                     + (header.Column?.CanUserSort == true ? " · Click to sort." : "") + " Drag either edge to resize; the nearest neighbor shrinks first. Reset columns restores measured widths.";
@@ -26,39 +26,39 @@ public static partial class Usability
             // A recycled table/tree cell must keep its binding when its DataContext changes.
             if (element.ToolTip is string description && !System.Windows.Data.BindingOperations.IsDataBound(element, FrameworkElement.ToolTipProperty)) element.ToolTip = new ToolTip { Content = new TextBlock { Text = description, TextWrapping = TextWrapping.Wrap, MaxWidth = 410 } };
             if (!(bool)element.GetValue(HasTooltipPolicyProperty))
-            { element.SetValue(HasTooltipPolicyProperty, true); element.MouseLeave += (_, _) => { if (element.ToolTip is ToolTip tip) tip.IsOpen = false; }; }
+            { element.SetValue(HasTooltipPolicyProperty, true); tooltipElements.Add(new(element)); element.MouseLeave += (_, _) => { if (element.ToolTip is ToolTip tip) tip.IsOpen = false; }; }
         }
     }
     private static string Help(string text) => text switch
     {
-        "Add to queue" or "Add selected to queue" => "Pin the selected goal to your ordered queue. Quest pins also enable tracking; removing a pin does not untrack its quest.",
+        "Add to queue" or "Add selected to queue" => "Prioritize this goal in Queue. Quest pins also enable tracking.",
         "Add to build" => "Place the inspected candidate and preview rank in the selected local build. Use a valid selected slot, or choose from valid destinations. Undo restores the previous build; this does not establish inventory ownership.",
         "Add manual item" => "Record the known physical instance at its recorded rank, or a catalog item at +0, in the selected pet inventory. An inspector preview does not establish ownership or an upgraded physical copy.",
         "Add to planned build" or "Add to selected list" => "Add the selected item to the visible inventory or planned build immediately. An occupied position uses the next empty position; Undo reverses the addition.",
         "Undo" => "Reverse the latest change to this inventory or planned loadout, including additions, rank edits and reordering.",
         "Compare…" => "Compare Current item and Candidate with Differences below, including the inspected rank. Raw differences remain available when a rating or equipment compatibility is unavailable.",
-        "Edit item…" or "Edit selected item…" => "Open advanced editing for this inventory entry: position, intended or verified equipment slot, rank and Exaltations.",
+        "Edit item…" or "Edit selected item…" => "Edit this position, item, rank, and configured effects.",
         "Save plan" or "Save context" => "Save the selected pet inventory's summon context. Inventory edits already save locally; actual game equipment is unchanged.",
-        "View sources" or "View progress" => "Open the selected goal's acquisition sources or matching checklist branch using cached data.",
+        "View sources" or "View progress" => "View this goal's sources or checklist.",
         "Stat profiles…" or "Review Self profiles…" => "Review game evidence and confirm missing unbuffed/buffed totals and AA information used by preference comparisons.",
-        "Save" or "Save changes" => "Validate and save changes in this editor. Invalid entries remain unchanged and show an explanation.",
-        "Cancel" => "Close this editor and discard uncommitted changes.",
-        "Remove item" => "Remove the selected entry from this inventory or plan only. Undo restores its rank, effects and position.",
-        "Add effect" => "Add the selected Exaltation to this item's working copy after checking rank, class and slot restrictions. Save commits the edit.",
-        "Remove effect" => "Remove the selected effect from this editor's working copy. Cancel preserves the saved entry.",
+        "Save" or "Save changes" => "Validate and save these changes.",
+        "Cancel" => "Discard these edits and close.",
+        "Remove item" => "Remove this item from the local build. Undo is available.",
+        "Add effect" => "Configure this effect in the selected position. Save commits the edit.",
+        "Remove effect" => "Remove this configured effect. Save commits the edit.",
         "Save manual confirmation" or "Save planned item" => "Validate and save the edited item to the named destination. This never transfers or equips game items.",
-        "Track / untrack" => "Enable or pause this quest's requirements. Untracking pauses its queue entry; progress is retained.",
+        "Track / untrack" => "Track this quest in Progress, or stop tracking while keeping progress.",
         "Clear filters" => "Remove this view's filters and show all matching records again.",
         "Date range" => "Show date filters. Highlighted while the editor is open or a date filter is active.",
         "Export encounter" => "Save a ZIP snapshot of the selected encounter with CSV breakdowns, events, healing and versioned JSON. Active combat continues.",
         "Export scope" => "Export the current scope and filters, including duration denominators and available damage/healing records.",
-        "Reset columns" => "Restore measured default widths for this table. Other tables and splitters are unchanged.",
+        "Reset columns" => "Restore this table's default column widths.",
         "Edit weights" => "Edit preference points assigned to each stat. Scores do not predict damage or healing output.",
         "Confirm equipment" => "Supply the equipped baseline used by upgrade comparisons. Pet equipment requires manual confirmation.",
         "Save build" or "Save theorycraft build…" => "Explicitly save a named Theorycraft build. Current and ordinary named builds autosave; Theorycraft cannot activate into Current.",
         "Use as current build…" or "Use as current" => "Replace Current with this ordinary named build. You can save a named backup first; Undo retains the previous Current. Theorycraft cannot activate.",
         "Build ▾" or "Build" => "Create, duplicate, rename or remove a named build. Selecting a build edits that build without activating it.",
-        "Tools ▾" or "Tools" => "Open this workspace's tools. Click this button again, click outside, or press Escape to close the menu.",
+        "Tools ▾" or "Tools" => "Open workspace tools. Click again or press Escape to close.",
         "Filters…" => "Edit only the compact DPS tracker's saved filters. Combat Lab has independent filters; clearing preserves actor, scope, session and sorting.",
         "Click-through" => "Pass mouse input through this overlay to the game. "+((App)Application.Current).ShortcutLabel(EqlTracker.Core.OverlayShortcutAction.ClickThrough)+" restores interaction; this does not change the overlay's saved position.",
         "Smooth motion" => "Animate value and contribution-bar changes while preserving the exact published readings and existing DPS cadence.",
@@ -71,8 +71,8 @@ public static partial class Usability
         "Self" or "Player" => "This character's contributions, excluding owned-pet and group-member totals.",
         "Group" or "Group/Raid" => "Known group/raid characters with their verified pets folded into owner rows. Missing membership or combat coverage remains unknown.",
         "Choose icon…" => "Choose a tray and running-window icon for this character. Selection saves immediately.",
-        "Remove pin" => "Remove this queue pin while retaining quest tracking and progress.",
-        "↑ Move up" or "↓ Move down" => "Change queue order without changing shared inventory allocation priority.",
+        "Remove pin" => "Remove this Queue pin; keep tracking and progress.",
+        "↑ Move up" or "↓ Move down" => "Move this goal in Queue.",
         "Sync now" => "Run the verified native Sync shortcut once, then wait for fresh class and inventory evidence. Requires a linked shortcut and an in-world game character.",
         _ => text.TrimEnd('…',' ','▾') + ". Uses the current window's selection and context."
     };

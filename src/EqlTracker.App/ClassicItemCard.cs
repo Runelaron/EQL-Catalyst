@@ -26,10 +26,21 @@ internal sealed class ClassicItemCard : Border
         {
             if (value.Length == 0) return;
             if (line < text.Children.Count && text.Children[line] is TextBlock block) { NumericTransition.Set(block, value, animate); if (block.Tag?.ToString() != color) { block.SetResourceReference(TextBlock.ForegroundProperty, color); block.Tag = color; } }
-            else { var added = UI.Text(value,11,color); added.Tag = color; text.Children.Add(added); }
+            else { if (line < text.Children.Count) text.Children.RemoveAt(line); var added = UI.Text(value,11,color); added.Tag = color; text.Children.Insert(line, added); }
             line++;
         }
-        var stats = GearScorer.EffectiveStats(item, rank);
+        void Fields(IEnumerable<string> values) {
+            var row = line < text.Children.Count ? text.Children[line] as WrapPanel : null;
+            if (row == null) { if (line < text.Children.Count) text.Children.RemoveAt(line); row = new WrapPanel(); text.Children.Insert(line, row); }
+            var fields = values.Where(v => v.Length > 0).ToArray();
+            for (int i = 0; i < fields.Length; i++) {
+                TextBlock block; if (i < row.Children.Count) block = (TextBlock)row.Children[i]; else { block = UI.Text("",11); block.TextWrapping = TextWrapping.NoWrap; block.Margin = new(0,0,10,3); row.Children.Add(block); }
+                NumericTransition.Set(block, fields[i], animate);
+            }
+            while(row.Children.Count > fields.Length) row.Children.RemoveAt(row.Children.Count-1);
+            line++;
+        }
+        var projection = RankedItemStats.Resolve(item,rank); var stats = projection.Stats;
         string Number(string key, string label = "") => stats.TryGetValue(key, out double value) ? (label.Length > 0 ? label : key) + ": " + value.ToString("0.###") : "";
         string Signed(string key, string label = "") => stats.TryGetValue(key, out double value) ? (label.Length > 0 ? label : key) + ": " + value.ToString("+0.##;-0.##;0") : "";
         string Join(params string[] values) => string.Join("  ", values.Where(v => v.Length > 0));
@@ -39,8 +50,10 @@ internal sealed class ClassicItemCard : Border
         Line(Join(item.Display.Skill.Length > 0 ? "Skill: " + item.Display.Skill : "", Number("Delay", "Atk Delay")));
         Line(Join(Number("Damage", "DMG"), Number("Ratio")));
         Line(Number("AC"));
-        Line(Join(new[] { "STR", "DEX", "STA", "CHA", "WIS", "INT", "AGI", "HP", "Mana", "ATK", "Haste" }.Select(s => Signed(s, s == "Mana" ? "MANA" : s)).ToArray()));
-        Line(Join(new[] { "Fire", "Disease", "Cold", "Magic", "Poison", "Corruption" }.Select(s => Signed("Resist" + s, "SV " + s.ToUpperInvariant())).ToArray()));
+        Fields(new[] { "HP", "Mana", "Endurance", "STR", "DEX", "STA", "CHA", "WIS", "INT", "AGI", "ATK", "Haste" }.Select(s => Signed(s, s == "Mana" ? "MANA" : s == "Endurance" ? "END" : s)));
+        Fields(new[] { "Fire", "Cold", "Magic", "Disease", "Poison", "Corruption", "Void" }.Select(s => Signed("Resist" + s, "SV " + s.ToUpperInvariant())));
+        if (projection.Accuracy is {} accuracy) Line("Accuracy: +"+accuracy.ToString("0.##")+"% (observed)");
+        if (projection.ObservedDamageBonus is {} damageBonus) Line("DMG Bonus: "+damageBonus.ToString("0.##")+" (inspection only; not Pet ratio)","Muted");
         foreach (string effect in ItemEffects.Active(item, instance?.TransferredOutEffects)) Line("Effect: " + effect, "Mint");
         foreach (var effect in instance?.Augments ?? [])
         {
@@ -50,7 +63,9 @@ internal sealed class ClassicItemCard : Border
         }
         if (item.RequiredLevel > 0) Line("Required level: " + item.RequiredLevel);
         if (item.EffectActivationLevel is { } level) Line("Effect activation: level " + level, "Mint");
-        Line(Join(item.Display.Weight is { } weight ? "WT: " + weight.ToString("0.0") : "", item.Display.Range is { } range ? "Range: " + range : "", item.Display.Size.Length > 0 ? "Size: " + item.Display.Size : ""));
+        Line(Join(projection.Weight is { } weight ? "WT: " + weight.ToString("0.0") + (projection.WeightIsBase ? " (base; ranked unknown)" : "") : "", item.Display.Range is { } range ? "Range: " + range : "", item.Display.Size.Length > 0 ? "Size: " + item.Display.Size : ""));
+        if (projection.WeaponUncertain) Line("Conditional · ranked weapon damage unverified", "Violet");
+        else if (projection.UncertainStats.Count>0) Line("Unverified at this rank: "+string.Join(", ",projection.UncertainStats),"Violet");
         if (item.Classes.Count > 0) Line("Class: " + string.Join(" ", item.Classes));
         if (item.Races.Count > 0) Line("Race: " + string.Join(" ", item.Races));
         if (item.Deity.Length > 0) Line("Deity: " + item.Deity);
@@ -58,7 +73,7 @@ internal sealed class ClassicItemCard : Border
         if (item.ContentAvailability == ContentAvailability.Future) Line("Future content · " + item.AvailabilityEvidence, "Melee");
         while (text.Children.Count > line) text.Children.RemoveAt(text.Children.Count - 1);
         if (Child == null) Child = text;
-        ToolTip = "Known item facts at +" + rank + (rank > 0 ? " · tier-floor estimate; fractional XP unavailable." : ".") + "\n" + (item.Display.Source.Length > 0 ? item.Display.Source + " revision " + item.Display.Revision : "Display metadata incomplete; undocumented facts are omitted.");
+        ToolTip = "Known item facts at +" + rank + ".\n" + projection.Evidence + "\n" + (item.Display.Source.Length > 0 ? item.Display.Source + " revision " + item.Display.Revision : "Display metadata incomplete; undocumented facts are omitted.");
     }
 }
 
@@ -70,6 +85,7 @@ internal sealed class ItemDetailsInspector : StackPanel
     private readonly TextBlock pending = UI.Text("", 10, "Muted");
     private readonly ComboBox copies = new() { DisplayMemberPath = "Label", MinWidth = 120, HorizontalAlignment = HorizontalAlignment.Stretch };
     private Action<InventoryEntry?>? copyChanged;
+    private readonly ItemAcquisitionView acquisition = new();
     private string copiesKey = "";
     private sealed record CopyChoice(string Label, InventoryEntry? Instance) { public override string ToString() => Label; }
     internal bool AnimateValues { get; set; }
@@ -85,17 +101,19 @@ internal sealed class ItemDetailsInspector : StackPanel
     {
         RankSlider.Style = RankSliderStyles.Style(3);
         var reset = UI.Button("Reset preview", () => rankChanged?.Invoke(null)); reset.ToolTip = "Restore this candidate's recorded/list rank without editing inventory.";
-        rankArea = UI.Stack(UI.Label("Preview +Rank"), RankSlider, previewLabel, reset);
+        reset.MinHeight=0; reset.Height=22; reset.Padding=new(7,0,7,0); reset.Margin=new(6,0,0,0); reset.FontSize=11;reset.VerticalAlignment=VerticalAlignment.Center;
+        var previewRow=new Grid();previewRow.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});previewRow.ColumnDefinitions.Add(new(){Width=GridLength.Auto});previewLabel.VerticalAlignment=VerticalAlignment.Center;previewLabel.Margin=new(0);Grid.SetColumn(reset,1);previewRow.Children.Add(previewLabel);previewRow.Children.Add(reset);
+        rankArea = UI.Stack(UI.Label("Preview +Rank"), RankSlider, previewRow);
         copies.Visibility = Visibility.Collapsed;
         copies.SelectionChanged += (_, _) => { if (!updating && copies.SelectedItem is CopyChoice copy) copyChanged?.Invoke(copy.Instance); };
-        headerIcons=new(title);Children.Add(headerIcons); Children.Add(copies); Children.Add(facts); Children.Add(rankArea); Children.Add(pending); Children.Add(rating);
+        headerIcons=new(title);Children.Add(headerIcons); Children.Add(copies); Children.Add(facts); Children.Add(acquisition); Children.Add(rankArea); Children.Add(pending); Children.Add(rating);
         RankSlider.AddHandler(System.Windows.Controls.Primitives.Thumb.DragCompletedEvent, new System.Windows.Controls.Primitives.DragCompletedEventHandler((_, _) => PreviewCommitted?.Invoke()));
         RankSlider.PreviewKeyUp += (_, _) => PreviewCommitted?.Invoke();
         RankSlider.ValueChanged += (_, _) => { if (!updating) rankChanged?.Invoke((int)RankSlider.Value); };
         Clear();
     }
-    internal void Clear() { headerIcons.Clear(); copiesKey = ""; itemKey = ""; pending.Text = ""; copies.Visibility = Visibility.Collapsed; title.Text = "Select an item to view its stats and comparison."; facts.Content = null; rankArea.Visibility = rating.Visibility = Visibility.Collapsed; }
-    internal void SetOwnership(ItemDefinition item, InventorySnapshot inventory) => headerIcons.Show(item, ItemOwnership.For(item, inventory));
+    internal void Clear() { headerIcons.Clear(); copiesKey = ""; itemKey = ""; pending.Text = ""; copies.Visibility = Visibility.Collapsed; title.Text = "Select an item to view its stats and comparison."; facts.Content = null; acquisition.Visibility = rankArea.Visibility = rating.Visibility = Visibility.Collapsed; }
+    internal void SetOwnership(ItemDefinition item, InventorySnapshot inventory) { headerIcons.Show(item, ItemOwnership.For(item, inventory)); acquisition.Visibility=Visibility.Visible;if(Application.Current is App app)acquisition.Show(item,app.Controller.Catalog,inventory); }
     internal void ShowItem(ItemDefinition item, int rank, int listRank, bool preview, InventoryEntry? instance, GearComparison? comparison, string role, ItemPairComparison? pair, string reason, Action<int?> changed, Action formula)
     {
         rankChanged = changed; updating = true;
@@ -104,7 +122,7 @@ internal sealed class ItemDetailsInspector : StackPanel
         headerIcons.Show(item, new(false, "", false, null));
         if (sameItem && facts.Content is ClassicItemCard card) card.Update(item, rank, instance, AnimateValues); else facts.Content = new ClassicItemCard(item, rank, instance);
         RankSlider.Value = Math.Clamp(rank, 0, 10);
-        previewLabel.Text = preview ? $"Preview +{rank} · list +{listRank}" : rank > 10 ? $"Recorded +{rank} · move slider to preview +0–10" : $"Candidate +{rank}";
+        previewLabel.Text = preview ? $"Preview +{rank} · list +{listRank}" : rank > 10 ? $"Recorded +{rank} · move slider to preview +0–10" : instance != null && instance.Rank != listRank ? $"List preview +{rank} · owned +{instance.Rank}" : $"Candidate +{rank}";
         updating = false; rankArea.Visibility = rating.Visibility = Visibility.Visible;
         rating.FormulaRequested = formula; rating.AnimateValues = AnimateValues;
         bool waiting = reason.StartsWith("Updating"); pending.Text = waiting ? reason : "";
@@ -127,28 +145,71 @@ internal sealed class ItemDetailsInspector : StackPanel
 
 internal sealed class RatingFormulaDialog : FrostDialog
 {
-    internal RatingFormulaDialog(string role, Dictionary<string, double> weights, GearComparison? comparison, bool pet = true) : base("How this rating works", 620, 480)
+    internal RatingFormulaDialog(string role, Dictionary<string, double> weights, GearComparison? comparison, bool pet = true, string candidate = "", Action? statProfiles = null) : base("How this rating works", 680, 560)
     {
         var result = comparison?.Evaluation;
-        var lines = UI.Stack(UI.Text("Upgrade rating · " + role, 16, "Accent", true),
-            UI.Text("Rating change = Σ (usable stat change × your selected weight). The whole loadout is evaluated before and after replacing the selected item, including displaced equipment.", 12),
-            UI.Text(string.Join(" + ", weights.Where(w => w.Value != 0).Select(w => $"{w.Value:0.##} × Δ{w.Key}")), 12, "Mint"),
-            UI.Text("Item change → usable change → preference points", 13, "Melee", true));
+        var resolved = result?.Role;
+        var actualWeights = resolved?.Weights ?? weights;
+        var lines = UI.Stack(UI.Text(comparison?.Candidate ?? (candidate.Length > 0 ? candidate : "No item selected"), 18, "Accent", true),
+            UI.Text(comparison == null ? "Select an item for replacement arithmetic." : "Replaces: " + comparison.Replaces + " · Slot: " + comparison.Slot, 12),
+            UI.Text("Role: " + role, 14, "Melee", true),
+            UI.Text("Method: compare the entire loadout before and after replacement, including displaced equipment. Points = effective change × weight.", 12),
+            FocusedLayout.Disclosure("Formula & resolved weights",UI.Text("Formula: " + RatingExplanation.Formula(actualWeights),12,"Mint"),"Each resolved weight multiplies the effective stat change. The substituted result is shown below."));
+        if(pet) lines.Children.Add(UI.Text(PetRoleRatings.Explain(role),12,"SecondaryText"));
+        if (resolved != null)
+            lines.Children.Add(FocusedLayout.Disclosure("Why this role values these stats", RoleExplanationContent(resolved), "Resolved class priorities, design rationale and source. These weights are preferences, not game coefficients."));
         if (result != null)
         {
-            foreach (var context in pet ? new[] { result.Unbuffed } : new[] { result.Unbuffed, result.Buffed })
+            var summaries = new System.Windows.Controls.Primitives.UniformGrid { Columns = pet ? 1 : 2 };
+            foreach (var context in pet ? result.PetDefense!=null ? new[] {result.Unbuffed,result.PetDefense} : new[] { result.Unbuffed } : new[] { result.Unbuffed, result.Buffed }) summaries.Children.Add(UI.Card(UI.Stack(UI.Text(pet ? ReferenceEquals(context,result.PetDefense) ? "Defense preference" : result.PetDefense!=null ? "Damage preference" : "Equipment" : context.Name, 13, "Accent", true), UI.Text(context.Delta.HasValue ? context.Delta.Value.ToString("+0.0;-0.0;0") + " points" : "Unavailable", 16, context.Delta < 0 ? "Violet" : "Mint", true))));
+            lines.Children.Add(summaries);
+            foreach (var context in pet ? result.PetDefense!=null ? new[] {result.Unbuffed,result.PetDefense} : new[] { result.Unbuffed } : new[] { result.Unbuffed, result.Buffed })
             {
-                lines.Children.Add(UI.Text(pet ? "Equipment" : context.Name, 13, "Accent", true));
-                foreach (var change in context.Changes) lines.Children.Add(UI.Text(change.Explanation, 11));
-                lines.Children.Add(UI.Text("Net: " + (context.Delta?.ToString("+0.##;-0.##;0") ?? result.Status + " · " + context.Quality) + " points", 13, "Mint", true));
-                foreach (string note in result.Assumptions.Concat(context.Notes)) lines.Children.Add(UI.Text(note, 11, "Muted"));
+                lines.Children.Add(UI.Text(pet ? ReferenceEquals(context,result.PetDefense) ? "Defense preference" : result.PetDefense!=null ? "Damage preference" : "Equipment" : context.Name, 14, "Accent", true));
+                lines.Children.Add(UI.Text(RatingExplanation.Status(context), 11, context.Delta.HasValue ? "SecondaryText" : "Violet"));
+                foreach (bool gains in new[] { true, false })
+                {
+                    var changes = RatingExplanation.Ordered(context.Changes).Where(c => gains ? c.ItemChange > 0 : c.ItemChange < 0).ToList();
+                    if (changes.Count == 0) continue;
+                    lines.Children.Add(new Separator { Margin=new(0,8,0,6) });
+                    lines.Children.Add(UI.Text(gains ? "Gains:" : "Losses:", 13, gains ? "Mint" : "Violet", true));
+                    foreach (string category in ItemStatGroups.Categories)
+                    {
+                        var rows = changes.Where(c => ItemStatGroups.Category(c.Stat) == category).ToList();
+                        if (rows.Count == 0) continue;
+                        lines.Children.Add(UI.Text(category + ":", 12, "Melee", true));
+                        foreach (var change in rows) {
+                            var row=new Grid { Margin=new(0,2,0,3) };row.ColumnDefinitions.Add(new(){Width=new(100)});row.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});
+                            row.Children.Add(UI.Text(RatingExplanation.GroupedLabel(change.Stat)+":",11));var explanation=UI.Text(RatingExplanation.Change(change,resolved,true),11);Grid.SetColumn(explanation,1);row.Children.Add(explanation);lines.Children.Add(row);
+                        }
+                    }
+                }
+                lines.Children.Add(UI.Text("Result: " + RatingExplanation.Equation(context), 13, !context.Delta.HasValue || context.Delta < 0 ? "Violet" : "Mint", true));
+                if (context.Delta.HasValue) lines.Children.Add(FocusedLayout.Disclosure("Exact arithmetic", UI.Text(string.Join(" + ", RatingExplanation.Ordered(context.Changes).Where(c => c.Points != 0).Select(c => c.Points.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + " " + RatingExplanation.Label(c.Stat))) + " = " + context.Delta.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + " points", 11), "Unrounded stored contributions. The compact equation identifies any rounding adjustment."));
+                if (context.CurrentScore.HasValue && context.CandidateScore.HasValue) lines.Children.Add(UI.Text("Whole-loadout points: " + RatingExplanation.Number(context.CurrentScore.Value) + " → " + RatingExplanation.Number(context.CandidateScore.Value), 11));
+                if (!context.Delta.HasValue && !pet && statProfiles != null) lines.Children.Add(UI.Button("Review Stat profiles…", statProfiles));
+                var notes = result.Assumptions.Concat(context.Notes).Distinct().ToArray();
+                if (notes.Length > 0) lines.Children.Add(FocusedLayout.Disclosure("Evidence & assumptions", UI.Stack(notes.Select(n => (UIElement)UI.Text("• " + n, 11, "SecondaryText")).ToArray()), "Evidence, missing metadata, confirmed caps and uncertainty for this context."));
             }
-            if (result.IsHypothetical) lines.Children.Add(UI.Text("Hypothetical compatibility assumptions apply only to this Theorycraft workspace.", 12, "Melee", true));
+            if (result.EffectsGained.Count > 0) lines.Children.Add(UI.Text("Effects gained: " + string.Join(", ", result.EffectsGained), 12, "Mint"));
+            if (result.EffectsLost.Count > 0) lines.Children.Add(UI.Text("Effects lost: " + string.Join(", ", result.EffectsLost), 12, "Violet"));
+            if (result.WeaponEvidence.Length > 0) lines.Children.Add(UI.Text(result.WeaponEvidence, 11));
+            else if (result.WeaponNote.Length > 0) lines.Children.Add(UI.Text(result.WeaponNote, 11));
+            if (result.ActivationNote.Length > 0) lines.Children.Add(UI.Text(result.ActivationNote, 11));
+            if (result.Status == "Conditional" || result.IsHypothetical) lines.Children.Add(UI.Text(result.Status + " · " + string.Join("; ", result.Assumptions), 12, "Violet", true));
         }
-        else lines.Children.Add(UI.Text("A complete loadout rating is unavailable. Raw item stats and differences remain inspectable.", 12));
-        lines.Children.Add(UI.Text("Worn haste uses the strongest listed item. Only confirmed limits apply. Observed totals already including buffs or AAs are not added twice. Unknown base stats and bonuses are not invented. Item ranks use the existing tier-floor estimates: ordinary stats +10% per tier, weapon damage +5%, fixed delay/haste, with the scorer's rounding/minimum increment. Fractional item XP is unknown.", 11, "Muted"));
-        lines.Children.Add(UI.Text("Effects and procs are separate. DEX points are a preference, not predicted proc rate. Points are not DPS. Two-handed versus dual-wield results remain Conditional when off-hand contribution is unknown. Unscored stats still appear in item differences.", 11, "Muted"));
-        if (pet) lines.Children.Add(UI.Text("Rules: " + PetItemRules.Version + " · official ratio guidance: October 13, 2026; no published complete pet DPS formula.", 10, "Muted"));
+        else lines.Children.Add(UI.Text("A complete loadout comparison is unavailable. The stat card remains inspectable.", 12));
+        lines.Children.Add(FocusedLayout.Disclosure("Limits, ranks & separate effects", UI.Stack(
+            UI.Text("Only confirmed limits adjust effective changes. Worn haste uses the strongest item. Observed buff/AA totals are not added twice; unknown overflow remains uncertain.", 11),
+            UI.Text("Ranks: client-observed tier-start values take precedence at the exact documented rank. Other weapon damage and ranked haste remain Conditional. Delay stays fixed; ordinary positive stats use the documented 10%/minimum estimate. Fractional XP and unsupported fields remain unknown.", 11),
+            UI.Text("Points are not DPS, healing, proc rate or damage reduction. Attribute benefits are priorities without invented conversion formulas. Damage and delay are represented through ratio. Effects, procs and unresolved off-hand mechanics remain separate.", 11),
+            UI.Text("Arithmetic uses full-precision contributions; the inspector rounds the final display. Unchanged rows are omitted; changed zero-weight stats remain visible.", 11)), "Calculation boundaries and rank estimates."));
         Editor.Children.Add(lines); Actions.Children.Add(UI.Button("Close", Close));
+    }
+    internal static FrameworkElement RoleExplanationContent(SelfRoleResolution role)
+    {
+        var content = UI.Stack(role.Reasons.Select(n => (UIElement)UI.Text(n, 11, "SecondaryText")).ToArray());
+        if (role.Automatic) content.Children.Add(UI.Button("Casting-family source", () => UI.OpenUrl(CastingPriority.Source)));
+        return content;
     }
 }

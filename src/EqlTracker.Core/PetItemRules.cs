@@ -17,8 +17,11 @@ public sealed class ItemDisplayMetadata
 
 public static class PetItemRules
 {
-    public const int MetadataVersion = 7;
-    public const string Version = "EQL-2026-10-18/pet-use-v1";
+    public const int MetadataVersion = 9;
+    public const string Version = "EQL-2026-10-21/pet-use-v2";
+    public static bool Fits(ItemDefinition item, EquipmentPosition position, bool theorycraft = false) =>
+        EquipmentPositions.Fits(item, position, true) && (theorycraft || item.Stats.GetValueOrDefault("Damage") <= 0 || position.Slot is "Primary" or "Secondary");
+    public static bool CombatSlot(string slot, bool theorycraft = false) => slot is "Primary" or "Secondary" || theorycraft && slot == "Range";
     public static string Unsupported(ItemDefinition item)
     {
         if (item.Display.Skill.Equals("Archery", StringComparison.OrdinalIgnoreCase) || item.Display.Type.Equals("Bow", StringComparison.OrdinalIgnoreCase)) return "Pets cannot currently use bows";
@@ -45,7 +48,7 @@ public static class PetItemRules
         if (theorycraft) return true;
         if (Unsupported(item).Length > 0) return false;
         string eligibility = GearScorer.Eligibility(item, context, true, null, catalog);
-        return eligibility == "Eligible" || eligibility.StartsWith("Unknown") || eligibility.StartsWith("Confirm pet level");
+        return eligibility == "Eligible" || eligibility.StartsWith("Unknown") || eligibility.StartsWith("Confirm pet level") || eligibility.StartsWith("Verify");
     }
     public static bool CanAssume(string reason) => reason is "Pets cannot currently use bows" or "Ranged weapons are not supported pet equipment" or "Requires another class / pet" || reason.StartsWith("Requires level ");
     public sealed class WikiFixture
@@ -62,7 +65,7 @@ public static class PetItemRules
             var parsed = WikiClient.ParseItem(fixture.Title, fixture.Text, fixture.Revision);
             var existing = catalog.Find(parsed.Name) ?? catalog.Find(fixture.Title);
             if (existing == null) { catalog.Items.Add(parsed); catalog.InvalidateIndexes(); }
-            else if (existing.Display.Revision <= parsed.Display.Revision) existing.Display = parsed.Display;
+            else if (existing.Display.Revision <= parsed.Display.Revision) { existing.Display = parsed.Display; if (existing.Revision <= parsed.Revision && parsed.Stats.TryGetValue("Endurance", out var endurance)) existing.Stats["Endurance"] = endurance; }
         }
     }
 }

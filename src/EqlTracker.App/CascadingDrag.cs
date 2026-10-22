@@ -14,6 +14,8 @@ internal sealed class CascadingDrag
 {
     internal sealed record Observation(string Surface, string Grip, int Boundary, bool Canceled, double[] Before, double[] After, double[] Minimums, double[] ApplyMilliseconds, long[] ApplyAllocations);
     internal static Action<Observation>? Observe;
+    // Isolated routed-input harness supplies coordinates without moving the desktop pointer.
+    internal static Func<FrameworkElement,MouseEventArgs,Point>? ReviewPosition;
     internal sealed class Session(WidthTrack[] tracks, int boundary, Action<double[]> apply, Action<bool> finish)
     {
         internal readonly WidthTrack[] Tracks = tracks;
@@ -54,7 +56,7 @@ internal sealed class CascadingDrag
     {
         if (e.Handled || e.ChangedButton != MouseButton.Left || Grip(e.OriginalSource as DependencyObject) is not { } thumb) return;
         var session = create(thumb); if (session == null) return;
-        e.Handled = true; active = session; capture = thumb; start = e.GetPosition(root); pending = 0;
+        e.Handled = true; active = session; capture = thumb; start = (ReviewPosition?.Invoke(root,e) ?? e.GetPosition(root)); pending = 0;
         if (thumb is GridSplitter) Keyboard.Focus(thumb);
         timings = Observe == null ? null : []; allocations = Observe == null ? null : [];
         if (!thumb.CaptureMouse()) { End(true); return; }
@@ -64,7 +66,7 @@ internal sealed class CascadingDrag
     private void Move(object sender, MouseEventArgs e)
     {
         if (active == null) return;
-        pending = e.GetPosition(root).X - start.X; e.Handled = true;
+        pending = (ReviewPosition?.Invoke(root,e) ?? e.GetPosition(root)).X - start.X; e.Handled = true;
         if (queued) return; queued = true;
         root.Dispatcher.BeginInvoke(() => { queued = false; Apply(); }, DispatcherPriority.Render);
     }
@@ -78,7 +80,7 @@ internal sealed class CascadingDrag
     private void Up(object sender, MouseButtonEventArgs e)
     {
         if (active == null || e.ChangedButton != MouseButton.Left) return;
-        pending = e.GetPosition(root).X - start.X; Apply(); e.Handled = true; End(false);
+        pending = (ReviewPosition?.Invoke(root,e) ?? e.GetPosition(root)).X - start.X; Apply(); e.Handled = true; End(false);
     }
     private void Key(object sender, KeyEventArgs e)
     {

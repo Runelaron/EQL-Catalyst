@@ -5,7 +5,7 @@ public sealed record BuildContribution(string Stat, double ItemChange, double Cu
     public double Points => UsableChange * Weight;
     public double Capped => ItemChange - UsableChange;
     public string Category => Stat is "AC" or "HP" or "STA" or "AGI" || Stat.StartsWith("Resist") ? "Defense" : Stat is "Mana" or "INT" or "WIS" or "ManaRegen" or "HPRegen" ? "Sustain" : "Offense/procs";
-    public string Explanation => $"{ItemChange:+0.##;-0.##;0} {Stat} item change → {UsableChange:+0.##;-0.##;0} usable → {Points:+0.##;-0.##;0} points" + (Weight == 0 ? " · Not scored by this role" : "") + (Note.Length > 0 ? " · " + Note : "");
+    public string Explanation => RatingExplanation.Change(this);
 }
 public sealed class ContextRating
 {
@@ -20,11 +20,15 @@ public sealed class ContextRating
 }
 public sealed class LoadoutComparison
 {
+    public string PetGoal { get; set; } = "";
+    public ContextRating? PetDefense { get; set; }
+    public SelfRoleResolution? Role { get; init; }
     public bool IsHypothetical { get; set; }
     public List<string> Assumptions { get; set; } = [];
     public bool Pet { get; init; }
     public string Status { get; set; } = "Rated";
     public string WeaponNote { get; set; } = "";
+    public string WeaponEvidence { get; set; } = "";
     public string ActivationNote { get; set; } = "";
     public ContextRating Unbuffed { get; init; } = new() { Name = "Unbuffed" };
     public ContextRating Buffed { get; init; } = new() { Name = "Usual buffs" };
@@ -41,9 +45,15 @@ public sealed class LoadoutComparison
 public sealed class LoadoutEvaluationSession
 {
     private readonly Catalog catalog;
+    private readonly PetBuild? petInventory;
+    private readonly bool petSelectionConditional;
+    private readonly Dictionary<string,int> petPositions = [];
     private readonly LoadoutProfile loadout;
     private readonly bool pet;
     private readonly bool theorycraft;
+    private readonly SelfRoleResolution? role;
+    private readonly string petGoal;
+    private readonly Dictionary<string,double>? petDefenseWeights;
     private readonly Dictionary<string, double> weights;
     private readonly List<EquipmentPosition> before, reference;
     private readonly Dictionary<string, double> currentStats, referenceStats;
@@ -53,22 +63,35 @@ public sealed class LoadoutEvaluationSession
     private readonly string referenceFingerprint;
     private readonly HashSet<string> missingMetadata = [];
     public LoadoutEvaluationSession(Catalog catalog, LoadoutProfile loadout, bool pet, Dictionary<string, double> weights,
-        List<EquipmentPosition>? positions = null, List<EquipmentPosition>? reference = null, bool theorycraft = false)
+        List<EquipmentPosition>? positions = null, List<EquipmentPosition>? reference = null, bool theorycraft = false, SelfRoleResolution? role = null, string petGoal = "", Dictionary<string,double>? petDefenseWeights = null, PetBuild? petInventory = null, EffectivePetEquipment? effectivePetEquipment = null)
     {
         this.catalog = catalog; this.loadout = loadout; this.pet = pet; this.weights = weights;
-        this.theorycraft = theorycraft;
+        this.theorycraft = theorycraft; this.role = pet ? null : role;
+        this.petGoal = pet ? PetRoleRatings.Normalize(petGoal) : ""; this.petDefenseWeights=petDefenseWeights;
         before = positions ?? EquipmentPositions.For(loadout, pet); this.reference = reference ?? EquipmentPositions.For(loadout, pet);
+        this.petInventory = pet && petInventory != null ? EquipmentPositions.Copy(petInventory) : null;
+        if (this.petInventory != null) {
+            PetSlotPlanning.Migrate(this.petInventory, catalog);
+            petSelectionConditional = PetSlotPlanning.Warnings(this.petInventory, catalog, PetEquipmentPlanner.Capacity(loadout.Classes)).Any(n => n.StartsWith("Conditional"));
+            var inferred = effectivePetEquipment ?? PetEquipmentInference.Build(this.petInventory, loadout, catalog);
+            if (positions == null) before = inferred.Positions;
+            if (reference == null) this.reference = inferred.Positions;
+            petSelectionConditional |= inferred.Totals.Notes.Any(n => n.StartsWith("Conditional"));
+            foreach (var selection in inferred.Selections) if (this.petInventory.Items.FirstOrDefault(i => i.Id == selection.EntryId) is { } item) petPositions[selection.PositionId] = item.Position;
+            foreach (var position in before.Where(p => p.Item == null)) { if (position.Slot == "Primary") petPositions[position.Id] = 1; if (position.Slot == "Secondary" && this.petInventory.DualWield) petPositions[position.Id] = 2; }
+        }
         referenceFingerprint = EquipmentPositions.Fingerprint(this.reference);
         (currentStats, currentEffects, baselineComplete) = Aggregate(before); referenceStats = Aggregate(this.reference).Stats;
     }
     private ItemDefinition? Definition(InventoryEntry entry) => catalog.FindKey(entry.ConfirmedItemKey) ?? catalog.Find(entry.Name, entry.GameId == 0 ? null : entry.GameId);
     private (Dictionary<string, double> Stats, List<string> Effects, bool Complete) Item(InventoryEntry entry, string slot)
     {
-        string key = slot + "|" + entry.Rank + "|" + entry.Name + "|" + entry.GameId + "|" + entry.ConfirmedItemKey + "|" + string.Join(';', entry.TransferredOutEffects) + "|" + string.Join(';', entry.Augments.Select(a => a.Name + ":" + a.EffectIdentity + ":" + a.EffectText)); if (cache.TryGetValue(key, out var found)) return found;
+        string key = RankedItemStats.Version + "|" + slot + "|" + entry.Rank + "|" + entry.Name + "|" + entry.GameId + "|" + entry.ConfirmedItemKey + "|" + string.Join(';', entry.TransferredOutEffects) + "|" + string.Join(';', entry.Augments.Select(a => a.Name + ":" + a.EffectIdentity + ":" + a.EffectText)); if (cache.TryGetValue(key, out var found)) return found;
         var item = Definition(entry); var stats = item == null ? new Dictionary<string, double>() : GearScorer.EffectiveStats(item, entry.Rank);
         if (pet && !theorycraft && item != null && PetItemRules.Unsupported(item).Length > 0) return cache[key] = (new(), [], true);
         if (item?.MetadataComplete != true) missingMetadata.Add(entry.Name);
-        if (slot is not ("Primary" or "Secondary" or "Range")) foreach (string combat in new[] { "Ratio", "Damage", "Delay", "Backstab" }) stats.Remove(combat);
+        if (pet && slot == "Secondary" && petInventory is { DualWield: false } && item?.Stats.GetValueOrDefault("Delay") > 0) return cache[key] = (new(), [], true);
+        if (pet ? !PetItemRules.CombatSlot(slot,theorycraft) : slot is not ("Primary" or "Secondary" or "Range")) foreach (string combat in new[] { "Ratio", "Damage", "Delay", "Backstab" }) stats.Remove(combat);
         var effects = (item?.Effects ?? []).Except(entry.TransferredOutEffects).ToList(); bool complete = item?.MetadataComplete == true;
         foreach (var augment in entry.Augments)
         {
@@ -90,16 +113,19 @@ public sealed class LoadoutEvaluationSession
         return (stats, effects.Distinct().ToList(), complete);
     }
     public static string PetSignature(LoadoutProfile p) => p.PetType + "|" + p.PetLevel + "|" + p.PetSummonSpell + "|" + p.PetSummonRank + "|" + p.PetFocus;
+    public bool Fits(ItemDefinition item,EquipmentPosition position) => pet ? PetItemRules.Fits(item,position,theorycraft) && !(petInventory is { DualWield:false } && position.Slot == "Secondary" && item.Stats.GetValueOrDefault("Delay") > 0) : EquipmentPositions.Fits(item,position,false);
     private ContextRating Rate(string name, Dictionary<string, double> after, bool complete, bool includeAAs, bool fullTotals)
     {
         var profiles = pet ? loadout.PetStatProfiles : loadout.StatProfiles; var profile = profiles.FirstOrDefault(p => p.Name == name);
-        var notes = new List<string>(); bool observed = profile?.ConfirmedAt != null;
+        var notes = new List<string>();
+        if (role is { Complete: false }) return new() { Name = name, Quality = "Confirm three distinct active classes for automatic role priorities", Notes = [role.Casting.Explanation] };
+        bool observed = profile?.ConfirmedAt != null;
         if (observed && (profile!.EquipmentFingerprint != referenceFingerprint || profile.Level != (pet ? loadout.PetLevel ?? 0 : loadout.Level) || !profile.Classes.Order().SequenceEqual(loadout.Classes.Order()) || pet && profile.PetSignature != PetSignature(loadout)))
         { observed = false; notes.Add("Stat profile is stale: equipment, level, classes or pet context changed. Confirm totals again."); }
         if (!complete) { if (missingMetadata.Count > 0) notes.Add("Metadata pending: " + string.Join(", ",missingMetadata)); return new() { Name = name, Quality = "Metadata or selected position incomplete", Notes = notes }; }
         if (!fullTotals)
         {
-            notes.Add("Unchanged equipment metadata pending: " + string.Join(", ",missingMetadata) + ". Only the known replacement's marginal preference change is shown; whole-build totals remain unknown.");
+            notes.Add("Known replacement estimate only. Other equipment needs metadata: " + string.Join(", ",missingMetadata) + ". Whole-build totals are unavailable.");
             if (weights.GetValueOrDefault("Haste") != 0 && after.GetValueOrDefault("Haste") != currentStats.GetValueOrDefault("Haste") && !(observed && profile!.Stats.ContainsKey("Haste"))) return new() {Name=name,Quality="Missing metadata can change haste stacking; comparison unavailable",Notes=notes};
         }
         if (!observed && name == "Usual buffs") return new() { Name = name, Quality = profile == null ? "Confirm Usual buffs profile" : "Confirm stale Usual buffs profile", Notes = notes };
@@ -160,7 +186,7 @@ public sealed class LoadoutEvaluationSession
         bool complete = knownChanges && eligibility == "Eligible";
         if (id.Length == 0 && before.Any(p => p.Knowledge == EquipmentKnowledge.Unknown) && !before.Any(p => p.Knowledge == EquipmentKnowledge.Occupied)) complete = false;
         var selected = before.FirstOrDefault(s => s.Id == id); if (selected?.Knowledge == EquipmentKnowledge.Unknown) complete = false;
-        var result = new LoadoutComparison() { Pet = pet, PositionId = id, Eligibility = eligibility, Replaced = before.Where(p => after.FirstOrDefault(a => a.Id == p.Id)?.Item?.Name != p.Item?.Name && p.Item != null).Select(p => p.Label + ": " + p.Item!.Name).ToList(),
+        var result = new LoadoutComparison() { Role = role, Pet = pet, PositionId = id, Eligibility = eligibility, Replaced = before.Where(p => Different(p, after.FirstOrDefault(a => a.Id == p.Id)) && p.Item != null).Select(p => p.Label + ": " + Identity.Canonical(p.Item!.Name) + " +" + p.Item.Rank).ToList(),
             Unbuffed = Rate("Unbuffed", aggregate.Stats, complete, includeAAs, baselineComplete && aggregate.Complete), Buffed = pet ? new() { Name = "Legacy buff context" } : Rate("Usual buffs", aggregate.Stats, complete, includeAAs, baselineComplete && aggregate.Complete), EffectsGained = aggregate.Effects.Except(currentEffects).ToList(), EffectsLost = currentEffects.Except(aggregate.Effects).ToList() };
         if (pet)
         {
@@ -168,17 +194,30 @@ public sealed class LoadoutEvaluationSession
             bool twoBefore = before.Any(p => p.Slot == "Primary" && p.Item != null && Definition(p.Item)?.TwoHanded == true);
             bool twoAfter = after.Any(p => p.Slot == "Primary" && p.Item != null && Definition(p.Item)?.TwoHanded == true);
             bool handChanged = twoBefore != twoAfter && (before.Count(Weapon) > 1 || after.Count(Weapon) > 1);
-            string Ratios(IEnumerable<EquipmentPosition> values) => string.Join(" · ", values.Where(Weapon).Select(p => p.Slot + " " + GearScorer.EffectiveStats(Definition(p.Item!)!, p.Item!.Rank).GetValueOrDefault("Ratio").ToString("0.###")));
-            if (before.Any(p => p.Slot is "Primary" or "Secondary" && Different(p, after.FirstOrDefault(a => a.Id == p.Id)))) result.WeaponNote = "Current ratios: " + Ratios(before) + " → planned: " + Ratios(after) + ". Ratio preference is not a pet DPS prediction.";
+            string Ratios(IEnumerable<EquipmentPosition> values) => string.Join(" · ", values.Where(Weapon).Select(p => { var projection=RankedItemStats.Resolve(Definition(p.Item!)!,p.Item!.Rank);return p.Slot + " " + projection.Stats.GetValueOrDefault("Ratio").ToString("0.###") + (projection.WeaponUncertain ? " (estimate)" : ""); }));
+            result.WeaponNote = "Current: " + (before.Any(Weapon) ? Ratios(before) : "No active weapons");
+            result.WeaponEvidence = "Current ratios: " + Ratios(before) + " → replacement: " + Ratios(after) + ". Ratio preference is not a pet DPS prediction.";
             if (handChanged)
             {
                 result.Status = "Conditional";
                 var old = result.Unbuffed;
-                result = new() { Pet = true, Status = "Conditional", PositionId = result.PositionId, Eligibility = result.Eligibility, Replaced = result.Replaced, EffectsGained = result.EffectsGained, EffectsLost = result.EffectsLost, ActivationNote = result.ActivationNote, WeaponNote = result.WeaponNote,
+                result = new() { Pet = true, Status = "Conditional", PositionId = result.PositionId, Eligibility = result.Eligibility, Replaced = result.Replaced, EffectsGained = result.EffectsGained, EffectsLost = result.EffectsLost, ActivationNote = result.ActivationNote, WeaponNote = result.WeaponNote, WeaponEvidence = result.WeaponEvidence,
                     Unbuffed = new() { Name = "Upgrade rating", Changes = old.Changes, Notes = old.Notes, Quality = "Conditional: off-hand contribution unknown; compare ratios, stats and procs. No overall DPS winner is inferred." } };
             }
         }
+        if (petSelectionConditional) {
+            result.Status = "Conditional"; result.WeaponEvidence += " Inventory hand selection has incomplete or user-observed rules; this is a conditional preference comparison, not a DPS winner.";
+        }
+        var changed = before.Where(p=>Different(p,after.FirstOrDefault(a=>a.Id==p.Id))).Concat(after.Where(p=>Different(p,before.FirstOrDefault(a=>a.Id==p.Id)))).Where(p=>p.Item!=null).ToList();
+        var uncertainRanks = changed.Where(p=>Definition(p.Item!) is {} d && RankedItemStats.Resolve(d,p.Item!.Rank).UncertainStats.Any(s=>weights.GetValueOrDefault(s)!=0 && (s is not ("Ratio" or "Damage") || (pet ? PetItemRules.CombatSlot(p.Slot,theorycraft) : p.Slot is "Primary" or "Secondary" or "Range")))).Select(p=>p.Item!.Name).Distinct().ToList();
+        if (uncertainRanks.Count > 0) {
+            result.Status = "Conditional";
+            string note = "Conditional ranked-stat estimate: " + string.Join(", ",uncertainRanks) + ". Weapon scaling / ranked haste is unverified; estimated points do not establish a confirmed winner.";
+            result.Unbuffed.Notes.Add(note); result.Buffed.Notes.Add(note); result.WeaponEvidence += " " + note;
+        }
         result.IsHypothetical = theorycraft;
+        result.PetGoal=petGoal;
+        if(pet && petGoal=="Balanced") result.PetDefense=new LoadoutEvaluationSession(catalog,loadout,true,new(petDefenseWeights ?? PetRoleRatings.Tank),before,reference,theorycraft).CompareBuild(after,id,eligibility,includeAAs).Unbuffed;
         if (theorycraft)
         {
             result.Assumptions = after.Where(p => p.Item != null).Select(p => Definition(p.Item!) is { } d ? d.Name + ": " + GearScorer.Eligibility(d, loadout, pet, p.Item!.Augments, catalog) : "").Where(s => !s.EndsWith(": Eligible") && s.Length > 0).Distinct().ToList();
@@ -190,7 +229,14 @@ public sealed class LoadoutEvaluationSession
     {
         var position = before.FirstOrDefault(s => s.Id == id);
         if (position == null) return new() { Eligibility = "Select a replacement position" };
+        if (petInventory is { DualWield: false } && position.Slot == "Secondary" && candidate.Stats.GetValueOrDefault("Delay") > 0) return new() { Pet = true, PositionId = id, Eligibility = "Enable Dual wield for a Secondary weapon" };
         var entry = instance == null ? new InventoryEntry() : EquipmentPositions.Copy(instance); entry.Name = candidate.Name + (rank > 0 ? " +" + rank : ""); entry.GameId = candidate.GameId ?? 0; entry.ConfirmedItemKey = candidate.Key; entry.Count = 1; entry.Location = position.Slot;
+        entry.PhysicalId=instance?.PhysicalId??"";
+        var slotNotes = new List<string>();
+        if (petInventory != null && petPositions.TryGetValue(id, out int inventoryPosition)) {
+            var preview = new PetInventoryItem { Id = "preview", Position = inventoryPosition, Name = candidate.Name, ItemKey = candidate.Key, Rank = rank, Slot = position.Slot };
+            entry.Augments = PetSlotPlanning.ActiveEffects(petInventory, preview, candidate, position.Slot, loadout, catalog, slotNotes).Select(e => new InventoryEntry { Name = e.SourceName + " (Exaltation)", EffectIdentity = e.EffectId, EffectText = e.Effect, Count = 1 }).ToList();
+        }
         string eligible = GearScorer.Eligibility(candidate, loadout, pet, entry.Augments, catalog);
         if (theorycraft && (PetItemRules.CanAssume(eligible) || !pet && eligible is "Verify race restriction" or "Verify deity restriction")) eligible = "Eligible";
         string levelNote = "";
@@ -203,16 +249,22 @@ public sealed class LoadoutEvaluationSession
             else if (rank < ExaltationPlanner.Unlock(type)) eligible = "Exaltation requires destination +" + ExaltationPlanner.Unlock(type);
             if (position.Slot != "Any Slot" && source != null && !source.Slots.Any(s=>EquipmentPositions.Normalize(s)==position.Slot)) eligible = "Slot restricted by Exaltation";
         }
-        if (!EquipmentPositions.Fits(candidate, position, pet)) eligible = "Incompatible selected position";
-        var result = CompareBuild(EquipmentPositions.Replace(before, id, entry, catalog), id, eligible, includeAAs);
+        if (!Fits(candidate, position)) eligible = "Incompatible selected position";
+        var after = EquipmentPositions.Replace(before, id, entry, catalog);
+        // A move is a single physical copy. Unknown catalog copies may match a unique Lore item.
+        var existing = before.Where(p=>p.Id!=id && p.Item!=null && (entry.PhysicalId.Length>0 ? p.Item.PhysicalId==entry.PhysicalId : candidate.Display.Flags.Contains("LORE EQUIPPED") && p.Item.ConfirmedItemKey==candidate.Key && p.Item.Rank==rank)).ToList();
+        if (existing.Count == 1) foreach (var old in after.Where(p=>p.Id==existing[0].Id)) { old.Item=null;old.Knowledge=EquipmentKnowledge.Empty; }
+        if (after.Where(p=>p.Item!=null).GroupBy(p=>p.Item!.PhysicalId).Any(g=>g.Key.Length>0&&g.Count()>1)) eligible="Duplicate physical-copy reference";
+        if (after.Where(p=>p.Item!=null).GroupBy(p=>p.Item!.ConfirmedItemKey).Any(g=>g.Count()>1&&catalog.FindKey(g.Key)?.Display.Flags.Contains("LORE EQUIPPED")==true)) eligible="LORE EQUIPPED duplicate; replace or move the existing item";
+        var result = CompareBuild(after, id, eligible, includeAAs);
         if (candidate.EffectActivationLevel is { } activation) result.ActivationNote = $"Item effect activation level {activation}; " + ((pet?loadout.PetLevel:loadout.Level) is { } actual ? actual<activation ? $"inactive at current level {actual}." : $"current level {actual} meets it." : "actual pet level needs confirmation.");
-        result.ActivationNote = levelNote + result.ActivationNote;
+        result.ActivationNote = levelNote + result.ActivationNote + (slotNotes.Count > 0 ? "\n" + string.Join("\n", slotNotes) : "");
         if (levelNote.Length > 0 && result.Status == "Rated") result.Status = "Eligibility unconfirmed";
         return result;
     }
     public int? BreakEven(ItemDefinition candidate, string id, InventoryEntry? entry = null, bool includeAAs = true)
     {
-        for (int rank = 0; rank <= 20; rank++) { var value = Compare(candidate, rank, id, entry, includeAAs); if (value.Unbuffed.Delta is > 0 && (pet || value.Buffed.Delta is > 0)) return rank; } return null;
+        for (int rank = 0; rank <= 10; rank++) { var value = Compare(candidate, rank, id, entry, includeAAs); if (value.Status != "Conditional" && value.Unbuffed.Delta is > 0 && (pet || value.Buffed.Delta is > 0)) return rank; } return null;
     }
     public GearComparison Present(ItemDefinition item, int rank, string id, InventoryEntry? instance = null, bool includeAAs = true)
     {

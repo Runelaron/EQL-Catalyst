@@ -31,9 +31,9 @@ internal static class PlanningUiChecks
             Click("Browse quests"); check((tabs.SelectedItem as TabItem)?.Tag is TrackerTab.Quests, "Browse quests opens the opt-in library");
             var library = Tree(quest).OfType<DataGrid>().Single(g => g.Columns.Any(col => col.Header?.ToString() == "Quest / reward"));
             var darkforge = library.Items.OfType<QuestLibraryRow>().First(r => r.Quest.Name == "Darkforge Breastplate"); library.SelectedItem = darkforge; Flush();
-            check(darkforge.Tracking == "Not tracked", "New Classic reward is initially untracked"); Click("Add to queue");
+            check(darkforge.Tracking == "Not tracked", "New Classic reward is initially untracked"); Click("Queue");
             check(c.Profile.GoalQueue.Any(g => g.Kind == "Quest" && g.QuestId == darkforge.Quest.Id), "Quest library queues a whole reward card and enables tracking");
-            Click("Add to queue"); check(c.Profile.GoalQueue.Count(g => g.QuestId == darkforge.Quest.Id) == 1, "Repeated queue action deduplicates a quest card");
+            Click("Queue"); check(c.Profile.GoalQueue.All(g => g.QuestId != darkforge.Quest.Id), "Repeated Queue action removes the exact pin"); Click("Queue");
             quest.ShowView(TrackerTab.Queue); Flush(); var queue = Tree(quest).OfType<ListBox>().Single(l => l.IsVisible);
             check(queue.Items.OfType<QueueEntry>().Single(r => r.Goal.QuestId == darkforge.Quest.Id).Ingredients.Count == 3, "Quest queue card exposes its three ingredient requirements");
             quest.ShowView(TrackerTab.Quests); Flush(); Click("Track / untrack"); quest.ShowView(TrackerTab.Queue); Flush();

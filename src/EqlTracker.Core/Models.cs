@@ -136,6 +136,10 @@ public sealed class QuestStep
 }
 public sealed class QuestDefinition
 {
+    public long StartRevision { get; set; }
+    public string StartZone { get; set; } = "";
+    public string StartNpc { get; set; } = "";
+    public string StartEvidence { get; set; } = "";
     public int RecipeVersion { get; set; }
     public string ChecklistCoverage { get; set; } = "Legacy";
     public string Kind { get; set; } = "Epic";
@@ -156,6 +160,8 @@ public sealed class QuestDefinition
 }
 public sealed class InventoryEntry
 {
+    [System.Text.Json.Serialization.JsonIgnore] public string PhysicalId { get; set; } = "";
+    public string RankEvidence { get; set; } = "";
     public string ConfirmedItemKey { get; set; } = "";
     public override string ToString() => Name + (Location.Length > 0 ? " · " + Location : "");
     public string EffectText { get; set; } = "";
@@ -174,6 +180,8 @@ public sealed class InventoryEntry
 }
 public sealed class InventorySnapshot
 {
+    public List<string> AppliedItemObservations { get; set; } = [];
+    public List<ItemRankObservation> RankObservations { get; set; } = [];
     public List<EquipmentPosition> EquipmentPositions { get; set; } = [];
     public DateTime CapturedAt { get; set; }
     public DateTime? LastObservedChangeAt { get; set; }
@@ -228,7 +236,7 @@ public sealed class InventorySnapshot
     {
         var rows = Matching(item).ToList();
         string Area(InventoryEntry e) => e.IsCollection ? "Collection (presence only)" : e.Location.StartsWith("SharedBank", StringComparison.OrdinalIgnoreCase) ? "Shared bank" : e.Location.StartsWith("Bank", StringComparison.OrdinalIgnoreCase) ? "Bank" : e.Estimated ? "Log estimate" : "Bags / equipment";
-        return rows.Count == 0 ? "No ownership evidence in the latest snapshot" : string.Join("\n", rows.GroupBy(Area).Select(g => g.Key + ": " + (g.All(e => e.IsCollection) ? "quantity unknown" : g.Sum(e => e.Count ?? 0).ToString()) + " · " + string.Join(", ", g.Select(e => e.Location).Distinct()))) + $"\nSnapshot {CapturedAt:MMM dd HH:mm}";
+        return rows.Count == 0 ? "No ownership evidence in the latest snapshot" : string.Join("\n", rows.GroupBy(Area).Select(g => g.Key + ": " + (g.All(e => e.IsCollection) ? "quantity unknown" : g.Sum(e => e.Count ?? 0).ToString()) + " · " + string.Join(", ", g.Select(e => e.Location).Distinct()))) + $"\nComplete capture: {(CapturedAt==default?"not imported":CapturedAt.ToString("MMM dd HH:mm"))}" + (LastObservedChangeAt>CapturedAt?$"\nLog updates through {LastObservedChangeAt:MMM dd HH:mm}; placement remains unverified.":"") + (Warning.Length>0?"\n"+Warning:"");
     }
 }
 public sealed class WishlistGoal
@@ -244,6 +252,7 @@ public sealed class WishlistGoal
 }
 public sealed class LoadoutProfile
 {
+    public string PreviousSelfRole { get; set; } = "";
     public int GearBuildVersion { get; set; }
     public List<GearDraft> GearBuilds { get; set; } = [];
     public string SelectedGearBuildId { get; set; } = "current";
@@ -287,12 +296,19 @@ public sealed class OverlaySettings
 }
 public sealed class CharacterProfile
 {
+    public int SelfRoleVersion { get; set; }
+    public Dictionary<string, Dictionary<string, double>> SelfRoleOverrides { get; set; } = [];
+    public TooltipLevel Tooltips { get; set; } = TooltipLevel.Essential;
+    public int TooltipDelayMilliseconds { get; set; } = TooltipPreferences.DefaultDelay;
     public WikiRefreshMode WikiRefresh { get; set; } = WikiRefreshMode.Daily;
     public DateTime? LastWikiRefreshAt { get; set; }
     public bool UpdateCurrentBuildFromInventory { get; set; } = true;
     public InventoryBadgeStyle InventoryBadge { get; set; } = InventoryBadgeStyle.Chest;
     public int GearRatingVersion { get; set; }
     public int PetRatingVersion { get; set; }
+    public Dictionary<string,Dictionary<string,double>> PetGoalWeights { get; set; } = [];
+    public int PetGoalVersion { get; set; }
+    public PetComparisonPreferences PetComparison { get; set; } = new();
     public string GearTarget { get; set; } = "Self";
     public string GearPositionId { get; set; } = "CHEST:1";
     public string GearPetPositionId { get; set; } = "PET:1";
@@ -358,6 +374,7 @@ public sealed class CharacterProfile
     public List<GroupMembership> GroupMembers { get; set; } = [];
     public Dictionary<string, double> PanelSplits { get; set; } = [];
     public Dictionary<string, double> ColumnWidths { get; set; } = [];
+    public Dictionary<string, int> LayoutAdjustments { get; set; } = [];
     public Dictionary<string, PanelState> Panels { get; set; } = [];
     public HashSet<string> ExpandedQuestNodes { get; set; } = [];
     public HashSet<string> CollapsedQuestNodes { get; set; } = [];

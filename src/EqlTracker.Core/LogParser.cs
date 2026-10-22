@@ -49,6 +49,9 @@ public sealed partial class LogParser(string character)
         if (message.StartsWith("You have gained a level! Welcome to level ", StringComparison.Ordinal) && int.TryParse(message.Split(' ').Last().TrimEnd('!'), out var level)) { result.Level = level; return result; }
         var pet = PetPattern().Match(message);
         if (pet.Success) { result.PetName = pet.Groups["name"].Value; return result; }
+        var upgraded = Regex.Match(message, @"^You have successfully merged two items together to create a new item: (?<result>.+?)(?:\.)?$");
+        if (upgraded.Success && Identity.Rank(upgraded.Groups["result"].Value) > 0)
+        { var name = upgraded.Groups["result"].Value; result.Item = new(time, Identity.Canonical(name), "Upgraded", 1, "", name); return result; }
         var loot = LootPattern().Match(message);
         if (loot.Success)
         {

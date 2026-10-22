@@ -1,0 +1,30 @@
+using EqlTracker.Core;
+using System.Text.Json;
+
+static class ProgressBrowseTests
+{
+    internal static void Register(Action<string,Action> register)
+    {
+        void Test(string name,Action run)=>register("Progress inventory browsing · "+name,run);
+        static void Check(bool ok,string reason="Assertion failed"){if(!ok)throw new Exception(reason);}
+        static (Catalog Catalog,CharacterProfile Profile,InventorySnapshot Inventory) Fixture()
+        {
+            var item=new ItemDefinition{Key="token",Name="Ancient Token",Aliases=["Old Token"],GameId=101};
+            return(new(){Items=[item,new(){Key="reward",Name="Reward Blade"},new(){Key="unused",Name="Unrelated item"}],Quests=[
+                new(){Id="q1",Name="First Trial",RewardKey="reward",Requirements=[new(){ItemKey="token"}],Steps=[new(){Id="s1",Inputs=[new(){ItemKey="Old Token"}],Outputs=[new(){ItemKey="reward"}]}]},
+                new(){Id="q2",Name="Second Trial",RewardKey="token",Steps=[new(){Id="s2",Outputs=[new(){ItemKey="token"}]}]}]},new(){QuestTracking=new(){["q1"]=true,["q2"]=false}},new(){Entries=[new(){Name="Old Token +14",GameId=101,Count=1,Location="Bank1"},new(){Name="Ancient Token +4",Count=1,Location="Worn"},new(){Name="Unrelated item",Count=1,Location="Bag"}]});
+        }
+        Test("physical ranks and aliases group into one stable item with all related quests",()=>{var(c,p,i)=Fixture();var rows=new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"");Check(rows.Count==1&&rows[0].Key=="token"&&rows[0].Quests.Select(q=>q.Id).SequenceEqual(new[]{"q1","q2"}));Check(rows[0].Evidence.Contains("Bank")&&i.Entries[0].Rank==14);});
+        Test("tracked limits quests without changing tracking",()=>{var(c,p,i)=Fixture();var before=JsonSerializer.Serialize(p);var rows=new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,true,"");Check(rows.Count==1&&rows[0].Quests.Single().Id=="q1");Check(before==JsonSerializer.Serialize(p));});
+        Test("item alias quest and reward searches",()=>{var(c,p,i)=Fixture();var index=new ProgressBrowseIndex(c);foreach(var text in new[]{"ancient","Old Token","Second Trial","Reward Blade"})Check(index.Choices(ProgressBrowseMode.Item,p,i,false,text).Single().Key=="token",text);Check(index.Choices(ProgressBrowseMode.Item,p,i,false,"absent").Count==0);});
+        Test("collection augment zero and negative counts are not physical stock",()=>{foreach(int? count in new int?[]{null,0,-1}){var(c,p,i)=Fixture();i.Entries=[new(){Name="Ancient Token",Count=count}];Check(new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Count==0);}var(cc,pp,ii)=Fixture();ii.Entries=[new(){Name="Ancient Token",Count=1,Location="Augmentation"}];Check(new ProgressBrowseIndex(cc).Choices(ProgressBrowseMode.Item,pp,ii,false,"").Count==0);});
+        Test("loot export removal and metadata arrival refresh choices",()=>{var(c,p,i)=Fixture();i.Entries.Clear();i.Invalidate();var index=new ProgressBrowseIndex(c);Check(index.Choices(ProgressBrowseMode.Item,p,i,false,"").Count==0);i.Entries.Add(new(){Name="Ancient Token",Count=1,Estimated=true,Location="Log estimate"});i.Invalidate();Check(index.Choices(ProgressBrowseMode.Item,p,i,false,"").Count==1);i.Entries.Clear();i.Invalidate();Check(index.Choices(ProgressBrowseMode.Item,p,i,false,"").Count==0);c.Quests.Add(new(){Id="new",Name="New",Requirements=[new(){ItemKey="unused"}]});i.Entries.Add(new(){Name="Unrelated item",Count=1});i.Invalidate();Check(new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Single().Key=="unused");});
+        Test("inactive route associations are discoverable without route changes",()=>{var(c,p,i)=Fixture();c.Quests[0].Requirements.Clear();c.Quests[0].Steps[0].Optional=true;c.Quests[0].Steps[0].Route="Alternative";var before=JsonSerializer.Serialize(p);var index=new ProgressBrowseIndex(c);Check(index.Choices(ProgressBrowseMode.Item,p,i,true,"").Count==1&&index.AlternateRoutes(c.Quests[0],p,"token")=="Alternative");Check(before==JsonSerializer.Serialize(p));});
+        Test("quest mode retains reward-aware search",()=>{var(c,p,i)=Fixture();var rows=new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Quest,p,i,true,"Reward Blade");Check(rows.Single().Key=="q1"&&rows[0].ItemKey=="");});
+        Test("duplicate labels keep distinct quest identities",()=>{var(c,p,i)=Fixture();c.Quests[1].Name=c.Quests[0].Name;var rows=new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Quest,p,i,false,"");Check(rows.Count==2&&rows.Select(r=>r.Key).Distinct().Count()==2);});
+        Test("unresolved explicit identities never claim a quest association",()=>{var(c,p,i)=Fixture();c.Items[0].RequiresExplicitIdentity=true;i.Entries=[new(){Name="Old Token",Count=1}];Check(new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Count==0);i.Entries[0].ConfirmedItemKey="token";i.Invalidate();Check(new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Count==1);});
+        Test("missing metadata stays browsable by documented identity",()=>{var(c,p,i)=Fixture();c.Items[0].MetadataComplete=false;Check(new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Single().Label=="Ancient Token");});
+        Test("shared-bank and estimated evidence retain source uncertainty",()=>{var(c,p,i)=Fixture();i.Entries=[new(){Name="Ancient Token",Count=1,Location="SharedBank1"},new(){Name="Ancient Token",Count=1,Estimated=true}];var row=new ProgressBrowseIndex(c).Choices(ProgressBrowseMode.Item,p,i,false,"").Single();Check(row.Evidence.Contains("Shared bank")&&row.Evidence.Contains("Log estimate"));});
+        Test("browsing preserves inventory profile and canonical quest data",()=>{var(c,p,i)=Fixture();var before=JsonSerializer.Serialize(new{c,p,i});var index=new ProgressBrowseIndex(c);foreach(var mode in new[]{ProgressBrowseMode.Item,ProgressBrowseMode.Quest})foreach(bool tracked in new[]{true,false})index.Choices(mode,p,i,tracked,"");Check(before==JsonSerializer.Serialize(new{c,p,i}));});
+    }
+}

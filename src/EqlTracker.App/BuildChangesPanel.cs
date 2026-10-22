@@ -19,7 +19,7 @@ public sealed class BuildChangesPanel : Expander
             var old = baseline.FirstOrDefault(p => p.Id == change.Id);
             var single = change.Item == null ? baseline.Select(p => p.Id == change.Id ? change : p).ToList() : EquipmentPositions.Replace(baseline, change.Id, change.Item, catalog);
             var evaluation = session.CompareBuild(single, change.Id);
-            string text = change.Label + ": " + (old?.Item?.Name ?? "Empty") + " → " + (change.Item?.Name ?? "Empty") + " · " + (evaluation.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? (evaluation.Status == "Conditional" ? "Conditional" : "—")) + " pts";
+            string text = change.Label + ": " + (old?.Item?.Name ?? "Empty") + " → " + (change.Item?.Name ?? "Empty") + " · " + (evaluation.Pet ? PetRoleRatings.Text(evaluation) : evaluation.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? (evaluation.Status == "Conditional" ? "Conditional" : "—")) + " pts";
             string tooltip = "Current effects: " + string.Join("; ", old?.Item?.Augments.Select(a => a.EffectText) ?? []) + "\nPlanned effects: " + string.Join("; ", change.Item?.Augments.Select(a => a.EffectText) ?? []) + "\n" + string.Join('\n', evaluation.Unbuffed.Changes.Select(c => c.Explanation));
             rows.Add(new(change.Id, text, tooltip));
         }
@@ -29,7 +29,7 @@ public sealed class BuildChangesPanel : Expander
     {
         Visibility = visible ? Visibility.Visible : Visibility.Collapsed; if (!visible || signature == snapshot.Key) return; signature = snapshot.Key;
         var stack = new StackPanel(); var total = snapshot.Total;
-        stack.Children.Add(UI.Text("Cumulative: " + (total.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? total.Unbuffed.Quality) + " preference points" + (!total.Pet ? " · Buffed " + (total.Buffed.Delta?.ToString("+0.0;-0.0;0") ?? "—") : ""), 11, "Mint"));
+        stack.Children.Add(UI.Text("Cumulative: " + (total.Pet ? PetRoleRatings.Text(total) : total.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? total.Unbuffed.Quality) + " preference points" + (!total.Pet ? " · Buffed " + (total.Buffed.Delta?.ToString("+0.0;-0.0;0") ?? "—") : ""), 11, "Mint"));
         foreach (var row in snapshot.Rows)
         {
             var text = UI.Text(row.Text, 11); text.ToolTip = row.Tooltip;

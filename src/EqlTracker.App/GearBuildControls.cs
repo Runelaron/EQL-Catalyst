@@ -139,20 +139,29 @@ public sealed partial class QuestWindow
         if (gearTable.SelectedItem is not GearRow row) return;
         var current = visibleGearPositions.FirstOrDefault(p => p.Id == row.PositionId)?.Item;
         var pair = ItemPairComparison.Create(current == null ? null : Controller.Catalog.FindKey(current.ConfirmedItemKey) ?? Controller.Catalog.Find(current.Name), current, row.Item, GearInspectedRank(row), GearInspectedInstance(row), Controller.Profile.ActiveLoadout, Controller.Catalog, false);
-        var window = new FrostWindow(Controller, "Item comparison", "Current item / candidate / differences", 750, 550) { Owner = this }; var comparison = new ComparisonPanel(); comparison.ShowPair(pair); window.Body.Children.Add(UI.Scroll(comparison)); Native.ShowPanel(window);
+        var window = new FrostWindow(Controller, "Item comparison", "Current item / candidate / differences", 750, 550) { Owner = this }; var comparison = new ComparisonPanel(); comparison.ShowPair(pair,()=>{
+            if(gearTable.SelectedItem is not GearRow active)return pair;var baseline=visibleGearPositions.FirstOrDefault(p=>p.Id==active.PositionId)?.Item;var definition=baseline==null?null:Controller.Catalog.FindKey(baseline.ConfirmedItemKey)??Controller.Catalog.Find(baseline.Name);
+            return ItemPairComparison.Create(definition,baseline,Controller.Catalog.FindKey(active.Item.Key)??active.Item,GearInspectedRank(active),GearInspectedInstance(active),Controller.Profile.ActiveLoadout,Controller.Catalog,false);
+        },()=>gearPreview.Revision+"|"+gearFingerprint+"|"+(gearTable.SelectedItem as GearRow)?.Item.Key); window.Body.Children.Add(UI.Scroll(comparison)); Native.ShowPanel(window);
     }
-    private void OpenGearRoles() => new GearRolesDialog(Controller.Profile, preset.SelectedItem?.ToString() ?? "Balanced Tank") { Owner = this }.ShowDialog();
+    private void OpenGearRoles()
+    {
+        CharacterProfile working; lock (Controller.Sync) working = EquipmentPositions.Copy(Controller.Profile);
+        new GearRolesDialog(working, preset.SelectedItem?.ToString() ?? "Balanced") { Owner = this }.ShowDialog();
+    }
 }
 internal sealed class GearRolesDialog : FrostDialog
 {
-    internal GearRolesDialog(CharacterProfile profile, string selected) : base("Roles and rating formulas", 640, 480)
+    internal GearRolesDialog(CharacterProfile profile, string selected) : base("Roles and rating formulas", 680, 560)
     {
-        var content = new StackPanel();
-        content.Children.Add(UI.Text("Roles express stat preferences, not predicted DPS, mitigation or proc rates. Both Self contexts use the same weights with their own confirmed totals and limits.", 12));
-        foreach (var role in profile.Weights.Where(p => !p.Key.StartsWith("Pet", StringComparison.OrdinalIgnoreCase))) {
-            var weights = UI.Stack(UI.Text(string.Join(" + ", role.Value.Where(w => w.Value != 0).Select(w => $"{w.Value:0.##} × Δ{w.Key}")), 12, "Mint"), UI.Text("Whole-loadout before/after; confirmed caps only, strongest worn haste, no duplicate AA/buff bonuses. Effects and procs are separate. The item rating's ⓘ explains its exact arithmetic in both contexts.", 11));
-            content.Children.Add(new Expander { Header = role.Key, Content = weights, IsExpanded = role.Key == selected });
+        var content = UI.Stack(UI.Text("Damage / Balanced / Survival", 16, "Accent", true), UI.Text("Choose an aim for the whole character. Class-aware priorities include melee, casting resources and survival together. Numbers are editable preference points, not predictions of DPS, healing or mitigation.", 12));
+        foreach (string name in SelfRoleRatings.Names(profile))
+        {
+            var resolved = SelfRoleRatings.Resolve(profile, profile.ActiveLoadout, name);
+            var body = UI.Stack(RatingFormulaDialog.RoleExplanationContent(resolved), UI.Text(RatingExplanation.Formula(resolved.Weights), 12, "Mint"));
+            content.Children.Add(new Expander { Header = name + (SelfRoleRatings.Goals.Contains(name) ? "" : " · Custom"), Content = body, IsExpanded = name == selected });
         }
+        content.Children.Add(UI.Text("Custom roles retain your saved values. Retired preset definitions stay internal for compatibility; they are not offered as Gear roles. Both Self contexts use the same resolved weights with their own confirmed totals and limits; the item's ⓘ shows exact replacement arithmetic.", 11, "SecondaryText"));
         Editor.Children.Add(content); Actions.Children.Add(UI.Button("Close", Close));
     }
 }

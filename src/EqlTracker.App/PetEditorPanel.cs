@@ -12,8 +12,10 @@ public sealed partial class QuestWindow
     private readonly ItemDetailsInspector petComparison = new();
     private readonly TextBlock petTotals = UI.Text("", 11, "Foreground"), petWeapons = UI.Text("", 10, "Mint");
     private readonly BuildChangesPanel petChanges = new();
+    private readonly CheckBox petDualWield = new() { Content = "Dual wield", ToolTip = "Reserve Primary and Secondary positions. Turning off keeps Secondary setup inactive and frees position 2." };
+    private readonly TextBlock petSlotWarning = UI.Text("", 11, "Melee");
     private ComboBox? petRoleChoice;
-    private string SelectedPetPreset => SelectedPetInventory?.Preset is { Length: > 0 } name ? name : Controller.Profile.ActiveLoadout.PetPreset;
+    private string SelectedPetPreset => PetRoleRatings.Normalize(SelectedPetInventory?.Preset is { Length: > 0 } name ? name : Controller.Profile.ActiveLoadout.PetPreset);
     private string petPreferredPosition = "*";
     private sealed record PetReplacementChoice(string Id, string Label) { public override string ToString() => Label; }
     private readonly ComboBox petReplacement = new() { Width = 155, DisplayMemberPath = "Label", SelectedValuePath = "Id" };
@@ -24,7 +26,7 @@ public sealed partial class QuestWindow
     private CancellationTokenSource? petViewCancel;
     private string petRowsKey = "";
     private sealed record PetSearchRow(ItemDefinition Item, string Ownership)
-    { public string Type => PetItemRules.Type(Item); public int Rank { get; init; } public InventoryEntry? Instance { get; init; } public GearComparison? Comparison { get; init; } public double? UnbuffedDelta => Comparison?.Evaluation?.Unbuffed.Delta; public string Rating => Comparison?.Evaluation?.Status == "Conditional" ? "Conditional" : UnbuffedDelta?.ToString("+0.0;-0.0;0") ?? "—"; public override string ToString() => Item.Key + "|" + Instance?.Location + "|" + Rank; public string Name => Item.Name + (Rank > 0 ? " +" + Rank : ""); public string SlotText => string.Join(" / ", Item.Slots); }
+    { public string Type => PetItemRules.Type(Item); public int Rank { get; init; } public InventoryEntry? Instance { get; init; } public GearComparison? Comparison { get; init; } public double? UnbuffedDelta => Comparison?.Evaluation?.Status=="Conditional"?null:Comparison?.Evaluation?.Unbuffed.Delta; public double? DefenseDelta=>Comparison?.Evaluation?.Status=="Conditional"?null:Comparison?.Evaluation?.PetDefense?.Delta; public bool StrongTradeoff { get; set; } public string RatingTooltip => Comparison?.Evaluation?.Status == "Conditional" ? "Conditional · " + Comparison.Confidence : PetRoleRatings.Text(Comparison?.Evaluation); public string Rating => Comparison?.Evaluation?.Status == "Conditional" ? "Cond." : PetRoleRatings.Text(Comparison?.Evaluation); public override string ToString() => Item.Key + "|" + Instance?.Location + "|" + Rank; public string Name => Item.Name + (Rank > 0 ? " +" + Rank : ""); public string SlotText => string.Join(" / ", Item.Slots); }
     private sealed class PetItemRow(PetInventoryItem item, string state, string procs = "", string type = "Unknown")
     {
         public override string ToString() => Item.Id.Length > 0 ? Item.Id : "empty:" + Item.Position;
@@ -48,6 +50,7 @@ public sealed partial class QuestWindow
     }
     private UIElement BuildPet()
     {
+        if(PetLayoutDefaults.Apply(Controller.Profile)) Controller.Save();
         var root = new DockPanel(); petRank.IsEditable = false; petBuild.DisplayMemberPath = "Name"; petBuild.SelectedValuePath = "Id";
         CanHide = () => ConfirmGearWorkspaceExit() && ConfirmPetWorkspaceExit();
         petComparison.PreviewCommitted += ShowPetComparison;
@@ -56,7 +59,7 @@ public sealed partial class QuestWindow
         petTheorySave = UI.Button("Save theorycraft build…", () => SavePetTheorycraft()); petTheorySave.Visibility = Visibility.Collapsed;
         petTheorySave.ToolTip = "Explicitly save this isolated workspace as a Theorycraft build. Current inventory is unchanged.";
         var top = new WrapPanel();
-        var petRole = UI.Select(Controller.Profile.Weights.Keys, Controller.Profile.ActiveLoadout.PetPreset, 145);
+        var petRole = UI.Select(PetRoleRatings.Choices(Controller.Profile), PetRoleRatings.Normalize(Controller.Profile.ActiveLoadout.PetPreset), 145);
         petRoleChoice = petRole;
         petRole.ToolTip = "Editable role preferences. Points are not predicted DPS, procs or avoidance.";
         petRole.SelectionChanged += (_, _) => { if (initializing || petContextLoading || SelectedPetInventory is not { } build) return; string selected = petRole.SelectedItem?.ToString() ?? "Pet DPS"; if (SelectedPetPreset == selected) return; PetBuildEditing.Remember(build, "Rating preset"); build.Preset = selected; if (PetDestination == PetInventoryDestination.Confirmed) Controller.Profile.ActiveLoadout.PetPreset = selected; PetEdited(true); };
@@ -73,21 +76,27 @@ public sealed partial class QuestWindow
         foreach (var control in new UIElement[] { UI.Field("Build", petBuild), UI.ActionField(undoPet), confirmField, UI.ActionField(toolsButton), UI.ActionField(petTheorySave) }) top.Children.Add(control);
         petFocusField = (FrameworkElement)UI.Field("Focus", petFocusName);
         var context = new WrapPanel(); foreach (var control in new UIElement[] { UI.Field("Pet Type", petElement), UI.Field("Spell", petSpell), UI.Field("Rank", petSummonTier), petFocusField, UI.Field("Level", petLevel), UI.Field("Role", petRole) }) context.Children.Add(control);
+        top.Children.Add(UI.ActionField(UI.Button("Compare pets…", OpenPetComparison)));
+        top.Children.Add(UI.ActionField(UI.Button("Pet weights…", OpenPetGoalWeights)));
         var header = UI.Stack(top, petTheoryNote,
             PetDetailsDisclosure( UI.Stack(context, petContextNote), "Summon and focus evidence. Valid edits save automatically; Undo restores changes."));
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
         petSearch.Width=170;petSearch.Height=28;petSearch.Margin=new(0);
         var left = new DockPanel(); var searchControls = new WrapPanel(); searchControls.Children.Add(UI.Field("Search",(FrameworkElement)FocusedLayout.Search(petSearch, "Find pet equipment…"))); searchControls.Children.Add(BuildPetExpansionFilter()); petTheoryCheck.VerticalAlignment=VerticalAlignment.Center; searchControls.Children.Add(UI.ActionField(petTheoryCheck));
-        var filters = new WrapPanel(); foreach (var control in new UIElement[] { UI.Field("Ownership", petOwnership), UI.Field("Wearable slot", petSlot), UI.Field("Preview rank", petRank), UI.Field("Current item", petReplacement) }) filters.Children.Add(control);
+        var filters = new WrapPanel(); foreach (var control in new UIElement[] { UI.Field("Ownership", petOwnership), UI.Field("Slot", petSlot), UI.Field("Set Rank", petRank), UI.Field("Current item", petReplacement) }) filters.Children.Add(control);
         petCandidateFilterNote.Visibility = Visibility.Collapsed;
-        var candidateHeader = UI.Stack(UI.Label("Find items for pet inventory"), searchControls, petCandidateFilterNote, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter catalog items by ownership or compatibility; inventory positions do not enforce wearable slots."));
-        DockPanel.SetDock(candidateHeader, Dock.Top); left.Children.Add(candidateHeader);
-        var ratingColumn = new DataGridTextColumn { Header = "Upgrade rating", Binding = new System.Windows.Data.Binding("Rating"), SortMemberPath = "UnbuffedDelta", Width = 100 };
+        var candidateHeader = UI.Stack(searchControls, petCandidateFilterNote, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter catalog items by ownership or compatibility; inventory positions do not enforce wearable slots."));
+        var boundedHeader = UI.BoundedHeader(candidateHeader, left); DockPanel.SetDock(boundedHeader, Dock.Top); left.Children.Add(boundedHeader);
+        var ratingColumn = new DataGridTextColumn { Header = "Rating", Binding = new System.Windows.Data.Binding("Rating"), SortMemberPath = "UnbuffedDelta", Width = 78 };
+        var ratingCell=new Style(typeof(DataGridCell),TryFindResource(typeof(DataGridCell)) as Style);ratingCell.Setters.Add(new Setter(ToolTipProperty,new System.Windows.Data.Binding("RatingTooltip")));ratingCell.Setters.Add(new Setter(System.Windows.Automation.AutomationProperties.NameProperty,new System.Windows.Data.Binding("RatingTooltip")));ratingColumn.CellStyle=ratingCell;
         petResults.Columns.Add(ratingColumn); ConfigurePetRatingSort(ratingColumn);
         petResults.Columns.Insert(1, new DataGridTextColumn { Header = "Type", SortMemberPath = "Type", Binding = new System.Windows.Data.Binding("Type"), Width = 85 });
 
+        TableLayout.SetDefaultScale(petResults, petResults.Columns[0], 2d / 3);
+        TableLayout.SetDefaultSample(petResults, ratingColumn, "+9999.9");
         TableLayout.SetKey(petResults, "tracker.pet.candidates"); TableLayout.SetKey(petItems, "tracker.pet.inventory");
-        var gripColumn = new DataGridTextColumn { Header = "", Binding = new System.Windows.Data.Binding("Grip"), Width = 24, MinWidth = 22, IsReadOnly = true };
+        var gripColumn = new DataGridTextColumn { Header = "", Binding = new System.Windows.Data.Binding("Grip"), Width = 16, MinWidth = 16, MaxWidth = 16, CanUserResize = false, IsReadOnly = true };
+        var gripCell = new Style(typeof(DataGridCell),TryFindResource(typeof(DataGridCell)) as Style); gripCell.Setters.Add(new Setter(Control.PaddingProperty,new Thickness(1,3,1,3))); gripColumn.CellStyle=gripCell;
         TableLayout.SuppressCellTooltip(gripColumn); petItems.Columns.Insert(0, gripColumn);
         petItems.Columns.Insert(3, new DataGridTextColumn { Header = "Type", SortMemberPath = "Type", Binding = new System.Windows.Data.Binding("Type"), Width = 78 });
 
@@ -97,7 +106,9 @@ public sealed partial class QuestWindow
         DockPanel.SetDock(leftActions, Dock.Bottom); left.Children.Add(leftActions); left.Children.Add(petResults);
         var right = new DockPanel();
         var inventoryTools = FocusedLayout.Menu("Inventory ▾", ("Edit selected item…", () => EditPetItem((petItems.SelectedItem as PetItemRow)?.Item), "Edit position, intended slot, rank and Exaltations."), ("Remove item", RemovePetItem, "Remove from this build; Undo is available."));
-        var rightHeader = UI.Stack(petListTitle, inventoryTools); DockPanel.SetDock(rightHeader, Dock.Top); right.Children.Add(rightHeader);
+        petDualWield.Click += (_, _) => { if (petContextLoading || SelectedPetInventory is not { } build) return; PetSlotPlanning.Toggle(build, petDualWield.IsChecked == true, Controller.Catalog, PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes)); if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now); PetEdited(); };
+        var inventoryRow = UI.Row(inventoryTools, petDualWield); petDualWield.Margin = new(10,0,0,0); petDualWield.VerticalAlignment = VerticalAlignment.Center;
+        var rightHeader = UI.Stack(petListTitle, inventoryRow, petSlotWarning); DockPanel.SetDock(rightHeader, Dock.Top); right.Children.Add(rightHeader);
         var totalsCard = UI.Card(UI.Stack(UI.Text("Gear totals", 12, "Accent", true), petTotals, petWeapons)); totalsCard.Padding = new(6, 4, 6, 4); totalsCard.ToolTip = "Inferred equipment contributions only. Unknown pet base stats and buffs are excluded; strongest worn haste is used. Edit item… corrects intended or verified slots."; DockPanel.SetDock(totalsCard, Dock.Bottom); right.Children.Add(totalsCard);
         DockPanel.SetDock(petFeedback, Dock.Bottom); right.Children.Add(petFeedback); right.Children.Add(petItems);
         foreach (var column in petItems.Columns.Where(c => c.SortMemberPath is "Slot" or "State")) column.Visibility = Visibility.Collapsed;
@@ -121,25 +132,17 @@ public sealed partial class QuestWindow
         var note = UI.Text("Pet inventory is manually confirmed · exports cannot identify it.", 11, "Muted"); note.ToolTip = "Add, right-click and drop use the next empty position. Add immediately; drag rows to reorder. +Rank edits inline. Use Edit item… for effects or verified equipment. Plans never imply actual ownership.";
         petListTitle.ToolTip = note.ToolTip;
         var footer = UI.Stack(petNote, petDraftSummary, petChanges); DockPanel.SetDock(footer, Dock.Bottom); right.Children.Insert(0, footer);
-        var split = UI.Split(TrackerLeftPane(right), left, 400, Controller.Profile, "pet-focused-items", 180, 230);
+        var split = UI.Split(TrackerLeftPane(right), left, 400, Controller.Profile, "pet-focused-items", 180, 210);
         if (!Controller.Profile.PanelSplits.ContainsKey("pet-focused-items")) { split.ColumnDefinitions[0].Width = new(.44, GridUnitType.Star); split.ColumnDefinitions[2].Width = new(.56, GridUnitType.Star); }
         var comparison = FloatingInspector("Item Details", petComparison);
-        var outer = UI.Split(split, comparison, 340, Controller.Profile, "pet-focused-comparison", 420, 240); root.Children.Add(outer);
+        var outer = UI.Split(split, comparison, 340, Controller.Profile, "pet-focused-comparison", 395, 220); root.Children.Add(UI.HorizontalWorkspace(outer, 620));
         if (!Controller.Profile.PanelSplits.ContainsKey("pet-focused-comparison")) { outer.ColumnDefinitions[0].Width = new(.75, GridUnitType.Star); outer.ColumnDefinitions[2].Width = new(.25, GridUnitType.Star); }
         petInnerSplit = split; petOuterSplit = outer;
-        var divider = outer.Children.OfType<GridSplitter>().Single();
-        bool lastWide = true;
         void Adapt()
         {
-            bool wide = ActualWidth >= 1080 && ActualHeight >= 540;
-            comparison.Visibility = divider.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-            if (!wide) { outer.ColumnDefinitions[2].MinWidth = 0; outer.ColumnDefinitions[2].Width = new(0); outer.ColumnDefinitions[1].Width = new(0); outer.ColumnDefinitions[0].MinWidth = 0; }
-            else if (!lastWide) { double fraction = Controller.Profile.PanelSplits.GetValueOrDefault("pet-focused-comparison", .25); outer.ColumnDefinitions[0].Width = new(1 - fraction, GridUnitType.Star); outer.ColumnDefinitions[2].MinWidth = 240; outer.ColumnDefinitions[2].Width = new(fraction, GridUnitType.Star); outer.ColumnDefinitions[1].Width = new(5); }
-            lastWide = wide;
-            petSearch.Width = ActualWidth < 800 ? 160 : 220;
+            petSearch.Width = ActualWidth < 800 ? 120 : 165;
             note.Visibility = petNote.Visibility = petDraftSummary.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
-            petWeapons.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
-            petTotals.TextWrapping = ActualHeight < 540 ? TextWrapping.NoWrap : TextWrapping.Wrap; petTotals.TextTrimming = TextTrimming.CharacterEllipsis;
+            petTotals.TextTrimming = TextTrimming.CharacterEllipsis;
             if (ActualHeight < 540) petChanges.IsExpanded = false;
         }
         SizeChanged += (_, _) => Adapt(); Loaded += (_, _) => Adapt();
@@ -171,6 +174,7 @@ public sealed partial class QuestWindow
             return null;
         }
         petResults.PreviewMouseRightButtonDown += (_, e) => { if (RowAt(e.OriginalSource)?.Item is PetSearchRow row) petResults.SelectedItem = row; };
+        petItems.MouseDoubleClick += (_, e) => { var cell = Ancestor<DataGridCell>(e.OriginalSource); if (RowAt(e.OriginalSource)?.Item is PetItemRow row && cell?.Column != rankColumn) { EditPetItem(row.Item); e.Handled = true; } };
         petItems.PreviewMouseRightButtonDown += (_, e) => { if (RowAt(e.OriginalSource)?.Item is PetItemRow row) petItems.SelectedItem = row; };
         var catalogMenu = new ContextMenu(); var addMenu = new MenuItem { Header = "Add to selected list", ToolTip = "Add immediately to the selected inventory or plan, using the next empty position. No game items are moved." }; addMenu.Click += (_, _) => AddPetItem(); catalogMenu.Items.Add(addMenu); petResults.ContextMenu = catalogMenu;
         var inventoryMenu = new ContextMenu(); var edit = new MenuItem { Header = "Edit item…" }; edit.Click += (_, _) => EditPetItem((petItems.SelectedItem as PetItemRow)?.Item); inventoryMenu.Items.Add(edit); var remove = new MenuItem { Header = "Remove item" }; remove.Click += (_, _) => RemovePetItem(); inventoryMenu.Items.Add(remove); petItems.ContextMenu = inventoryMenu;
@@ -232,57 +236,64 @@ public sealed partial class QuestWindow
     private void RefreshPet()
     {
         if (petRankEditing) return;
+        if(petRatingColumn!=null) { petRatingColumn.Header="Rating"; TableLayout.SetDefaultSample(petResults, petRatingColumn, SelectedPetPreset=="Balanced"?"+9999 / +9999":"+9999.9"); }
         if (SelectedPetInventory is { } automaticBuild) RefreshAutomaticPetLevel(automaticBuild);
-        long sourceRevision = Controller.EquipmentRevision;
+        long sourceRevision = Controller.EquipmentRevision, sourcePetRevision = Controller.PetRevision, sourceEditRevision = petEditRevision;
         if (petBuild.Items.Count == 0 || PetDestination == PetInventoryDestination.Planned && CurrentBuild == null) RefreshBuildChoices(); var build = SelectedPetInventory; if (build == null) return; PetInventoryEditing.EnsureIdentities(build);
         bool hadInventorySelection = petItems.SelectedItem is PetItemRow;
         int selectedPosition = (petItems.SelectedItem as PetItemRow)?.Position ?? 1;
         string expansionKey = ItemExpansionFilter.Key(Controller.Profile.PetExpansions);
-        string key = $"{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{build.IsTheorycraft}|{petSearch.Text}|{petOwnership.SelectedIndex}|{PetDestination}|{build.Id}|{selectedPosition}|{petSlot.SelectedItem}|{petRank.Text}|{petPreferredPosition}|{expansionKey}"; if (key == petKey) return; petKey = key;
+        string key = $"{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{build.IsTheorycraft}|{petSearch.Text}|{petOwnership.SelectedIndex}|{PetDestination}|{build.Id}|{selectedPosition}|{petSlot.SelectedItem}|{petRank.Text}|{petPreferredPosition}|{expansionKey}"; if (key == petKey) return; petKey = key;
         petViewCancel?.Cancel(); petViewCancel?.Dispose(); petViewCancel = new(); var token = petViewCancel.Token;
-        var owner = (Controller.EquipmentView?.Profile.ActiveLoadout ?? EquipmentPositions.Copy(Controller.Profile.ActiveLoadout)); var plan = EquipmentPositions.Copy(build); var confirmed = EquipmentPositions.Copy(PetInventoryEditing.Confirmed(owner, Controller.Catalog));
+        var owner = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout); var plan = EquipmentPositions.Copy(build); var confirmed = EquipmentPositions.Copy(PetInventoryEditing.Confirmed(owner, Controller.Catalog));
         var context = GuidedPetBuilds.Context(owner, plan); var reference = GuidedPetBuilds.Positions(confirmed, owner, Controller.Catalog); var inferred = PetEquipmentInference.Build(plan, owner, Controller.Catalog); var positions = inferred.Positions;
         string preferredPosition = petPreferredPosition;
         bool wasInitializing = initializing; initializing = true;
         petReplacement.ItemsSource = new[] { new PetReplacementChoice("*", "Best compatible") }.Concat(plan.Items.OrderBy(i => i.Position).Select(i => new PetReplacementChoice(inferred.Selections.FirstOrDefault(s => s.EntryId == i.Id)?.PositionId ?? "inventory:" + i.Id, $"{i.Position} · {i.Name} +{i.Rank}"))).ToList(); petReplacement.SelectedValue = preferredPosition; initializing = wasInitializing;
         if (owner.PetEquipmentConfirmedAt == null && confirmed.Items.Count == 0) foreach (var position in reference) position.Knowledge = EquipmentKnowledge.Unknown;
-        var catalog = (Controller.EquipmentView?.Catalog ?? new Catalog { Items = Controller.Catalog.Items.ToList() }); var inventory = (Controller.EquipmentView?.Inventory ?? Controller.Inventory); var weights = new Dictionary<string,double>(Controller.Profile.Weights.GetValueOrDefault(SelectedPetPreset, GearScorer.Defaults["Pet damage"]));
-        string query = petSearch.Text.Trim(), slotFilter = petSlot.SelectedItem?.ToString() ?? "All slots"; int ownership = petOwnership.SelectedIndex; int? rankOverride = int.TryParse(petRank.Text, out int tier) ? Math.Clamp(tier,0,20) : null; var pending = Controller.PendingGear(query).ToList();
+        var catalog = (Controller.EquipmentView?.Catalog ?? new Catalog { Items = Controller.Catalog.Items.ToList() }); var inventory = (Controller.EquipmentView?.Inventory ?? Controller.Inventory); var weights = PetRoleRatings.Weights(Controller.Profile,SelectedPetPreset);
+        string query = petSearch.Text.Trim(), slotFilter = petSlot.SelectedItem?.ToString() ?? "All slots"; int ownership = petOwnership.SelectedIndex; int? rankOverride = int.TryParse(petRank.Text, out int tier) ? Math.Clamp(tier,0,10) : null; var pending = Controller.PendingGear(query).ToList();
         var expansions = Controller.Profile.PetExpansions.ToArray();
+        string selectedGoal=SelectedPetPreset;var defenseWeights=PetRoleRatings.Weights(Controller.Profile,"Tank");
         BuildChangesPanel.Snapshot? changes = null;
         List<PetSearchRow> BuildRows()
         {
             var rows = new List<PetSearchRow>();
-            var evaluator = new LoadoutEvaluationSession(catalog, context, true, weights, positions, reference, plan.IsTheorycraft);
+            var evaluator = new LoadoutEvaluationSession(catalog, context, true, weights, positions, reference, plan.IsTheorycraft, petGoal: selectedGoal, petDefenseWeights: defenseWeights, petInventory: plan,effectivePetEquipment:inferred);
             foreach (var item in catalog.Items.Where(i => ItemExpansionFilter.Includes(expansions, ItemPresentation.Expansion(i)) && (i.Slots.Count > 0 || query.Length >= 3) && (i.Name.Contains(query,StringComparison.OrdinalIgnoreCase) || i.Aliases.Any(a=>a.Contains(query,StringComparison.OrdinalIgnoreCase))) && (slotFilter == "All slots" || i.Slots.Any(s=>EquipmentPositions.Normalize(s)==slotFilter))))
             {
                 if (!PetItemRules.ShowCandidate(item, context, catalog, plan.IsTheorycraft)) continue;
                 token.ThrowIfCancellationRequested(); var stock = inventory.Evidence(item).Where(e=>!e.IsAugment && !e.IsCollection && e.Count>0).ToList(); bool petOwn = PetInventoryEditing.Has(confirmed,item), planned = owner.PetBuilds.Any(b=>PetInventoryEditing.Has(b,item));
                 if (ownership==1 && stock.Count==0 || ownership==2 && !petOwn || ownership==3 && !planned) continue;
                 string owned = string.Join(" · ",new[] { stock.Count>0 ? "Inventory Only" : "",petOwn ? "Pet · manual" : "",planned ? "Planned" : "" }.Where(x=>x.Length>0));
-                foreach (var instance in PhysicalItemChoices.Rows(stock, ownership == 1))
+                foreach (var instance in PhysicalItemChoices.Rows(PetEquipmentInference.CandidateCopies(stock,confirmed,item,ownership==1), ownership == 1))
                 {
-                    int rank=instance?.Rank ?? rankOverride ?? 0;
+                    int rank=CandidateRanks.Resolve(instance, rankOverride);
                     rows.Add(new(item,owned) { Rank=rank, Instance=instance,Comparison=PetEquipmentInference.Best(item, rank, instance, evaluator, positions, preferredPosition == "*" ? null : preferredPosition) });
                 }
             }
             foreach (var title in pending) if (ownership==0 && ItemExpansionFilter.Includes(expansions, "Unknown") && !rows.Any(r=>r.Item.Name.Equals(title,StringComparison.OrdinalIgnoreCase))) rows.Add(new(new() {Name=title,Key=Identity.Key(title),WikiUrl="https://eqlwiki.com/"+Uri.EscapeDataString(title.Replace(' ','_'))},"Metadata pending"));
-            changes = BuildChangesPanel.Prepare(reference, positions, catalog, new LoadoutEvaluationSession(catalog, context, true, weights, reference, reference, plan.IsTheorycraft));
-            return rows.OrderBy(r=>r.UnbuffedDelta>0 ? 0 : r.Comparison?.Evaluation?.Status == "Conditional" ? 1 : 2).ThenBy(r=>r.Name).ToList();
+            changes = BuildChangesPanel.Prepare(reference, positions, catalog, new LoadoutEvaluationSession(catalog, context, true, weights, reference, reference, plan.IsTheorycraft, petGoal: selectedGoal, petDefenseWeights: defenseWeights));
+            foreach(var row in rows.Where(r=>r.Comparison?.Evaluation?.Status != "Conditional" && r.DefenseDelta.HasValue && r.UnbuffedDelta.HasValue)) row.StrongTradeoff=!rows.Any(other=>other.Comparison?.Evaluation?.Status != "Conditional"&&other.DefenseDelta.HasValue&&other.UnbuffedDelta.HasValue&&PetRoleRatings.Dominates(other.UnbuffedDelta.Value,other.DefenseDelta.Value,row.UnbuffedDelta!.Value,row.DefenseDelta!.Value));
+            return rows.OrderBy(r=>r.Comparison?.Evaluation?.Status == "Conditional" ? 1 : r.UnbuffedDelta>0 ? 0 : 2).ThenBy(r=>r.Name).ToList();
         }
         void Apply(List<PetSearchRow> rows)
         {
-            if (sourceRevision != Controller.EquipmentRevision || token.IsCancellationRequested || petKey!=key || expansionKey != ItemExpansionFilter.Key(Controller.Profile.PetExpansions) || SelectedTab!=TrackerTab.Pet || !Body.IsVisible) return;
+            if (sourceRevision != Controller.EquipmentRevision || sourcePetRevision != Controller.PetRevision || sourceEditRevision != petEditRevision || token.IsCancellationRequested || petKey!=key || expansionKey != ItemExpansionFilter.Key(Controller.Profile.PetExpansions) || SelectedTab!=TrackerTab.Pet || !Body.IsVisible) return;
             petRowsKey = key;
+            petContextLoading = true; petDualWield.IsChecked = plan.DualWield; petContextLoading = false;
+            petSlotWarning.Text = string.Join("\n", PetSlotPlanning.Warnings(plan, catalog, PetEquipmentPlanner.Capacity(owner.Classes))); petSlotWarning.Visibility = petSlotWarning.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
             string? selected=(petResults.SelectedItem as PetSearchRow)?.ToString(); UI.SetRows(petResults,rows); ApplyPetSort(); petResults.SelectedItem=rows.FirstOrDefault(r=>r.ToString()==selected);
-            petCandidateFilterNote.Text = expansions.Length == 0 ? "Select an item expansion to show candidates." : rows.Count == 0 ? "No items match the selected filters." : "";
+            var excluded = query.Length < 3 ? [] : catalog.Items.Where(i=>i.Name.Contains(query,StringComparison.OrdinalIgnoreCase) && !rows.Any(r=>r.Item.Key==i.Key)).Select(i=>i.Name+": "+(!ItemExpansionFilter.Includes(expansions,ItemPresentation.Expansion(i)) ? "excluded by Expansion" : slotFilter!="All slots" && !i.Slots.Any(s=>EquipmentPositions.Normalize(s)==slotFilter) ? "excluded by Slot" : !PetItemRules.ShowCandidate(i,context,catalog,plan.IsTheorycraft) ? GearScorer.Eligibility(i,context,true,null,catalog) : ownership!=0 ? "excluded by Ownership" : "metadata unverified")).Take(4).ToArray();
+            petCandidateFilterNote.ToolTip=string.Join("\n",excluded);
+            petCandidateFilterNote.Text = excluded.Length>0 ? excluded.Length+" matching items excluded · hover for reasons" : expansions.Length == 0 ? "Select an item expansion to show candidates." : rows.Count == 0 ? "No items match the selected filters." : "";
             petCandidateFilterNote.Visibility = petCandidateFilterNote.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
             var all=Enumerable.Range(1,PetEquipmentPlanner.Capacity(owner.Classes)).Select(i=>plan.Items.FirstOrDefault(x=>x.Position==i) ?? new PetInventoryItem {Position=i,Slot="Storage"}).Concat(plan.Items.Where(i=>i.Position>PetEquipmentPlanner.Capacity(owner.Classes))).OrderBy(i=>i.Position);
-            var items=all.Select(i=>new PetItemRow(i,i.ItemKey.Length==0 ? "Empty · choose an item" : (i.EquipmentVerified ? "Verified equipment · " : PetDestination==PetInventoryDestination.Confirmed ? "Manual inventory · intended slot · " : "Planned · ")+PetEquipmentPlanner.Validate(plan,i,owner,catalog) + "\n" + (inferred.Selections.FirstOrDefault(s => s.EntryId == i.Id)?.Evidence ?? "Not selected into effective equipment") + "\nDrag ⠿ or the name to reorder; +Rank edits inline.\n" + string.Join("\n", i.Exaltations.Select(e => e.SourceName + ": " + e.Effect + " · " + e.State)), catalog.FindKey(i.ItemKey) is { } definition ? string.Join("; ", PetEquipmentInference.ProcEffects(definition, i.Entry())) : "", i.ItemKey.Length == 0 ? "" : catalog.FindKey(i.ItemKey) is { } typed ? PetItemRules.Type(typed) : "Unknown")).ToList();
+            var items=all.Select(i=>new PetItemRow(i,i.ItemKey.Length==0 ? "Empty · choose an item" : (i.EquipmentVerified ? "Verified equipment · " : PetDestination==PetInventoryDestination.Confirmed ? "Manual inventory · intended slot · " : "Planned · ")+PetEquipmentPlanner.Validate(plan,i,owner,catalog) + "\n" + (inferred.Selections.FirstOrDefault(s => s.EntryId == i.Id)?.Evidence ?? "Not selected into effective equipment") + "\nDrag ⠿ or the name to reorder; +Rank edits inline.\n" + string.Join("\n", i.Exaltations.Select(e => e.SourceName + ": " + e.Effect + " · " + e.State)), catalog.FindKey(i.ItemKey) is { } definition ? PetProcLabel(plan, i, definition, owner, catalog, inferred) : "", i.ItemKey.Length == 0 ? string.Join("; ", plan.SlotConfigurations.FirstOrDefault(s => s.Position == i.Position)?.Effects.Select(e => e.Effect + " · inactive") ?? []) : catalog.FindKey(i.ItemKey) is { } typed ? PetItemRules.Type(typed) : "Unknown")).ToList();
             bool was=initializing; initializing=true; UI.SetRows(petItems,items); petItems.SelectedItem=items.FirstOrDefault(i=>i.Item.Id.Length > 0 && i.Item.Id == petSelectedId) ?? (hadInventorySelection ? items.FirstOrDefault(i=>i.Position==selectedPosition) : null); initializing=was;
             var warnings=GuidedPetBuilds.Warnings(plan,owner,catalog).Concat(GuidedPetBuilds.Availability(plan,confirmed,inventory,catalog)).ToList(); petNote.Text=$"{plan.Items.Count(i => i.Position <= PetEquipmentPlanner.Capacity(owner.Classes))}/{PetEquipmentPlanner.Capacity(owner.Classes)} inventory positions · {warnings.Count} equipment notes"; petNote.ToolTip=string.Join('\n',warnings);
             var draft = changes!.Total;
-            petDraftSummary.Text = PetDestination == PetInventoryDestination.Planned ? $"Build vs confirmed · {draft.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} preference points" : "";
+            petDraftSummary.Text = PetDestination == PetInventoryDestination.Planned ? "Build vs confirmed · "+PetRoleRatings.Text(draft)+" preference points" : "";
             petTotals.Text = string.Join(" · ", new[] { "AC", "HP", "STR", "DEX", "ATK", "Haste" }.Select(s => s + " " + inferred.Totals.Stats.GetValueOrDefault(s).ToString("0.##") + (s == "Haste" ? "%" : "")));
             petWeapons.Text = string.Join("\n", inferred.Totals.Weapons.Concat(inferred.Totals.Procs)); petTotals.ToolTip = string.Join("\n", inferred.Totals.Notes);
             if (ActualHeight < 540) petChanges.IsExpanded = false;
@@ -296,16 +307,28 @@ public sealed partial class QuestWindow
         petSearchCancel?.Cancel(); petSearchCancel = new(); var token = petSearchCancel.Token; string query = petSearch.Text.Trim(); if (query.Length < 3 || Controller.Demo) return;
         try { await Task.Delay(500, token); await Controller.SearchGearAsync(query, token); if (!token.IsCancellationRequested) { petKey = ""; RefreshPet(); } } catch (OperationCanceledException) { }
     }
+    private static string PetProcLabel(PetBuild build, PetInventoryItem item, ItemDefinition definition, LoadoutProfile owner, Catalog catalog, EffectivePetEquipment equipment)
+    {
+        string intended = equipment.Positions.FirstOrDefault(p => p.Id == equipment.Selections.FirstOrDefault(s => s.EntryId == item.Id)?.PositionId)?.Slot ?? item.Slot;
+        var active = PetSlotPlanning.ActiveEffects(build, item, definition, intended, owner, catalog).Select(e => e.EffectId).ToHashSet();
+        var intrinsic = ItemEffects.Active(definition, item.TransferredOutEffects).Where(e => ExaltationPlanner.EffectType(e) == "Proc").Select(e => e + " · intrinsic");
+        var configured = item.Exaltations.Where(e => ExaltationPlanner.EffectType(e.Effect) == "Proc").Select(e => e.Effect + (!active.Contains(e.EffectId) ? " · inactive" : e.State == "Socketed" ? " · recorded" : " · planned"));
+        return string.Join("; ", intrinsic.Concat(configured));
+    }
     private void AddPetItem() { if (petResults.SelectedItem is PetSearchRow row) QuickAddPet(row.Item, PetInspectedInstance(row), (petItems.SelectedItem as PetItemRow)?.Position); else PetMessage("Select a catalog item to add.", true); }
     private void EditPetItem(PetInventoryItem? existing, ItemDefinition? item = null, int? rankOverride = null, int? requestedPosition = null)
     {
         if (SelectedPetInventory is not { } build) return;
-        item ??= existing == null ? null : Controller.Catalog.FindKey(existing.ItemKey) ?? Controller.Catalog.Find(existing.Name); if (item == null) return;
+        item ??= existing == null ? null : Controller.Catalog.FindKey(existing.ItemKey) ?? Controller.Catalog.Find(existing.Name);
         var selected=(petItems.SelectedItem as PetItemRow)?.Item;
-        int? position = requestedPosition ?? existing?.Position ?? (selected==null?null:selected.ItemKey.Length==0 || item.Slots.Any(s=>EquipmentPositions.Normalize(s)==EquipmentPositions.Normalize(selected.Slot))?selected.Position:PetInventoryEditing.NextPosition(build));
-        var editor = new PetItemDialog(Controller, item, build, PetDestination, existing, rankOverride, position) { Owner = this };
+        int? position = requestedPosition ?? existing?.Position ?? (selected==null?null:selected.ItemKey.Length==0 || item?.Slots.Any(s=>EquipmentPositions.Normalize(s)==EquipmentPositions.Normalize(selected.Slot)) == true?selected.Position:PetInventoryEditing.NextPosition(build));
+        string character = Controller.Profile.Character + "|" + Controller.Profile.Server;
+        var editor = new PetItemDialog(Controller, item, build, PetDestination, existing, rankOverride, position, () => Controller.Profile.Character + "|" + Controller.Profile.Server == character && SelectedPetInventory?.Id == build.Id ? SelectedPetInventory : null) { Owner = this };
         if (editor.ShowDialog() != true || editor.Result == null) return;
-        PetBuildEditing.Remember(build, "Edit item");
+        if (editor.Result.Position > PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes)) { PetMessage("Position exceeds current Pet inventory capacity.", true); return; }
+        PetBuildEditing.Remember(build, "Edit slot");
+        if (editor.Result.ItemKey.Length == 0) { build.Items.RemoveAll(i => i.Position == existing?.Position); PetSlotPlanning.SetEffects(build, editor.Result.Position, editor.Result.Exaltations, ""); if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now); PetEdited(); return; }
+        if (existing != null && existing.Position != editor.Result.Position) PetSlotPlanning.SetEffects(build, existing.Position, editor.Result.Exaltations, existing.Id);
         if (!PetInventoryEditing.Put(build, editor.Result, existing?.Position, editor.ReplaceOccupied, out string error)) { petNote.Text = error; return; }
         if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now);
         PetEdited();
@@ -314,7 +337,7 @@ public sealed partial class QuestWindow
     {
         if (SelectedPetInventory is not { } build || petItems.SelectedItem is not PetItemRow row) return;
         PetBuildEditing.Remember(build, "Remove item");
-        build.Items.RemoveAll(i=>i.Position==row.Position); if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now); PetEdited();
+        build.Items.RemoveAll(i=>i.Position==row.Position); PetSlotPlanning.CompactArmorAfterRemoval(build, Controller.Catalog, PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes)); if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now); PetEdited();
     }
     private void ConfirmBuild()
     {

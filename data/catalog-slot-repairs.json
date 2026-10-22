@@ -1,0 +1,72 @@
+[
+  {
+    "Title": "Aegis of Life",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = {{Item Lore Missing}}\n|itemname    = Aegis of Life\n|lucy_img_ID = 805\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NODROP<br>\nSlot: BACK SECONDARY<br>\nCharges: 1<br>\nAC: 12<br>\nWIS: +10<br>\nSV DISEASE: +25<br>\nEffect:  [[Superior Healing|<span class='itemeff'>Superior Healing</span>]] (Must Equip, Casting Time: Instant) at Level 30<br>\nWT: 9.5  Size: LARGE<br>\nClass: CLR PAL<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Aegis of Life Quest]]\n}}</onlyinclude>\n\n[[Category:Cleric Equipment]]\n[[Category:Paladin Equipment]]\n[[Category:Back]]\n[[Category:Secondary]]\n[[Category:Northern Karana]]\n[[Category:Light source]]\n\n[[Category:Quest Items]]\n[[Category:Clickies]]",
+    "Revision": 166585
+  },
+  {
+    "Title": "Black Silk Cape",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Black Silk Cape\n|lucy_img_ID = 842\n|statsblock  = \nLore Equipped, No Trade, Quest<br>\nSlot: Back<br>\nAC: 3<br>\nMANA: 10<br>\nSize: TINY<br>\nClass: NEC<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Plane of Sky]]\n\n* [[Keeper of Souls]]\n\n|relatedquests = \n\n* [[Plane of Sky#Necromancer Tests|Necromancer Test of Power]]\n\n}}</onlyinclude>\n\n[[Category:Necromancer Equipment]]\n[[Category:Back]]\n[[Category:Plane of Sky]]\n\n[[Category:Quest Items]]",
+    "Revision": 177607
+  },
+  {
+    "Title": "Blade of Abrogation",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Blade of Abrogation\n|lucy_img_ID = 603\n|statsblock  = \nLore Equipped, No Trade, Quest, Placeable<br>\nSlot: Primary<br>\nSkill: 1H Slashing  Atk Delay: 39<br>\nDMG: 20 <br>\nDmg Bon: 19<br>\nSTR: +7  INT: +3<br>\nWT: 7.5  Size: MEDIUM<br>\nClass: SHD<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Plane of Sky]]\n\n* [[a blade storm]]\n* [[a gorgalask]]\n* [[a soul harvester]]\n* [[a soul tamer]]\n* [[a thunder spirit]]\n* [[a thunder spirit princess]]\n* [[an azarack]]\n* [[an essence tamer]]\n* [[heart harpie]]\n* [[Eye of Veeshan]]\n* [[Gorgalosk]]\n* [[heart harpie]]\n* [[Protector of Sky]]\n* [[Sister of the Spire]]\n* [[The Spiroc Lord]]\n* [[Bazzt Zzzt]]\n* [[the Hand of Veeshan]]\n* [[Keeper of Souls]]\n* [[Bzzzt]]\n\n|relatedquests = \n\n* [[Shadow Knight Epic Quest]]\n\n}}</onlyinclude>\n\n[[Category:Shadow Knight Equipment]]\n[[Category:Primary]]\n[[Category:1H Slashing]]\n[[Category:Plane of Sky]]\n\n[[Category:Quest Items]]\n[[Category:Placeable Items]]",
+    "Revision": 179776
+  },
+  {
+    "Title": "Blazing Wand",
+    "Text": "\n<onlyinclude>{{Itempage\n|notes       = {{Item Lore | 'Blazing Wand' }} \n|itemname    = Blazing Wand\n|lucy_img_ID = 809\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NO DROP  <br>\nSlot: PRIMARY<br>\nCharges: 5<br>\nSkill: 1H Blunt  Atk Delay: 30<br>\nDMG: 5 <br>\nEffect:  [[Blaze]] (Any Slot/Can Equip, Casting Time: Instant) at Level 35<br>\nWT: 1.5  Size: MEDIUM<br>\nClass: MAG<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Kedge Keep]]\n\n* [[Undertow]]\n\n|relatedquests = \n\n* [[Magician Epic Quest]]\n\n}}</onlyinclude>\n\n[[Category:Kedge Keep]]\n[[Category:Magician Equipment]]\n[[Category:Primary]]\n[[Category:1H Blunt]]\n[[Category:Instant Click Equipment]]\n\n[[Category:Quest Items]]",
+    "Revision": 160303
+  },
+  {
+    "Title": "Blood Soaked Plasmatic Priest Robe",
+    "Text": "<onlyinclude>{{Itempage\n|notes       = {{Item Lore Missing}}\n|itemname    = Blood Soaked Plasmatic Priest Robe\n|lucy_img_ID = 931\n|statsblock  = \nMAGIC ITEM  LORE ITEM<br>\nAC: 6<br>\nSV FIRE: +2<br>\nWT: 10.0  Size: MEDIUM<br>\nClass: CLR WIZ MAG<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Temple of Solusek Ro]]\n\n* [[a plasmatic priest]]\n\n|relatedquests = \n\n* [[Cleric Epic Quest]]\n\n}}</onlyinclude>\n\n\n[[Category:Temple of Solusek Ro]]\n\n[[Category:Quest Items]]",
+    "Revision": 193977
+  },
+  {
+    "Title": "Leatherfoot Raider Skullcap",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|notes       = {{Item Lore|Player Raider Cap}}  <p><b>Players use this item to escape the threat of death or to teleport to West Commons during urgent raid situations.</b></p>\n<p>\nThere are '''two''' items with identical names. This one is the Rivervale quest reward.  The cap sells to vendors for very little, but costs around 92p to buy back, and thus costs about 184p to recharge. The recharge rate for this item was '''not''' affected by the April 2020 nerf. The other one, [[Leatherfoot Raider Skullcap (drop)]], drops from halflings in [[Nektulos]] and is for the [[Halfling Raider Helms]] quest. \n</p>\n|itemname    = Leatherfoot Raider Skullcap\n|lucy_img_ID = 640\n|statsblock  = \nMAGIC ITEM  LORE ITEM<br>\nSlot: HEAD<br>\nCharges: 1<br>\nAC: 7<br>\nSTR: +5  CHA: +10  AGI: +5<br>\nSV MAGIC: +5<br>\nEffect:  [[Ring of Commons]] (Any Slot, Casting Time: Instant)<br>\nWT: 0.5  Size: SMALL<br>\nClass: WAR CLR PAL RNG DRU ROG<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Leatherfoot Raiders]]\n\n}}</onlyinclude>\n\n[[Category:Cleric Equipment]]\n[[Category:Druid Equipment]]\n[[Category:Paladin Equipment]]\n[[Category:Ranger Equipment]]\n[[Category:Rogue Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Head]]\n[[Category:Fashion: Leather]]\n\n[[Category:Quest Items]]",
+    "Revision": 163360
+  },
+  {
+    "Title": "Midnight Mallet",
+    "Text": "{{Classic Era}}\n<onlyinclude>{{Itempage\n|merchant_value = 76p 1g 9s\n|notes       = \n|itemname    = Midnight Mallet\n|lucy_img_ID = 903\n|statsblock  = \nAttunable<br>\nSlot: PRIMARY<br>\nCharges: 5<br>\nSkill: 2H Blunt  Atk Delay: 44<br>\nDMG: 14<br>\nEffect:  [[Walking Sleep]] (Any Slot, Casting Time: 0.3, Cooldown: 1 seconds, Cooldown Group: 52)<br>\nWT: 11.0  Size: GIANT<br>\nClass: CLR SHM BST BER<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Lynuga's Gem Collection]]\n\n}}</onlyinclude>\n\n[[Category:Clickies]]\n[[Category:Beastlord Equipment]]\n[[Category:Berserker Equipment]]\n[[Category:Cleric Equipment]]\n[[Category:Shaman Equipment]]\n[[Category:Primary]]\n[[Category:2H Blunt]]\n[[Category:Aggro Clickies]]\n\n[[Category:Quest Items]]",
+    "Revision": 179091
+  },
+  {
+    "Title": "Mystic Cloak",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|notes       = Confirmed this is inventory-clickable.  Not rechargeable.  Does not consume jasper.\n|itemname    = Mystic Cloak\n|lucy_img_ID = 840\n|statsblock  = \nLORE ITEM  NO DROP<br>\nSlot: BACK<br>\nCharges: 10<br>\nAC: 8<br>\nINT: +5<br>\nSV MAGIC: +5<br>\nEffect:  [[Steelskin|<span class='itemeff'>Steelskin</span>]] (Any Slot, Casting Time: Instant)<br>\nWT: 0.5  Size: MEDIUM<br>\nClass: NEC WIZ MAG ENC<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[The Mystic Cloak]]\n\n}}</onlyinclude>\n\n[[Category:Enchanter Equipment]]\n[[Category:Magician Equipment]]\n[[Category:Necromancer Equipment]]\n[[Category:Wizard Equipment]]\n[[Category:Back]]\n\n[[Category:Quest Items]]",
+    "Revision": 160165
+  },
+  {
+    "Title": "Orb of Mastery",
+    "Text": "{{Epics Era}}\n\n<onlyinclude>{{Itempage\n|notes       = {{Item Lore|Orb of Mastery}}<br>See also: [[Summon Orb|Spell: Summon Orb]].\n|itemname    = Orb of Mastery\n|lucy_img_ID = 810\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NO DROP<br>\nSlot: PRIMARY<br>\nCharges: 1<br>\nSkill: 1H Blunt  Atk Delay: 30<br>\nDMG: 20 <br>\nSTR: +15  DEX: +5  STA: +10  INT: +20  MANA: +100<br>\nSV FIRE: +20  SV COLD: +20  SV MAGIC: +10<br>\nEffect:  [[Manifest Elements]] (Must Equip, Casting Time: 20.0) at Level 46<br>\nWT: 1.0  Size: TINY<br>\nClass: MAG<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Magician Epic Quest]]\n\n}}</onlyinclude>\n\n[[Category:Magician Equipment]]\n[[Category:Primary]]\n[[Category:1H Blunt]]\n\n[[Category:Quest Items]]",
+    "Revision": 162939
+  },
+  {
+    "Title": "SoulFire",
+    "Text": "{{Classic Era}}\n\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = SoulFire\n|lucy_img_ID = 519\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NO DROP<br>\nSlot: PRIMARY<br>\nCharges: Unlimited<br>\nSkill: 2H Slashing  Atk Delay: 45<br>\nDMG: 23 <br>\nSTR: +7  WIS: +7<br>\nEffect:  [[Promised Renewal]] (Any Slot/Can Equip, Casting Time: Instant) at Level 40<br>\nWT: 5.0  Size: LARGE<br>\nClass: PAL<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Zimel's Blades (SoulFire)]]\n* [[The Fiery Avenger]]\n* [[The Torrid Corruptor]]\n\n}}\n</onlyinclude>\n\n[[Category:Paladin Equipment]]\n[[Category:Primary]]\n[[Category:2H Slashing]]\n[[Category:Light source]]\n\n[[Category:Quest Items]]\n[[Category:Clickies]]",
+    "Revision": 168588
+  },
+  {
+    "Title": "Spiroc Wingblade",
+    "Text": "<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Spiroc Wingblade\n|lucy_img_ID = 588\n|statsblock  = \nLore Equipped, No Trade, Quest, Placeable<br>\nSlot: Primary Secondary<br>\nSkill: 1H Slashing  Atk Delay: 38<br>\nDMG: 15 <br>\nDmg Bon: 18<br>\nEffect:  [[Serpent Sight]] (Casting Time: Instant) at Level 45<br>\nWT: 10.0  Size: MEDIUM<br>\nClass: WAR RNG<br>\nRace: ALL<br>\n|dropsfrom = \n\n[[Plane of Sky]]\n\n* [[The Spiroc Lord]]\n\n|relatedquests = \n\n* [[Warrior Epic Quest]]\n\n}}</onlyinclude>\n\n[[Category:Ranger Equipment]]\n[[Category:Warrior Equipment]]\n[[Category:Primary]]\n[[Category:Secondary]]\n[[Category:1H Slashing]]\n[[Category:Plane of Sky]]\n\n[[Category:Quest Items]]\n[[Category:Placeable Items]]",
+    "Revision": 171305
+  },
+  {
+    "Title": "Stained Parchment Bottom",
+    "Text": "<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Stained Parchment Bottom\n|lucy_img_ID = 864\n|statsblock  = \nLORE ITEM<br>\nAC: 4<br>\nWT: 1.0  Size: MEDIUM<br>\nClass: NONE<br>\nRace: NONE<br>\n\n|dropsfrom = \n\n[[Neriak|Neriak Third Gate]]\n\n* [[Tani N`Mar]]\n\n|relatedquests = \n\n* [[Rogue Epic Quest]]\n\n}}</onlyinclude>\n\n\n\n[[Category:Quest Items]]",
+    "Revision": 197283
+  },
+  {
+    "Title": "Stained Parchment Top",
+    "Text": "<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Stained Parchment Top\n|lucy_img_ID = 864\n|statsblock  = \nLORE ITEM<br>\nAC: 4<br>\nWT: 1.0  Size: MEDIUM<br>\nClass: NONE<br>\nRace: NONE<br>\n\n|dropsfrom = \n\n[[Kaladim|North Kaladim]]\n\n* [[Founy Jestands]]\n\n|relatedquests = \n\n* [[Rogue Epic Quest]]\n\n}}</onlyinclude>\n\n\n\n[[Category:Quest Items]]",
+    "Revision": 197284
+  },
+  {
+    "Title": "Weeping Wand",
+    "Text": "{{Temple Era}}\n\n<onlyinclude>{{Itempage\n|notes       = \n|itemname    = Weeping Wand\n|lucy_img_ID = 810\n|statsblock  = \nMAGIC ITEM  LORE ITEM  NO DROP  <br>\nSlot: PRIMARY<br>\nCharges: 2<br>\nSkill: 1H Blunt  Atk Delay: 25<br>\nDMG: 5   AC: 3<br>\nINT: +3<br>\nEffect:  [[Strip Enchantment]] (Any Slot/Can Equip, Casting Time: Instant) at Level 20<br>\nWT: 1.0  Size: MEDIUM<br>\nClass: WIZ<br>\nRace: ALL<br>\n|relatedquests = \n\n* [[Weeping Wand Quest]]\n\n}}</onlyinclude>\n\n[[Category:Wizard Equipment]]\n[[Category:Primary]]\n[[Category:1H Blunt]]\n[[Category:Instant Click Equipment]]\n\n[[Category:Quest Items]]",
+    "Revision": 160172
+  }
+]

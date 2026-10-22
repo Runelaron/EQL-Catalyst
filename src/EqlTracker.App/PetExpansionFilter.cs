@@ -11,7 +11,7 @@ public sealed partial class QuestWindow
     {
         var menu = new ContextMenu();
         var button = OverlayMenus.Button(menu, "Filter pet candidates by exact item introduction expansion. This selection is independent of Gear; Unknown includes unverified or pending metadata.", "Expansion Filter ▾");
-        button.Width = 180; button.Height=28;button.Margin=new(0);
+        button.Width = 120; button.Height=28;button.Margin=new(0);
         void Label()
         {
             int count = ItemExpansionFilter.Choices.Count(x => Controller.Profile.PetExpansions.Contains(x));

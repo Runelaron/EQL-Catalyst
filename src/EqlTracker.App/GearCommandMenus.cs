@@ -7,11 +7,11 @@ public sealed partial class QuestWindow
     private static FrameworkElement GearField(string label,FrameworkElement control,Button? info=null)
     {
         var heading=new Grid{Height=22};var text=UI.Label(label);text.Margin=new(0);text.VerticalAlignment=VerticalAlignment.Center;heading.Children.Add(text);
-        if(info!=null){info.Style=(Style)Application.Current.FindResource(typeof(Button));info.Width=info.Height=20;info.MinHeight=0;info.Margin=new(0);info.FontSize=12;info.Padding=new(0);info.HorizontalAlignment=HorizontalAlignment.Right;info.VerticalAlignment=VerticalAlignment.Center;heading.Children.Add(info);}
-        control.Height=28;var field=UI.Stack(heading,control);field.Margin=new(0,0,6,0);return field;
+        if(info!=null){info.Style=(Style)Application.Current.FindResource(typeof(Button));info.Width=info.Height=20;info.MinHeight=info.MinWidth=0;info.Margin=new(0);info.FontSize=12;info.Padding=new(0);info.HorizontalAlignment=HorizontalAlignment.Right;info.VerticalAlignment=VerticalAlignment.Center;heading.Children.Add(info);}
+        control.Height=28;control.Margin=new(0);var field=UI.Stack(heading,control);field.Margin=new(0,0,6,0);return field;
     }
     private static FrameworkElement GearAction(FrameworkElement control)
-    {control.Height=28;var field=UI.Stack(new Border{Height=22},control);field.Margin=new(0,0,6,0);return field;}
+    {control.Height=28;control.Margin=new(0);var field=UI.Stack(new Border{Height=22},control);field.Margin=new(0,0,6,0);return field;}
     private Button GearCommandMenu(bool build)
     {
         var menu=new ContextMenu();
@@ -31,7 +31,7 @@ public sealed partial class QuestWindow
         }
         else
         {
-            Item("Stat profiles…",OpenGearStats,"Review observed stats, AAs and advanced comparisons.");Item("Edit role weights…",EditWeights,"Edit the selected role's saved stat preferences.");Item("Manual equipment correction…",EditEquipment,"Correct the local Current baseline.");
+            Item("Stat profiles…",OpenGearStats,"Review observed stats, AAs and advanced comparisons.");Item("Add role…",AddRole,"Create a named Self role from the selected role’s resolved weights.");Item("Edit role weights…",EditWeights,"Edit the selected role's saved stat preferences.");Item("Manual equipment correction…",EditEquipment,"Correct the local Current baseline.");
             Item("View sources",ShowGearSources,"Select a candidate to inspect its acquisition sources.",()=>gearTable.SelectedItem is GearRow);
             Item("Break-even rank",CalculateBreakEven,"Select a candidate to estimate its first positive comparison through +10.",()=>gearTable.SelectedItem is GearRow);
             Item("Reset Gear panels",ResetGearPanels,"Restore equipment/candidates/details to 33% / 42% / 25%.");

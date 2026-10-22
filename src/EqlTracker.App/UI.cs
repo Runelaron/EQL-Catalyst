@@ -106,6 +106,21 @@ public static class UI
     }
     public static void OpenUrl(string url)
     { if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == "https" && uri.Host.Equals("eqlwiki.com", StringComparison.OrdinalIgnoreCase)) Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true }); }
+    // Measure the workspace against a finite viewport; overflow keeps all panes accessible.
+    internal static ScrollViewer HorizontalWorkspace(FrameworkElement content, double minimum)
+    {
+        var scroll = new ScrollViewer { Content = content, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, CanContentScroll = false };
+        content.MinWidth = minimum;
+        void Fit() { double width = Math.Max(minimum, scroll.ViewportWidth > 0 ? scroll.ViewportWidth : scroll.ActualWidth); if (double.IsFinite(width) && Math.Abs(content.Width - width) > .25 || double.IsNaN(content.Width)) content.Width = width; }
+        scroll.SizeChanged += (_, _) => Fit(); scroll.ScrollChanged += (_, e) => { if(e.ViewportWidthChange != 0) Fit(); }; scroll.Loaded += (_, _) => Fit();
+        return scroll;
+    }
+    internal static ScrollViewer BoundedHeader(UIElement content, FrameworkElement pane)
+    {
+        var scroll = new ScrollViewer { Content=content, HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled, VerticalScrollBarVisibility=ScrollBarVisibility.Auto, MaxHeight=210 };
+        pane.SizeChanged += (_, _) => scroll.MaxHeight = Math.Clamp(pane.ActualHeight * .45, 70, 230);
+        return scroll;
+    }
     public static Grid Split(UIElement left, UIElement right, double rightWidth = 320, CharacterProfile? profile = null, string key = "", double leftMin = 0, double rightMin = 0)
     {
         var grid = new Grid(); double fraction = profile?.PanelSplits.GetValueOrDefault(key, .3) ?? .3;
@@ -122,6 +137,7 @@ public enum WindowSurface { Theme, Solid }
 
 public class FrostWindow : Window
 {
+    internal WindowResizeController? OuterResize {get;private set;}
     public WindowSurface SurfaceStyle { get; }
     internal CharacterProfile LayoutProfile => Controller.Profile;
     internal void SaveLayout() { if (!Controller.Demo) Controller.Save(); }
@@ -162,7 +178,7 @@ public class FrostWindow : Window
         {
             IsCollapsed = false; Body.Visibility = Visibility.Visible; Frame.Padding = expandedPadding; HeadingTitle.FontSize = expandedFont;
             MinHeight = expandedMinimum; Height = Math.Max(expandedMinimum, expandedHeight); Subtitle.Visibility = Subtitle.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ResizeMode = IsLocked ? ResizeMode.NoResize : ResizeMode.CanResizeWithGrip; collapseButton.Content = "−"; collapseButton.ToolTip = "Collapse to title bar";
+            ResizeMode = IsLocked ? ResizeMode.NoResize : Passive?ResizeMode.CanResizeWithGrip:ResizeMode.CanResize; collapseButton.Content = "−"; collapseButton.ToolTip = "Collapse to title bar";
             foreach (var button in HeaderActions.Children.OfType<Button>()) button.Width = button.Height = Passive ? 17 : 24;
         }
         Controller.Profile.Panels[panelKey] = new() { Collapsed = IsCollapsed, Width = Width, Height = expandedHeight };
@@ -205,7 +221,9 @@ public class FrostWindow : Window
         // Resize thumbs receive the input instead of passing it through to the game.
         AddHandler(System.Windows.Controls.Primitives.Thumb.DragStartedEvent, new System.Windows.Controls.Primitives.DragStartedEventHandler((_, _) => { if (Passive && !Controller.Demo) priorForeground = Native.BeginInteraction(this); }), true);
         AddHandler(System.Windows.Controls.Primitives.Thumb.DragCompletedEvent, new System.Windows.Controls.Primitives.DragCompletedEventHandler((_, _) => { if (Passive && !Controller.Demo) Native.EndInteraction(this, priorForeground, true, this is OverlayWindow ow && ow.ClickThrough); }), true);
-        Grid.SetRow(Body, 1); content.Children.Add(header); content.Children.Add(Body); Frame.Child = content; Content = Frame;
+        Grid.SetRow(Body, 1); content.Children.Add(header); content.Children.Add(Body);
+        if(!overlay){ResizeMode=ResizeMode.CanResize;OuterResize=new(this);Grid.SetRowSpan(OuterResize.Grip,2);content.Children.Add(OuterResize.Grip);}
+        Frame.Child = content; Content = Frame;
         Closing += (_, e) => { if (!App.Exiting) { e.Cancel = true; if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); } };
         Loaded += (_, _) => { Usability.Tooltips(Body); if (!IsCollapsed && controller.Profile.Panels.TryGetValue(panelKey, out var state) && state.Collapsed) { if (state.Width >= MinWidth) Width = state.Width; if (state.Height > MinHeight) Height = state.Height; ToggleCollapse(); } };
     }

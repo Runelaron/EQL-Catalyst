@@ -34,6 +34,12 @@ public static class QuestTracking
 
 public sealed class PetBuild
 {
+    public int SlotConfigurationVersion { get; set; }
+    public bool DualWield { get; set; }
+    public List<PetSlotConfiguration> SlotConfigurations { get; set; } = [];
+    public PetInventoryItem? DormantSecondary { get; set; }
+    public PetSlotConfiguration? DormantSecondaryConfiguration { get; set; }
+    public PetComparisonScenario? ComparisonScenario { get; set; }
     public bool IsTheorycraft { get; set; }
     public string TheorycraftRulesVersion { get; set; } = "";
     public List<string> TheorycraftAssumptions { get; set; } = [];
@@ -67,7 +73,7 @@ public sealed class PetInventoryItem
     public DateTime? ConfirmedAt { get; set; }
     public List<ExaltationAssignment> Exaltations { get; set; } = [];
     public List<string> TransferredOutEffects { get; set; } = [];
-    public InventoryEntry Entry() => new() { Location = Slot, Name = Name + (Rank > 0 ? " +" + Rank : ""), Count = 1, ConfirmedItemKey = ItemKey,
+    public InventoryEntry Entry() => new() { PhysicalId = Id.Length > 0 ? "pet:" + Id : "", Location = Slot, Name = Name + (Rank > 0 ? " +" + Rank : ""), Count = 1, ConfirmedItemKey = ItemKey,
         TransferredOutEffects = TransferredOutEffects.ToList(),
         Augments = Exaltations.Where(a => a.State == "Socketed").Select(a => new InventoryEntry { Name = a.SourceName + " (Exaltation)", Location = "Augmentation", EffectText = a.Effect, EffectIdentity = a.EffectId }).ToList() };
 }

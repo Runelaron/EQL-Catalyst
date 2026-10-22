@@ -10,9 +10,9 @@ public static class FocusedLayout
     public static readonly DependencyProperty IsPrimaryProperty = DependencyProperty.RegisterAttached("IsPrimary", typeof(bool), typeof(FocusedLayout), new PropertyMetadata(false));
     public static bool GetIsPrimary(DependencyObject value) => (bool)value.GetValue(IsPrimaryProperty);
     public static void SetIsPrimary(DependencyObject value, bool primary) => value.SetValue(IsPrimaryProperty, primary);
-    internal static Expander Disclosure(string title, UIElement content, string help)
+    internal static Expander Disclosure(string title, UIElement content, string help, bool expanded = false)
     {
-        var panel = new Expander { Header = title, Content = content, IsExpanded = false, Margin = new(0, 0, 0, 4), ToolTip = help };
+        var panel = new Expander { Header = title, Content = content, IsExpanded = expanded, Margin = new(0, 0, 0, 4), ToolTip = help };
         return panel;
     }
     internal static Button Menu(string title, params (string Label, Action Action, string Help)[] actions)

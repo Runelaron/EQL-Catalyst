@@ -85,7 +85,7 @@ public sealed partial class QuestWindow
             var arithmeticTable = Usability.Tree(arithmetic).OfType<DataGrid>().Single(); var arithmeticColumn = arithmeticTable.Columns[0]; TableLayout.Prefer(arithmeticTable, arithmeticColumn, arithmeticColumn.MinWidth + 30); double savedWidth = arithmeticColumn.ActualWidth;
             ChangePetPreviewRank(7); ShowPetComparison(); Flush();
             Check(arithmetic.IsExpanded && ReferenceEquals(arithmeticTable, Usability.Tree(arithmetic).OfType<DataGrid>().Single()) && Math.Abs(savedWidth-arithmeticColumn.ActualWidth)<1, "Expanded arithmetic retains its controls and manual column width across rank previews");
-            Check(arithmeticTable.Items.OfType<BuildContribution>().Select(c => c.Points).SequenceEqual(petDisplayedComparison!.Evaluation!.Unbuffed.Changes.Select(c => c.Points)), "Lazily opened arithmetic shows the current preview's exact contributions");
+            Check(arithmeticTable.Items.OfType<BuildContribution>().Select(c => c.Points).SequenceEqual(RatingExplanation.Ordered(petDisplayedComparison!.Evaluation!.Unbuffed.Changes).Select(c => c.Points)), "Lazily opened arithmetic shows the current preview's exact contributions");
             Capture("pet-arithmetic", (FrameworkElement)Content, 1440, 860); arithmetic.IsExpanded = false; Flush();
             var type = petResults.Columns.Single(c => c.SortMemberPath == "Type"); TableLayout.Reset(petResults); Flush(); Check(type.ActualWidth >= type.MinWidth && type.MinWidth > 65, "Pet Type default accommodates measured type names");
             Check(Usability.Tree(this).OfType<Button>().Any(b => b.Content?.ToString() == "Expansion Filter · All ▾"), "Expansion Filter uses a compact summary beside Theorycraft");

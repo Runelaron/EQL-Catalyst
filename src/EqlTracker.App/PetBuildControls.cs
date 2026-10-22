@@ -126,7 +126,7 @@ public sealed partial class QuestWindow
     private bool petRatingDescending = true;
     private sealed class PetRatingComparer(bool descending) : IComparer
     {
-        public int Compare(object? a, object? b) { if (a is not PetSearchRow x || b is not PetSearchRow y) return 0; int value = PetBuildEditing.CompareRatings(x.UnbuffedDelta, x.Comparison?.Evaluation?.Status == "Conditional", y.UnbuffedDelta, y.Comparison?.Evaluation?.Status == "Conditional", descending); return value != 0 ? value : StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name); }
+        public int Compare(object? a, object? b) { if (a is not PetSearchRow x || b is not PetSearchRow y) return 0; int value = x.DefenseDelta.HasValue || y.DefenseDelta.HasValue ? (descending ? y.StrongTradeoff.CompareTo(x.StrongTradeoff) : x.StrongTradeoff.CompareTo(y.StrongTradeoff)) : PetBuildEditing.CompareRatings(x.UnbuffedDelta, x.Comparison?.Evaluation?.Status == "Conditional", y.UnbuffedDelta, y.Comparison?.Evaluation?.Status == "Conditional", descending); return value != 0 ? value : StringComparer.OrdinalIgnoreCase.Compare(x.Name, y.Name); }
     }
     private void ConfigurePetRatingSort(DataGridColumn column)
     {

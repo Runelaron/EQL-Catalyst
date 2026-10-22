@@ -43,6 +43,21 @@ public sealed class WikiClient : IDisposable
         foreach (var page in pages.EnumerateObject()) { var p = page.Value; if (!p.TryGetProperty("revisions", out var revisions) || revisions.GetArrayLength() == 0) continue; var rev = revisions[0]; return SpellReference.Parse(p.GetProperty("title").GetString()!, rev.GetProperty("slots").GetProperty("main").GetProperty("*").GetString() ?? "", rev.GetProperty("revid").GetInt64()); }
         return null;
     }
+    public async Task<List<QuestStartEvidence>> QuestStartsAsync(IEnumerable<string> names,CancellationToken token)
+    {
+        var result=new List<QuestStartEvidence>();
+        foreach(var batch in names.Distinct().Chunk(30))
+        {
+            using var doc=await Query("https://eqlwiki.com/api.php?action=query&prop=revisions&rvprop=ids%7Ccontent&rvslots=main&format=json&titles="+Uri.EscapeDataString(string.Join('|',batch)),token);
+            if(!doc.RootElement.TryGetProperty("query",out var query)||!query.TryGetProperty("pages",out var pages))continue;
+            foreach(var page in pages.EnumerateObject())
+            {
+                var value=page.Value;if(!value.TryGetProperty("revisions",out var revisions)||revisions.GetArrayLength()==0)continue;
+                var revision=revisions[0];result.Add(QuestStartEvidence.Parse(value.GetProperty("title").GetString()!,revision.GetProperty("slots").GetProperty("main").GetProperty("*").GetString()??"",revision.GetProperty("revid").GetInt64()));
+            }
+        }
+        return result;
+    }
     public async Task<List<ItemDefinition>> FetchItemsAsync(IEnumerable<string> names, CancellationToken token, Dictionary<string, long>? knownRevisions = null)
     {
         var result = new List<ItemDefinition>();
@@ -102,15 +117,18 @@ public sealed class WikiClient : IDisposable
         item.Display.Size = Regex.Match(block, @"\bSize:\s*(TINY|SMALL|MEDIUM|LARGE|GIANT)", RegexOptions.IgnoreCase).Groups[1].Value.ToUpperInvariant();
         var range = Regex.Match(block, @"\bRange:\s*(\d+)", RegexOptions.IgnoreCase);
         if (range.Success) item.Display.Range = int.Parse(range.Groups[1].Value);
-        foreach (var stat in new[] { "AC", "HP", "MANA", "ATK", "STR", "STA", "DEX", "AGI", "INT", "WIS", "CHA", "Haste" })
+        foreach (var stat in new[] { "AC", "HP", "MANA", "END", "ATK", "STR", "STA", "DEX", "AGI", "INT", "WIS", "CHA", "Haste" })
         {
             var m = Regex.Match(block, @"\b" + stat + @":\s*\+?(-?\d+(?:\.\d+)?)", RegexOptions.IgnoreCase);
-            if (m.Success) item.Stats[stat == "MANA" ? "Mana" : stat] = double.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
+            if (m.Success) item.Stats[stat == "MANA" ? "Mana" : stat == "END" ? "Endurance" : stat] = double.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
         }
-        var dmg = Regex.Match(block, @"\bDMG:\s*(\d+)"); var delay = Regex.Match(block, @"Delay:\s*(\d+)");
+        var dmg = Regex.Match(block, @"\bDMG:\s*(\d+)", RegexOptions.IgnoreCase); var delay = Regex.Match(block, @"Delay:\s*(\d+)", RegexOptions.IgnoreCase);
         if (dmg.Success && delay.Success) { item.Stats["Damage"] = double.Parse(dmg.Groups[1].Value); item.Stats["Delay"] = double.Parse(delay.Groups[1].Value); if (item.Stats["Delay"] > 0) item.Stats["Ratio"] = item.Stats["Damage"] / item.Stats["Delay"]; }
-        item.Slots = Regex.Match(block, @"Slot:\s*([A-Z0-9 /]+?)(?=\s+(?:Skill|AC|STR|STA|HP|Effect|WT|Size|Class|MANA):|$)").Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-        item.Classes = Regex.Match(block, @"Class:\s*([A-Z ]+?)(?=\s+(?:Race|Deity|DMG|WT):|$)").Groups[1].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+        string slots = Regex.Match(block, @"\bSlot:\s*(.+?)(?=\s+(?:Skill|Charges|AC|STR|STA|DEX|AGI|INT|WIS|CHA|HP|MANA|Effect|WT|Size|Class|Race|Required Level):|\r?\n|$)", RegexOptions.IgnoreCase).Groups[1].Value;
+        item.Slots = ParseSlots(slots);
+        if(item.Slots.Count==0)
+            item.Slots = Regex.Matches(text,@"\[\[Category:\s*([^]|]+)(?:\|[^]]*)?\]\]",RegexOptions.IgnoreCase).SelectMany(m=>ParseSlots(m.Groups[1].Value)).Distinct().ToList();
+        item.Classes = Regex.Match(block, @"Class:\s*([A-Z /]+?)(?=\s+(?:Race|Deity|DMG|WT):|$)",RegexOptions.IgnoreCase).Groups[1].Value.Split([' ','/'], StringSplitOptions.RemoveEmptyEntries).Select(c=>c.ToUpperInvariant()).ToList();
         var race = Regex.Match(block, @"Race:\s*(.+?)(?=\s+(?:Deity|DMG|WT):|$)").Groups[1].Value;
         if (race.Length > 0) item.Races.Add(race);
         item.Effects = Regex.Matches(Field(text, "statsblock"), @"Effect:\s*(.*?)(?=<br|\n|$)", RegexOptions.IgnoreCase).Select(m => Plain(m.Groups[1].Value)).ToList();
@@ -162,6 +180,14 @@ public sealed class WikiClient : IDisposable
         }
         ItemEffects.Normalize(item); ItemExpansionEvidence.Apply(item);
         return item;
+    }
+    private static List<string> ParseSlots(string text)
+    {
+        // Exact category/slot tokens only. "Quest Items" and "Warrior Equipment" cannot become slots.
+        var known = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase) { ["primary"]="PRIMARY",["secondary"]="SECONDARY",["range"]="RANGE",["ranged"]="RANGE",["ammo"]="AMMO",["head"]="HEAD",["face"]="FACE",["neck"]="NECK",["ear"]="EAR",["ears"]="EAR",["chest"]="CHEST",["arms"]="ARMS",["back"]="BACK",["cloak"]="BACK",["waist"]="WAIST",["belt"]="WAIST",["wrist"]="WRIST",["wrists"]="WRIST",["hands"]="HANDS",["gloves"]="HANDS",["finger"]="FINGER",["fingers"]="FINGER",["legs"]="LEGS",["feet"]="FEET",["shoulders"]="SHOULDERS" };
+        var tokens=text.Trim().Split([' ','/',',',';'],StringSplitOptions.RemoveEmptyEntries);
+        if(tokens.Any(t=>!known.ContainsKey(t))) return [];
+        return tokens.Select(t=>known[t]).Distinct().ToList();
     }
     public void Dispose() => http.Dispose();
 }

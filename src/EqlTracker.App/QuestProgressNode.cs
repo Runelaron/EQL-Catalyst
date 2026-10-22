@@ -11,6 +11,8 @@ public sealed class QuestProgressNode : INotifyPropertyChanged
     public ObservableCollection<QuestProgressNode> Children { get; } = [];
     private readonly TrackerController controller;
     private bool expanded, selected;
+    private bool itemMatch;
+    public bool IsItemMatch { get => itemMatch; internal set { if(itemMatch==value)return;itemMatch=value;PropertyChanged?.Invoke(this,new(nameof(IsItemMatch))); } }
     public string Title => (Node.Fulfilled ? "✓ " : "") + Node.Name;
     public string Status => Node.Status;
     public bool Fulfilled => Node.Fulfilled;
@@ -27,6 +29,8 @@ public sealed class QuestProgressNode : INotifyPropertyChanged
         }
     }
     public bool IsSelected { get => selected; set { if (selected == value) return; selected = value; PropertyChanged?.Invoke(this, new(nameof(IsSelected))); } }
+    internal void ExpandForBrowse(bool value)
+    { if(expanded==value)return;expanded=value;PropertyChanged?.Invoke(this,new(nameof(IsExpanded))); }
     private QuestProgressNode(QuestNode node, TrackerController owner, int depth)
     {
         Node = node; controller = owner;

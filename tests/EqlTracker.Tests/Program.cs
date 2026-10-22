@@ -7,6 +7,16 @@ if (args.Length == 2 && args[0] == "--refresh-item-display") { await ItemDisplay
 if (args.Length == 2 && args[0] == "--audit-item-display") { await ItemDisplayRefresh.Run(args[1], false); return; }
 
 var tests = new List<(string Name, Action Run)>();
+UpdateTests.Register((name,run)=>tests.Add((name,run)));
+ProgressRewardTests.Register((name,run)=>tests.Add((name,run)));
+ProgressBrowseTests.Register((name,run)=>tests.Add((name,run)));
+ProgressActionTests.Register((name,run)=>tests.Add((name,run)));
+CompactPetTests.Register((name,run)=>tests.Add((name,run)));
+CorrectPetRatingTests.Register((name,run)=>tests.Add((name,run)));
+QuestPetSlotTests.Register((name,run)=>tests.Add((name,run)));
+RoleRatingTests.Register((name,run)=>tests.Add((name,run)));
+PetComparisonTests.Register((name,run)=>tests.Add((name,run)));
+LivePetTests.Register((name,run)=>tests.Add((name,run)));
 CompactSettingsTests.Register((name,run)=>tests.Add((name,run)));
 CascadeWidthTests.Register((name,run)=>tests.Add((name,run)));
 CharacterSelectionTests.Register((name,run)=>tests.Add((name,run)));

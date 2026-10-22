@@ -37,7 +37,7 @@ internal static class FocusedWorkspaceChecks
             var sources = Find<Button>().Single(b => b.IsVisible && b.Content?.ToString() == "View sources"); sources.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Flush();
             check(Find<TabControl>().First().SelectedItem is TabItem { Tag: TrackerTab.Progress }, "Queue source action navigates to the matching quest branch without fragile name search");
             q.ShowView(TrackerTab.Quests, "Darkforge"); Flush();
-            check(Find<Button>().Count(b => b.IsVisible && b.Content?.ToString() == "Add to queue") == 1, "Quest discovery exposes one queue action in the selected reward inspector");
+            check(Find<Button>().Count(b => b.IsVisible && b.Content?.ToString() == "Queue") == 1, "Quest discovery exposes one queue action in the selected reward inspector");
             check(Find<Expander>().Any(e => e.Header?.ToString() == "Full checklist & coverage" && !e.IsExpanded), "Full quest narrative is disclosed on request in discovery");
             q.ShowView(TrackerTab.Exaltations, "Bloodmoon"); Flush();
             check(Find<ComboBox>().Any(b => b.Items.Contains("Any") && b.Items.Contains("Pet") && b.SelectedItem?.ToString() == "Any"), "Exaltations starts with Any; selecting a target exposes its assignment controls");

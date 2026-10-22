@@ -11,14 +11,14 @@ public sealed record ScoreContribution(string Stat, double Current, double Candi
 public sealed record GearComparison(string Candidate, string Slot, string Replaces, double Score, double BaselineScore, double Delta, string Contributions, string Effects, string Eligibility, string Confidence)
 {
     public LoadoutComparison? Evaluation { get; init; }
-    public string Verdict => Eligibility != "Eligible" ? Eligibility
+    public string Verdict => Evaluation?.Status == "Conditional" || Confidence.StartsWith("Conditional", StringComparison.Ordinal) ? "Conditional estimate" : Eligibility != "Eligible" ? Eligibility
         : Confidence.Contains("pet equipment has not been confirmed", StringComparison.Ordinal) ? "Confirm pet equipment"
         : Confidence.Contains("Self equipment baseline is unavailable", StringComparison.Ordinal) ? "Import Self equipment"
         : Confidence.StartsWith("Unknown", StringComparison.Ordinal) ? "Metadata pending"
         : Delta > 0 ? "Potential upgrade" : Delta < 0 ? "Lower stat score" : "Equal stat score";
     public double? ItemScore { get; init; }
     public List<ScoreContribution> Breakdown { get; init; } = [];
-    public bool CanCompare => Eligibility == "Eligible" && !Confidence.StartsWith("Unknown", StringComparison.Ordinal);
+    public bool CanCompare => Eligibility == "Eligible" && Evaluation?.Status != "Conditional" && !Confidence.StartsWith("Conditional", StringComparison.Ordinal) && !Confidence.StartsWith("Unknown", StringComparison.Ordinal);
 }
 public static class GearScorer
 {
@@ -35,7 +35,7 @@ public static class GearScorer
     };
     public static List<string> EligibleClasses(LoadoutProfile profile, bool pet)
     {
-        var result = profile.Classes.ToList();
+        var result = profile.Classes.Select(CastingPriority.Code).ToList();
         if (pet) { result.Add("WAR"); result.Add(profile.PetType switch { "Air" => "MNK", "Earth" => "RNG", "Fire" => "WIZ", "Water" => "ROG", "Animation" => "PAL", "Undead" => "SHD", "Warder" or "Spirit" => "BST", _ => "WAR" }); }
         return result.Distinct().ToList();
     }
@@ -43,7 +43,8 @@ public static class GearScorer
     {
         if (pet && PetItemRules.Unsupported(item) is { Length: > 0 } unsupported) return unsupported;
         if (!item.MetadataComplete) return "Unknown item restrictions";
-        var classes = item.Classes.ToHashSet(); var slots = item.Slots.ToHashSet();
+        if (item.Classes.Count == 0) return "Unknown item restrictions";
+        var classes = item.Classes.Select(c => c == "ALL" ? c : CastingPriority.Code(c)).ToHashSet(); var slots = item.Slots.ToHashSet();
         foreach (var augment in augments ?? [])
         {
             var metadata = catalog.Find(augment.Name, augment.GameId == 0 ? null : augment.GameId);
@@ -61,11 +62,7 @@ public static class GearScorer
     }
     public static Dictionary<string, double> EffectiveStats(ItemDefinition item, int rank)
     {
-        // Exported +tier lacks fractional XP; this is explicitly a tier-floor estimate.
-        // Weapons gain 5% damage per tier; ordinary stats gain 10%. Delay stays fixed.
-        var stats = item.Stats.ToDictionary(x => x.Key, x => x.Key is "Delay" or "Ratio" or "Haste" ? x.Value : rank == 0 ? x.Value : Math.Max(Math.Floor(x.Value * (1 + rank * (x.Key == "Damage" ? .05 : .1))), x.Value + rank));
-        if (stats.GetValueOrDefault("Delay") > 0) stats["Ratio"] = stats.GetValueOrDefault("Damage") / stats["Delay"];
-        return stats;
+        return RankedItemStats.Resolve(item, rank).Stats;
     }
     public static double Score(Dictionary<string, double> stats, Dictionary<string, double> weights) => weights.Sum(x => stats.GetValueOrDefault(x.Key) * x.Value);
     public static GearComparison Compare(ItemDefinition candidate, int rank, string slot, LoadoutProfile loadout, bool pet, Catalog catalog, Dictionary<string, double> weights, List<InventoryEntry>? candidateAugments = null, List<string>? transferredOut = null)
@@ -98,6 +95,8 @@ public static class GearScorer
         var oldEffects = baseline.SelectMany(e => (catalog.Find(e.Name, e.GameId == 0 ? null : e.GameId)?.Effects ?? []).Except(e.TransferredOutEffects).Concat(SocketEffects(e.Augments))).Distinct().ToList();
         var newEffects = candidate.Effects.Except(transferredOut ?? []).Concat(SocketEffects(candidateAugments ?? [])).Distinct().ToList();
         var confidence = !complete ? "Unknown: " + string.Join("; ", missing) : rank > 0 || candidateAugments?.Count > 0 || baseline.Any(e => e.Rank > 0 || e.Augments.Count > 0) ? "Estimated tier floor; XP and transferred effects need confirmation" : "Base item stats; effects / stacking are separate";
+        bool disputed = RankedItemStats.Resolve(candidate,rank).UncertainStats.Any(s=>weights.GetValueOrDefault(s)!=0) || baseline.Any(e=>catalog.Find(e.Name,e.GameId==0?null:e.GameId) is {} d && RankedItemStats.Resolve(d,e.Rank).UncertainStats.Any(s=>weights.GetValueOrDefault(s)!=0));
+        if (complete && disputed) confidence="Conditional ranked-stat estimate; weapon scaling / ranked haste unverified. " + confidence;
         var eligibility = Eligibility(candidate, loadout, pet, candidateAugments, catalog);
         if (candidateAugments?.Any(a => catalog.Find(a.Name, a.GameId == 0 ? null : a.GameId) is { } metadata && metadata.Slots.Count > 0 && !metadata.Slots.Contains(slot)) == true) eligibility = "Slot restricted by Exaltation";
         if (!candidate.Slots.Contains(slot)) eligibility = "Incompatible slot";

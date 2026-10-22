@@ -25,7 +25,7 @@ static class PetUpgradeTests
         test("Pet ratios and two-hand dual-wield comparisons stay conditional; procs stay separate", () => {
             var a = Item("a", "PRIMARY", new() { ["Damage"] = 10, ["Delay"] = 20 }); var b = Item("b", "SECONDARY", new() { ["Damage"] = 8, ["Delay"] = 20 }); var two = Item("two", "PRIMARY", new() { ["Damage"] = 30, ["Delay"] = 25 }); two.TwoHanded = true; two.Effects = ["Proc: Flame Shock (Combat)"];
             var c = new Catalog { Items = [a,b,two] }; var owner = new LoadoutProfile(); var build = new PetBuild { Items = [Entry(a,1),Entry(b,2)] }; var result = PetEquipmentInference.Build(build, owner, c); var session = new LoadoutEvaluationSession(c, owner, true, GearScorer.Defaults["Pet DPS"], result.Positions, result.Positions); var change = session.Compare(two,4,"PRIMARY:1");
-            Check(change.Status == "Conditional" && change.Unbuffed.Delta == null && change.Replaced.Count == 2 && change.WeaponNote.Contains("ratios")); Check(change.EffectsGained.Count == 1);
+            Check(change.Status == "Conditional" && change.Unbuffed.Delta == null && change.Replaced.Count == 2 && change.WeaponNote.StartsWith("Current:") && change.WeaponEvidence.Contains("ratios")); Check(change.EffectsGained.Count == 1);
         });
         test("Rank-sensitive cache and change identity reconcile repeated item comparisons", () => {
             var item = Item("ranked", "CHEST", new() { ["STR"] = 10 }); var c = new Catalog { Items = [item] }; var owner = new LoadoutProfile(); var build = new PetBuild { Items = [Entry(item,1)] }; var result = PetEquipmentInference.Build(build, owner, c); var session = new LoadoutEvaluationSession(c,owner,true,new() { ["STR"] = 1 },result.Positions,result.Positions);
@@ -33,7 +33,7 @@ static class PetUpgradeTests
         });
         test("Pet preset migration is idempotent and preserves edited weights", () => {
             var p = new CharacterProfile { Weights = new() { ["Melee"] = new(GearScorer.Defaults["Melee"]) } }; p.ActiveLoadout.PetPreset = "Melee"; GearRatingMigration.Apply(p); Check(p.ActiveLoadout.PetPreset == "Pet DPS" && p.Weights["Pet DPS"]["AC"] == .25); GearRatingMigration.Apply(p); Check(p.ActiveLoadout.PetPreset == "Pet DPS");
-            var custom = new CharacterProfile { Weights = new() { ["Melee"] = new() { ["DEX"] = 9 } } }; custom.ActiveLoadout.PetPreset = "Melee"; GearRatingMigration.Apply(custom); Check(custom.ActiveLoadout.PetPreset == "Melee" && custom.Weights["Melee"]["DEX"] == 9);
+            var custom = new CharacterProfile { Weights = new() { ["Melee"] = new() { ["DEX"] = 9 } } }; custom.ActiveLoadout.PetPreset = "Melee"; GearRatingMigration.Apply(custom); Check(custom.ActiveLoadout.PetPreset == "Custom pet Melee" && custom.Weights["Melee"]["DEX"] == 9 && PetRoleRatings.Weights(custom,custom.ActiveLoadout.PetPreset)["DEX"] == 9);
         });
         test("AA rank editing distinguishes unknown, verified limits and manual numeric models", () => {
             var aa = new GearAaModifier { Kind = AaModifierKind.FlatStat, Value = 8, Confirmed = true }; Check(AaRankEditing.Set(aa,1,out _) && aa.Rank == 1 && !aa.Confirmed && aa.Value == 8); Check(AaRankEditing.Set(aa,0,out _) && aa.Rank == 0); Check(AaRankEditing.Set(aa,null,out _) && aa.Rank == null);

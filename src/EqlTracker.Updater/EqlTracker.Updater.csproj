@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWindowsForms>true</UseWindowsForms><AssemblyName>EQLUpdater</AssemblyName><ApplicationManifest>../EqlTracker.App/app.manifest</ApplicationManifest></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../EqlTracker.Core/EqlTracker.Core.csproj" /></ItemGroup>
+</Project>

@@ -13,7 +13,10 @@ public sealed partial class QuestWindow
         var context = SelectedPetInventory is { } build ? GuidedPetBuilds.Context(Controller.Profile.ActiveLoadout, build) : Controller.Profile.ActiveLoadout;
         var pair = ItemPairComparison.Create(definition, current?.Entry(), row.Item, PetInspectedRank(row), PetInspectedInstance(row), context, Controller.Catalog);
         var panel = new FrostWindow(Controller, "Pet item comparison", "Ranked item differences · separate from upgrade recommendations", 720, 530) { Owner = this };
-        panel.Body.Children.Add(UI.Scroll(new PetPairComparisonView(pair))); Native.ShowPanel(panel);
+        panel.Body.Children.Add(UI.Scroll(new PetPairComparisonView(pair,()=>{
+            if(petResults.SelectedItem is not PetSearchRow active)return pair;var baseline=(petItems.SelectedItem as PetItemRow)?.Item;var metadata=baseline==null?null:Controller.Catalog.FindKey(baseline.ItemKey);var loadout=SelectedPetInventory is {} selected?GuidedPetBuilds.Context(Controller.Profile.ActiveLoadout,selected):Controller.Profile.ActiveLoadout;
+            return ItemPairComparison.Create(metadata,baseline?.Entry(),Controller.Catalog.FindKey(active.Item.Key)??active.Item,PetInspectedRank(active),PetInspectedInstance(active),loadout,Controller.Catalog);
+        },()=>petPreview.Revision+"|"+petKey+"|"+(petResults.SelectedItem as PetSearchRow)?.Item.Key))); Native.ShowPanel(panel);
     }
     private void CloneConfirmedPet()
     {

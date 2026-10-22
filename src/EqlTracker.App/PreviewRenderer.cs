@@ -8,6 +8,7 @@ namespace EqlTracker.App;
 
 public static class PreviewRenderer
 {
+    internal static bool Capturing {get;private set;}
     public static void Render(string folder, QuestWindow quest, DpsWindow dps, OverlayWindow objectives, OverlayWindow meter, double scale)
     {
         Directory.CreateDirectory(folder);
@@ -174,6 +175,7 @@ public static class PreviewRenderer
     internal static readonly List<object> CaptureGeometry = [];
     internal static RenderTargetBitmap Capture(FrameworkElement element, double width, double height, double scale)
     {
+        bool wasCapturing=Capturing;Capturing=true;
         var owner = Window.GetWindow(element); bool root = owner?.Content == element;
         if (owner is { } window) { window.MinWidth = 0; window.MinHeight = 0; window.Width = width; window.Height = height; window.UpdateLayout(); }
         System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
@@ -189,10 +191,13 @@ public static class PreviewRenderer
             element.InvalidateMeasure();element.InvalidateArrange();
             element.Measure(new Size(width, height)); element.Arrange(new Rect(0, 0, width, height)); element.UpdateLayout();
             System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            // Detached previews still need the production viewport fitter after measuring.
+            foreach(var table in Usability.Tree(element).OfType<DataGrid>()) TableLayout.FitSnapshot(table);
+            element.UpdateLayout();
             CaptureGeometry.Add(new { Width = width, Height = height, ActualWidth = element.ActualWidth, ActualHeight = element.ActualHeight, Scale = scale, Parent = VisualTreeHelper.GetParent(element)?.GetType().Name, Clip = VisualTreeHelper.GetClip(element)?.Bounds.ToString(), Dpi = VisualTreeHelper.GetDpi(element).DpiScaleX });
             var bitmap = new RenderTargetBitmap((int)Math.Ceiling(width * scale), (int)Math.Ceiling(height * scale), 96 * scale, 96 * scale, PixelFormats.Pbgra32); bitmap.Render(element); return bitmap;
         }
-        finally { if(host!=null)host.Children.Remove(element);element.Width = oldWidth; element.Height = oldHeight; if (root) { element.Resources = resources; owner!.Content = element; owner.UpdateLayout(); } }
+        finally { if(host!=null)host.Children.Remove(element);element.Width = oldWidth; element.Height = oldHeight; if (root) { element.Resources = resources; owner!.Content = element; owner.UpdateLayout(); } Capturing=wasCapturing; }
     }
     private static void Compose(string path, int width, int height, double scale, string heading, IEnumerable<(ImageSource Image, double X, double Y, double W, double H)> images, string note)
     {

@@ -102,12 +102,12 @@ public sealed partial class QuestWindow
         queueInspector.Children.Add(UI.Button("View sources", () => BrowseQueueEntry(entry, row), true));
         if (row != null)
         {
-            AddFocusedSources(queueInspector, row.Sources);
+            AddFocusedSources(queueInspector, row.Sources,Controller.Catalog.FindKey(row.Key));
             if (Controller.Catalog.FindKey(row.Key) is { } item) queueInspector.Children.Add(UI.Text(Controller.Inventory.Ownership(item), 11, "Mint"));
             if (row.ParentReward.Length > 0) queueInspector.Children.Add(FocusedLayout.Disclosure("Parent reward · " + row.ParentReward, UI.Text(row.Instructions, 11), "The selected ingredient can often be collected before later turn-ins."));
         }
         else if (Controller.Catalog.FindKey(entry.Goal.ItemKey) is { } item)
-        { AddFocusedSources(queueInspector, item.Sources); queueInspector.Children.Add(UI.Text(Controller.Inventory.Ownership(item), 11, "Mint")); }
+        { AddFocusedSources(queueInspector, item.Sources,item); queueInspector.Children.Add(UI.Text(Controller.Inventory.Ownership(item), 11, "Mint")); }
         else queueInspector.Children.Add(UI.Text("No outstanding ingredient list. Browse the goal for its checklist or acquisition notes.", 11, "Muted"));
         Usability.Tooltips(queueInspector);
     }
@@ -118,12 +118,12 @@ public sealed partial class QuestWindow
         else if (entry.Goal.Kind == "Exaltation") ShowView(TrackerTab.Exaltations, Controller.Catalog.FindKey(entry.Goal.ItemKey)?.Name ?? entry.Goal.Name);
         else ShowView(TrackerTab.Gear, Controller.Catalog.FindKey(entry.Goal.ItemKey)?.Name ?? entry.Goal.Name);
     }
-    private void AddFocusedSources(StackPanel pane, IEnumerable<ItemSource> sources)
+    private void AddFocusedSources(StackPanel pane,IEnumerable<ItemSource> sources,ItemDefinition? item=null)
     {
-        var rows = sources.OrderByDescending(s => Identity.ZoneKey(s.Zone) == Identity.ZoneKey(Controller.Profile.Zone)).ToList();
-        if (rows.Count == 0) pane.Children.Add(UI.Text("Source information pending · see the wiki reference.", 11, "Muted"));
-        foreach (var source in rows)
-            pane.Children.Add(UI.Card(UI.Stack(UI.Text(source.Zone.Length > 0 ? source.Zone : "Location not documented", 12, "Foreground", true), UI.Text(source.Mob, 12), UI.Text(source.Method + " · " + source.Era + " · " + source.Availability, 11, "Muted"), UI.Text(source.Coordinates, 11, "Mint"))));
+        var rows=sources.OrderByDescending(s=>Identity.ZoneKey(s.Zone)==Identity.ZoneKey(Controller.Profile.Zone)).ToList();
+        if(rows.Count==0){pane.Children.Add(UI.Text("Source information pending · see the wiki reference.",11,"Muted"));return;}
+        var scoped=new ItemDefinition{Key=item?.Key??"focused-source",Name=item?.Name??"Selected item",Aliases=item?.Aliases??[],Sources=rows};
+        foreach(var card in QuestPresentationView.Sources(ProgressPresentation.SourcesFor([scoped.Key],new(){Items=[scoped]})))pane.Children.Add(card);
     }
     internal void OpenItemFilters() => itemFilters.IsExpanded = true;
 }

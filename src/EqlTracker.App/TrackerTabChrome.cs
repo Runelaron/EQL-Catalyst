@@ -27,12 +27,14 @@ public sealed class TrackerTabChrome : Decorator
     public bool Focused { get => (bool)GetValue(FocusedProperty); set => SetValue(FocusedProperty,value); }
     private readonly TextBlock label;
     private string labelColor="";
+    private double LeadingGap => Tag is TrackerTab.Queue ? 12 : 0;
     private const double RightGap=6,BottomGap=2,Inset=.75,VerticalBand=5;
-    internal Rect OutlineBounds => new(Inset,VerticalBand+Inset,Math.Max(0,ActualWidth-RightGap-2*Inset),Math.Max(0,ActualHeight-BottomGap-2*VerticalBand-2*Inset));
+    internal Rect OutlineBounds => new(Inset+LeadingGap,VerticalBand+Inset,Math.Max(0,ActualWidth-RightGap-2*Inset-LeadingGap),Math.Max(0,ActualHeight-BottomGap-2*VerticalBand-2*Inset));
     internal bool ShowInsideMarks => !Selected && (Hovered||Focused);
     public TrackerTabChrome()
     {
         SetResourceReference(StyleIdProperty,"TrackerTabStyle");
+        SetBinding(TagProperty, new Binding("Tag") { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
         label = new() { FontSize=14, FontWeight=FontWeights.SemiBold, HorizontalAlignment=HorizontalAlignment.Center, VerticalAlignment=VerticalAlignment.Center };
         label.SetBinding(TextBlock.TextProperty,new Binding("Header") { RelativeSource=new RelativeSource(RelativeSourceMode.FindAncestor,typeof(TabItem),1) });
         Child=label;
@@ -47,9 +49,9 @@ public sealed class TrackerTabChrome : Decorator
         IsHitTestVisible=false;
     }
     protected override Size MeasureOverride(Size available)
-    { double padding=GetCompactHeaders(this)?16:32;Child!.Measure(new(Math.Max(0,available.Width-padding-RightGap-2*Inset),Math.Max(0,available.Height-20-BottomGap-2*Inset))); return new(Math.Max(GetCompactHeaders(this)?40:64,Child.DesiredSize.Width+padding)+RightGap+2*Inset,Math.Max(38,Child.DesiredSize.Height+20)+BottomGap+2*Inset); }
+    { double padding=GetCompactHeaders(this)?16:32;Child!.Measure(new(Math.Max(0,available.Width-padding-RightGap-2*Inset-LeadingGap),Math.Max(0,available.Height-20-BottomGap-2*Inset))); return new(Math.Max(GetCompactHeaders(this)?40:64,Child.DesiredSize.Width+padding+LeadingGap)+RightGap+2*Inset,Math.Max(38,Child.DesiredSize.Height+20)+BottomGap+2*Inset); }
     protected override Size ArrangeOverride(Size final)
-    {double padding=GetCompactHeaders(this)?8:16;Child!.Arrange(new Rect(padding+Inset,VerticalBand+Inset,Math.Max(0,final.Width-padding*2-RightGap-2*Inset),Math.Max(0,final.Height-BottomGap-2*VerticalBand-2*Inset))); return final; }
+    {double padding=GetCompactHeaders(this)?8:16;Child!.Arrange(new Rect(padding+Inset+LeadingGap,VerticalBand+Inset,Math.Max(0,final.Width-padding*2-RightGap-2*Inset-LeadingGap),Math.Max(0,final.Height-BottomGap-2*VerticalBand-2*Inset))); return final; }
     internal static Geometry Shape(TrackerTabStyle style,double w,double h)
     {
         string path=style switch {
@@ -77,6 +79,7 @@ public sealed class TrackerTabChrome : Decorator
     { var old=CultureInfo.CurrentCulture;try { CultureInfo.CurrentCulture=CultureInfo.InvariantCulture;return Shape(style,w,h); } finally { CultureInfo.CurrentCulture=old; } }
     protected override void OnRender(DrawingContext dc)
     {
+        if (LeadingGap > 0) dc.DrawLine(new Pen(UI.Brush("Edge"),1),new Point(LeadingGap/2,12),new Point(LeadingGap/2,Math.Max(12,ActualHeight-12)));
         var bounds=OutlineBounds;double w=bounds.Width,h=bounds.Height;if(w<32||h<20)return;
         dc.PushTransform(new TranslateTransform(bounds.X,bounds.Y));
         var edge=new Pen(UI.Brush(Selected?"Melee":Hovered?"Accent":"Edge"),1);

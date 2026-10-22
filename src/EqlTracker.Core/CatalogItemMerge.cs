@@ -17,6 +17,8 @@ public static class CatalogItemMerge
             bool newer = (item.Revision, item.MetadataVersion, item.MetadataComplete).CompareTo((old.Revision, old.MetadataVersion, old.MetadataComplete)) >= 0;
             var selected = EquipmentPositions.Copy(newer ? item : old); var other = newer ? old : item;
             selected.GameId ??= other.GameId;
+            foreach(var stat in other.Stats) selected.Stats.TryAdd(stat.Key,stat.Value);
+            selected.Effects = selected.Effects.Concat(other.Effects).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             if (selected.Display.Source.Length == 0 && other.Display.Source.Length > 0) selected.Display = EquipmentPositions.Copy(other.Display);
             if (selected.Display.WeaponShape == WeaponShape.Unknown && other.Display.WeaponShape != WeaponShape.Unknown && other.Display.WeaponShapeEvidence.Length > 0)
             { selected.Display.WeaponShape = other.Display.WeaponShape; selected.Display.WeaponShapeEvidence = other.Display.WeaponShapeEvidence; }

@@ -18,7 +18,7 @@ public sealed partial class QuestWindow
     private Grid? petInnerSplit, petOuterSplit;
     private readonly DispatcherTimer petPreviewDelay = new() { Interval = TimeSpan.FromMilliseconds(50) };
     private InventoryEntry? PetInspectedInstance(PetSearchRow row) => petPreview.Identity == row.ToString() ? petInspectedCopy ?? row.Instance : row.Instance;
-    private int PetInspectedRank(PetSearchRow row) => petPreview.Identity == row.ToString() ? petPreview.Rank ?? PetInspectedInstance(row)?.Rank ?? row.Rank : row.Rank;
+    private int PetInspectedRank(PetSearchRow row) => petPreview.Identity == row.ToString() ? petPreview.Rank ?? (petRank.SelectedIndex == 0 && petInspectedCopy != null ? petInspectedCopy.Rank : row.Rank) : row.Rank;
     private void ChangePetPreviewRank(int? rank)
     {
         using var measurement = UpdateDiagnostics.Measure("Rank input apply");
@@ -37,22 +37,22 @@ public sealed partial class QuestWindow
         int rank = PetInspectedRank(row);
         var instance = PetInspectedInstance(row);
         long equipmentRevision = Controller.EquipmentRevision, petRevision = Controller.PetRevision;
-        string key = $"{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{SelectedPetInventory?.Id}|{petPreview.Identity}|{petPreview.Revision}|{PhysicalItemChoices.Identity(instance)}|{petPreferredPosition}";
+        string key = $"{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{SelectedPetInventory?.Id}|{petPreview.Identity}|{petPreview.Revision}|{PhysicalItemChoices.Identity(instance)}|{petPreferredPosition}";
         if (key == petPreviewKey) return; petPreviewKey = key;
         petPreviewCancel?.Cancel(); petPreviewCancel?.Dispose(); petPreviewCancel = new(); var token = petPreviewCancel.Token;
         if (rank == row.Rank && ReferenceEquals(instance, row.Instance)) { if (!Controller.Demo && petRowsKey != petKey) { petPreviewKey = ""; DisplaySelectedPet(row, null, $"Updating +{rank}…"); } else DisplaySelectedPet(row, row.Comparison, ""); return; }
         DisplaySelectedPet(row, null, $"Updating +{rank}…");
         if (SelectedPetInventory is not { } selected) return;
-        string baselineKey = $"{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{selected.Id}";
+        string baselineKey = $"{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{selected.Id}";
         if (petSelectedSession == null || petSessionKey != baselineKey)
         {
-            var owner = EquipmentPositions.Copy(Controller.EquipmentView?.Profile.ActiveLoadout ?? Controller.Profile.ActiveLoadout);
+            var owner = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout);
             var plan = EquipmentPositions.Copy(selected); var context = GuidedPetBuilds.Context(owner, plan);
-            petSelectedPositions = PetEquipmentInference.Build(plan, owner, Controller.Catalog).Positions;
+            var equipment = PetEquipmentInference.Build(plan, owner, Controller.Catalog); petSelectedPositions = equipment.Positions;
             petRankCache.Clear();
             var reference = GuidedPetBuilds.Positions(PetInventoryEditing.Confirmed(owner, Controller.Catalog), owner, Controller.Catalog);
-            var weights = Controller.Profile.Weights.GetValueOrDefault(SelectedPetPreset) ?? GearScorer.Defaults["Pet DPS"];
-            petSelectedSession = new(Controller.Catalog, context, true, new(weights), petSelectedPositions, reference, plan.IsTheorycraft); petSessionKey = baselineKey;
+            var weights = PetRoleRatings.Weights(Controller.Profile, SelectedPetPreset);
+            petSelectedSession = new(Controller.Catalog, context, true, new(weights), petSelectedPositions, reference, plan.IsTheorycraft, petGoal: SelectedPetPreset, petDefenseWeights: PetRoleRatings.Weights(Controller.Profile,"Tank"), petInventory: plan,effectivePetEquipment:equipment); petSessionKey = baselineKey;
         }
         var session = petSelectedSession; string preferred = petPreferredPosition;
         string cacheKey = row.Item.Key + "|" + PhysicalItemChoices.Identity(instance) + "|" + rank + "|" + preferred;
@@ -79,15 +79,16 @@ public sealed partial class QuestWindow
     }
     private void OpenPetFormula()
     {
-        var weights = Controller.Profile.Weights.GetValueOrDefault(SelectedPetPreset) ?? GearScorer.Defaults["Pet DPS"];
-        new RatingFormulaDialog(SelectedPetPreset, new(weights), petDisplayedComparison) { Owner = this }.ShowDialog();
+        var weights = PetRoleRatings.Weights(Controller.Profile, SelectedPetPreset);
+        var row = petResults.SelectedItem as PetSearchRow;
+        new RatingFormulaDialog(SelectedPetPreset, new(weights), petDisplayedComparison, true, row == null ? "" : row.Item.Name + " +" + PetInspectedRank(row)) { Owner = this }.ShowDialog();
     }
     private void ResetPetPanels()
     {
         if (petOuterSplit != null) PaneLayout.Cancel(petOuterSplit);
         Controller.Profile.PanelSplits["pet-focused-items"] = .56; Controller.Profile.PanelSplits["pet-focused-comparison"] = .25;
         if (petInnerSplit != null) { petInnerSplit.ColumnDefinitions[0].Width = new(.44, GridUnitType.Star); petInnerSplit.ColumnDefinitions[2].Width = new(.56, GridUnitType.Star); }
-        if (petOuterSplit != null && ActualWidth >= 1080) { petOuterSplit.ColumnDefinitions[0].Width = new(.75, GridUnitType.Star); petOuterSplit.ColumnDefinitions[2].Width = new(.25, GridUnitType.Star); }
+        if (petOuterSplit != null) { petOuterSplit.ColumnDefinitions[0].Width = new(.75, GridUnitType.Star); petOuterSplit.ColumnDefinitions[2].Width = new(.25, GridUnitType.Star); }
         Controller.Save();
     }
 }

@@ -9,11 +9,11 @@ public sealed class ComparisonPanel : StackPanel
     public bool AnimateValues { get; set; }
     public Action? FormulaRequested { get; set; }
     private PetPairComparisonView? rawPair;
-    public void ShowPair(ItemPairComparison pair)
+    public void ShowPair(ItemPairComparison pair,Func<ItemPairComparison>? refresh=null,Func<string>? revision=null)
     {
         if (rawPair != null) Children.Remove(rawPair);
         foreach (UIElement child in Children) child.Visibility = Visibility.Collapsed;
-        rawPair = new(pair); Children.Add(rawPair);
+        rawPair = new(pair,refresh,revision); Children.Add(rawPair);
     }
     private readonly TextBlock heading = UI.Text("Select an item to compare.", 12, "Accent", true);
     private readonly TextBlock baseline = UI.Text("", 11), quality = UI.Text("", 11, "Muted"), effects = UI.Text("", 11, "Mint");

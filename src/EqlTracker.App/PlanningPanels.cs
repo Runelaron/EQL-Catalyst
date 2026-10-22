@@ -9,7 +9,7 @@ namespace EqlTracker.App;
 
 public enum TrackerTab { Queue = 0, Items = 1, Quests = 2, Gear = 3, Pet = 4, Exaltations = 5, Progress = 6 }
 public static class TrackerNavigation
-{ public static IReadOnlyList<TrackerTab> Order { get; } = new[] { TrackerTab.Queue, TrackerTab.Items, TrackerTab.Quests, TrackerTab.Progress, TrackerTab.Gear, TrackerTab.Exaltations, TrackerTab.Pet }; }
+{ public static IReadOnlyList<TrackerTab> Order { get; } = new[] { TrackerTab.Items, TrackerTab.Quests, TrackerTab.Queue, TrackerTab.Progress, TrackerTab.Gear, TrackerTab.Exaltations, TrackerTab.Pet }; }
 public sealed record QuestLibraryRow(QuestDefinition Quest, string Tracking, string State, string Suggestion, string Explanation)
 { public GearComparison? Comparison { get; init; } public string Preset { get; init; } = ""; public bool IsSuggested => Comparison?.Evaluation is { } e ? e.Unbuffed.Delta > 0 || e.Buffed.Delta > 0 : Comparison?.CanCompare == true && Comparison.Delta > 0; public string Name => (IsSuggested ? "✦ " : "") + Quest.Name; public string Class => string.Join("/", QuestTracking.Classes(Quest)); public string Expansion => Quest.Expansion; public string Set => Quest.SetName; }
 public sealed partial class QuestWindow
@@ -28,9 +28,9 @@ public sealed partial class QuestWindow
     private readonly TextBox questQuantity = UI.Input("1", 42);
     private string libraryKey = "", petKey = "", exaltKey = "";
     private readonly TextBox petSearch = UI.Input("", 220), petPosition = UI.Input("1", 42);
-    private readonly ComboBox petRank = EditablePetNumber(Enumerable.Range(0, 11).Select(i => i.ToString()), "0", 60), petLevel = EditablePetNumber(new[] { "Auto", "Unknown" }.Concat(Enumerable.Range(1, 50).Select(i => i.ToString())), "Unknown", 80);
+    private readonly ComboBox petRank = UI.Select(new[]{"Actual"}.Concat(Enumerable.Range(0, 11).Select(i => i.ToString())), "Actual", 68), petLevel = EditablePetNumber(new[] { "Auto", "Unknown" }.Concat(Enumerable.Range(1, 50).Select(i => i.ToString())), "Unknown", 80);
     private readonly ComboBox petBuild = UI.Select([], "", 170), petElement = UI.Select(["Unknown", "Earth", "Water", "Air", "Fire", "Undead", "Animation", "Warder", "Spirit"], "Unknown", 95);
-    private readonly ComboBox petSlot = UI.Select(new[] { "All slots" }.Concat(EquipmentPositions.Names.Where(n => n != "Any Slot")), "All slots", 110);
+    private readonly ComboBox petSlot = UI.Select(new[] { "All slots" }.Concat(EquipmentPositions.Names.Where(n => n != "Any Slot")), "All slots", 84);
     private readonly ComboBox petOwnership = UI.Select(["All items", "Inventory Only", "Confirmed pet", "Planned items"], "All items", 130);
     private readonly DataGrid petResults = UI.Table(("Item", "Name", 0, null), ("Slots", "SlotText", 150, null), ("Ownership", "Ownership", 130, null));
     private readonly DataGrid petItems = UI.Table(("#", "Position", 32, null), ("Item", "Name", 0, null), ("Slot", "Slot", 85, null), ("+rank", "Rank", 50, null), ("Status", "State", 230, null));
@@ -52,7 +52,7 @@ public sealed partial class QuestWindow
     internal void ShowView(TrackerTab id, string? item = null)
     {
         bool wasInitializing = initializing; initializing = true;
-        if (item != null) { if (id == TrackerTab.Gear) { gearSearch.Text = item; GearSelectedPosition = "*"; } if (id == TrackerTab.Progress) questSelection.SelectedItem = item; if (id == TrackerTab.Quests) librarySearch.Text = item; if (id == TrackerTab.Pet) petSearch.Text = item; if (id == TrackerTab.Exaltations) exaltSearch.Text = item; }
+        if (item != null) { if (id == TrackerTab.Gear) { gearSearch.Text = item; GearSelectedPosition = "*"; } if (id == TrackerTab.Progress) SelectProgressQuest(item); if (id == TrackerTab.Quests) librarySearch.Text = item; if (id == TrackerTab.Pet) petSearch.Text = item; if (id == TrackerTab.Exaltations) exaltSearch.Text = item; }
         tabs.SelectedItem = tabById[id]; initializing = wasInitializing;
         if (id != TrackerTab.Gear) { gearViewCancel?.Cancel(); gearFingerprint = null; }
         if (id != TrackerTab.Pet) { petViewCancel?.Cancel(); petKey = ""; }
@@ -96,9 +96,9 @@ public sealed partial class QuestWindow
     {
         foreach (var column in libraryTable.Columns.OfType<DataGridTextColumn>().Where(c => c.SortMemberPath is "Name" or "Suggestion"))
         { var style = new Style(typeof(TextBlock)); style.Setters.Add(new Setter(ToolTipProperty, new Binding("Explanation"))); style.Setters.Add(new Setter(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis)); column.ElementStyle = style; }
+        librarySearch.Height = 28;
         var root = new DockPanel(); var controls = new WrapPanel();
         foreach (var c in new UIElement[] { FocusedLayout.Search(librarySearch, "Find a quest or reward…"), libraryClasses, libraryState,
-            UI.Button("Track / untrack", () => { if (libraryTable.SelectedItem is QuestLibraryRow r) { QuestTracking.Track(Controller.Profile, r.Quest, !QuestTracking.Selected(r.Quest, Controller.Profile, Controller.Inventory, Controller.Catalog), int.TryParse(questQuantity.Text, out int n) ? n : 1); Changed(); } }),
             }) controls.Children.Add(c);
         var heading = UI.Stack(controls, FocusedLayout.Disclosure("More filters", UI.Row(libraryExpansion), "Filter quest expansion independently of item-source availability."));
         DockPanel.SetDock(heading, Dock.Top); root.Children.Add(heading);
@@ -113,11 +113,11 @@ public sealed partial class QuestWindow
         if (item != null)
         {
             var loadout = p.ActiveLoadout;
-            selectedPreset = pet ? loadout.PetPreset : loadout.Preset; var weights = p.Weights.GetValueOrDefault(selectedPreset, GearScorer.Defaults["Tank"]);
-            var comparisons = GearRecommendations.For(item, 0, catalog, loadout, pet, weights);
+            selectedPreset = pet ? loadout.PetPreset : loadout.Preset; var resolvedRole = pet ? null : SelfRoleRatings.Resolve(p,loadout,selectedPreset); var weights = pet ? PetRoleRatings.Weights(p,selectedPreset) : resolvedRole?.Weights ?? p.Weights.GetValueOrDefault(selectedPreset, GearScorer.Defaults["Tank"]);
+            var comparisons = GearRecommendations.For(item, 0, catalog, loadout, pet, weights, resolvedRole, pet?PetRoleRatings.Weights(p,"Tank"):null);
             var best = comparisons.FirstOrDefault(c => c.Evaluation is { } e && (e.Unbuffed.Delta > 0 || e.Buffed.Delta > 0)) ?? comparisons.FirstOrDefault(c=>c.CanCompare);
             selectedComparison = best ?? comparisons.FirstOrDefault();
-            if (best != null) { suggestion = pet ? $"{selectedPreset} · {best.Evaluation?.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} pts" : $"{selectedPreset} · U {best.Evaluation?.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} / B {best.Evaluation?.Buffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} pts"; explanation = best.Slot + " · " + best.Replaces + "\n" + best.Contributions + "\n" + best.Effects; }
+            if (best != null) { suggestion = pet ? selectedPreset+" · "+PetRoleRatings.Text(best.Evaluation)+" pts" : $"{selectedPreset} · U {best.Evaluation?.Unbuffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} / B {best.Evaluation?.Buffed.Delta?.ToString("+0.0;-0.0;0") ?? "—"} pts"; explanation = best.Slot + " · " + best.Replaces + "\n" + best.Contributions + "\n" + best.Effects; }
             else if (comparisons.FirstOrDefault() is { Eligibility: not "Eligible" } restricted) { suggestion = "Future / restricted"; explanation = restricted.Eligibility; }
         }
         bool done = QuestTracking.Fulfilled(q, p, inventory, catalog);
@@ -128,14 +128,13 @@ public sealed partial class QuestWindow
     {
         string key = $"{Controller.QuestRevision}|{Controller.EquipmentRevision}|{librarySearch.Text}|{libraryClasses.SelectedItem}|{libraryExpansion.SelectedItem}|{libraryState.SelectedItem}"; if (key == libraryKey) return; libraryKey = key;
         libraryViewCancel?.Cancel();libraryViewCancel?.Dispose();libraryViewCancel=new();var token=libraryViewCancel.Token;
-        var planningInput = Controller.PlanningProfile ?? EquipmentPositions.Copy(Controller.Profile); var equipmentInput = Controller.EquipmentView?.Profile; var inventory = Controller.EquipmentView?.Inventory ?? Controller.Inventory; var catalog = Controller.EquipmentView?.Catalog ?? new Catalog { Items = Controller.Catalog.Items.ToList(), Quests = Controller.Catalog.Quests.ToList() };
+        var planningInput = EquipmentPositions.Copy(Controller.Profile); var inventory = Controller.EquipmentView?.Inventory ?? Controller.Inventory; var catalog = Controller.EquipmentView?.Catalog ?? new Catalog { Items = Controller.Catalog.Items.ToList(), Quests = Controller.Catalog.Quests.ToList() };
         bool pet=libraryClasses.SelectedItem?.ToString()=="Pet compatible",allClasses=libraryClasses.SelectedItem?.ToString()=="All classes"; string expansion=libraryExpansion.SelectedItem?.ToString()??"All expansions",state=libraryState.SelectedItem?.ToString()??"All quests",query=librarySearch.Text;
         List<QuestLibraryRow> Build()
         {
             var p = EquipmentPositions.Copy(planningInput);
-            if (equipmentInput != null) { p.Loadouts = equipmentInput.Loadouts; p.Weights = equipmentInput.Weights; p.SelectedLoadout = equipmentInput.SelectedLoadout; }
             var eligible=pet?GearScorer.EligibleClasses(p.ActiveLoadout,true):p.EnabledClasses;
-            var rows=new List<QuestLibraryRow>();foreach(var q in catalog.Quests.Where(q=>(allClasses || QuestTracking.Relevant(q,eligible)) && (expansion=="All expansions" || q.Expansion==expansion) && (q.Name+q.SetName+q.Class).Contains(query,StringComparison.OrdinalIgnoreCase))) {token.ThrowIfCancellationRequested();rows.Add(LibraryRow(q,p,catalog,inventory,pet));}
+            var rows=new List<QuestLibraryRow>();foreach(var q in catalog.Quests.Where(q=>(allClasses || QuestTracking.Relevant(q,eligible)) && (expansion=="All expansions" || q.Expansion==expansion) && QuestPresentation.Matches(q,catalog,query))) {token.ThrowIfCancellationRequested();rows.Add(LibraryRow(q,p,catalog,inventory,pet));}
             return rows.Where(r=>state switch {"Tracked"=>r.Tracking.StartsWith("✓"),"Untracked"=>!r.Tracking.StartsWith("✓"),"Owned / completed"=>r.State=="Owned / completed","Suggested"=>r.IsSuggested,_=>true}).OrderBy(r=>r.Quest.Kind!="Epic").ThenBy(r=>r.Set).ThenBy(r=>r.Name).ToList();
         }
         void Apply(List<QuestLibraryRow> rows)
@@ -151,20 +150,24 @@ public sealed partial class QuestWindow
         questQuantity.Text = Controller.Profile.QuestQuantities.GetValueOrDefault(r.Quest.Id, 1).ToString();
         if (questQuantity.Parent is Panel oldQuantityRow) oldQuantityRow.Children.Remove(questQuantity);
         libraryDetail.Children.Add(UI.Card(UI.Stack(UI.Label(r.Quest.SetName), UI.Text(r.Quest.Name, 16, "Accent", true), UI.Text(r.State + " · " + r.Tracking, 12, "Mint"))));
-        var action = UI.CommitButton("Add to queue", () => PinQuest(r.Quest)); action.ToolTip = "Track this reward and pin its remaining requirements. Repeated additions do not duplicate it.";
-        libraryDetail.Children.Add(UI.Row(action, UI.Label("Qty"), questQuantity));
+        var action = QueueAction(r.Quest);
+        var tracked = QuestTracking.Selected(r.Quest, Controller.Profile, Controller.Inventory, Controller.Catalog);
+        var track = UI.Button(tracked ? "Untrack" : "Track", () => { QuestTracking.Track(Controller.Profile, r.Quest, !QuestTracking.Selected(r.Quest, Controller.Profile, Controller.Inventory, Controller.Catalog), int.TryParse(questQuantity.Text, out int n) ? n : 1); Changed(); });
+        track.ToolTip = tracked ? "Stop tracking this quest in Progress; progress is retained." : "Track this quest in Progress.";
+        libraryDetail.Children.Add(UI.Row(track, action, UI.Label("Qty"), questQuantity));
         libraryDetail.Children.Add(UI.Button("View progress", () => ShowView(TrackerTab.Progress, r.Quest.Name)));
-        var comparison = new ComparisonPanel(); comparison.Show(r.Comparison, r.Preset); libraryDetail.Children.Add(FocusedLayout.Disclosure("Reward comparison · " + r.Suggestion, comparison, "Compare both stat contexts; effects and unscored losses are preserved."));
+        var comparison = new ComparisonPanel(); comparison.Show(r.Comparison, r.Preset); libraryDetail.Children.Add(FocusedLayout.Disclosure("Reward Comparison", comparison, "Compare both stat contexts; effects and unscored losses are preserved."));
         libraryDetail.Children.Add(UI.Text(r.Quest.RecommendedLevel > 0 ? $"Quest recommended level {r.Quest.RecommendedLevel}. Equip level and +rank are separate." : "Quest recommended level not documented.", 11, "Muted"));
-        if (Controller.Catalog.FindKey(r.Quest.RewardKey) is { } reward) AddFocusedSources(libraryDetail, reward.Sources);
+        if (Controller.Catalog.FindKey(r.Quest.RewardKey) is { } reward) AddFocusedSources(libraryDetail, reward.Sources,reward);
         var steps = new StackPanel(); steps.Children.Add(UI.Text(r.Quest.Coverage, 11, "Muted"));
-        foreach (var step in r.Quest.Steps) steps.Children.Add(UI.Card(UI.Stack(UI.Text(step.Name, 12, "Foreground", true), UI.Text(step.Instructions, 11), UI.Text(string.Join("\n", step.Inputs.Select(i => $"{i.Count} × {Controller.Catalog.FindKey(i.ItemKey)?.Name ?? i.ItemKey}")), 11, "Mint"))));
+        var checklist=ProgressPresentation.Build(new(){Kind=QuestNodeKind.Quest,QuestId=r.Quest.Id,Name=r.Quest.Name},r.Quest,Controller.Profile,Controller.Catalog,allRoutes:true);
+        foreach(var block in checklist.Instructions)steps.Children.Add(UI.Card(QuestPresentationView.Instruction(block,Controller.Catalog,true)));
         libraryDetail.Children.Add(FocusedLayout.Disclosure("Full checklist & coverage", steps, "Ingredients, intermediate rewards and alternate routes. View Progress to navigate a specific branch.")); libraryDetail.Children.Add(UI.Button("Open walkthrough", () => UI.OpenUrl(r.Quest.WikiUrl)));
         Usability.Tooltips(libraryDetail);
     }
-    private void ConfigureGearControls(WrapPanel controls)
+    private FrameworkElement GearExpansionControl()
     {
-        var menu = new ContextMenu(); var button = OverlayMenus.Button(menu, "Exact expansion selections include clearly marked zone-based assumptions; unresolved metadata stays Unknown.", "All ▾"); button.Width = 180;button.Height=28;button.Margin=new(0);button.Tag="gear-expansion-filter";
+        var menu = new ContextMenu(); var button = OverlayMenus.Button(menu, "Exact expansion selections include clearly marked zone-based assumptions; unresolved metadata stays Unknown.", "All ▾"); button.Width = 90;button.Height=28;button.Margin=new(0);button.Tag="gear-expansion-filter";
         void Update()
         {
             var selected = ItemExpansionFilter.Choices.Where(Controller.Profile.GearExpansions.Contains).ToArray();
@@ -175,7 +178,7 @@ public sealed partial class QuestWindow
             var choice = new MenuItem { Header = name, IsCheckable = true, IsChecked = Controller.Profile.GearExpansions.Contains(name), StaysOpenOnClick = true };
             choice.Click += (_, _) => { if (choice.IsChecked) { if (!Controller.Profile.GearExpansions.Contains(name)) Controller.Profile.GearExpansions.Add(name); } else Controller.Profile.GearExpansions.Remove(name); Update(); GearEdited(); }; menu.Items.Add(choice);
         }
-        Update(); controls.Children.Add(UI.Field("Expansion",button));
+        Update(); return (FrameworkElement)UI.Field("Expansion",button);
     }
     private void LayoutQuestColumns()
     {
@@ -248,7 +251,7 @@ public sealed partial class QuestWindow
         exaltDetail.Children.Add(FocusedLayout.Disclosure("Ownership evidence", UI.Text(e.OwnershipEvidence.Details, 11), "Distinguishes source equipment, extracted storage, socketed effects and collection/keyring presence. No copies are invented."));
         exaltDetail.Children.Add(UI.CommitButton("Add to queue", PinExaltation));
         exaltDetail.Children.Add(FocusedLayout.Disclosure("Unlock rules", UI.Text("Ornamentation +0 · Focus +1 · Click +2 · Worn +3 · Proc +4. Source ownership is not an extracted effect. Collection entries prove presence, not quantity. Intrinsic effects remain separate from socketed and planned effects.", 11, "SecondaryText"), "Effect types unlock at different source and destination ranks; source ownership is not effect ownership."));
-        AddFocusedSources(exaltDetail, e.Source.Sources.DistinctBy(s => (s.Zone, s.Mob, s.Method, s.Availability)));
+        AddFocusedSources(exaltDetail, e.Source.Sources.DistinctBy(s => (s.Zone, s.Mob, s.Method, s.Availability)),e.Source);
         exaltDetail.Children.Add(UI.Button("Open source wiki", () => UI.OpenUrl(e.Source.WikiUrl)));
         if (exaltDestination.Parent is Panel prior) prior.Children.Remove(exaltDestination);
         var assignment = new StackPanel();

@@ -1,8 +1,8 @@
-# EQL Catalyst — Beta 1.1
+# EQL Catalyst — Beta 1.4
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.1**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.1.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.4**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.4.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
@@ -19,7 +19,7 @@ An independent Windows companion for **EverQuest Legends**: follow combat, organ
 
 Scores are preference points, **not predicted DPS**. Missing or disputed mechanics stay labeled. Class Loadout comparison is in development. Live-game interaction and physical-monitor DPI acceptance remain separate from automated tests.
 
-Beta 1.1 adds cascading panel/column resizing, visible handles, whole-app character switching, clearer visual appearance selectors, customizable overlay shortcuts, and a deeper Shadowman theme. See [release notes](CHANGELOG.md), [appearance and shortcuts](docs/compact-settings.md), and [character/layout controls](docs/cascading-controls.md).
+Beta 1.4 adds opt-in weekly update checks/downloads, a ready-to-install icon beside Settings, clearer quest browsing and acquisition details, repaired Pet equipment ratings and catalog coverage, and compact controls. See [release notes](CHANGELOG.md), [application updates](docs/application-updates.md), and [Progress help](docs/progress-rewards.md).
 
 ## Install
 
@@ -43,3 +43,7 @@ The build script downloads a checksum-pinned, publisher-verified Inno Setup **7.
 Application code and first-party project material: **GPL-3.0-only**, copyright 2026 Runelaron. See [LICENSE](LICENSE). Wiki-derived content remains **CC BY-SA 4.0**, the bundled font remains **SIL OFL 1.1**, and dependencies keep their own licenses. See [third-party notices](THIRD-PARTY-NOTICES.md) and [artwork notices](ASSET-NOTICES.md).
 
 EQL Catalyst is an independent community companion, not an official Daybreak, Darkpaw, or Game Jawn product. EverQuest and other referenced characters/trademarks remain the property of their respective owners.
+
+See [Gear roles, item comparisons, and tooltip preferences](docs/role-ratings.md) for class-aware rating priorities, custom weights, formula arithmetic, and help settings.
+
+See [Pet comparison and buff planning](docs/pet-comparison.md) for class-gated summons, intended equipment, reassignment, separate DPS/Balanced/Tank goals, and the limits of current prediction evidence.

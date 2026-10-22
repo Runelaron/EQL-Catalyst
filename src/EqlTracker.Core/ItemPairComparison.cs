@@ -6,12 +6,13 @@ public sealed record ItemPairSide(string Name, int Rank, IReadOnlyDictionary<str
 { public ItemDefinition? Definition { get; init; } public InventoryEntry? Instance { get; init; } }
 public sealed record ItemPairComparison(ItemPairSide Current, ItemPairSide Candidate, IReadOnlyList<ItemPairStat> Differences, string Warning)
 {
+    public bool Pet { get; init; } = true;
     public static ItemPairComparison Create(ItemDefinition? current, InventoryEntry? currentInstance, ItemDefinition candidate, int rank, InventoryEntry? instance, LoadoutProfile context, Catalog catalog, bool pet = true)
     {
         int currentRank = currentInstance?.Rank ?? 0;
         var before = current == null ? new Dictionary<string, double>() : GearScorer.EffectiveStats(current, currentRank);
         var after = GearScorer.EffectiveStats(candidate, rank);
-        var changes = before.Keys.Union(after.Keys).OrderBy(s => s).Select(s => new ItemPairStat(s, before.TryGetValue(s, out double a) ? a : current?.MetadataComplete == true ? 0 : null, after.TryGetValue(s, out double b) ? b : candidate.MetadataComplete ? 0 : null)).ToList();
+        var changes = before.Keys.Union(after.Keys).OrderBy(s => Array.IndexOf(ItemStatGroups.Categories,ItemStatGroups.Category(s))).ThenBy(ItemStatGroups.Order).ThenBy(s=>s).Select(s => new ItemPairStat(s, before.TryGetValue(s, out double a) ? a : current?.MetadataComplete == true ? 0 : null, after.TryGetValue(s, out double b) ? b : candidate.MetadataComplete ? 0 : null)).ToList();
         string eligibility = GearScorer.Eligibility(candidate, context, pet, instance?.Augments, catalog);
         foreach (var effect in instance?.Augments ?? [])
         {
@@ -20,6 +21,7 @@ public sealed record ItemPairComparison(ItemPairSide Current, ItemPairSide Candi
         }
         string warning = current == null ? "Current item metadata is unavailable. Select an inventory item to compare." : !candidate.MetadataComplete || !current.MetadataComplete ? "Some metadata is missing; unknown values are shown as —." : eligibility != "Eligible" ? eligibility + " · raw item differences only; this is not an upgrade recommendation." : !current.Slots.Select(EquipmentPositions.Normalize).Intersect(candidate.Slots.Select(EquipmentPositions.Normalize)).Any() ? "These items have no shared wearable slot · raw differences only." : "";
         ItemPairSide Side(ItemDefinition? item, int tier, InventoryEntry? physical) => new(item?.Name ?? currentInstance?.Name ?? "No current item selected", tier, item == null ? new Dictionary<string, double>() : GearScorer.EffectiveStats(item, tier), item == null ? [] : ItemEffects.Active(item, physical?.TransferredOutEffects).Concat(physical?.Augments.Select(a => a.EffectText.Length > 0 ? a.EffectText : a.Name) ?? []).ToArray(), item == null ? "Metadata unknown" : ItemPresentation.Slots(item.Slots) + " · " + string.Join(" / ", item.Classes));
-        return new(Side(current, currentRank, currentInstance) with { Definition = current, Instance = currentInstance }, Side(candidate, rank, instance) with { Definition = candidate, Instance = instance }, changes, warning);
+        if (RankedItemStats.Resolve(candidate,rank).WeaponUncertain || current != null && RankedItemStats.Resolve(current,currentRank).WeaponUncertain) warning += (warning.Length > 0 ? "\n" : "") + "Conditional ranked weapon estimate; no confirmed winner.";
+        return new(Side(current, currentRank, currentInstance) with { Definition = current, Instance = currentInstance }, Side(candidate, rank, instance) with { Definition = candidate, Instance = instance }, changes, warning) { Pet = pet };
     }
 }

@@ -1,0 +1,107 @@
+[
+  {
+    "Name": "Bard Epic Quest",
+    "Revision": 176792,
+    "StartZone": "Dreadlands",
+    "StartNpc": "Baldric Slezaf",
+    "Source": "https://eqlwiki.com/Bard_Epic_Quest?oldid=176792 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Berserker Epic Quest",
+    "Revision": 131435,
+    "StartZone": "Lake of Ill Omen",
+    "StartNpc": "Keras McArik",
+    "Source": "https://eqlwiki.com/Berserker_Epic_Quest?oldid=131435 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Cleric Epic Quest",
+    "Revision": 124170,
+    "StartZone": "Lake Rathetear",
+    "StartNpc": "Shmendrik Lavawalker",
+    "Source": "https://eqlwiki.com/Cleric_Epic_Quest?oldid=124170 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Druid Epic Quest",
+    "Revision": 162921,
+    "StartZone": "Burning Woods",
+    "StartNpc": "",
+    "Source": "https://eqlwiki.com/Druid_Epic_Quest?oldid=162921 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Enchanter Epic Quest",
+    "Revision": 162922,
+    "StartZone": "Erudin",
+    "StartNpc": "Stofo Olan",
+    "Source": "https://eqlwiki.com/Enchanter_Epic_Quest?oldid=162922 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Magician Epic Quest",
+    "Revision": 177221,
+    "StartZone": "Lake Rathetear",
+    "StartNpc": "Rykas",
+    "Source": "https://eqlwiki.com/Magician_Epic_Quest?oldid=177221 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Monk Epic Quest",
+    "Revision": 162924,
+    "StartZone": "Erudin",
+    "StartNpc": "Tomekeeper Danl",
+    "Source": "https://eqlwiki.com/Monk_Epic_Quest?oldid=162924 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Necromancer Epic Quest",
+    "Revision": 162925,
+    "StartZone": "Nektulos Forest",
+    "StartNpc": "Venenzi Oberzendi",
+    "Source": "https://eqlwiki.com/Necromancer_Epic_Quest?oldid=162925 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Paladin Epic Quest",
+    "Revision": 162926,
+    "StartZone": "Plane of Fear",
+    "StartNpc": "Irak Altil",
+    "Source": "https://eqlwiki.com/Paladin_Epic_Quest?oldid=162926 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Ranger Epic Quest",
+    "Revision": 162927,
+    "StartZone": "Burning Woods",
+    "StartNpc": "Telin Darkforest",
+    "Source": "https://eqlwiki.com/Ranger_Epic_Quest?oldid=162927 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Rogue Epic Quest",
+    "Revision": 162928,
+    "StartZone": "Qeynos Aqueducts",
+    "StartNpc": "Malka Rale",
+    "Source": "https://eqlwiki.com/Rogue_Epic_Quest?oldid=162928 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Shadow Knight Epic Quest",
+    "Revision": 162929,
+    "StartZone": "The Overthere",
+    "StartNpc": "Kurron Ni",
+    "Source": "https://eqlwiki.com/Shadow_Knight_Epic_Quest?oldid=162929 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Shaman Epic Quest",
+    "Revision": 133418,
+    "StartZone": "Various",
+    "StartNpc": "a lesser spirit",
+    "Source": "https://eqlwiki.com/Shaman_Epic_Quest?oldid=133418 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Warrior Epic Quest",
+    "Revision": 162930,
+    "StartZone": "East Freeport",
+    "StartNpc": "Kargek Redblade, Wenden Blackhammer",
+    "Source": "https://eqlwiki.com/Warrior_Epic_Quest?oldid=162930 · structured quest-start fields · parser v1"
+  },
+  {
+    "Name": "Wizard Epic Quest",
+    "Revision": 162931,
+    "StartZone": "Temple of Solusek Ro",
+    "StartNpc": "Solomen",
+    "Source": "https://eqlwiki.com/Wizard_Epic_Quest?oldid=162931 · structured quest-start fields · parser v1"
+  }
+]

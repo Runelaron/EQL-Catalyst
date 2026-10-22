@@ -117,6 +117,8 @@ public partial class App : Application
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException or Microsoft.Data.Sqlite.SqliteException or System.Text.Json.JsonException)
         { MessageBox.Show("Unable to open this profile. Existing data was not replaced.\n\n" + error.Message, "EQL Catalyst"); Shutdown(1); return; }
+        Updates = new(diagnostic?Path.Combine(preview??benchmark??smoke!,".update-state"):DataRoot, ReleaseInfo.Version, !diagnostic && !e.Args.Contains("--offline"));
+        if (!diagnostic) _ = UpdateCommands();
         IconArtwork.Apply(Controller.Profile);
         RefreshShortcutHints();
         CatalystBranding.SelectedId = CatalystBranding.Resolve(Controller.Profile.AppIconId).Id;
@@ -180,6 +182,13 @@ public partial class App : Application
             try
             {
                 if (e.Args.Contains("--cascade-pointer")) { CascadingResizeReview.OpenPointer(preview,Controller); return; }
+                if(e.Args.Contains("--beta14-review")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewBeta14(preview);ExitTracker();return; }
+                if(e.Args.Contains("--progress-reward-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewProgressRewards(preview);ExitTracker();return; }
+                if(e.Args.Contains("--compact-pet-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewCompactPet(preview);ExitTracker();return; }
+                if(e.Args.Contains("--correct-pet-ratings-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewCorrectPetRatings(preview);ExitTracker();return; }
+                if(e.Args.Contains("--quest-pet-slots-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewQuestPetSlots(preview);ExitTracker();return; }
+                if(e.Args.Contains("--pet-comparison-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetComparison(preview,!e.Args.Contains("--checks-only"));ExitTracker();return; }
+                if(e.Args.Contains("--role-ratings-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewRoleRatings(preview,!e.Args.Contains("--checks-only"));ExitTracker();return; }
                 if(e.Args.Contains("--compact-settings-only")){CompactSettingsReview.Run(preview,Controller,quests);ExitTracker();return;}
                 if (e.Args.Contains("--cascade-only")) { CascadingResizeReview.Run(preview,Controller,quests,dps,e.Args.Contains("--gear-capture-only"),e.Args.Contains("--lab-panels-only")); ExitTracker(); return; }
                 if (e.Args.Contains("--public-screens")) { PublicScreens.Run(preview, Controller, quests, dps, DpsOverlay); ExitTracker(); return; }
@@ -301,6 +310,8 @@ public partial class App : Application
         wheelRouter = new();
         wheelRouter.ForegroundChanged += allowed => { if (!allowed) foreach (var panel in Panels()) { panel.CancelInteraction(); if (Controller.Profile.HideWhenUnfocused) panel.Hide(); } };
         timer.Start(); Controller.Start(); StartCharacterDiscovery();
+        if (Value("--update-receipt") is string receipt && Path.GetFullPath(receipt).StartsWith(Path.Combine(DataRoot,"updates")+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase))
+            UpdateFiles.WriteJson(receipt,new{Version=ReleaseInfo.Version,Started=DateTimeOffset.UtcNow});
         if (firstSetup || e.Args.Contains("--open-tracker")) { OpenQuests(); if(Enum.TryParse<TrackerTab>(Value("--tracker-tab"),out var requested))quests?.ShowView(requested); }
     }
     private readonly List<double> uiSamples = [];
@@ -358,6 +369,7 @@ public partial class App : Application
     private void ApplyTheme(bool force = false)
     {
         var theme = Controller.Profile.Theme == "Auto" ? Controller.ThemeName : Controller.Profile.Theme; if (!force && theme == currentTheme) return; currentTheme = theme;
+        Usability.UpdateTooltipPreferences(Controller.Profile);
         Appearance.ApplySecondaryText(TrackerPresentation.Secondary(Controller.Profile,theme)); Appearance.Apply(theme);
         if (!Equals(Resources["TrackerTabStyle"],Controller.Profile.TrackerTabs)) Resources["TrackerTabStyle"]=Controller.Profile.TrackerTabs;
     }
@@ -366,6 +378,6 @@ public partial class App : Application
     public void ExitTracker()
     {
         if (!Exiting && !Controller.Demo && (quests?.ConfirmGearWorkspaceExit() == false || quests?.ConfirmPetWorkspaceExit() == false)) return;
-        if (Exiting) return; Exiting = true; timer.Stop(); iconRefresh.Stop(); StopCharacterDiscovery(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
+        if (Exiting) return; Exiting = true; updatePipeCancel.Cancel(); Updates?.Dispose(); timer.Stop(); iconRefresh.Stop(); StopCharacterDiscovery(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
     }
 }

@@ -131,6 +131,7 @@ public static class GearRatingMigration
 {
     public static void Apply(CharacterProfile profile)
     {
+        PetRoleRatings.Apply(profile);
         // Historical log estimates are inventory stock, never evidence of a worn slot.
         foreach (var loadout in profile.Loadouts) loadout.Equipment.RemoveAll(e => e.Location.Equals("Observed loot", StringComparison.OrdinalIgnoreCase));
         var legacy = GearScorer.Defaults["Tank"];
@@ -143,13 +144,14 @@ public static class GearRatingMigration
                 if (loadout.PetPreset is "Melee" or "Pet damage" && profile.Weights.TryGetValue(loadout.PetPreset, out var weights) && weights.Count == GearScorer.Defaults["Pet damage"].Count && weights.All(x => GearScorer.Defaults["Pet damage"].GetValueOrDefault(x.Key) == x.Value)) loadout.PetPreset = "Pet DPS";
             profile.PetRatingVersion = 1;
         }
-        if (profile.GearRatingVersion > 0) return;
+        if (profile.GearRatingVersion > 0) { SelfRoleRatings.Apply(profile); return; }
         if (profile.Weights.TryGetValue("Tank", out var old) && old.Count == legacy.Count && old.All(x => legacy.GetValueOrDefault(x.Key) == x.Value))
         {
             profile.Weights.Remove("Tank");
             foreach (var loadout in profile.Loadouts) { if (loadout.Preset == "Tank") loadout.Preset = "Balanced Tank"; if (loadout.PetPreset == "Tank") loadout.PetPreset = "Balanced Tank"; }
         }
         profile.GearRatingVersion = 1;
+        SelfRoleRatings.Apply(profile);
     }
 }
 

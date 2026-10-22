@@ -10,12 +10,13 @@ public sealed partial class QuestWindow
     private string gearSelectedKey = "", gearBaselineKey = "";
     private LoadoutEvaluationSession? gearSelectedSession;
     private GearComparison? gearDisplayedComparison;
+    private string gearDisplayedIdentity = "";
     private CancellationTokenSource? gearPreviewCancel;
     private readonly Dictionary<string, GearComparison> gearRankCache = [];
     private readonly DispatcherTimer gearPreviewDelay = new() { Interval = TimeSpan.FromMilliseconds(50) };
     private string GearIdentity(GearRow row) => row.Item.Key + "|" + row.PositionId + "|" + PhysicalItemChoices.Identity(row.Instance);
     private InventoryEntry? GearInspectedInstance(GearRow row) => gearPreview.Identity == GearIdentity(row) ? gearInspectedCopy ?? row.Instance : row.Instance;
-    private int GearInspectedRank(GearRow row) => gearPreview.Identity == GearIdentity(row) ? gearPreview.Rank ?? GearInspectedInstance(row)?.Rank ?? row.Rank : row.Rank;
+    private int GearInspectedRank(GearRow row) => gearPreview.Identity == GearIdentity(row) ? gearPreview.Rank ?? (gearRankChoice.SelectedIndex == 0 && gearInspectedCopy != null ? gearInspectedCopy.Rank : row.Rank) : row.Rank;
     private void ChangeGearPreviewRank(int? rank)
     {
         if (gearTable.SelectedItem is not GearRow row) return;
@@ -44,8 +45,9 @@ public sealed partial class QuestWindow
             var loadout = gearEvaluationLoadout ?? EquipmentPositions.Copy(Controller.Profile.ActiveLoadout);
             var reference = gearEvaluationReference.Count > 0 ? gearEvaluationReference : GearReference(loadout, false);
             if (GearPet) loadout = GuidedPetBuilds.Context(loadout, gearDestination.SelectedIndex == 1 && CurrentBuild != null ? CurrentBuild : PetInventoryEditing.Confirmed(loadout, Controller.Catalog));
-            var weights = Controller.Profile.Weights.GetValueOrDefault(GearPet ? loadout.PetPreset : preset.SelectedItem?.ToString() ?? "Balanced Tank") ?? GearScorer.Defaults[GearPet ? "Pet DPS" : "Balanced Tank"];
-            gearSelectedSession = new(Controller.EquipmentView?.Catalog ?? Controller.Catalog, loadout, GearPet, new(weights), EquipmentPositions.Copy(visibleGearPositions), reference, gearTheory != null);
+            var resolvedRole = GearPet ? null : SelfRoleRatings.Resolve(Controller.Profile, loadout, preset.SelectedItem?.ToString());
+            var weights = resolvedRole?.Weights ?? Controller.Profile.Weights.GetValueOrDefault(loadout.PetPreset) ?? GearScorer.Defaults["Pet DPS"];
+            gearSelectedSession = new(Controller.EquipmentView?.Catalog ?? Controller.Catalog, loadout, GearPet, new(weights), EquipmentPositions.Copy(visibleGearPositions), reference, gearTheory != null, resolvedRole);
         }
         var session = gearSelectedSession; bool aa = gearWithoutAa.IsChecked != true;
         string cache = identity + "|" + PhysicalItemChoices.Identity(instance) + "|" + rank;
@@ -61,7 +63,7 @@ public sealed partial class QuestWindow
     }
     private void DisplaySelectedGear(GearRow row, GearComparison? comparison, string reason)
     {
-        if (!reason.StartsWith("Updating")) gearDisplayedComparison = comparison;
+        if (!reason.StartsWith("Updating")) { gearDisplayedComparison = comparison; gearDisplayedIdentity = GearIdentity(row); }
         int rank = GearInspectedRank(row); var current = visibleGearPositions.FirstOrDefault(p => p.Id == row.PositionId)?.Item;
         ItemPairComparison? pair = comparison?.Evaluation == null && reason.Length == 0 ? ItemPairComparison.Create(current == null ? null : Controller.Catalog.FindKey(current.ConfirmedItemKey) ?? Controller.Catalog.Find(current.Name), current, row.Item, rank, GearInspectedInstance(row), Controller.Profile.ActiveLoadout, Controller.Catalog, GearPet) : null;
         gearInspector.AnimateValues = Controller.Profile.SmoothMeterMotion;
@@ -73,8 +75,11 @@ public sealed partial class QuestWindow
     }
     private void OpenGearFormula()
     {
-        string role = GearPet ? Controller.Profile.ActiveLoadout.PetPreset : preset.SelectedItem?.ToString() ?? "Balanced Tank";
-        var weights = Controller.Profile.Weights.GetValueOrDefault(role) ?? GearScorer.Defaults[GearPet ? "Pet DPS" : "Balanced Tank"];
-        new RatingFormulaDialog(role, new(weights), gearDisplayedComparison, GearPet) { Owner = this }.ShowDialog();
+        string role = GearPet ? Controller.Profile.ActiveLoadout.PetPreset : preset.SelectedItem?.ToString() ?? "Balanced";
+        var resolved = GearPet ? null : SelfRoleRatings.Resolve(Controller.Profile, Controller.Profile.ActiveLoadout, role);
+        var weights = resolved?.Weights ?? Controller.Profile.Weights.GetValueOrDefault(role) ?? GearScorer.Defaults["Pet DPS"];
+        var row = gearTable.SelectedItem as GearRow;
+        var comparison = row != null && gearDisplayedIdentity == GearIdentity(row) ? gearDisplayedComparison : null;
+        new RatingFormulaDialog(role, new(weights), comparison, GearPet, row == null ? "" : row.Item.Name + " +" + GearInspectedRank(row), () => OpenGearStats()) { Owner = this }.ShowDialog();
     }
 }

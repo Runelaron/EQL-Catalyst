@@ -1,6 +1,6 @@
 # Install, update and remove
 
-1. Download **EQL-Catalyst-1.1.0-beta.1-win-x64-setup.exe** from the [Beta 1.1 prerelease](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.1.0-beta.1).
+1. Download **EQL-Catalyst-1.4.0-beta.1-win-x64-setup.exe** from the [Beta 1.4 prerelease](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.4.0-beta.1).
 2. Compare its SHA-256 with the release checksum file (`Get-FileHash -Algorithm SHA256`). This build is unsigned; Windows warnings or policy blocks are possible. Do not disable security protections.
 3. Choose **Install for me** for `%LOCALAPPDATA%\Programs\EQL Catalyst`, or **Install for all users** for native `Program Files\EQL Catalyst` with elevation. Start Menu access is included; the desktop shortcut is optional.
 4. On first launch choose the game folder containing `eqgame.exe` and a character/server. Discovery uses filenames; blank game folder supports offline startup. The last successfully opened profile is remembered.
@@ -19,3 +19,7 @@ Uninstall removes installed application files and shortcuts while preserving cha
 - **Capture unavailable:** native sync is optional. Review and verify the shortcut before enabling scheduled capture; the default interval is two hours once enabled.
 - **Windows blocks the app:** respect local policy. No paid signing service or bypass is supplied.
 - **First launch cancelled:** no new profile is created. Run the app again when ready.
+
+## Updates
+
+Beta 1.4 introduces optional weekly checks and downloads. Existing Beta 1.1 users install this release manually once. Then open **Settings → Sync & files → Application updates** to opt in, or check manually. A prepared update appears immediately to the right of Settings; choose when to update and restart. See [Application updates](application-updates.md).
