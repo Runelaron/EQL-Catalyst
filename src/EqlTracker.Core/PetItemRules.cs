@@ -17,7 +17,7 @@ public sealed class ItemDisplayMetadata
 
 public static class PetItemRules
 {
-    public const int MetadataVersion = 9;
+    public const int MetadataVersion = 11;
     public const string Version = "EQL-2026-10-21/pet-use-v2";
     public static bool Fits(ItemDefinition item, EquipmentPosition position, bool theorycraft = false) =>
         EquipmentPositions.Fits(item, position, true) && (theorycraft || item.Stats.GetValueOrDefault("Damage") <= 0 || position.Slot is "Primary" or "Secondary");

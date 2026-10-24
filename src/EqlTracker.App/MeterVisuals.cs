@@ -91,6 +91,10 @@ public sealed class ActorBadge : FrameworkElement
             var ink=UI.Brush("Accent");foreach(var point in new[]{new Point(5,9),new Point(12,5),new Point(19,9)})dc.DrawEllipse(ink,null,point,2.6,2.6);
             dc.DrawRoundedRectangle(ink,null,new Rect(1,13,7,7),2,2);dc.DrawRoundedRectangle(ink,null,new Rect(8,10,8,12),2,2);dc.DrawRoundedRectangle(ink,null,new Rect(16,13,7,7),2,2);
         }
+        else if (actor == "Pet" && Element == "Monster")
+        {
+            MonsterArtwork.Draw(dc,new(0,0,24,24),IconArtwork.Style==IconArtworkStyle.Vibrant);
+        }
         else if (actor == "Pet" && PetElementDetector.Elements.Contains(Element))
         {
             string shape = Element switch

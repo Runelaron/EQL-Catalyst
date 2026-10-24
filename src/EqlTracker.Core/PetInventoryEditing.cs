@@ -22,7 +22,7 @@ public static class PetInventoryEditing
         if (instance is { IsCollection: false })
         {
             item.TransferredOutEffects = instance.TransferredOutEffects.ToList();
-            item.Exaltations = instance.Augments.Select(a => new ExaltationAssignment { EffectId = a.EffectIdentity, SourceName = Identity.Canonical(a.Name), Effect = a.EffectText.Length > 0 ? a.EffectText : a.Name, State = "Socketed" }).ToList();
+            item.Exaltations = PetEffectPolicy.Observed(instance.Augments);
         }
         Remember(build); build.Items.Add(item);
         if (PetSlotPlanning.Slot(build, position).Effects.Count == 0 && item.Exaltations.Count > 0) PetSlotPlanning.SetEffects(build, position, item.Exaltations, item.Id);
@@ -51,13 +51,14 @@ public static class PetInventoryEditing
         var inventory = loadout.ConfirmedPetInventory ??= new() { Name = "Current build", Preset = loadout.PetPreset, PetType = loadout.PetType, PetLevel = loadout.PetLevel, SummonSpell = loadout.PetSummonSpell, SummonRank = loadout.PetSummonRank, Focus = loadout.PetFocus,
             Items = loadout.PetEquipment.Select((entry, index) => new PetInventoryItem { Position = index + 1, Slot = entry.Location, Name = Identity.Canonical(entry.Name), Rank = Math.Max(entry.Rank, Identity.Rank(entry.Name)),
                 ItemKey = catalog.Find(entry.Name, entry.GameId == 0 ? null : entry.GameId)?.Key ?? Identity.Key(entry.Name), ConfirmedAt = loadout.PetEquipmentConfirmedAt,
-                TransferredOutEffects = entry.TransferredOutEffects.ToList(), Exaltations = entry.Augments.Select(a => new ExaltationAssignment { SourceName = Identity.Canonical(a.Name), Effect = a.EffectText.Length > 0 ? a.EffectText : a.Name, EffectId = a.EffectIdentity, State = "Socketed" }).ToList() }).ToList() };
+                TransferredOutEffects = entry.TransferredOutEffects.ToList(), Exaltations = PetEffectPolicy.Observed(entry.Augments) }).ToList() };
         EnsureIdentities(inventory); PetSlotPlanning.Migrate(inventory, catalog); return inventory;
     }
     public static int NextPosition(PetBuild build) { int position = 1; while (build.Items.Any(i => i.Position == position)) position++; return position; }
     public static bool Put(PetBuild build, PetInventoryItem value, int? originalPosition, bool replace, out string error)
     {
         error = "";
+        error = PetEffectPolicy.Validate(value.Exaltations); if (error.Length > 0) return false;
         if (value.Position < 1 || value.Rank is < 0 or > 20 || value.ItemKey.Length == 0) { error = "Use a positive position, a known item, and +rank 0–20."; return false; }
         var occupied = build.Items.FirstOrDefault(i => i.Position == value.Position && i.Position != originalPosition);
         if (occupied != null && !replace) { error = $"Position {value.Position} holds {occupied.Name}. Choose another position or explicitly enable replacement."; return false; }

@@ -164,20 +164,6 @@
       "resourceSha256": "a0119c73003894ea97e0adaed883a4c8edd453ef28a8866263a099b57fd61084"
     },
     {
-      "role": "pet-fire",
-      "source": "design/painted-icons/v3/masters/pet-fire.png",
-      "sourceSha256": "fa444c7e2df1bf6ade0ad0685bf5194786bf0049b8bc9dddc1b448426453f3c0",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-fire-256.png",
-      "resourceSha256": "752d1fc00f024a6244ba51e9e2b4f9ad089ee1d1d276a8fcfd1cc4a8152c9aa5"
-    },
-    {
-      "role": "pet-water",
-      "source": "design/painted-icons/v3/masters/pet-water.png",
-      "sourceSha256": "bebf38c335d339080922301826c0d7fa6ca17bfd0aaf9755d656e006701deee4",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-256.png",
-      "resourceSha256": "399f5d7a2a7d17f048e72ec471fb5878faaa29a0f5a06ff04b55a9630ec1ba37"
-    },
-    {
       "role": "glyph-healing",
       "source": "design/painted-icons/v3/masters/glyph-healing.png",
       "sourceSha256": "a6aa3ccf70c9c7d857253bafb2ea77e210098a131f926a957f59595b78ceff83",
@@ -394,6 +380,70 @@
       "sourceSha256": "157923e4fe1f58d86983b88b0c18d883cf556fae1f0eccc2c91df7bcb3641a19",
       "resource": "src/EqlTracker.App/Assets/Painted/combat-max-hit-256.png",
       "resourceSha256": "4a4273a82fd03d88a422db7b088b47c58b3b5595ecea1f99270a9753a79bf019"
+    },
+    {
+      "role": "actor-group",
+      "source": "src/EqlTracker.App/Assets/Painted/actor-group-256.png",
+      "sourceSha256": "b5a66d8090a73231f8eaada0e49ac31890640ef5001a1a783d2dad3c812d1a20",
+      "resource": "src/EqlTracker.App/Assets/Painted/actor-group-256.png",
+      "resourceSha256": "b5a66d8090a73231f8eaada0e49ac31890640ef5001a1a783d2dad3c812d1a20",
+      "provenance": "AI-generated project artwork; built-in image generation; prompt in docs/dps-title-selector.md"
+    },
+    {
+      "role": "pet-monster",
+      "source": "docs/previews/pet-icon-candidates/monster-d.png",
+      "sourceSha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-256.png",
+      "resourceSha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
+      "provenance": "Approved Monster D; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-water",
+      "source": "docs/previews/pet-icon-candidates/water-c.png",
+      "sourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-256.png",
+      "resourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "provenance": "Approved Water C; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-undead-skeleton",
+      "source": "docs/previews/pet-icon-candidates/undead-skeleton-a.png",
+      "sourceSha256": "f5590e436c3ffd331f1717042e41e1ea349ca5fddd2209d6220b9f47febb3cf1",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-undead-skeleton-256.png",
+      "resourceSha256": "f5590e436c3ffd331f1717042e41e1ea349ca5fddd2209d6220b9f47febb3cf1",
+      "provenance": "Approved Undead Skeleton A; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-undead-wraith-a",
+      "source": "docs/previews/pet-icon-candidates/undead-wraith-a.png",
+      "sourceSha256": "cd62d9b58c9906d897bdf3c306fbb529e6a0bd1fefd7a72c8eaf12538713f3c6",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-undead-wraith-a-256.png",
+      "resourceSha256": "cd62d9b58c9906d897bdf3c306fbb529e6a0bd1fefd7a72c8eaf12538713f3c6",
+      "provenance": "Approved Undead Wraith A; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-undead-wraith-b",
+      "source": "docs/previews/pet-icon-candidates/undead-wraith-b.png",
+      "sourceSha256": "6a2827abc10653c8d5fbe7ea6dc9d3ef69b4f2097798a67643ca0cc05a67eb97",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-undead-wraith-b-256.png",
+      "resourceSha256": "6a2827abc10653c8d5fbe7ea6dc9d3ef69b4f2097798a67643ca0cc05a67eb97",
+      "provenance": "Approved Undead Wraith B; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-fire",
+      "source": "docs/previews/pet-icon-candidates/fire-wizard-c.png",
+      "sourceSha256": "78cb7e6f805c397cf4d71282361cdf8f54df2db626209b401393cd17cfeab614",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-fire-256.png",
+      "resourceSha256": "78cb7e6f805c397cf4d71282361cdf8f54df2db626209b401393cd17cfeab614",
+      "provenance": "Approved Fire Wizard C; original pixels and alpha unchanged; simplified native vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-fire-crystal",
+      "source": "docs/previews/pet-icon-candidates/fire-wizard-b.png",
+      "sourceSha256": "75bea1a1109387bea57e5c095102f3390824ab158501d5a9d38728cade3032bf",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-fire-crystal-256.png",
+      "resourceSha256": "75bea1a1109387bea57e5c095102f3390824ab158501d5a9d38728cade3032bf",
+      "provenance": "Approved Fire Wizard B; original pixels and alpha unchanged; simplified native vector through 24 DIP and all Clean sizes."
     }
   ],
   "icoFrames": [

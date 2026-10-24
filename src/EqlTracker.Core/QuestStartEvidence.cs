@@ -14,7 +14,8 @@ public sealed record QuestStartEvidence(string Name, long Revision, string Start
             value=Regex.Replace(value,@"\[\[([^]|]+)(?:\|([^]]+))?\]\]",m=>m.Groups[2].Success?m.Groups[2].Value:m.Groups[1].Value);
             return Regex.Replace(value,@"<[^>]*>|'{2,}","").Trim();
         }
-        return new(name,revision,Read("Start Zone|Starting Zone"),Read("Quest Giver|Start NPC|Starting NPC"),"https://eqlwiki.com/"+Uri.EscapeDataString(name.Replace(' ','_'))+"?oldid="+revision+" · structured quest-start fields · parser v1");
+        string zone=Read("Starts In|Start Zone|Starting Zone"),npc=Read("Quest Giver|Start NPC|Starting NPC");
+        return new(name,revision,WikiContentQuality.Placeholder(zone)?"":zone,WikiContentQuality.Placeholder(npc)?"":npc,"https://eqlwiki.com/"+Uri.EscapeDataString(name.Replace(' ','_'))+"?oldid="+revision+" · structured quest-start fields · parser v2");
     }
     public static void Apply(Catalog catalog,string path)
     {

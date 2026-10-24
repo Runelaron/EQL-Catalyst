@@ -100,20 +100,21 @@ public sealed partial class OverlayWindow
 {
     internal void ReviewDisplayModes(Action<bool,string> check,Action<string,FrameworkElement,double,double> capture,Action<string,DependencyObject> audit)
     {
-        var button=paired.Children.OfType<Button>().Single();var menu=button.ContextMenu!;string labBefore=JsonSerializer.Serialize(Controller.Profile.Meter);
+        var button=paired.Children.OfType<Button>().Single();var menu=button.ContextMenu!;string labBefore=JsonSerializer.Serialize(Controller.Profile.Meter),primaryBefore=JsonSerializer.Serialize(Controller.Profile.OverlayMeter);
         foreach(var style in Enum.GetValues<IconArtworkStyle>())
         {
             Controller.Profile.IconStyle=style;IconArtwork.Apply(Controller.Profile);
             foreach(string actor in new[]{"Pet","Player","Combined","Group"})
             {
-                SelectDisplay(actor);Refresh();UpdateLayout();check(paired.Visibility==Visibility.Visible&&button.Width==20&&button.Height==17,"Footer selector stays available and same size · "+actor+" · "+style);
+                SelectDisplay(actor,secondary:true);Refresh();UpdateLayout();check(paired.Visibility==Visibility.Visible&&button.Width==20&&button.Height==17,"Footer selector stays available and same size · "+actor+" · "+style);
                 check(secondaryDps.Suffix.Length==0&&paired.Children.Count==2,"Footer contains only selected numeric DPS and icon · "+actor+" · "+style);
-                if(actor!="Group")check(secondaryDps.Text==Controller.OverlayDpsView().Dps.ToString("N1"),"Footer follows selected personal DPS · "+actor+" · "+style);
+                if(actor!="Group")check(secondaryDps.Text==Controller.Profile.OverlayFooterDisplay!.Rate(Controller.OverlayDpsView(),null)?.ToString("N1"),"Footer follows its selected personal DPS · "+actor+" · "+style);
                 check(menu.Items.OfType<MenuItem>().Count()==4&&menu.Items.OfType<MenuItem>().All(i=>i.Icon is ActorBadge),"Four display choices have matching role icons · "+actor+" · "+style);
                 capture("overlay-"+actor.ToLowerInvariant()+"-"+style.ToString().ToLowerInvariant(),(FrameworkElement)Content,300,260);
             }
         }
         check(labBefore==JsonSerializer.Serialize(Controller.Profile.Meter),"Footer selection leaves Combat Lab independent");
+        check(primaryBefore==JsonSerializer.Serialize(Controller.Profile.OverlayMeter),"Footer selection leaves primary display independent");
         capture("overlay-minimum",(FrameworkElement)Content,128,72);check(button.ActualWidth==20&&button.ActualHeight==17&&button.IsVisible,"Minimum overlay keeps the same display button");
         var help=GetHelpWindow();help.Left=help.Top=-15000;help.ShowActivated=false;help.ShowInTaskbar=false;help.Show();audit("Objective help",(DependencyObject)help.Content);help.Close();
         menu.RaiseEvent(new RoutedEventArgs(ContextMenu.OpenedEvent));var items=menu.Items.OfType<Control>().ToArray();menu.Items.Clear();var host=new StackPanel{Width=170,Background=UI.Brush("SolidInnerSurface"),Resources=menu.Resources};foreach(var item in items)host.Children.Add(item);capture("display-menu",host,170,145);check(Usability.Tree(host).OfType<ActorBadge>().Count(b=>b.Visibility==Visibility.Visible&&b.ActualWidth>0&&VisualTreeHelper.GetDrawing(b)!=null)==4,"Menu template renders every assigned display icon");host.Children.Clear();foreach(var item in items)menu.Items.Add(item);

@@ -9,15 +9,16 @@ internal sealed class ClassicItemCard : Border
     private ItemDefinition? previous;
     private int previousRank = -1;
     private string previousInstance = "";
-    internal ClassicItemCard(ItemDefinition item, int rank, InventoryEntry? instance = null)
+    private bool previousPet;
+    internal ClassicItemCard(ItemDefinition item, int rank, InventoryEntry? instance = null, bool pet = false)
     {
-        Update(item, rank, instance, false);
+        Update(item, rank, instance, false, pet);
     }
-    internal void Update(ItemDefinition item, int rank, InventoryEntry? instance, bool animate)
+    internal void Update(ItemDefinition item, int rank, InventoryEntry? instance, bool animate, bool pet = false)
     {
         string instanceKey = PhysicalItemChoices.Identity(instance);
-        if (ReferenceEquals(item, previous) && previousRank == rank && previousInstance == instanceKey) return;
-        previous = item; previousRank = rank; previousInstance = instanceKey;
+        if (ReferenceEquals(item, previous) && previousRank == rank && previousInstance == instanceKey && previousPet == pet) return;
+        previous = item; previousRank = rank; previousInstance = instanceKey; previousPet = pet;
         using var measure = UpdateDiagnostics.Measure("Classic item values apply");
         SetResourceReference(BackgroundProperty, "DetailSurface"); SetResourceReference(BorderBrushProperty, "Border");
         BorderThickness = new(1); Padding = new(7); Margin = new(0, 4, 0, 5);
@@ -52,20 +53,23 @@ internal sealed class ClassicItemCard : Border
         Line(Number("AC"));
         Fields(new[] { "HP", "Mana", "Endurance", "STR", "DEX", "STA", "CHA", "WIS", "INT", "AGI", "ATK", "Haste" }.Select(s => Signed(s, s == "Mana" ? "MANA" : s == "Endurance" ? "END" : s)));
         Fields(new[] { "Fire", "Cold", "Magic", "Disease", "Poison", "Corruption", "Void" }.Select(s => Signed("Resist" + s, "SV " + s.ToUpperInvariant())));
-        if (projection.Accuracy is {} accuracy) Line("Accuracy: +"+accuracy.ToString("0.##")+"% (observed)");
+        if (projection.Accuracy is {} accuracy) Line("Accuracy: +"+accuracy.ToString("0.##")+"% ("+(projection.Kind==ItemStatEvidenceKind.ClientObserved ? "observed" : "rank rule")+")");
         if (projection.ObservedDamageBonus is {} damageBonus) Line("DMG Bonus: "+damageBonus.ToString("0.##")+" (inspection only; not Pet ratio)","Muted");
-        foreach (string effect in ItemEffects.Active(item, instance?.TransferredOutEffects)) Line("Effect: " + effect, "Mint");
-        foreach (var effect in instance?.Augments ?? [])
+        foreach (string effect in ItemEffects.Active(item, instance?.TransferredOutEffects)) Line((pet ? "Catalog effect (not selected): " : "Effect: ") + effect, pet ? "Muted" : "Mint");
+        IEnumerable<InventoryEntry> selectedEffects = instance?.Augments ?? [];
+        var conflictingTypes = selectedEffects.GroupBy(e => ExaltationPlanner.EffectType(e.EffectText)).Where(g => PetEffectPolicy.Recognized(g.Key) && g.Count()>1).Select(g=>g.Key).ToHashSet();
+        if (pet) selectedEffects = selectedEffects.OrderBy(e => ExaltationPlanner.EffectType(e.EffectText) == "Proc" && (ItemEquipmentIcons.IsWeapon(item) || item.Stats.GetValueOrDefault("Delay")>0) ? -1 : Array.IndexOf(new[]{"Focus","Click","Worn","Proc"},ExaltationPlanner.EffectType(e.EffectText)) is var order && order>=0 ? order : 4);
+        foreach (var effect in selectedEffects)
         {
             string type = ExaltationPlanner.EffectType(effect.EffectText);
             string locked = type != "Unknown" && rank < ExaltationPlanner.Unlock(type) ? " · locked at this preview rank; requires +" + ExaltationPlanner.Unlock(type) : "";
+            if (pet && conflictingTypes.Contains(type)) locked = " · inactive; conflicting " + type + " assignments";
             Line("Exaltation: " + (effect.EffectText.Length > 0 ? effect.EffectText : effect.Name) + locked, locked.Length > 0 ? "Melee" : "Mint");
         }
         if (item.RequiredLevel > 0) Line("Required level: " + item.RequiredLevel);
         if (item.EffectActivationLevel is { } level) Line("Effect activation: level " + level, "Mint");
-        Line(Join(projection.Weight is { } weight ? "WT: " + weight.ToString("0.0") + (projection.WeightIsBase ? " (base; ranked unknown)" : "") : "", item.Display.Range is { } range ? "Range: " + range : "", item.Display.Size.Length > 0 ? "Size: " + item.Display.Size : ""));
-        if (projection.WeaponUncertain) Line("Conditional · ranked weapon damage unverified", "Violet");
-        else if (projection.UncertainStats.Count>0) Line("Unverified at this rank: "+string.Join(", ",projection.UncertainStats),"Violet");
+        Line(Join(projection.Weight is { } weight ? (projection.WeightIsBase ? "WT (base): " : "WT: ") + weight.ToString("0.0") : "", item.Display.Range is { } range ? "Range: " + range : "", item.Display.Size.Length > 0 ? "Size: " + item.Display.Size : ""));
+        if (projection.WeaponUncertain) Line("Weapon stats incomplete: damage or delay missing", "Violet");
         if (item.Classes.Count > 0) Line("Class: " + string.Join(" ", item.Classes));
         if (item.Races.Count > 0) Line("Race: " + string.Join(" ", item.Races));
         if (item.Deity.Length > 0) Line("Deity: " + item.Deity);
@@ -79,8 +83,10 @@ internal sealed class ClassicItemCard : Border
 
 internal sealed class ItemDetailsInspector : StackPanel
 {
+    internal bool PetContext { get; set; }
     private readonly ItemHeaderIcons headerIcons;
-    private readonly TextBlock title = UI.Text("Select an item to view its stats.", 16, "Accent", true), previewLabel = UI.Text("", 11, "Mint");
+    private readonly TextBlock title = UI.Text("Select an item to view its stats.", 16, "Accent", true);
+    internal Button ResetPreview { get; private set; } = null!;
     private readonly ContentControl facts = new();
     private readonly TextBlock pending = UI.Text("", 10, "Muted");
     private readonly ComboBox copies = new() { DisplayMemberPath = "Label", MinWidth = 120, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -100,10 +106,10 @@ internal sealed class ItemDetailsInspector : StackPanel
     internal ItemDetailsInspector()
     {
         RankSlider.Style = RankSliderStyles.Style(3);
-        var reset = UI.Button("Reset preview", () => rankChanged?.Invoke(null)); reset.ToolTip = "Restore this candidate's recorded/list rank without editing inventory.";
+        var reset = ResetPreview = UI.Button("Reset preview", () => rankChanged?.Invoke(null)); reset.ToolTip = "Restore this candidate's recorded/list rank without editing inventory.";
         reset.MinHeight=0; reset.Height=22; reset.Padding=new(7,0,7,0); reset.Margin=new(6,0,0,0); reset.FontSize=11;reset.VerticalAlignment=VerticalAlignment.Center;
-        var previewRow=new Grid();previewRow.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});previewRow.ColumnDefinitions.Add(new(){Width=GridLength.Auto});previewLabel.VerticalAlignment=VerticalAlignment.Center;previewLabel.Margin=new(0);Grid.SetColumn(reset,1);previewRow.Children.Add(previewLabel);previewRow.Children.Add(reset);
-        rankArea = UI.Stack(UI.Label("Preview +Rank"), RankSlider, previewRow);
+        var previewRow=new Grid();previewRow.ColumnDefinitions.Add(new(){Width=new(1,GridUnitType.Star)});previewRow.ColumnDefinitions.Add(new(){Width=GridLength.Auto});var previewTitle=UI.Label("Preview +Rank");previewTitle.VerticalAlignment=VerticalAlignment.Center;previewTitle.Margin=new(0);Grid.SetColumn(reset,1);previewRow.Children.Add(previewTitle);previewRow.Children.Add(reset);
+        rankArea = UI.Stack(previewRow, RankSlider);
         copies.Visibility = Visibility.Collapsed;
         copies.SelectionChanged += (_, _) => { if (!updating && copies.SelectedItem is CopyChoice copy) copyChanged?.Invoke(copy.Instance); };
         headerIcons=new(title);Children.Add(headerIcons); Children.Add(copies); Children.Add(facts); Children.Add(acquisition); Children.Add(rankArea); Children.Add(pending); Children.Add(rating);
@@ -120,9 +126,12 @@ internal sealed class ItemDetailsInspector : StackPanel
         bool sameItem = itemKey == item.Key; itemKey = item.Key;
         title.Text = item.Name + (rank > 0 ? " +" + rank : "");
         headerIcons.Show(item, new(false, "", false, null));
-        if (sameItem && facts.Content is ClassicItemCard card) card.Update(item, rank, instance, AnimateValues); else facts.Content = new ClassicItemCard(item, rank, instance);
+        bool pet = PetContext || comparison?.Evaluation?.Pet == true || pair?.Pet == true;
+        if (sameItem && facts.Content is ClassicItemCard card) card.Update(item, rank, instance, AnimateValues, pet); else facts.Content = new ClassicItemCard(item, rank, instance, pet);
         RankSlider.Value = Math.Clamp(rank, 0, 10);
-        previewLabel.Text = preview ? $"Preview +{rank} · list +{listRank}" : rank > 10 ? $"Recorded +{rank} · move slider to preview +0–10" : instance != null && instance.Rank != listRank ? $"List preview +{rank} · owned +{instance.Rank}" : $"Candidate +{rank}";
+        ResetPreview.IsEnabled = rank != listRank;
+        ResetPreview.ToolTip = rank == listRank ? "Already at the selected actual/list rank (+"+listRank+")." : "Restore the selected actual/list rank (+"+listRank+") without editing inventory.";
+        RankSlider.ToolTip = "Temporary +0–10 preview. Baseline: +"+listRank+". Recorded inventory ranks are unchanged.";
         updating = false; rankArea.Visibility = rating.Visibility = Visibility.Visible;
         rating.FormulaRequested = formula; rating.AnimateValues = AnimateValues;
         bool waiting = reason.StartsWith("Updating"); pending.Text = waiting ? reason : "";
@@ -201,7 +210,8 @@ internal sealed class RatingFormulaDialog : FrostDialog
         else lines.Children.Add(UI.Text("A complete loadout comparison is unavailable. The stat card remains inspectable.", 12));
         lines.Children.Add(FocusedLayout.Disclosure("Limits, ranks & separate effects", UI.Stack(
             UI.Text("Only confirmed limits adjust effective changes. Worn haste uses the strongest item. Observed buff/AA totals are not added twice; unknown overflow remains uncertain.", 11),
-            UI.Text("Ranks: client-observed tier-start values take precedence at the exact documented rank. Other weapon damage and ranked haste remain Conditional. Delay stays fixed; ordinary positive stats use the documented 10%/minimum estimate. Fractional XP and unsupported fields remain unknown.", 11),
+            UI.Text("Ranks: weapon damage uses the adopted 10% per-tier model, rounded down without the ordinary-stat minimum. Published 5% and 10% guides disagree; exact client-observed values take precedence at their documented rank. Delay stays fixed. Ordinary positive stats use 10% with the completed-tier minimum. Catalog haste and negative values are retained unless observed; unresolved inputs are explained separately.", 11),
+            UI.Text("Physical weight: WT (base) is catalog weight when no exact ranked observation is available. Weight does not affect preference points. Catalog baseline, owned rank and fractional tier progress are separate facts; a preview is not ownership evidence.", 11),
             UI.Text("Points are not DPS, healing, proc rate or damage reduction. Attribute benefits are priorities without invented conversion formulas. Damage and delay are represented through ratio. Effects, procs and unresolved off-hand mechanics remain separate.", 11),
             UI.Text("Arithmetic uses full-precision contributions; the inspector rounds the final display. Unchanged rows are omitted; changed zero-weight stats remain visible.", 11)), "Calculation boundaries and rank estimates."));
         Editor.Children.Add(lines); Actions.Children.Add(UI.Button("Close", Close));

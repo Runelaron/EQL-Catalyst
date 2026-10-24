@@ -1507,19 +1507,49 @@
       "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
     },
     {
-      "Asset": "EqlTracker.App/Assets/Painted/pet-fire-256.png",
-      "Sha256": "752d1fc00f024a6244ba51e9e2b4f9ad089ee1d1d276a8fcfd1cc4a8152c9aa5",
-      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
-    },
-    {
       "Asset": "EqlTracker.App/Assets/Painted/pet-generic-256.png",
       "Sha256": "1a970d61de3fcc4d2cbec91eb51342af56883d7731f71113545bba754f54b0c8",
       "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
     },
     {
+      "Asset": "EqlTracker.App/Assets/Painted/actor-group-256.png",
+      "Sha256": "b5a66d8090a73231f8eaada0e49ac31890640ef5001a1a783d2dad3c812d1a20",
+      "Provenance": "AI-generated Vibrant fantasy party emblem; built-in image generation; docs/dps-title-selector.md"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-256.png",
+      "Sha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
+      "Provenance": "Approved Monster D; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
       "Asset": "EqlTracker.App/Assets/Painted/pet-water-256.png",
-      "Sha256": "399f5d7a2a7d17f048e72ec471fb5878faaa29a0f5a06ff04b55a9630ec1ba37",
-      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
+      "Sha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "Provenance": "Approved Water C; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-undead-skeleton-256.png",
+      "Sha256": "f5590e436c3ffd331f1717042e41e1ea349ca5fddd2209d6220b9f47febb3cf1",
+      "Provenance": "Approved Undead Skeleton A; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-undead-wraith-a-256.png",
+      "Sha256": "cd62d9b58c9906d897bdf3c306fbb529e6a0bd1fefd7a72c8eaf12538713f3c6",
+      "Provenance": "Approved Undead Wraith A; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-undead-wraith-b-256.png",
+      "Sha256": "6a2827abc10653c8d5fbe7ea6dc9d3ef69b4f2097798a67643ca0cc05a67eb97",
+      "Provenance": "Approved Undead Wraith B; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-fire-256.png",
+      "Sha256": "78cb7e6f805c397cf4d71282361cdf8f54df2db626209b401393cd17cfeab614",
+      "Provenance": "Approved Fire Wizard C; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-fire-crystal-256.png",
+      "Sha256": "75bea1a1109387bea57e5c095102f3390824ab158501d5a9d38728cade3032bf",
+      "Provenance": "Approved Fire Wizard B; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
     }
   ],
   "PrivateReferencesIncluded": false

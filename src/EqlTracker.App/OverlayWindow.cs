@@ -7,6 +7,8 @@ namespace EqlTracker.App;
 
 public sealed partial class OverlayWindow : FrostWindow
 {
+    internal static Border CompactObjectiveCard(ObjectiveRow item,bool fallback)
+    {var card=UI.Card(UI.Text(CompactObjective.Text(item),12,"Foreground",true),new(0,0,0,3));card.Padding=new(4,2,4,2);card.ToolTip=CompactObjective.Tooltip(item,fallback);Usability.Tooltips(card);return card;}
     public bool ClickThrough => settings.ClickThrough;
     public bool IsDps { get; }
     private readonly StackPanel objectives = new();
@@ -37,7 +39,6 @@ public sealed partial class OverlayWindow : FrostWindow
     private readonly ComboBox miniActor, miniScope;
     private bool updatingChoices;
     private string objectiveSignature = "";
-    private DpsViewState? petBadgeView;private string petBadgeScope="",petBadgeElement="Unknown";
     public OverlayWindow(TrackerController controller, bool dps) : base(controller, dps ? "Pet damage" : "Zone Objectives", "", dps ? controller.Profile.Dps.Width : controller.Profile.Objectives.Width, dps ? controller.Profile.Dps.Height : controller.Profile.Objectives.Height, true)
     {
         IsDps = dps; settings = dps ? controller.Profile.Dps : controller.Profile.Objectives;
@@ -54,7 +55,7 @@ public sealed partial class OverlayWindow : FrostWindow
         var root = new Grid(); root.RowDefinitions.Add(new() { Height = GridLength.Auto }); root.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) }); root.RowDefinitions.Add(new() { Height = GridLength.Auto });
         if (dps)
         {
-            HeaderIcon.Content = badge; HeaderIcon.Visibility = Visibility.Visible;
+            BuildTitleDisplaySelector();
             var controls = new DockPanel { LastChildFill = true, Margin = new(0, 0, 0, 4) };
             var time = UI.Row(); foreach (var name in new[] { "Fight", "Session" }) { var b = Choice(name, () => { Controller.Profile.OverlayMeter!.Scope = name; Changed(); }); scopes[name] = b; time.Children.Add(b); }
             DockPanel.SetDock(time, Dock.Right); controls.Children.Add(time);
@@ -75,8 +76,8 @@ public sealed partial class OverlayWindow : FrostWindow
             foreach (var scope in new[] { "Fight", "Session" }) { var button = Choice(scope.ToUpperInvariant(), () => { Controller.Profile.OverlayMeter!.Scope = scope; Changed(); }); button.FontSize = 10; button.Padding = new(4, 0, 4, 0); button.ToolTip = scope == "Fight" ? "Current or newest fight" : "All combat since tracker launch"; tinyScopes.Children.Add(button); }
             miniSummary.Children.Add(miniChoices); miniSummary.Children.Add(miniValue); miniSummary.Children.Add(tinyScopes);
             root.Children.Add(UI.Stack(fullSummary, miniSummary)); Grid.SetRow(damageRows, 1); root.Children.Add(damageRows); Grid.SetRow(groupRows,1);root.Children.Add(groupRows);groupRows.Visibility=Visibility.Collapsed;GroupMemberPresentation.Configure(groupRows,true);
-            var displayMenu=new ContextMenu();FillDisplayChoices(displayMenu);OverlayMenuDensity.Attach(displayMenu,Controller.Profile);
-            var flip=OverlayMenus.Button(displayMenu,"Choose Pet, Self, Combined or Group DPS",timedDismissal:true);flip.Content=displayBadge;flip.Width=20;flip.Height=17;flip.Tag="overlay-display-selector";
+            var displayMenu=new ContextMenu();FillDisplayChoices(displayMenu,secondary:true);OverlayMenuDensity.Attach(displayMenu,Controller.Profile);
+            var flip=OverlayMenus.Button(displayMenu,"Choose secondary Pet, Self, Combined or Group DPS",timedDismissal:true);flip.Content=displayBadge;flip.Width=20;flip.Height=17;flip.Tag="overlay-display-selector";
             DockPanel.SetDock(flip, Dock.Right); paired.Children.Add(flip);
             secondaryDps.FontSize=11;secondaryDps.Margin=new(0);paired.Children.Add(secondaryDps);
             var menu = new ContextMenu();
@@ -156,25 +157,26 @@ public sealed partial class OverlayWindow : FrostWindow
     private static void Mark(Dictionary<string, Button> buttons, string selected)
     { foreach (var (key, button) in buttons) { button.SetResourceReference(Control.ForegroundProperty, key == selected ? "Mint" : "Muted"); button.SetResourceReference(Control.BorderBrushProperty, key == selected ? "Accent" : "Edge"); } }
     private void Changed() { Controller.Save(); Refresh(); }
-    private void SelectDisplay(string value)
-    { var p=Controller.Profile.OverlayMeter!;p.DisplayMode=value=="Group"?OverlayCombatMode.Group:OverlayCombatMode.Personal;if(value!="Group")p.Actor=value;Changed(); }
-    private void FillDisplayChoices(ItemsControl parent)
+    private void SelectDisplay(string value,bool secondary=false)
+    { if(secondary)Controller.Profile.OverlayFooterDisplay!.Select(value);else { var p=Controller.Profile.OverlayMeter!;p.DisplayMode=value=="Group"?OverlayCombatMode.Group:OverlayCombatMode.Personal;if(value!="Group")p.Actor=value; }Changed(); }
+    private string SelectedDisplay(bool secondary) => secondary ? Controller.Profile.OverlayFooterDisplay!.Value : Controller.Profile.OverlayMeter!.DisplayMode==OverlayCombatMode.Group?"Group":Controller.Profile.OverlayMeter.Actor;
+    private void FillDisplayChoices(ItemsControl parent,bool secondary=false)
     {
         foreach(string value in new[]{"Pet","Player","Combined","Group"})
         {
             var glyph=new ActorBadge{Width=16,Height=16};
-            var item=OverlayMenus.Choice(parent,value=="Player"?"Self":value,()=>Controller.Profile.OverlayMeter!.DisplayMode==OverlayCombatMode.Group?value=="Group":value!="Group"&&Controller.Profile.OverlayMeter.Actor==value,()=>SelectDisplay(value));item.Icon=glyph;
-            void Update(){string help=value switch {"Pet"=>"DPS from timestamp-verified owned pets.","Player"=>"DPS from your character only.","Combined"=>"Total DPS from Self and the verified owned pet; group members are excluded.",_=>"DPS from known group/raid characters and verified pets. Missing log coverage remains unknown."};string element=DisplayPetElement();glyph.Set(value,value=="Pet"&&PetElementDetector.Elements.Contains(element),help,element);item.ToolTip=help+" Uses this tracker's independent scope and filters.";}
+            var item=OverlayMenus.Choice(parent,value=="Player"?"Self":value,()=>SelectedDisplay(secondary)==value,()=>SelectDisplay(value,secondary));item.Icon=glyph;
+            void Update(){string help=value switch {"Pet"=>"DPS from timestamp-verified owned pets.","Player"=>"DPS from your character only.","Combined"=>"Total DPS from Self and the verified owned pet; group members are excluded.",_=>"DPS from known group/raid characters and verified pets. Missing log coverage remains unknown."};string element=DisplayPetElement();glyph.Set(value,value=="Pet"&&PetElementDetector.HasFamilyIcon(element),help,element);item.ToolTip=help+" Uses this tracker's independent scope and filters.";}
             Update();if(parent is ContextMenu menu)menu.Opened+=(_,_)=>Update();else if(parent is MenuItem group)group.SubmenuOpened+=(_,_)=>Update();
         }
     }
     private string DisplayPetElement()
-    {var p=Controller.Profile.OverlayMeter!;if(p.Scope=="Fight")return Controller.Profile.EffectivePetElement;var view=Controller.Published?.OverlayCombat??lastMeterView;if(view==null)return "Unknown";if(ReferenceEquals(view,petBadgeView)&&petBadgeScope==p.Scope)return petBadgeElement;petBadgeView=view;petBadgeScope=p.Scope;var kinds=view.Fights.Select(f=>f.PetType).Distinct().Take(2).ToArray();return petBadgeElement=kinds.Length==1?kinds[0]:"Unknown";}
+    { var view=Controller.Published?.OverlayCombat??lastMeterView; return PetIdentityResolver.DisplayFamily(Controller.Profile,view?.Fights??[],Controller.Profile.OverlayMeter!.Scope=="History"); }
     private void FooterDisplay(string actor,string help)
     {
-        string element=DisplayPetElement();displayBadge.Set(actor,actor=="Pet"&&PetElementDetector.Elements.Contains(element),"Display · "+(actor=="Player"?"Self":actor),element);
-        paired.ToolTip=help+"\nChoose Pet / Self / Combined / Group using the icon. This tracker's filters are independent of Combat Lab.";secondaryDps.ToolTip=paired.ToolTip;
-        if(displayBadge.Parent is Button button)button.ToolTip="Display: "+(actor=="Player"?"Self":actor)+". Click to choose Pet, Self, Combined or Group.\n"+help;
+        string element=DisplayPetElement();displayBadge.Set(actor,actor=="Pet"&&PetElementDetector.HasFamilyIcon(element),"Display · "+(actor=="Player"?"Self":actor),element);
+        paired.ToolTip=help+"\nSecondary readout · independent of the title selector; uses this panel's scope and filters.";secondaryDps.ToolTip=paired.ToolTip;
+        if(displayBadge.Parent is Button button) { button.ToolTip="Secondary display: "+(actor=="Player"?"Self":actor)+". Choose Pet, Self, Combined or Group.\n"+paired.ToolTip;System.Windows.Automation.AutomationProperties.SetName(button,"Secondary DPS display: "+(actor=="Player"?"Self":actor)); }
     }
     private GroupProjection? lastGroup;
     private void RefreshGroup(DpsViewState view,DpsSelection selection)
@@ -191,9 +193,9 @@ public sealed partial class OverlayWindow : FrostWindow
         if(projection!=null&&!ReferenceEquals(lastGroup,projection)&&(due||lastGroup==null||lastGroup.Members.Count!=projection.Members.Count))
         {
             string? id=(groupRows.SelectedItem as GroupMemberRow)?.Id;UI.SetRows(groupRows,projection.Members.ToList());if(id!=null)groupRows.SelectedItem=projection.Members.FirstOrDefault(m=>m.Id==id);
-            miniDps.SetNumber(projection.Rate,false,true);secondaryDps.SetNumber(projection.Rate,false,true);if(!projection.Members.Any(m=>m.Total.HasValue))miniDps.Text=secondaryDps.Text="—";lastGroup=projection;
+            miniDps.SetNumber(projection.Rate,false,true);if(!projection.Members.Any(m=>m.Total.HasValue))miniDps.Text="—";lastGroup=projection;
         }
-        if(projection==null)secondaryDps.Text="—";FooterDisplay("Group",(projection==null?"Group snapshot updating":$"{projection.Total:N0} observed damage · {projection.Rate:N1} DPS · {view.Seconds:N0}s combat\n{projection.Coverage}")+"\nCharacter rows include only verified owned-pet contributions.");
+        if(projection==null)miniDps.Text="—";
         miniDuration.Text=$"{view.Seconds:N0}s";split.Text=projection==null?"Updating group…":!projection.Members.Any(m=>m.Total.HasValue)?"Member totals unavailable":$"{projection.Total:N0} observed damage · {projection.Rate:N1} DPS";
         splitBar.Visibility=Visibility.Collapsed;legend.Text="Characters include verified owned pets";legend.ToolTip=projection?.Coverage;
         alert.Text=projection==null?"Updating group…":projection.Members.Any(m=>m.Total.HasValue)?"":"No qualifying member damage observed";
@@ -208,7 +210,7 @@ public sealed partial class OverlayWindow : FrostWindow
     }
     private void UpdateDensity()
     {
-        if (IsCollapsed) { Subtitle.Visibility = Visibility.Collapsed; return; }
+        if (IsCollapsed) { SizeTitleDisplaySelector(true); Subtitle.Visibility = Visibility.Collapsed; return; }
         double width = ActualWidth > 0 ? ActualWidth : Width, height = ActualHeight > 0 ? ActualHeight : Height;
         bool dense = width < 360 || height < 240, tiny = height < 120;
         Frame.Padding = new(dense ? 3 : 8); Header.Margin = new(0, 0, 0, dense ? 1 : 4);
@@ -228,7 +230,7 @@ public sealed partial class OverlayWindow : FrostWindow
             footer.Visibility = footer.Text.Length == 0 || dense && height < 200 ? Visibility.Collapsed : Visibility.Visible;
             overview.Visibility = !group&&height >= 128 ? Visibility.Visible : Visibility.Collapsed;
             alert.Visibility = dense ? Visibility.Collapsed : alert.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-            HeaderIcon.Visibility = Controller.Profile.MeterStyle == "Minimal" ? Visibility.Collapsed : Visibility.Visible;
+            HeaderIcon.Visibility = Visibility.Visible; SizeTitleDisplaySelector(dense);
             Frame.SetResourceReference(Border.BorderBrushProperty, Controller.Profile.MeterStyle == "Minimal" ? "Edge" : "Accent");
             glow.Color = UI.Brush("Accent").Color; Frame.Effect = Controller.Profile.MeterStyle == "Luminous" ? glow : null;
         }
@@ -251,12 +253,14 @@ public sealed partial class OverlayWindow : FrostWindow
             OverlayMenuDensity.Update(Controller.Profile);
             if (IsDps)
             {
+                RefreshTitleDisplaySelector();
                 var view = Controller.OverlayDpsView(); var p = Controller.Profile.OverlayMeter!;
+                RefreshSecondaryDisplay(view);
                 if (p.DisplayMode==OverlayCombatMode.Group) { RefreshGroup(view,p); return; }
                 groupRows.Visibility=Visibility.Collapsed;damageRows.Visibility=Visibility.Visible;overview.Visibility=Visibility.Visible;paired.Visibility=Visibility.Visible;
                 bool updateDps = dpsCadence.Due(DisplayCadence.Context(view, MeterVisualContext.Key(Controller.Profile.OverlayMeter!, view, Controller.SessionStart)));
                 double rolling = Controller.Published?.OverlayRollingDps ?? Controller.Combat.RollingDps(view.Filter, DateTime.Now);
-                string state = $"{p.DisplayMode}|{p.Actor}|{p.Scope}|{p.FilterCount}|{Controller.Profile.MeterStyle}|{Controller.Profile.SmoothMeterMotion}|{Controller.Profile.ShowLinkedHealing}|{ActualWidth}|{ActualHeight}|{Controller.QuestRevision}";
+                string state = $"{p.DisplayMode}|{p.Actor}|{p.Scope}|{p.FilterCount}|{Controller.Profile.MeterStyle}|{Controller.Profile.SmoothMeterMotion}|{Controller.Profile.ShowLinkedHealing}|{ActualWidth}|{ActualHeight}|{Controller.QuestRevision}|{Controller.Profile.EffectivePetElement}|{Controller.PetResearchRevision}";
                 if ((!Controller.Demo || Controller.Published!=null) && ReferenceEquals(lastMeterView, view) && lastOverlayState == state)
                 {
                     if (lastRolling != rolling) overview.Set(view.Damage, view.MaxHit, rolling, view.DetailComplete, Controller.Profile.SmoothMeterMotion, false, ActualWidth < 360 || ActualHeight < 240);
@@ -267,10 +271,12 @@ public sealed partial class OverlayWindow : FrostWindow
                 bool smooth = Controller.Profile.SmoothMeterMotion && !Controller.Demo;
                 Mark(actors, p.Actor); Mark(scopes, p.Scope); Mark(sorts, p.Sort);
                 updatingChoices = true; miniActor.SelectedItem = ActorLabel(p.Actor); miniScope.SelectedItem = p.Scope == "Session" ? "Sess." : "Fight"; updatingChoices = false;
-                var identity = Controller.Profile.PetIdentities.Where(x => x.Until == null).OrderByDescending(x => x.From).FirstOrDefault();
-                string petName = identity?.Name ?? Controller.Profile.ActiveLoadout.PetName;
+                var historicalFight = p.Scope == "History" ? view.Fights.FirstOrDefault() : null;
+                var identity = historicalFight != null ? PetIdentityResolver.At(Controller.Profile,historicalFight.Start,historicalFight.PetName) : Controller.Profile.PetIdentities.OrderByDescending(x => x.From).FirstOrDefault();
+                string petName = historicalFight?.PetName ?? identity?.Name ?? Controller.Profile.ActiveLoadout.PetName;
                 string petEvidence = identity != null ? identity.Confirmed ? "Identity manually confirmed" : "Name detected from pet messages" : petName.Length > 0 ? "Name from loadout tag; ownership not currently observed" : "Waiting for a pet ownership message";
-                string element = Controller.Profile.EffectivePetElement;
+                if(p.Scope=="Session") petEvidence+="\n"+PetIdentityResolver.SessionEvidence(Controller.Profile,view.Fights);
+                string element = DisplayPetElement();
                 badge.Set(p.Actor, identity != null, p.Actor == "Combined" ? ActorBadge.TotalTooltip : $"{(petName.Length > 0 ? petName : "Unidentified pet")}\n{petEvidence}\n{element} · {(Controller.Profile.PetElementOverride.Length > 0 ? "Manual override" : identity?.ElementConfidence ?? "Unknown")}\n{identity?.ElementEvidence}", element);
                 HeadingTitle.Text = p.Actor switch { "Pet" => "Pet damage — " + (petName.Length > 0 ? petName : "not identified"), "Player" => "Self damage — " + Controller.Profile.Character, "Unknown" => "Unattributed damage", _ => "Combined damage" };
                 fullHeading = HeadingTitle.Text;
@@ -278,8 +284,6 @@ public sealed partial class OverlayWindow : FrostWindow
                 string zone = p.Scope == "Session" ? Controller.Profile.Zone : view.Fights.FirstOrDefault()?.Zone ?? Controller.Profile.Zone;
                 Subtitle.Visibility = Visibility.Visible; Subtitle.Text = $"{zone} · {view.Seconds:N0}s · {(p.Scope == "Session" ? "Session" : p.Scope == "History" ? "Saved fight" : view.InCombat ? "Fighting" : "Last fight")} · {view.Dps:N1} dps"; Subtitle.ToolTip = Subtitle.Text; if(p.FilterCount>0){Subtitle.Text+=$" · Filtered ({p.FilterCount})";}
                 if (updateDps) miniDps.SetNumber(view.Dps, false, true); miniDps.ToolTip = DisplayCadence.DpsHelp; miniDuration.Text = $"{(view.InCombat ? "● " : "")}{view.Seconds:N0}s";
-                if (updateDps) secondaryDps.SetNumber(view.Dps, false, true);
-                FooterDisplay(p.Actor,$"{view.Dps:N1} DPS · {view.Damage:N0} damage · {view.Seconds:N0}s combat\nPet {view.PetDps:N1} · Self {view.PlayerDps:N1} · Combined {view.CombinedDps:N1} DPS\n{(view.DetailComplete?"Retained event details available":"Summary records included; details incomplete")}\n"+DisplayCadence.DpsHelp);
                 miniDuration.SetResourceReference(TextBlock.ForegroundProperty, view.InCombat ? "Mint" : "Muted");
                 if (updateDps) split.Text = $"Pet {view.PetDps:N1} · Self {view.PlayerDps:N1} · Combined {view.CombinedDps:N1} dps";
                 long detailed = view.MeleeDamage + view.SpellDamage;
@@ -312,7 +316,7 @@ public sealed partial class OverlayWindow : FrostWindow
                     objectiveSignature = signature; objectives.Children.Clear();
                     if (fallback) objectives.Children.Add(UI.Text(Controller.Profile.ObjectiveMode == "My queue" ? "Next goals · My queue" : "Next goals · Suggestions", 10, "Mint"));
                     foreach (var item in shown)
-                    { var card = UI.Card(UI.Stack(UI.Text(item.Class + " · " + item.Item, 12, "Foreground", true), UI.Text((fallback ? item.Zone + " · " : "") + item.Mob + " · need " + item.Remaining, 11, "Muted")), new(0, 0, 0, 4)); card.ToolTip = fallback ? "Destination: " + item.Zone + "\n" + item.Instructions + "\nSuggestions use goal priority and source evidence; no travel or drop-rate estimate." : item.Instructions; objectives.Children.Add(card); }
+                    { objectives.Children.Add(CompactObjectiveCard(item,fallback)); }
                     if (shown.Count == 0) objectives.Children.Add(UI.Text(Controller.Profile.ObjectiveMode == "My queue" ? "No goals in Zone or Queue" : "No goals in zone", 12, "Muted"));
                 }
                 footer.Text = $"{local.Count} Obj" + ((ActualWidth > 0 ? ActualWidth : Width) < 180 ? "" : Controller.Inventory.UpdatedAt == default ? " · Not updated" : " · Updated " + Controller.Inventory.UpdatedAt.ToString("MMM/dd", System.Globalization.CultureInfo.InvariantCulture));

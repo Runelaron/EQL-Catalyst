@@ -30,6 +30,8 @@ public sealed partial class TrackerController
     private string savedPlanningSettings = "";
     private string PlanningSettings => JsonSerializer.Serialize(new { Classes = Profile.EnabledClasses.ToArray(), Profile.GoalQueue, Profile.QuestTracking, Profile.QuestQuantities, Profile.GoalPriority, Profile.CompletedSteps, Profile.CompletedQuests, Profile.Routes, Profile.CurrentExpansion, Profile.Era, Profile.PlanThrough, Profile.Zone, Profile.Wishlist, Profile.SelectedLoadout });
     public TrackerViewSnapshot? Published => Volatile.Read(ref published);
+    private string OverlaySelectionKey => JsonSerializer.Serialize(Profile.OverlayMeter) + "|group:" + DpsDisplayChoice.NeedsGroup(Profile);
+    private string CombatSourceKey=>$"{Combat.Revision}|{Combat.Healing.Revision}|{historicalSnapshotRevision}|{historyRevision}|{Combat.Encounters.Count}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}";
     public long QuestRevision => Published?.QuestRevision ?? planningRevision;
     public long CombatRevision => Combat.Revision + historyRevision;
     public double LastSnapshotMilliseconds { get; private set; }
@@ -71,7 +73,7 @@ public sealed partial class TrackerController
                 var watch = Stopwatch.StartNew();
                 List<Encounter>? history = null; Encounter? current = null; DpsSelection? selection = null, overlaySelection = null;
                 string nextCombat = "", nextOverlay = "", sourceKey = ""; DateTime session = SessionStart;
-                IReadOnlyList<PlaySession>? sessionRecords = null;
+                IReadOnlyList<PlaySession>? sessionRecords = null;CombatLabBrowseState? labBrowse=null;
                 CharacterProfile? groupProfile = null; IReadOnlyList<GroupPeriod> groups = [];
                 CharacterProfile? planProfile = null, persistedProfile = null; InventorySnapshot? planInventory = null, persistedInventory = null; Catalog? frozenCatalog = null, persistedCatalog = null; string nextPlan = "";
                 EquipmentViewSnapshot? nextEquipment = null;
@@ -96,8 +98,8 @@ public sealed partial class TrackerController
                         lastEquipment = equipmentKey;
                     }
                     sourceKey = $"{Combat.Revision}|{Combat.Healing.Revision}|{historicalSnapshotRevision}|{historyRevision}|{Combat.Encounters.Count}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}";
-                    nextCombat = sourceKey + "|" + JsonSerializer.Serialize(Profile.Meter);
-                    nextOverlay = sourceKey + "|" + JsonSerializer.Serialize(Profile.OverlayMeter);
+                    nextCombat = sourceKey + "|" + JsonSerializer.Serialize(Profile.Meter)+"|"+LabBrowseKey;
+                    nextOverlay = sourceKey + "|" + OverlaySelectionKey;
                     if (sourceKey != lastSource)
                     {
                         if (lastHistoryRevision != historyRevision) { historical.Clear(); lastHistoryRevision = historyRevision; }
@@ -113,11 +115,12 @@ public sealed partial class TrackerController
                     if (nextCombat != lastCombat || nextOverlay != lastOverlay)
                     {
                         history = sourceHistory; current = sourceCurrent; sessionRecords = SessionRecords;
-                        if (nextCombat != lastCombat) selection = Profile.Meter.Copy();
-                        if (nextOverlay != lastOverlay) { overlaySelection = Profile.OverlayMeter!.Copy(); if (overlaySelection.DisplayMode == OverlayCombatMode.Group) { groupProfile = new() { Character = Profile.Character, PetIdentities = Profile.PetIdentities.Select(EquipmentPositions.Copy).ToList(), GroupMembers = Profile.GroupMembers.Select(EquipmentPositions.Copy).ToList() }; groups = GroupPeriods; } }
+                        if (nextCombat != lastCombat) {selection = Profile.Meter.Copy();labBrowse=EquipmentPositions.Copy(labBrowsing);}
+                        if (nextOverlay != lastOverlay) { overlaySelection = Profile.OverlayMeter!.Copy(); if (DpsDisplayChoice.NeedsGroup(Profile)) { groupProfile = new() { Character = Profile.Character, PetIdentities = Profile.PetIdentities.Select(EquipmentPositions.Copy).ToList(), GroupMembers = Profile.GroupMembers.Select(EquipmentPositions.Copy).ToList() }; groups = GroupPeriods; } }
                     }
                 }
                 captureMeasure.Dispose();
+                RefreshPetResearch(sourceHistory, sourceKey);
                 if (nextEquipment != null) Volatile.Write(ref equipmentInputs, nextEquipment);
                 
                 if (planProfile != null && planInventory != null && frozenCatalog != null)
@@ -132,11 +135,11 @@ public sealed partial class TrackerController
                 {
                     rollingCurrent = current;
                     using var combatMeasure = UpdateDiagnostics.Measure("Combat aggregates + chart");
-                    var combat = selection == null ? Published!.Combat : DpsViews.Build(history, current, session, selection, sessionRecords);
+                    var combat = selection == null ? Published!.Combat : BuildLabCombat(history, current, session, selection, sessionRecords,labBrowse);
                     var overlay = overlaySelection == null ? Published!.OverlayCombat : DpsViews.Build(history, current, session, overlaySelection, sessionRecords);
                     var overlayGroup = groupProfile != null && overlay != null ? GroupProjection.Build(overlay, null, groupProfile, groups, nextOverlay, cancel.Token) : overlaySelection == null ? Published?.OverlayGroup : null;
                     bool valid;
-                    using (UpdateDiagnostics.Lock(Sync)) valid = nextCombat == sourceKey + "|" + JsonSerializer.Serialize(Profile.Meter) && nextOverlay == sourceKey + "|" + JsonSerializer.Serialize(Profile.OverlayMeter) && sourceKey == $"{Combat.Revision}|{Combat.Healing.Revision}|{historicalSnapshotRevision}|{historyRevision}|{Combat.Encounters.Count}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}";
+                    using (UpdateDiagnostics.Lock(Sync)) valid = nextCombat == sourceKey + "|" + JsonSerializer.Serialize(Profile.Meter)+"|"+LabBrowseKey && nextOverlay == sourceKey + "|" + OverlaySelectionKey && sourceKey == $"{Combat.Revision}|{Combat.Healing.Revision}|{historicalSnapshotRevision}|{historyRevision}|{Combat.Encounters.Count}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}";
                     if (valid)
                     {
                         lastCombat = nextCombat; lastOverlay = nextOverlay;
@@ -150,27 +153,27 @@ public sealed partial class TrackerController
                     List<Encounter>? healingFights = null; List<HealingEvent> outside = []; HealingFilter? healingFilter = null; string healingSort = "", healingKey;
                     using (UpdateDiagnostics.Lock(Sync))
                     {
-                        healingKey = $"{Combat.Healing.Revision}|{Combat.Revision}|{historicalSnapshotRevision}|{historyRevision}|{JsonSerializer.Serialize(Profile.Healing)}|{JsonSerializer.Serialize(Profile.Meter)}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}";
-                        if (healingKey != lastHealing)
+                        healingKey = HealingProjectionKey;
+                        if (healingKey != lastHealing&&lastCombat==CombatSourceKey+"|"+JsonSerializer.Serialize(Profile.Meter)+"|"+LabBrowseKey)
                         {
                             var ids = selected.Combat.Fights.Select(f => f.Id).ToHashSet();
                             healingFights = Combat.Encounters.Concat(Combat.Current == null ? [] : [Combat.Current]).Where(f => ids.Contains(f.Id)).Select(HealingCopy).ToList();
                             healingFilter = Profile.Healing.Filter(selected.Combat.Filter.From, selected.Combat.Filter.Until); healingSort = Profile.Healing.Sort;
-                            if (Profile.Meter.Scope == "Session") outside = Combat.Healing.Events.Where(e => e.EncounterId.Length == 0 && (selected.Combat.Session?.NextLogin == null || e.Time < selected.Combat.Session!.NextLogin) && (Profile.Meter.ClassCombinations.Count == 0 || Profile.Meter.ClassCombinations.Contains(SessionEvidence.ClassesAt(selected.Combat.Session, e.Time))) && HealingMetrics.Matches(e, healingFilter)).Select(e => e.Copy()).ToList();
+                            if (Profile.Meter.Scope == "Session") outside = Combat.Healing.Events.Where(e => e.EncounterId.Length == 0 && (selected.Combat.Session?.NextLogin == null || e.Time < selected.Combat.Session!.NextLogin) && (Profile.Meter.ClassCombinations.Count == 0 || Profile.Meter.ClassCombinations.Contains(SessionEvidence.ClassesAt(selected.Combat.Session, e.Time))) && LabOutsideHealing(e)&&HealingMetrics.Matches(e, healingFilter)).Select(e => e.Copy()).ToList();
                         }
                     }
                     if (healingFights != null && healingFilter != null)
                     {
                         using var healingMeasure = UpdateDiagnostics.Measure("Healing aggregates + chart");
                         var healing = HealingMetrics.Build(healingFights, outside, healingFilter, healingSort, string.Join('|', healingFights.Select(f => f.Id)) + JsonSerializer.Serialize(healingFilter));
-                        Volatile.Write(ref published, Published! with { Revision = ++serial, Healing = healing }); lastHealing = healingKey;
+                        using(UpdateDiagnostics.Lock(Sync))if(healingKey==HealingProjectionKey&&ReferenceEquals(Published?.Combat,selected.Combat)){Volatile.Write(ref published, Published! with { Revision = ++serial, Healing = healing }); lastHealing = healingKey;}
                     }
                 }
                 else lastHealing = "";
                 if (Published is { } rollingView)
                 {
                     DateTime now = DateTime.Now;
-                    double rolling = rollingCurrent?.Events.Where(e => e.Time > now.AddSeconds(-5) && e.Time <= now && CombatMetrics.Matches(e, rollingView.Combat.Filter)).Sum(e => e.Damage) / 5d ?? 0;
+                    double rolling = rollingCurrent!=null&&rollingView.Combat.Fights.Any(f=>f.Id==rollingCurrent.Id)?rollingCurrent.Events.Where(e => e.Time > now.AddSeconds(-5) && e.Time <= now && CombatMetrics.Matches(e, rollingView.Combat.Filter)).Sum(e => e.Damage) / 5d:0;
                     double overlayRolling = rollingView.OverlayCombat is { } ov && rollingCurrent!=null && ov.Fights.Any(f=>f.Id==rollingCurrent.Id) ? rollingCurrent.Events.Where(e => e.Time > now.AddSeconds(-5) && e.Time <= now && CombatMetrics.Matches(e, ov.Filter)).Sum(e => e.Damage) / 5d : 0;
                     if (rolling != rollingView.RollingDps || overlayRolling != rollingView.OverlayRollingDps) Volatile.Write(ref published, rollingView with { RollingDps = rolling, OverlayRollingDps = overlayRolling });
                 }

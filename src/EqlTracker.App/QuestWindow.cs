@@ -64,15 +64,17 @@ public sealed partial class QuestWindow : FrostWindow
     private string queueSignature = "", questFilterKey = "";
     private string? fingerprint, classFingerprint, stepFingerprint, gearFingerprint;
     private bool initializing = true;
-    public QuestWindow(TrackerController controller) : base(controller, "Quest & Gear Tracker", "Prepare now. Know what to keep. Find the next upgrade.", 1220, 800, surface: WindowSurface.Theme)
+    public QuestWindow(TrackerController controller) : base(controller, "Quest & Gear Tracker", "Prepare now. Know what to keep. Find the next upgrade.", 915, 800, surface: WindowSurface.Theme)
     {
         Appearance.RaisedButtons(Body);
         CatalystHeading.Apply(HeadingTitle, "Quest & Gear Tracker");
+        InstallTrackerHeaderInfo();
         era = UI.Select(ExpansionRules.Names, ExpansionRules.Current(controller.Profile), 100);
         search.Margin = new(0, 0, 0, 4); search.Height = progressSearch.Height = 28;
         planThrough = UI.Select(ExpansionRules.Names, controller.Profile.PlanThrough, 100);
         preset = UI.Select(controller.Profile.Weights.Keys, "Pet damage", 165);
         zone = UI.Select(new[] { "All zones", "Current zone" }.Concat(controller.Catalog.Zones.Order()), "Current zone", 215);
+        zone.SelectionChanged += (_,_) => zone.ToolTip = OctoberContent.ZoneHelp(zone.SelectedItem?.ToString() ?? "");
         table = UI.Table(("Item", "Item", 0, null), ("H/N", "Quantity", 50, null), ("Cls", "Class", 42, null), ("Zone", "Zone", 150, null), ("Status", "Availability", 125, null));
         table.MinWidth = 280; TableLayout.SetKey(table, "quest");
         ScrollViewer.SetVerticalScrollBarVisibility(table, ScrollBarVisibility.Visible);
@@ -134,7 +136,7 @@ public sealed partial class QuestWindow : FrostWindow
         preset.SelectionChanged += (_, _) => { if (initializing) return; lock (Controller.Sync) Controller.Profile.ActiveLoadout.Preset = preset.SelectedItem?.ToString() ?? "Balanced Tank"; fingerprint = stepFingerprint = gearFingerprint = null; Controller.Save(); Refresh(); };
         search.TextChanged += (_, _) => { fingerprint = null; if (!initializing) Refresh(); };
         gearSearch.TextChanged += (_, _) => { gearFingerprint = null; if (!initializing) { Refresh(); ScheduleGearSearch(); } };
-        tabs.SelectionChanged += (_, e) => { if (e.Source == tabs && !initializing) { if (SelectedTab != TrackerTab.Gear && gearTheory != null && !ConfirmGearWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Gear]; initializing = previous; return; } if (SelectedTab != TrackerTab.Pet && petTheory != null) { if (!ConfirmPetWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Pet]; initializing = previous; return; } RefreshBuildChoices("current"); } if (SelectedTab != TrackerTab.Gear) { gearViewCancel?.Cancel(); gearFingerprint = null; } if (SelectedTab != TrackerTab.Pet) { petViewCancel?.Cancel(); petPreviewCancel?.Cancel(); petKey = ""; } if (SelectedTab != TrackerTab.Quests) { libraryViewCancel?.Cancel(); libraryKey = ""; } if (SelectedTab != TrackerTab.Items) { questFilterKey = ""; fingerprint = null; } Refresh(); } };
+        tabs.SelectionChanged += (_, e) => { if (e.Source == tabs && !initializing) { if (SelectedTab != TrackerTab.Gear && gearTheory != null && !ConfirmGearWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Gear]; initializing = previous; return; } if (SelectedTab != TrackerTab.Pet && petDraft != null) { if (!ConfirmPetWorkspaceExit()) { bool previous = initializing; initializing = true; tabs.SelectedItem = tabById[TrackerTab.Pet]; initializing = previous; return; } RefreshBuildChoices("current"); } if (SelectedTab != TrackerTab.Gear) { gearViewCancel?.Cancel(); gearFingerprint = null; } if (SelectedTab != TrackerTab.Pet) { petViewCancel?.Cancel(); petPreviewCancel?.Cancel(); petKey = ""; } if (SelectedTab != TrackerTab.Quests) { libraryViewCancel?.Cancel(); libraryKey = ""; } if (SelectedTab != TrackerTab.Items) { questFilterKey = ""; fingerprint = null; } Refresh(); } };
         Body.IsVisibleChanged += (_, _) => { if (!Body.IsVisible) { gearViewCancel?.Cancel(); petViewCancel?.Cancel(); libraryViewCancel?.Cancel(); petKey = libraryKey = ""; gearFingerprint = null; questFilterKey = ""; fingerprint = null; } };
         route.SelectionChanged += (_, _) => { if (initializing) return; lock (Controller.Sync) { var q = ProgressQuest; if (q == null) return; Controller.Profile.Routes[q.Id] = route.SelectedIndex == 1 ? "Alternative" : "Default"; Controller.Save(); stepFingerprint = fingerprint = null; Refresh(); } };
         initializing = false; Refresh();
@@ -272,8 +274,8 @@ public sealed partial class QuestWindow : FrostWindow
         if(choice==null)
         {
             progressSyncing=true;selectedStep=null;progressNodes.Clear();progressSyncing=false;howTo.Children.Clear();
-            howTo.Children.Add(UI.Text(progressMode==ProgressBrowseMode.Item?"No quest-related inventory items match. Clear search or select All.":"No quests match. Clear search or select All.",13,"Accent",true));
-            stepDetails.Text="No matching "+(progressMode==ProgressBrowseMode.Item?"item":"quest");progressRewardSlide?.Dismiss(true);UpdateProgressQuestContext();stepFingerprint=null;return;
+            howTo.Children.Add(UI.Text(progressMode==ProgressBrowseMode.Item?"No quest-related inventory items match. Clear search or uncheck Tracked.":"No quests match. Clear search or uncheck Tracked.",13,"Accent",true));
+            stepDetails.Text="No matching "+(progressMode==ProgressBrowseMode.Item?"item":progressMode==ProgressBrowseMode.Zone?"zone":"quest");progressRewardSlide?.Dismiss(true);UpdateProgressQuestContext();stepFingerprint=null;return;
         }
         string treeChoice=progressMode+"|"+choice.Key;
         string sig=treeChoice+"|"+Controller.QuestRevision+"|"+Controller.CatalogRevision+"|"+Controller.Inventory.Revision+"|"+string.Join(',',choice.Quests.Select(q=>q.Id))+"|"+string.Join(',',Controller.Profile.CompletedSteps)+"|"+string.Join(',',Controller.Profile.CompletedQuests)+"|"+string.Join(',',Controller.Profile.Routes.OrderBy(p=>p.Key));
@@ -286,7 +288,7 @@ public sealed partial class QuestWindow : FrostWindow
         progressSyncing=true;QuestProgressNode.Sync(progressNodes,roots,Controller);
         bool Reveal(QuestProgressNode node)
         {
-            node.IsItemMatch=choice.ItemKey.Length>0&&progressIndex!.IsItem(node.Node,choice.ItemKey);
+            node.IsItemMatch=choice.ItemKey.Length>0&&progressIndex!.IsItem(node.Node,choice.ItemKey)||choice.ZoneKey.Length>0&&progressIndex!.IsZone(node.Node,choice.ZoneKey);
             bool child=false;foreach(var n in node.Children)child=Reveal(n)||child;
             if(Browse.Expanded.TryGetValue(node.Node.Id,out bool expanded))node.ExpandForBrowse(expanded);
             else if(newChoice&&child)node.ExpandForBrowse(true);

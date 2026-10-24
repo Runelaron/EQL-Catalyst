@@ -43,11 +43,16 @@ public sealed partial class QuestWindow
         petSummonTier.ToolTip = "Summon spell upgrade rank. Choose 0–10 or enter a hypothetical rank in a planned build; this does not set item ranks.";
     }
     private void SchedulePetPersistence() { petPersistTimer.Stop(); petPersistTimer.Start(); }
+    private bool PetContextHypothetical(PetBuild build)
+    {
+        var identity=PetDetectedContext.Latest(Controller.Profile);
+        bool recorded=PetDestination==PetInventoryDestination.Confirmed&&build.SummonRankKnown&&identity?.SummonRank==build.SummonRank&&identity.CanonicalSummonSpell==build.SummonSpell;
+        return build.PetLevel>50||build.SummonRank>10&&!recorded;
+    }
     private void PetEdited(bool debounce = false)
     {
         petEditRevision++; petKey = ""; gearFingerprint = null; libraryKey = exaltKey = "";
-        if (petTheory != null) { petTheory.Changed(); UpdateTheorycraftNote(); PetMessage("Unsaved theorycraft changes · Save explicitly · Undo available."); }
-        else if (debounce) SchedulePetPersistence(); else Controller.Save();
+        petDraft?.Changed();UpdateTheorycraftNote();UpdatePetDraftActions();
         if (SelectedTab == TrackerTab.Pet && !initializing) RefreshPet();
     }
     private void LoadPetContext()
@@ -59,22 +64,28 @@ public sealed partial class QuestWindow
         {
             if (!petElement.Items.Contains(build.PetType)) petElement.Items.Add(build.PetType);
             if (petRoleChoice != null) petRoleChoice.SelectedItem = SelectedPetPreset;
-            petElement.SelectedItem = build.PetType; petLevel.Text = build.LevelMode == PetLevelMode.Automatic || build.LevelMode == PetLevelMode.Unspecified && !build.PetLevel.HasValue ? "Auto" : build.PetLevel?.ToString() ?? "Unknown"; petSummonTier.Text = build.SummonRank.ToString();
+            petElement.SelectedItem = build.PetType;petLevel.Tag=build.LevelMode==PetLevelMode.Automatic||build.LevelMode==PetLevelMode.Unspecified&&!build.PetLevel.HasValue;
+            var observed=PetDetailsStatistics.Project(build,Controller.Profile.ActiveLoadout,Controller.EquipmentView?.Catalog??Controller.Catalog,TrackerController.PetResearchEnabled?Controller.PetResearchSnapshot():null).ObservedLevel;
+            petLevel.Text=(bool)petLevel.Tag?"Auto "+((observed??build.PetLevel)?.ToString()??"—"):build.PetLevel?.ToString()??"Unknown";
+            if((bool)petLevel.Tag&&observed==null&&!build.PetLevel.HasValue)petLevel.Text="Auto —";
+            petLevel.ToolTip=(bool)petLevel.Tag?(observed.HasValue?"Auto uses a matching reviewed actual pet level.":"Auto shows the existing summon-level estimate; actual pet level is not observed."):"Manual build-level assumption.";
+            petSummonTier.Text = build.SummonRankKnown?build.SummonRank.ToString():"Unknown";
             var spells = petContextCatalog.Summons(build.PetType); petSpell.ItemsSource = spells; var resolved = petContextCatalog.Find(build.PetType, build.SummonSpell, build.SummonClass); petSpell.SelectedItem = resolved; petSpell.Text = resolved?.Label ?? build.SummonSpell;
             var focuses = petContextCatalog.Focuses.Where(f => f.PetType == build.PetType).ToList(); petFocusName.ItemsSource = new[] { "None" }.Concat(focuses.Select(f => f.Name)).ToList(); petFocusName.Text = build.Focus.Length > 0 ? build.Focus : "None";
             if (petFocusField != null) petFocusField.Visibility = focuses.Count > 0 || build.Focus.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-            petContextNote.Text = (build.LevelMode == PetLevelMode.Automatic ? build.LevelEvidence + "\n" : "") + (PetBuildEditing.Hypothetical(build.PetLevel, build.SummonRank) ? "Hypothetical · " : "") + petContextCatalog.FocusEvidence(build) + (focuses.Count == 0 ? " No focus options documented for this type in the cached coverage." : "");
+            petContextNote.Text = (build.LevelMode == PetLevelMode.Automatic ? build.LevelEvidence + "\n" : "") + (PetContextHypothetical(build) ? "Hypothetical · " : "") + petContextCatalog.FocusEvidence(build) + (focuses.Count == 0 ? " No focus options documented for this type in the cached coverage." : "");
             petContextNote.ToolTip = "Cached Pet Guide revision 198219 and Magician Focus Items. Applicability evidence is informational; disputed benefits are excluded from ratings.";
         }
         finally { petContextLoading = false; }
     }
     private void ApplyPetContext(bool typeChanged = false)
     {
-        if (initializing || petContextLoading || SelectedPetInventory is not { } build) return;
-        string rawLevel = petLevel.Text.Trim(); bool automatic = rawLevel == "Auto"; int? level = null;
+        if (initializing || petContextLoading || SelectedPetInventory is not { } build || petDetailsPopup!=null&&PetDestination==PetInventoryDestination.Confirmed&&build.FollowDetectedSummon) return;
+        string rawLevel = petLevel.Text.Trim(); bool automatic = rawLevel.StartsWith("Auto",StringComparison.OrdinalIgnoreCase);petLevel.Tag=automatic;int? level = null;
         if (!automatic && rawLevel.Length > 0 && !rawLevel.Equals("Unknown", StringComparison.OrdinalIgnoreCase)) { if (!int.TryParse(rawLevel, out int number)) { PetMessage("Level must be Unknown or a whole number. Previous value retained.", true); return; } level = number; }
         if (!int.TryParse(petSummonTier.Text, out int rank)) { PetMessage("Spell rank must be a whole number. Previous value retained.", true); return; }
         string type = petElement.SelectedItem?.ToString() ?? "Unknown";
+        if(typeChanged&&type!=build.PetType){petContextLoading=true;petSpell.SelectedItem=null;petSpell.Text="";petFocusName.Text="None";petContextLoading=false;}
         var selectedSpell = petContextCatalog.Find(type, petSpell.Text);
         string spell = selectedSpell?.Name ?? petSpell.Text.Trim();
         string focus = petFocusName.Text.Trim() == "None" ? "" : petFocusName.Text.Trim();
@@ -82,24 +93,24 @@ public sealed partial class QuestWindow
         var scenario = new PetBuild { PetType = type, SummonSpell = spell, SummonClass = selectedSpell?.CasterClass ?? build.SummonClass, SummonRank = rank, Focus = focus };
         var estimate = petContextCatalog.Estimate(scenario, Controller.Profile.ActiveLoadout.Level);
         if (automatic) level = estimate.Level;
-        var previous = (build.PetType, build.PetLevel, build.SummonSpell, build.SummonRank, build.Focus, build.SummonClass, build.LevelMode);
+        var previous = (build.PetType, build.PetLevel, build.SummonSpell, build.SummonRank, build.Focus, build.SummonClass, build.LevelMode, build.SummonRankKnown);
         if (!PetBuildEditing.ApplyContext(build, type, level, spell, rank, focus, PetDestination == PetInventoryDestination.Confirmed, out string error, selectedSpell?.CasterClass ?? build.SummonClass, mode, automatic ? estimate.Explanation : "Manual level override")) { PetMessage(error + " Previous value retained.", true); return; }
-        if (previous == (build.PetType, build.PetLevel, build.SummonSpell, build.SummonRank, build.Focus, build.SummonClass, build.LevelMode)) return;
-        if (PetDestination == PetInventoryDestination.Confirmed) { var owner = Controller.Profile.ActiveLoadout; owner.PetLevel = build.PetLevel; owner.PetSummonSpell = build.SummonSpell; owner.PetSummonRank = build.SummonRank; owner.PetFocus = build.Focus; }
-        petContextNote.Text = (automatic ? estimate.Explanation + "\n" : "") + (PetBuildEditing.Hypothetical(level, rank) ? "Hypothetical · " : "") + petContextCatalog.FocusEvidence(build);
+        if (previous == (build.PetType, build.PetLevel, build.SummonSpell, build.SummonRank, build.Focus, build.SummonClass, build.LevelMode, build.SummonRankKnown)) return;
+        petContextNote.Text = (automatic ? estimate.Explanation + "\n" : "") + (PetContextHypothetical(build) ? "Hypothetical · " : "") + petContextCatalog.FocusEvidence(build);
         if (typeChanged) LoadPetContext();
-        PetEdited(true); PetMessage(petTheory != null ? "Theorycraft context updated · Save explicitly · Undo available." : "Context updated · saved automatically · Undo available.");
+        PetEdited(true); PetMessage(petTheory != null ? "Theorycraft context updated · Save explicitly · Undo available." : "Context updated in draft · Save to commit.");
     }
     private void RefreshAutomaticPetLevel(PetBuild build)
     {
+        if(PetDestination==PetInventoryDestination.Confirmed&&build.FollowDetectedSummon)return;
+        if (!build.SummonRankKnown) return;
         if (build.LevelMode != PetLevelMode.Automatic && !(build.LevelMode == PetLevelMode.Unspecified && !build.PetLevel.HasValue)) return;
         var estimate = petContextCatalog.Estimate(build, Controller.Profile.ActiveLoadout.Level);
         bool changed = build.PetLevel != estimate.Level || build.LevelMode != PetLevelMode.Automatic || build.LevelEvidence != estimate.Explanation;
-        build.LevelMode = PetLevelMode.Automatic; build.PetLevel = estimate.Level; build.LevelEvidence = estimate.Explanation;
+        build.PetLevel = estimate.Level; build.LevelEvidence = estimate.Explanation;
         if (!changed) return;
-        if (PetDestination == PetInventoryDestination.Confirmed) Controller.Profile.ActiveLoadout.PetLevel = build.PetLevel;
         petEditRevision++;
-        if (petTheory == null) SchedulePetPersistence(); else { petTheory.Changed(); UpdateTheorycraftNote(); }
+        UpdatePetDraftActions();
     }
     private void SyncPetCurrentItem(PetInventoryItem item)
     {

@@ -13,9 +13,11 @@ public class FrostDialog : Window
     protected readonly StackPanel Heading = new();
     public FrostDialog(string title, double width = 560, double height = 400)
     {
+        PlanningScrollbars.Apply(this);
         Title = CatalystBranding.Name + " — " + title; Icon = CatalystBranding.WindowIcon;
         Width = width; Height = height; MinWidth = 400; MinHeight = 260;
         WindowStyle = WindowStyle.None; ResizeMode = ResizeMode.CanResizeWithGrip;
+        System.Windows.Shell.WindowChrome.SetWindowChrome(this,new(){CaptionHeight=0,GlassFrameThickness=new(0),ResizeBorderThickness=new(5),CornerRadius=new(0),UseAeroCaptionButtons=false});
         ShowInTaskbar = false; WindowStartupLocation = WindowStartupLocation.CenterOwner;
         UseLayoutRounding = SnapsToDevicePixels = true; FontFamily = new FontFamily("Segoe UI"); FontSize = 12;
         Appearance.SolidResources(this); SetResourceReference(BackgroundProperty, "SolidSurface"); SetResourceReference(ForegroundProperty, "Foreground");

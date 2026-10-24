@@ -14,6 +14,29 @@ public sealed record PetLevelEstimate(int? Level, string Explanation);
 public sealed record PetFocusOption(string PetType, string Name, string Kind, string Url, long Revision);
 public sealed class PetContextCatalog
 {
+    public static PetContextCatalog Bundled { get; } = LoadBundled();
+    private static PetContextCatalog LoadBundled()
+    { try { return Load(Path.Combine(AppContext.BaseDirectory,"data","pet-context.json")); } catch(Exception e) when(e is IOException or System.Text.Json.JsonException) { return new(); } }
+    public PetCastIdentity? ResolveCast(string raw)
+    {
+        string Normalize(string s)=>System.Text.RegularExpressions.Regex.Replace(s.Trim(),@"\s+"," ");
+        raw=Normalize(raw);
+        var names=Spells.SelectMany(s=>new[]{s.Name}.Concat(s.Aliases).Select(name=>(Spell:s,Name:Normalize(name)))).OrderByDescending(x=>x.Name.Length);
+        foreach(var entry in names)
+        {
+            int? rank=null;
+            if(raw.Equals(entry.Name,StringComparison.OrdinalIgnoreCase))rank=0;
+            else if(raw.StartsWith(entry.Name+" ",StringComparison.OrdinalIgnoreCase))
+            {
+                string suffix=raw[(entry.Name.Length+1)..];
+                if(suffix.StartsWith('+')&&int.TryParse(suffix[1..],out int n)&&n is >=0 and <=1000)rank=n;
+                else if(suffix.Length>0&&System.Text.RegularExpressions.Regex.IsMatch(suffix,@"^(?=.)M?(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$",System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                {int value=0,previous=0;foreach(char c in suffix.ToUpperInvariant().Reverse()){int v=c switch{'M'=>1000,'D'=>500,'C'=>100,'L'=>50,'X'=>10,'V'=>5,_=>1};value+=v<previous?-v:v;previous=v;}if(value<=1000)rank=value;}
+            }
+            if(rank.HasValue)return new(entry.Spell,raw,rank.Value);
+        }
+        return null;
+    }
     public string Version { get; set; } = "";
     public List<PetSummonOption> Spells { get; set; } = [];
     public List<PetFocusOption> Focuses { get; set; } = [];
@@ -40,3 +63,4 @@ public sealed class PetContextCatalog
         return note + "Focus benefit/applicability unverified; no numerical bonus applied.";
     }
 }
+public sealed record PetCastIdentity(PetSummonOption Spell,string Raw,int Rank);

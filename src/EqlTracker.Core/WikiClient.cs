@@ -6,9 +6,12 @@ namespace EqlTracker.Core;
 
 public sealed class WikiClient : IDisposable
 {
-    private readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(30) };
+    private readonly HttpClient http;
+    public WikiClient() : this(new HttpClientHandler()) { }
+    internal WikiClient(HttpMessageHandler handler) { http=new(handler){Timeout=TimeSpan.FromSeconds(30)}; http.DefaultRequestHeaders.UserAgent.ParseAdd("EQLTracker/1.0 (local companion; cached batched requests)"); }
     private readonly SemaphoreSlim requests = new(1);
     private DateTime lastRequest;
+    private readonly Dictionary<string,(PublicWikiPage Page,DateTime At)> acquisitionPages = new(StringComparer.OrdinalIgnoreCase);
     private async Task<JsonDocument> Query(string url, CancellationToken token)
     {
         await requests.WaitAsync(token);
@@ -34,7 +37,6 @@ public sealed class WikiClient : IDisposable
         var names = doc.RootElement.GetProperty("query").GetProperty("search").EnumerateArray().Select(p => p.GetProperty("title").GetString()!).Prepend(text);
         return await FetchItemsAsync(names, token);
     }
-    public WikiClient() => http.DefaultRequestHeaders.UserAgent.ParseAdd("EQLTracker/1.0 (local companion; cached batched requests)");
     public async Task<SpellReference?> SpellReferenceAsync(string name, CancellationToken token, bool exactName=false)
     {
         string title = exactName?name:SpellReference.BaseName(name);
@@ -64,30 +66,44 @@ public sealed class WikiClient : IDisposable
         foreach (var batch in names.Select(Identity.Canonical).Distinct().Chunk(50))
         {
             IEnumerable<string> changed = batch;
-            if (knownRevisions != null)
-            {
-                var known = batch.Where(n => knownRevisions.ContainsKey(Identity.Key(n))).ToArray();
-                if (known.Length > 0)
-                {
-                    var revisions = await CheckRevisionsAsync(known, token);
-                    var unchanged = revisions.Where(r => knownRevisions.TryGetValue(Identity.Key(r.Title), out var previous) && previous == r.Revision).Select(r => Identity.Key(r.Title)).ToHashSet();
-                    changed = batch.Where(n => !unchanged.Contains(Identity.Key(n))).ToList();
-                    if (!changed.Any()) continue;
-                }
-            }
+            // Scheduled refresh must also re-read independently revised quest/vendor evidence.
             var url = "https://eqlwiki.com/api.php?action=query&prop=revisions&rvprop=ids%7Ccontent&rvslots=main&redirects=1&format=json&titles=" + Uri.EscapeDataString(string.Join('|', changed));
             using var doc = await Query(url, token);
             if (!doc.RootElement.TryGetProperty("query", out var query) || !query.TryGetProperty("pages", out var pages)) continue;
+            var links = new Dictionary<ItemDefinition,IReadOnlyList<QuestAcquisitionLink>>();
             foreach (var page in pages.EnumerateObject())
             {
                 var p = page.Value;
                 if (!p.TryGetProperty("revisions", out var revisions) || revisions.GetArrayLength() == 0) continue;
                 var rev = revisions[0]; var text = rev.GetProperty("slots").GetProperty("main").GetProperty("*").GetString() ?? "";
                 if (!text.Contains("{{Itempage", StringComparison.OrdinalIgnoreCase)) continue;
-                result.Add(ParseItem(p.GetProperty("title").GetString()!, text, rev.GetProperty("revid").GetInt64()));
+                var item=ParseItem(p.GetProperty("title").GetString()!, text, rev.GetProperty("revid").GetInt64());
+                result.Add(item);links[item]=ItemAcquisitionEvidence.Related(text);
             }
+            await ResolveAcquisition(links,token);
         }
         return result;
+    }
+    private async Task ResolveAcquisition(Dictionary<ItemDefinition,IReadOnlyList<QuestAcquisitionLink>> links,CancellationToken token)
+    {
+        var needed=links.Values.SelectMany(v=>v).Select(l=>l.Target).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        foreach(var batch in needed.Where(n=>!acquisitionPages.TryGetValue(n,out var cached)||DateTime.UtcNow-cached.At>TimeSpan.FromMinutes(30)).Chunk(30))
+        {
+            using var document=await Query("https://eqlwiki.com/api.php?action=query&prop=revisions&rvprop=ids%7Ccontent&rvslots=main&redirects=1&format=json&titles="+Uri.EscapeDataString(string.Join('|',batch)),token);
+            if(!document.RootElement.TryGetProperty("query",out var query)||!query.TryGetProperty("pages",out var pages))continue;
+            var aliases=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
+            foreach(string field in new[]{"normalized","redirects"})if(query.TryGetProperty(field,out var rows))foreach(var row in rows.EnumerateArray())aliases[row.GetProperty("from").GetString()!]=row.GetProperty("to").GetString()!;
+            foreach(var row in pages.EnumerateObject())
+            {
+                var page=row.Value;if(!page.TryGetProperty("revisions",out var revisions)||revisions.GetArrayLength()==0)continue;
+                var revision=revisions[0];string title=page.GetProperty("title").GetString()!;
+                var evidence=new PublicWikiPage(title,revision.GetProperty("slots").GetProperty("main").GetProperty("*").GetString()??"",revision.GetProperty("revid").GetInt64());
+                acquisitionPages[title]=(evidence,DateTime.UtcNow);
+                foreach(string alias in batch){string current=alias;for(int i=0;i<8&&aliases.TryGetValue(current,out var target);i++)current=target;if(current.Equals(title,StringComparison.OrdinalIgnoreCase))acquisitionPages[alias]=(evidence,DateTime.UtcNow);}
+            }
+        }
+        foreach(var (item,related) in links)foreach(var link in related)if(acquisitionPages.TryGetValue(link.Target,out var page)&&ItemAcquisitionEvidence.Resolve(item,link,page.Page) is {} source)item.Sources.Add(source);
+        if(acquisitionPages.Count>512)foreach(string name in acquisitionPages.OrderBy(kv=>kv.Value.At).Take(acquisitionPages.Count-512).Select(kv=>kv.Key).ToArray())acquisitionPages.Remove(name);
     }
     public async Task<List<SourceDocument>> CheckRevisionsAsync(IEnumerable<string> titles, CancellationToken token)
     {
@@ -106,8 +122,9 @@ public sealed class WikiClient : IDisposable
     {
         static string Field(string t, string name) => WikiTemplateFields.Value(t, name);
         static string Plain(string t) => WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(t, @"\[\[(?:[^]|]+\|)?([^]]+)\]\]", "$1"), "<[^>]+>", " ")).Trim();
-        string name = Plain(Field(text, "itemname")); if (name.Length == 0) name = title;
-        var block = Plain(Field(text, "statsblock"));
+        string name = Plain(Field(text, "itemname")); if (name.Length == 0||WikiContentQuality.Placeholder(name)) name = title;
+        bool unfilled=WikiContentQuality.TemplateBlock(Plain(Field(text,"statsblock")));
+        var block = unfilled?"":Plain(Field(text, "statsblock"));
         var item = new ItemDefinition { Name = name, Key = Identity.Key(name), WikiUrl = "https://eqlwiki.com/" + Uri.EscapeDataString(title.Replace(' ', '_')), Revision = revision, Aliases = name == title ? [] : [title], TwoHanded = block.Contains("Skill: 2H", StringComparison.OrdinalIgnoreCase) };
         string skill = Regex.Match(block, @"Skill:\s*(.+?)(?=\s+(?:Atk\s+Delay|Delay|DMG|AC|WT|Class):|$)", RegexOptions.IgnoreCase).Groups[1].Value.Trim();
         item.Display = new() { Skill = skill, Type = skill.Equals("Archery", StringComparison.OrdinalIgnoreCase) ? "Bow" : skill, Source = item.WikiUrl, Revision = revision };
@@ -126,14 +143,14 @@ public sealed class WikiClient : IDisposable
         if (dmg.Success && delay.Success) { item.Stats["Damage"] = double.Parse(dmg.Groups[1].Value); item.Stats["Delay"] = double.Parse(delay.Groups[1].Value); if (item.Stats["Delay"] > 0) item.Stats["Ratio"] = item.Stats["Damage"] / item.Stats["Delay"]; }
         string slots = Regex.Match(block, @"\bSlot:\s*(.+?)(?=\s+(?:Skill|Charges|AC|STR|STA|DEX|AGI|INT|WIS|CHA|HP|MANA|Effect|WT|Size|Class|Race|Required Level):|\r?\n|$)", RegexOptions.IgnoreCase).Groups[1].Value;
         item.Slots = ParseSlots(slots);
-        if(item.Slots.Count==0)
+        if(item.Slots.Count==0&&!unfilled)
             item.Slots = Regex.Matches(text,@"\[\[Category:\s*([^]|]+)(?:\|[^]]*)?\]\]",RegexOptions.IgnoreCase).SelectMany(m=>ParseSlots(m.Groups[1].Value)).Distinct().ToList();
         item.Classes = Regex.Match(block, @"Class:\s*([A-Z /]+?)(?=\s+(?:Race|Deity|DMG|WT):|$)",RegexOptions.IgnoreCase).Groups[1].Value.Split([' ','/'], StringSplitOptions.RemoveEmptyEntries).Select(c=>c.ToUpperInvariant()).ToList();
         var race = Regex.Match(block, @"Race:\s*(.+?)(?=\s+(?:Deity|DMG|WT):|$)").Groups[1].Value;
         if (race.Length > 0) item.Races.Add(race);
-        item.Effects = Regex.Matches(Field(text, "statsblock"), @"Effect:\s*(.*?)(?=<br|\n|$)", RegexOptions.IgnoreCase).Select(m => Plain(m.Groups[1].Value)).ToList();
+        item.Effects = unfilled?[]:Regex.Matches(Field(text, "statsblock"), @"Effect:\s*(.*?)(?=<br|\n|$)", RegexOptions.IgnoreCase).Select(m => Plain(m.Groups[1].Value)).Where(v=>!v.Contains("Effect_Name",StringComparison.OrdinalIgnoreCase)).ToList();
         foreach (var effect in new[] { "focus_effect", "worn_effect", "click_effect", "proc_effect" })
-            if (Plain(Field(text, effect)) is { Length: > 0 } value) item.Effects.Add(effect.Replace('_', ' ') + ": " + value);
+            if (Plain(Field(text, effect)) is { Length: > 0 } value&&!WikiContentQuality.Placeholder(value)) item.Effects.Add(effect.Replace('_', ' ') + ": " + value);
         var level = Regex.Match(block, @"Required Level:?\s*(\d+)", RegexOptions.IgnoreCase);
         if (level.Success) item.RequiredLevel = int.Parse(level.Groups[1].Value);
         var effectLevel = Regex.Match(block, @"at Level:?\s*(\d+)", RegexOptions.IgnoreCase);
@@ -142,7 +159,8 @@ public sealed class WikiClient : IDisposable
         foreach (Match resistance in Regex.Matches(block, @"SV (\w+):\s*\+?(-?\d+)", RegexOptions.IgnoreCase))
             item.Stats["Resist" + System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(resistance.Groups[1].Value.ToLowerInvariant())] = double.Parse(resistance.Groups[2].Value);
         item.MetadataComplete = item.Slots.Count > 0 && item.Classes.Count > 0;
-        if (item.Display.Type.Length == 0)
+        if(unfilled)item.Display.TypeEvidence=WikiContentQuality.IncompleteTemplate;
+        else if (item.Display.Type.Length == 0)
         {
             string documented = Plain(Field(text, "itemtype")); if (documented.Length == 0) documented = Plain(Field(text, "item_type"));
             if (documented.Length > 0) { item.Display.Type = documented; item.Display.TypeEvidence = "Documented item type"; }
@@ -166,9 +184,10 @@ public sealed class WikiClient : IDisposable
         foreach (var line in Field(text, "dropsfrom").Split('\n'))
         {
             var links = Regex.Matches(line, @"\[\[([^]|]+)(?:\|[^]]*)?\]\]").Select(m => m.Groups[1].Value).ToList();
+            links=links.Where(l=>!WikiContentQuality.Placeholder(l)).ToList();
             if (!line.TrimStart().StartsWith('*') && links.Count > 0) zone = links[0];
             else if (line.TrimStart().StartsWith('*')) foreach (var mob in links.Count > 0 ? links : [Plain(line).TrimStart('*', ' ')])
-                item.Sources.Add(new() { Zone = zone, Mob = mob, Availability = "Wiki documented", Era = "Unverified" });
+                if(!WikiContentQuality.Placeholder(mob))item.Sources.Add(new() { Zone = zone, Mob = mob, Availability = "Wiki documented", Era = "Unverified",WikiUrl=item.WikiUrl,Revision=revision,EvidenceId=ItemAcquisitionEvidence.Version+":drop:"+Identity.Key(zone+" "+mob) });
         }
         string crafted = Field(text, "playercrafted");
         foreach (Match recipe in Regex.Matches(crafted, @"(?ms)^\*\s+\[\[(?<skill>Blacksmithing|Smithing|Tailoring|Baking|Brewing|Fletching|Jewelry Making|Jewelcraft|Pottery|Research)(?:\|[^]]*)?\]\].*?(?=^\*\s+\[\[|\z)"))
@@ -179,6 +198,7 @@ public sealed class WikiClient : IDisposable
             item.CraftRecipes.Add(new() { Id = item.Key + ":craft:" + item.CraftRecipes.Count, RecipeId = item.Key + ":craft:" + item.CraftRecipes.Count, Kind = RecipeKind.Tradeskill, Name = name, WikiUrl = item.WikiUrl, Revision = revision, Container = container, Inputs = inputs, Outputs = [new() { ItemKey = item.Key }], Instructions = Plain(recipe.Value) });
         }
         ItemEffects.Normalize(item); ItemExpansionEvidence.Apply(item);
+        ItemAcquisitionEvidence.ParsePurchases(item,text,revision);
         return item;
     }
     private static List<string> ParseSlots(string text)

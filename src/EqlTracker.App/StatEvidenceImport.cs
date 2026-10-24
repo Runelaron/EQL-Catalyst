@@ -9,6 +9,7 @@ public sealed partial class TrackerController
     private SpellMessageIndex? statMessages;
     private string statMessageFolder = "";
     private DateTime statMessageWrite;
+    private DateTime statNamesWrite;
     private DateTime nextStatRead;
     public long StatEvidenceRevision { get { lock(Sync)return statEvidence.Revision; } }
     public StatEvidenceState StatEvidenceSnapshot() { lock(Sync)return EquipmentPositions.Copy(statEvidence); }
@@ -43,29 +44,51 @@ public sealed partial class TrackerController
             var log=Path.Combine(folder,"Logs",$"eqlog_{character}_{server}.txt");
             if(!File.Exists(log)){lock(Sync){if(statEvidence.Status!="Character log missing · cached evidence retained")statEvidence.Revision++;statEvidence.Status="Character log missing · cached evidence retained";}return;}
             string names=Path.Combine(folder,"spells_us.txt"),messages=Path.Combine(folder,"spells_us_str.txt");
-            if(statMessageFolder!=folder || statMessages==null || File.GetLastWriteTimeUtc(messages)!=statMessageWrite)
+            DateTime messageWrite=File.GetLastWriteTimeUtc(messages),namesWrite=File.GetLastWriteTimeUtc(names);
+            bool clientChanged=statMessageFolder!=folder||messageWrite!=statMessageWrite||namesWrite!=statNamesWrite;
+            if(clientChanged||connectedReferenceRevision!=referenceRevision)
             {
-                statMessageFolder=folder;statMessages=null;
-                if(File.Exists(names) && File.Exists(messages))
+                RefreshConnectedSpellClient(names);
+                if(clientChanged)
                 {
-                    statMessages=SpellMessageIndex.Parse(File.ReadLines(names),File.ReadLines(messages));
-                    statMessageWrite=File.GetLastWriteTimeUtc(messages);
-                    lock(Sync)statEvidence.SpellSource=$"Installed spell-message files · {File.GetLastWriteTime(messages):MMM/dd}";
+                    SpellMessageIndex? nextMessages=null;
+                    string source="Spell messages unavailable; retained history preserved";
+                    if(File.Exists(names)&&File.Exists(messages))
+                    {
+                        nextMessages=SpellMessageIndex.Parse(File.ReadLines(names),File.ReadLines(messages));
+                        string Sha(string file){using var input=File.OpenRead(file);return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(input));}
+                        source=$"Read-only spell messages · {messageWrite:yyyy-MM-dd} UTC · spells_us.txt SHA-256: {Sha(names)} · spells_us_str.txt SHA-256: {Sha(messages)}";
+                    }
+                    statMessages=nextMessages;statMessageFolder=folder;statMessageWrite=messageWrite;statNamesWrite=namesWrite;
+                    lock(Sync)statEvidence.SpellSource=source;
                 }
             }
-            var batch=LogTailer.Read(log,offset);StatEvidenceState updated;
-            lock(Sync)updated=EquipmentPositions.Copy(statEvidence);
-            foreach(var line in batch.Lines)StatEvidenceReader.Observe(updated,line.Text,line.Id,character,pets,statMessages);
+            var batch=LogTailer.Read(log,offset);
+            bool sharedOffset=connectedCheckpoint!=null&&offset!=null&&connectedCheckpoint.Generation==offset.Generation&&connectedCheckpoint.Offset==offset.Offset;
+            var metadata=sharedOffset?null:LogTailer.Read(log,connectedCheckpoint,128*1024);
+            StatEvidenceState updated;ConnectedSpellState spells;
+            lock(Sync){updated=EquipmentPositions.Copy(statEvidence);spells=EquipmentPositions.Copy(connectedSpells);}
+            var index=SpellIndexSnapshot();var evidenceParser=new LogParser(character);
+            foreach(var line in batch.Lines)
+            {
+                cancel.Token.ThrowIfCancellationRequested();
+                if(evidenceParser.Parse(line.Text,line.Id) is {} parsed)ConnectedSpellEvidence.Attempt(spells,parsed,line.Id,character,pets,index);
+                StatEvidenceReader.Observe(updated,line.Text,line.Id,character,pets,statMessages,effect=>{ObserveResearchEffect(effect);ConnectedSpellEvidence.Effect(spells,effect,index);});
+            }
+            if(metadata!=null)ConnectedSpellEvidence.ReadMetadata(spells,metadata.Lines,character,pets,index,statMessages,cancel.Token);
             lock(Sync)
             {
                 bool wasCaughtUp=statEvidence.CaughtUp;
                 statEvidence=updated;
+                connectedSpells=spells;
+                RefreshStandardPetBuffs();
+                connectedCheckpoint=metadata?.Checkpoint??batch.Checkpoint;
                 statCheckpoint=batch.Checkpoint;statEvidence.CaughtUp=batch.CaughtUp;
                 if(wasCaughtUp!=batch.CaughtUp)statEvidence.Revision++;
                 statEvidence.Status=batch.CaughtUp?"Following character log · historical evidence, not a complete active-stat snapshot":"Reading retained stat/AA/effect evidence…";
-                if(batch.Lines.Count>0 || batch.Reset)
-                {var savedEvidence = EquipmentPositions.Copy(statEvidence); var savedCheckpoint = EquipmentPositions.Copy(statCheckpoint); QueuePersistence(() => { store.Set("statEvidence", savedEvidence); store.Set("statEvidenceCheckpoint", savedCheckpoint); });}
-                if(!batch.CaughtUp)nextStatRead=DateTime.MinValue;
+                if(batch.Lines.Count>0 || batch.Reset || metadata is {Lines.Count:>0} or {Reset:true})
+                {var savedEvidence = EquipmentPositions.Copy(statEvidence); var savedCheckpoint = EquipmentPositions.Copy(statCheckpoint);var savedSpells=EquipmentPositions.Copy(connectedSpells);var savedConnectedCheckpoint=EquipmentPositions.Copy(connectedCheckpoint); QueuePersistence(() => { store.Set("statEvidence", savedEvidence); store.Set("statEvidenceCheckpoint", savedCheckpoint);store.Set("connectedSpellEvidence-v1",savedSpells);store.Set("connectedSpellCheckpoint-v1",savedConnectedCheckpoint); });}
+                if(!batch.CaughtUp||metadata is {CaughtUp:false})nextStatRead=DateTime.MinValue;
             }
         }
         catch(Exception e) when(e is IOException or UnauthorizedAccessException or ArgumentException)

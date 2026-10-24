@@ -67,7 +67,7 @@ public static partial class StatEvidenceReader
     [GeneratedRegex("^You have improved (?<name>.+) (?<rank>[0-9]+) at a cost of [0-9]+ ability points?\\.$")] private static partial Regex Improved();
     [GeneratedRegex("^You have gained the ability \"(?<name>[^\"]+)\" at a cost of [0-9]+ ability points?\\.$")] private static partial Regex Learned();
     [GeneratedRegex("^\\[(?<level>[0-9]+) (?<classes>[A-Z]+(?:/[A-Z]+){0,2})\\] (?<name>[^ ]+)(?: |$)")] private static partial Regex Who();
-    public static bool Observe(StatEvidenceState state,string line,string id,string character,IReadOnlyList<PetIdentity> pets,SpellMessageIndex? spells)
+    public static bool Observe(StatEvidenceState state,string line,string id,string character,IReadOnlyList<PetIdentity> pets,SpellMessageIndex? spells,Action<EffectEvidence>? observed=null)
     {
         int end=line.IndexOf("] ",StringComparison.Ordinal);if(end<0)return false;string message=line[(end+2)..];
         var aa=message.StartsWith("You have improved ",StringComparison.Ordinal)?Improved().Match(message):Learned().Match(message);
@@ -82,8 +82,9 @@ public static partial class StatEvidenceReader
             effects=spells.Landing(message,false);if(effects==null){effects=spells.Fade(message);faded=effects!=null;}
             if(effects==null)
             {
-                int space=message.IndexOf(' ');int possessive=message.IndexOf('\'');int cut=possessive>0 && (space<0 || possessive<space)?possessive:space;
-                if(cut>0){string name=message[..cut];if(pets.Any(p=>p.Name.Equals(name,StringComparison.OrdinalIgnoreCase))){effects=spells.Landing(message[cut..],true);if(effects!=null){owner="Pet";actor=name;}}}
+                // Prefer the known complete actor name (including spaces) over a first-word split.
+                var pet=pets.Where(p=>message.StartsWith(p.Name+" ",StringComparison.OrdinalIgnoreCase)||message.StartsWith(p.Name+"'",StringComparison.OrdinalIgnoreCase)).OrderByDescending(p=>p.Name.Length).FirstOrDefault();
+                if(pet!=null){effects=spells.Landing(message[pet.Name.Length..],true);if(effects!=null){owner="Pet";actor=pet.Name;}}
             }
         }
         if(!aa.Success && gainedLevel==null && (who==null || !who.Success || !who.Groups["name"].Value.Equals(character,StringComparison.OrdinalIgnoreCase)) && effects==null)return false;
@@ -106,6 +107,7 @@ public static partial class StatEvidenceReader
                 if(actor==character)actor=petAt(at);
                 else if(!pets.Any(p=>p.Name.Equals(actor,StringComparison.OrdinalIgnoreCase) && at>=p.From && (p.Until==null || at<p.Until)))return changed;
             }
+            observed?.Invoke(new(){Owner=owner,Actor=actor,Spells=effects.ToList(),At=at,LogId=id,Evidence=message,State=faded?"Fade":"Landing"});
             string identity=string.Join('|',effects.Order());var prior=state.Effects.FirstOrDefault(e=>e.Owner==owner && e.Actor.Equals(actor,StringComparison.OrdinalIgnoreCase) && string.Join('|',e.Spells.Order())==identity);
             if(prior==null || at>prior.At)
             {

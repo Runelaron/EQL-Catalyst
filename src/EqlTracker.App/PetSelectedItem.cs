@@ -9,6 +9,7 @@ public sealed partial class QuestWindow
 {
     private SelectedItemPreviewState petPreview = new("", null, 0);
     private InventoryEntry? petInspectedCopy;
+    private PetSearchRow? petInspectedRow;
     private readonly Dictionary<string, GearComparison?> petRankCache = [];
     private CancellationTokenSource? petPreviewCancel;
     private string petPreviewKey = "", petSessionKey = "";
@@ -33,17 +34,27 @@ public sealed partial class QuestWindow
         petPreviewDelay.Stop();
         if (petResults.SelectedItem is not PetSearchRow row) { petPreviewCancel?.Cancel(); petPreviewKey = ""; petComparison.Clear(); return; }
         if (!Controller.Demo && row.Item.MetadataVersion < PetItemRules.MetadataVersion) Controller.RequestGearMetadata(row.Item.Name);
-        if (petPreview.Identity != row.ToString()) { petPreview = new(row.ToString(), null, petPreview.Revision + 1); petInspectedCopy = row.Instance; }
+        if (petPreview.Identity != row.ToString()) { petPreview = new(row.ToString(), null, petPreview.Revision + 1); petInspectedCopy = row.Instance; petInspectedRow = row; }
+        else if (!ReferenceEquals(petInspectedRow, row))
+        {
+            // Keep the selection, but replace its immutable snapshot after effects,
+            // ownership or inventory refresh. Never carry old effects into new rows.
+            var previousCopy = petInspectedCopy;
+            if (previousCopy == null || ReferenceEquals(previousCopy, petInspectedRow?.Instance)) petInspectedCopy = row.Instance;
+            else petInspectedCopy = Controller.Inventory.Evidence(row.Item).FirstOrDefault(copy => !copy.IsAugment && !copy.IsCollection && copy.Count > 0 &&
+                (previousCopy.PhysicalId.Length > 0 ? copy.PhysicalId == previousCopy.PhysicalId : copy.GameId == previousCopy.GameId && copy.Location == previousCopy.Location && Identity.Key(copy.Name) == Identity.Key(previousCopy.Name))) ?? row.Instance;
+            petInspectedRow = row; petPreview = petPreview with { Revision = petPreview.Revision + 1 }; petPreviewKey = "";
+        }
         int rank = PetInspectedRank(row);
         var instance = PetInspectedInstance(row);
         long equipmentRevision = Controller.EquipmentRevision, petRevision = Controller.PetRevision;
-        string key = $"{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{SelectedPetInventory?.Id}|{petPreview.Identity}|{petPreview.Revision}|{PhysicalItemChoices.Identity(instance)}|{petPreferredPosition}";
+        string key = $"{PetEffectPolicy.Version}|{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{SelectedPetInventory?.Id}|{petPreview.Identity}|{petPreview.Revision}|{PhysicalItemChoices.Identity(instance)}|{petPreferredPosition}";
         if (key == petPreviewKey) return; petPreviewKey = key;
         petPreviewCancel?.Cancel(); petPreviewCancel?.Dispose(); petPreviewCancel = new(); var token = petPreviewCancel.Token;
         if (rank == row.Rank && ReferenceEquals(instance, row.Instance)) { if (!Controller.Demo && petRowsKey != petKey) { petPreviewKey = ""; DisplaySelectedPet(row, null, $"Updating +{rank}…"); } else DisplaySelectedPet(row, row.Comparison, ""); return; }
         DisplaySelectedPet(row, null, $"Updating +{rank}…");
         if (SelectedPetInventory is not { } selected) return;
-        string baselineKey = $"{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{selected.Id}";
+        string baselineKey = $"{PetEffectPolicy.Version}|{RankedItemStats.Version}|{PetItemRules.Version}|{Controller.EquipmentRevision}|{Controller.PetRevision}|{petEditRevision}|{petTheory?.Revision}|{selected.Id}";
         if (petSelectedSession == null || petSessionKey != baselineKey)
         {
             var owner = EquipmentPositions.Copy(Controller.Profile.ActiveLoadout);
@@ -73,7 +84,7 @@ public sealed partial class QuestWindow
             pair = ItemPairComparison.Create(Controller.Catalog.FindKey(current.ItemKey), current.Entry(), row.Item, rank, row.Instance, context, Controller.Catalog);
         }
         petComparison.AnimateValues = Controller.Profile.SmoothMeterMotion;
-        petComparison.ShowItem(row.Item, rank, row.Rank, petPreview.Rank.HasValue, PetInspectedInstance(row), comparison, SelectedPetPreset, pair, reason, ChangePetPreviewRank, OpenPetFormula);
+        petComparison.ShowItem(row.Item, rank, petRank.SelectedIndex == 0 ? PetInspectedInstance(row)?.Rank ?? row.Rank : row.Rank, petPreview.Rank.HasValue, PetInspectedInstance(row), comparison, SelectedPetPreset, pair, reason, ChangePetPreviewRank, OpenPetFormula);
         petComparison.SetOwnership(row.Item, Controller.Inventory);
         petComparison.SetCopies(PhysicalItemChoices.Ordered(Controller.Inventory.Evidence(row.Item).Where(i => !i.IsAugment && !i.IsCollection && i.Count > 0)), PetInspectedInstance(row), copy => { petInspectedCopy = copy; petPreview = petPreview with { Rank = null, Revision = petPreview.Revision + 1 }; petPreviewKey = ""; ShowPetComparison(); });
     }

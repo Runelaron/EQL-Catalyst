@@ -1,12 +1,22 @@
 using System.Diagnostics;
 using EqlTracker.Core;
 
+if(args.Length==2&&args[0]=="--refresh-private-pet-buff-evidence"){PrivatePetBuffRefresh.Run(args[1]);return;}
+if(args.Length==3&&args[0]=="--validate-private-pet-research")
+{
+    var state=Json.Read<PetResearchState>(args[1]);foreach(var sheet in state.Sheets)sheet.Validate();foreach(var buff in state.Buffs)PetResearch.NormalizeBuff(buff);
+    var fights=Json.Read<List<Encounter>>(args[2]);PetResearch.Collect(state,fights,new());var copy=EquipmentPositions.Copy(state);
+    if(copy.Samples.Values.Any(s=>s.Components.Values.Sum()!=s.Damage||s.BuffPeriodDamage.Values.Sum()!=s.Damage||Math.Abs(s.BuffPeriodSeconds.Values.Sum()-s.Seconds)>.0001))throw new InvalidDataException("Research totals did not reconcile");
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new{Passed=true,Sheets=copy.Sheets.Count,Buffs=copy.Buffs.Count,Air=PetResearch.Summary(copy,"Air"),InvalidHP=copy.Sheets.Any(s=>s.Context.Pet=="Monster"&&s.Values["HP"]==null&&s.InvalidValues["HP"]==-1),ValidatedModels=copy.Models.Count(m=>m.Gate=="Validated locally")}));return;
+}
+
 if(args.Length==3&&args[0]=="--audit-inventory-replay"){InventoryReplayAudit.Run(args[1],args[2]);return;}
 
 if (args.Length == 2 && args[0] == "--refresh-item-display") { await ItemDisplayRefresh.Run(args[1]); return; }
 if (args.Length == 2 && args[0] == "--audit-item-display") { await ItemDisplayRefresh.Run(args[1], false); return; }
 
 var tests = new List<(string Name, Action Run)>();
+WorkspaceToolbarTests.Register((name,run)=>tests.Add((name,run)));
 UpdateTests.Register((name,run)=>tests.Add((name,run)));
 ProgressRewardTests.Register((name,run)=>tests.Add((name,run)));
 ProgressBrowseTests.Register((name,run)=>tests.Add((name,run)));
@@ -36,7 +46,7 @@ string Line(string text, int seconds = 0) => $"[Tue Oct 13 21:00:{seconds:00} 20
 InventorySnapshot Stock(params (string Name, int Count)[] values) => new() { Entries = values.Select(x => new InventoryEntry { Name = x.Name, GameId = catalog.Find(x.Name)?.GameId ?? 0, Count = x.Count, Location = "Bank1" }).ToList() };
 CharacterProfile Warrior() => new() { CurrentClasses = [], OptionalClasses = ["WAR"] };
 
-Test("Catalog class coverage and attribution", () => { Equal(16, catalog.Quests.Count(q => q.Kind == "Epic")); Assert(catalog.Quests.Where(x => x.Class != "BST").All(x => x.Requirements.Count > 0)); Assert(catalog.Quests.Single(x => x.Class == "BST").Coverage.Contains("missing")); Assert(catalog.Documents.Count > 800); Assert(catalog.Items.All(x => x.Key.Length > 0)); Equal(catalog.Items.Count, catalog.Items.Select(x => x.Key).Distinct().Count()); });
+Test("Catalog class coverage and attribution", () => { Equal(16, catalog.Quests.Count(q => q.Kind == "Epic")); Assert(catalog.Quests.Where(x => x.Class != "BST"&&!(x.Class=="ALL"&&x.ChecklistCoverage.StartsWith("Partial"))).All(x => x.Requirements.Count > 0)); Assert(catalog.Quests.Single(x => x.Class == "BST").Coverage.Contains("missing")); Assert(catalog.Documents.Count > 800); Assert(catalog.Items.All(x => x.Key.Length > 0)); Equal(catalog.Items.Count, catalog.Items.Select(x => x.Key).Distinct().Count()); });
 Test("Canonical rank and Exaltation identity", () => { Equal("Hand of the Maestro", Identity.Canonical("Hand of the Maestro +6")); Equal("Sword", Identity.Canonical("Sword (Exaltation)")); Equal(6, Identity.Rank("Sword +6")); Assert(Identity.IsAugment("Sword (Exaltation)")); });
 Test("Inventory distinguishes keyring presence and stock", () =>
 {
@@ -86,7 +96,7 @@ Test("Pet equipment uses pet plus owner's classes", () => { var item = new ItemD
 Test("Two-hand replacement removes secondary baseline", () => { var c = new Catalog { Items = [new() { Key = "one", Name = "One", Slots = ["PRIMARY", "SECONDARY"], Classes = ["ALL"], Stats = new() { ["ATK"] = 10 }, MetadataComplete = true }, new() { Key = "two", Name = "Two", Slots = ["PRIMARY"], Classes = ["ALL"], Stats = new() { ["ATK"] = 30 }, TwoHanded = true, MetadataComplete = true }] }; var p = new LoadoutProfile { Equipment = [new() { Location = "Primary", Name = "One" }, new() { Location = "Secondary", Name = "One" }] }; var r = GearScorer.Compare(c.Items[1], 0, "PRIMARY", p, false, c, new() { ["ATK"] = 1 }); Equal(20d, r.BaselineScore); Equal(10d, r.Delta); });
 Test("Exaltations restrict candidate slots", () => { var c = new Catalog { Items = [new() { Key = "blade", Name = "Blade", Slots = ["PRIMARY", "SECONDARY"], Classes = ["ALL"], MetadataComplete = true }, new() { Key = "proc", Name = "Proc", Slots = ["PRIMARY"], Classes = ["WAR"], MetadataComplete = true }] }; var p = new LoadoutProfile { Classes = ["WAR"] }; var r = GearScorer.Compare(c.Items[0], 0, "SECONDARY", p, false, c, new(), [new() { Name = "Proc (Exaltation)" }]); Equal("Slot restricted by Exaltation", r.Eligibility); });
 Test("Paired slots compare against lower stat score", () => { var c = new Catalog { Items = [new() { Name = "Low", Stats = new() { ["HP"] = 10 }, MetadataComplete = true }, new() { Name = "High", Stats = new() { ["HP"] = 30 }, MetadataComplete = true }] }; var p = new LoadoutProfile { Equipment = [new() { Location = "Ear", Name = "Low" }, new() { Location = "Ear", Name = "High" }] }; var r = GearScorer.Compare(new() { Name = "Candidate", Slots = ["EAR"], Classes = ["ALL"], Stats = new() { ["HP"] = 20 }, MetadataComplete = true }, 0, "EAR", p, false, c, new() { ["HP"] = 1 }); Equal(10d, r.Delta); });
-Test("Ranked weapons use 5% damage tiers independently of 10% ordinary stats", () => { var s = GearScorer.EffectiveStats(new() { Stats = new() { ["Damage"] = 20, ["Delay"] = 40, ["Ratio"] = .5, ["HP"] = 20 } }, 5); Equal(.625, s["Ratio"]); Equal(25d, s["Damage"]); Equal(40d, s["Delay"]); Equal(30d, s["HP"]); });
+Test("Ranked weapons use adopted 10% damage tiers independently of ordinary minimums", () => { var s = GearScorer.EffectiveStats(new() { Stats = new() { ["Damage"] = 20, ["Delay"] = 40, ["Ratio"] = .5, ["HP"] = 20 } }, 5); Equal(.75, s["Ratio"]); Equal(30d, s["Damage"]); Equal(40d, s["Delay"]); Equal(30d, s["HP"]); });
 Test("Wiki parser retains stats and sources", () => { var item = WikiClient.ParseItem("Blade", "{{Itempage\n|itemname=Blade\n|statsblock=Slot: PRIMARY SECONDARY<br>\nSkill: 1H Slashing Atk Delay: 20<br>\nDMG: 10 AC: 5<br>\nClass: WAR ROG<br>\nRace: ALL<br>\n|dropsfrom=\n[[Permafrost]]\n* [[an ice giant]]\n}}", 1); Equal(.5, item.Stats["Ratio"]); Assert(item.MetadataComplete); Equal("Permafrost", item.Sources[0].Zone); });
 Test("Tailer buffers partial lines and preserves duplicates", () => { var dir = Path.Combine(Path.GetTempPath(), "EQLTracker-test-" + Guid.NewGuid()); Directory.CreateDirectory(dir); var path = Path.Combine(dir, "log"); File.WriteAllText(path, "same\nsame\npartial"); var batch = LogTailer.Read(path, null); Equal(2, batch.Lines.Count); Assert(batch.Lines[0].Id != batch.Lines[1].Id); File.AppendAllText(path, " end\n"); var next = LogTailer.Read(path, batch.Checkpoint); Equal("partial end", next.Lines[0].Text); var empty = LogTailer.Read(path, next.Checkpoint); Equal(0, empty.Lines.Count); File.WriteAllText(path, "new\n"); var reset = LogTailer.Read(path, next.Checkpoint); Assert(reset.Reset); Equal("new", reset.Lines[0].Text); });
 Test("SQLite checkpoints and encounter detail survive restart", () => { var dir = Path.Combine(Path.GetTempPath(), "EQLTracker-db-" + Guid.NewGuid()); var path = Path.Combine(dir, "tracker.db"); var encounter = new Encounter { Finished = true, Start = DateTime.Now, End = DateTime.Now.AddSeconds(5), PlayerDamage = 42, Events = [new() { Id = "offset:1", Time = DateTime.Now, Owner = "Player", Damage = 42, Ability = "slashes" }] }; using (var store = new TrackerStore(path)) { store.Commit(new() { Offset = 25 }, new(), new(), [encounter], null, []); } using (var store = new TrackerStore(path)) { Equal(25L, store.Get<FileCheckpoint>("checkpoint")!.Offset); Equal(42L, store.LoadEncounters()[0].Events[0].Damage); store.Retain(DateTime.Now.AddDays(1)); var summary = store.LoadEncounters()[0]; Equal(42L, summary.PlayerDamage); Assert(!summary.DetailAvailable); } });
@@ -107,6 +117,7 @@ Test("Stable step IDs and prerequisites are unique and valid", () => { foreach (
 Test("Refresh preserves level/deity/resistance restrictions", () => { var item = WikiClient.ParseItem("Guard", "{{Itempage\n|itemname=Guard\n|statsblock=Slot: CHEST<br>\nAC: 10<br>\nSV MAGIC: +8<br>\nRequired Level: 50<br>\nClass: WAR<br>\nRace: ALL<br>\nDeity: Rallos Zek<br>\n}}", 4); Equal(50, item.RequiredLevel); Equal("Rallos Zek", item.Deity); Equal(8d, item.Stats["ResistMagic"]); });
 
 AdditionalTests.Register(Test);
+Beta16Tests.Register(Test);
 EncounterBoundaryTests.Register(Test);
 AdvancedTrackerTests.Register(Test);
 RefinementTests.Register(Test);
@@ -126,6 +137,16 @@ CombatInspectionTests.Register(Test);
 SessionTests.Register(Test);
 IconAppearanceTests.Register(Test);
 PetDetailsTests.Register(Test);
+PetFlowTests.Register(Test);
+PlacementEffectTests.Register(Test);
+LocalIterationTests.Register(Test);
+OctoberContentTests.Register(Test);
+IndependentDisplayTests.Register(Test);
+PetResearchTests.Register(Test);
+PetDetailsPopupTests.Register(Test);
+PetWorkspaceTests.Register((name,run)=>tests.Add((name,run)));
+PetContributionTests.Register(Test);
+StandardPetBuffTests.Register(Test);
 var watch = Stopwatch.StartNew(); int failed = 0;
 var selectedTests = args.Length==2&&args[0]=="--filter"?tests.Where(t=>t.Name.Contains(args[1],StringComparison.OrdinalIgnoreCase)).ToList():tests;
 foreach (var (name, run) in selectedTests) { try { run(); Console.WriteLine("PASS " + name); } catch (Exception e) { failed++; Console.WriteLine("FAIL " + name + ": " + e.Message); } }

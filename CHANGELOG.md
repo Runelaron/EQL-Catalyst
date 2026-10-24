@@ -1,5 +1,18 @@
 # Changes
 
+## Beta 1.6 — 2026-10-23
+
+- Shared translucent Tracker/Combat Lab toolbar with reorderable workspace buttons, attached movement, separately saved dimensions, repaired resize release, dedicated grip, pointer cursors and tinker-sprocket Settings artwork.
+- Session-first Damage and Healing browsing with Current following, compact labels, Back to session, Tools date limits, normalized Zone and explicitly documented Names only filtering. Overlay selectors remain independent.
+- Pet character-sheet popup, detected summon context, explicit Save/Undo drafts, fixed-position replacement/swap editing, compact Tools, signed gear resists and separate observed/additional/scenario values.
+- Explicit intrinsic Exaltation selection and one effect per type, preserved conflict review, complete effect tooltips, shared ranked weapon previews and the adopted 10% weapon-damage model with recorded exceptions.
+- October zone/race/Monster support, separate race level, seven partial Nektropos quest paths, refreshed offline item/acquisition evidence and a qualified named-NPC index. Unsupported formulas and unfinished walkthroughs remain unknown.
+- Independent DPS icon routing, selected Water/Monster/Skeleton artwork, Fire Wizard staff with crystal alternative, and independent Skeleton/Wraith choices. Seven revised concepts remain review-only.
+- Progress By zone browsing, compact objectives/headers and consistent window placement. Local research code remains build-gated and off in public packages; personal evidence is excluded.
+
+Profiles, inventories, custom priorities, ranks, Exaltations, quest progress and combat records remain compatible. Beta 1.4's signed updater accepts this release. See [help](docs/beta16.md), [validation](docs/beta16-validation.md) and the attached artifact-specific security/Windows reports.
+
+
 
 ## Beta 1.4 — 2026-10-21
 
@@ -11,47 +24,6 @@
 - Clearer editable Damage/Balanced/Survival priorities, item-specific arithmetic, tooltip preferences, responsive cascading resizing and preserved Item Details panes.
 
 Beta 1.1 users need one manual installation to obtain the updater. Physical-monitor DPI transitions and live-game acceptance remain separate from automated and synthetic Windows checks.
-
-## Unreleased local review
-
-- Compact Progress controls; add direct Collapse all, optional steps in More, and persistent Queue toggles beside walkthrough actions.
-- Consolidate source cards by zone/mob/vendor and normalized ground-spawn location, retaining provenance and distinct requirements.
-- Keep rolling inventory observations idempotent after restart and flag ambiguous ranked removals instead of selecting a copy.
-- Repair transparent-window resizing with a live corner grip and DPI-correct Windows tracking limits; preserve surface policies.
-- Provide three reward-name treatments for review without changing production styling.
-
-- Align Progress inputs/actions at 28 DIP and add independent By item browsing for physical inventory's documented quest connections.
-- Show every related quest with selection-aware commands, route explanations and live inventory refreshes.
-- Replace reward buttons with accessible text toggles; slide reward facts over a fixed, correctly clipped walkthrough instead of pushing both panels.
-
-- Consolidate Progress instructions and acquisition evidence; render one mob-first card per drop route and keep additional requirements visible.
-- Place Step status and Reward side by side. Click rewards for read-only classic item facts in a 180-ms slide-over within the walkthrough pane.
-- Support outside-click/Escape dismissal, retained walkthrough scrolling, actual owned-copy ranks and safe metadata refreshes.
-
-- Compact Pet controls and table defaults; keep Gear/Pet Item Details available in narrow windows, with workspace scrolling below pane minimums.
-- Repair Type preferred/minimum sizing, table viewport fitting, and rank/Rating labels. Preserve saved proportions and non-Pet layouts.
-- Repair eleven offline catalog slot omissions including Spiroc Wingblade; separate activation levels and force parser-version refreshes.
-- Lead Pet comparison cards with computed equipment preference / Gear HP and separate deltas, retaining measured evidence separately.
-- Match expander arrow/label colors; remove truncated duplicate quest instructions and duplicate acquisition cards.
-
-- Correct Pet self-comparisons, Dual wield replacement baselines and accidental Ranged weapon-ratio contributions; preserve physical-copy and LORE EQUIPPED limits.
-- Share versioned client-observed Whip +4 and Evensong +5 values across cards and ratings. Keep disputed ranked weapon/haste estimates Conditional and retain recorded Pet ranks without inventing ownership.
-- Separate weapon gains/losses from Stats, shorten grouped resist names, and show active Current hand ratios without the planned paragraph.
-- Remove repeated quest heading/instruction wording across Progress, checklists and prerequisites while preserving distinct instructions and identifiers.
-- Refresh loot, rank merges, ownership and quest progress consistently; retain unresolved physical-copy evidence and explicit quest untracking.
-- Preview all candidate ranks, including owned items, without changing inventory. Add Tracked / All Progress browsing and sourced Obtain From details.
-- Simplify Pet comparison into cards with Inventory / Best Possible previews, rank-efficient owned upgrades and optional local measured benchmarks.
-- Share Current's effective Pet equipment between views, preserve legacy summon aliases/ranks and keep unsupported DPS/HP unknown.
-- Structure rating explanations and keep comparison popups live without replacing their controls.
-
-- Add Compare pets with class-gated summons, per-summon scenarios, equipment-access reasons, isolated reassignment, buff planning and explicit named-plan saving.
-- Share Pet DPS / Balanced / Tank goals while preserving custom weights. Keep preference points, historical observations and supported predictions separate; incomplete mechanics never invent a DPS winner.
-- Compact Gear search, Slots and Expansion controls with aligned information buttons.
-- Damage, Balanced and Survival goals with transparent class-aware resource priorities; retired Gear presets removed from choices; custom roles and Pet weights preserved.
-- Named comparison formulas, ordered gains/losses, exact arithmetic and explicit rounding.
-- Tools → Add role, a three-column weight editor, and in-editor default restoration.
-- Per-character Essential / All / None tooltip levels and configurable delays; Essential and 0.75 seconds by default.
-
 
 ## Beta 1.1 — 1.1.0-beta.1
 

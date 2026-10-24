@@ -13,7 +13,6 @@ public sealed class HealingPanel : UserControl
     public event Action<HealingViewState>? Presented;
     public event Action<DamageRow?>? AbilitySelected;
 
-    private readonly ComboBox scope = UI.Select(["Fight", "Session", "History"], "Fight", 100);
     private readonly ComboBox direction = UI.Select(["Done", "Received"], "Done", 100);
     private readonly ComboBox actor = UI.Select(["Self + Pet", "Self", "Pet"], "Self + Pet", 105);
     private readonly ComboBox healer = UI.Select(["All healers"], "All healers", 145), recipient = UI.Select(["All recipients"], "All recipients", 145);
@@ -53,7 +52,7 @@ public sealed class HealingPanel : UserControl
         var table = new Grid(); table.RowDefinitions.Add(new() { Height = GridLength.Auto }); table.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) }); table.Children.Add(partyMode); Grid.SetRow(parties, 1); table.Children.Add(parties);
         var split = UI.Split(spells, table, 500, controller.Profile, "healing", 220, 180);
         MetricCards = cards; Content = split; spells.AbilitySelected += row => AbilitySelected?.Invoke(row);
-        foreach (var combo in new[] { scope, direction, actor, healer, recipient, kind, sort }) combo.SelectionChanged += (_, _) => Change();
+        foreach (var combo in new[] { direction, actor, healer, recipient, kind, sort }) combo.SelectionChanged += (_, _) => Change();
         spell.TextChanged += (_, _) => Change(); critical.Click += (_, _) => Change(); lifetap.Click += (_, _) => Change(); partyMode.SelectionChanged += (_, _) => { presented = null; Refresh(); };
         IsVisibleChanged += (_, _) => { if (IsVisible) { presented = null; Refresh(); } };
         
@@ -83,7 +82,7 @@ public sealed class HealingPanel : UserControl
         try
         {
             var view = controller.HealingView(); var p = controller.Profile.Healing;
-            scope.SelectedItem = controller.Profile.Meter.Scope; direction.SelectedItem = p.Direction; actor.SelectedItem = p.Actor == "Player" ? "Self" : p.Actor == "Pet" ? "Pet" : "Self + Pet";
+            direction.SelectedItem = p.Direction; actor.SelectedItem = p.Actor == "Player" ? "Self" : p.Actor == "Pet" ? "Pet" : "Self + Pet";
             kind.SelectedItem = p.Kind.Length == 0 ? "All healing" : p.Kind; sort.SelectedItem = p.Sort; spell.Text = p.Ability; critical.IsChecked = p.CriticalOnly; lifetap.IsChecked = p.LifetapOnly;
             if (ReferenceEquals(view, presented) && importStatus == controller.HealingImportStatus) return; presented = view; importStatus = controller.HealingImportStatus;
             bool reset = context != view.Context; context = view.Context;

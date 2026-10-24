@@ -30,7 +30,8 @@ public sealed partial class TrackerController
         var records = EquipmentPositions.Copy(sessionEvidence.Sessions);
         if (sessionSummaries.FirstOrDefault() is { } first && (records.Count == 0 || first.Start < records[0].Start))
             records.Insert(0, new() { Id = "inferred:stored", Start = first.Start, LastObserved = records.Count == 0 ? sessionSummaries.Max(f => f.End) : records[0].Start.AddTicks(-1), NextLogin = records.FirstOrDefault()?.Start, Inferred = true, Evidence = "Saved encounters preceding available login evidence" });
-        var choices = records.Select(s => new SessionChoice(s.Id, $"{s.Start:MMM/dd HH:mm} · {sessionSummaries.Count(f => f.Start >= s.Start && (!s.NextLogin.HasValue || f.Start < s.NextLogin))} fights · {(s.Inferred ? "inferred · " : "")}{(gameSessionLive && s.Id == records.LastOrDefault()?.Id ? "live" : "last observed")} {s.LastObserved:MMM/dd HH:mm}")).Reverse().ToArray();
+        var current=Combat.Current;var summaries=sessionSummaries.Concat(current!=null&&!sessionSummaries.Any(f=>f.Id==current.Id)?new[]{current}:[]).ToArray();
+        var choices = records.Select(s => new SessionChoice(s.Id, $"{s.Start:MM/dd HH:mm} · {summaries.Count(f => f.Start >= s.Start && (!s.NextLogin.HasValue || f.Start < s.NextLogin))} fights")).Reverse().ToArray();
         Volatile.Write(ref sessionView, new(sessionEvidence.Revision, records, choices) { ContentRevision = sessionEvidence.ContentRevision });
         }
     }

@@ -43,6 +43,7 @@ public static class Appearance
             ["Selection"] = classic ? "#806A567D" : warm ? "#80614B3B" : black ? "#80514D63" : "#604A3C79",
             ["Edge"] = classic ? "#A08F859B" : warm ? "#907C674A" : black ? "#805A626D" : "#805A7180",
             ["Melee"] = "#E9B94F", ["Spell"] = "#64BDEE", ["Healing"] = "#79D45C",
+            ["PetHP"]="#FF8C88",["PetMana"]="#64BDEE",["PetEndurance"]="#F1D16A",
             ["ButtonFace"] = classic ? "#D0C5A7" : warm ? "#796044" : black ? "#363B45" : "#345563",
             ["ButtonText"] = classic ? "#201E20" : "#F5ECD6", ["ButtonLight"] = classic ? "#F4EAD0" : warm ? "#BE9E72" : "#78959D",
             ["ButtonShadow"] = "#FF12151C", ["PetEarth"] = "#CFA779", ["PetAir"] = "#DCECEF", ["PetFire"] = "#EC8C89"

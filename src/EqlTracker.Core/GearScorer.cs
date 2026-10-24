@@ -36,7 +36,7 @@ public static class GearScorer
     public static List<string> EligibleClasses(LoadoutProfile profile, bool pet)
     {
         var result = profile.Classes.Select(CastingPriority.Code).ToList();
-        if (pet) { result.Add("WAR"); result.Add(profile.PetType switch { "Air" => "MNK", "Earth" => "RNG", "Fire" => "WIZ", "Water" => "ROG", "Animation" => "PAL", "Undead" => "SHD", "Warder" or "Spirit" => "BST", _ => "WAR" }); }
+        if (pet) { result.Add("WAR"); result.AddRange(PetDefinition.For(profile.PetType).Classes); }
         return result.Distinct().ToList();
     }
     public static string Eligibility(ItemDefinition item, LoadoutProfile loadout, bool pet, IEnumerable<InventoryEntry>? augments, Catalog catalog)
@@ -56,7 +56,7 @@ public static class GearScorer
         if (slots.Count == 0) return "No compatible slot";
         if (pet && item.RequiredLevel > 0 && !loadout.PetLevel.HasValue) return "Confirm pet level (requires " + item.RequiredLevel + ")";
         if (item.RequiredLevel > (pet ? loadout.PetLevel ?? 0 : loadout.Level)) return $"Requires level {item.RequiredLevel}";
-        if (!pet && item.Races.Count > 0 && !item.Races.Contains("ALL") && !item.Races.Any(x => x.Contains(loadout.Race, StringComparison.OrdinalIgnoreCase))) return "Verify race restriction";
+        if (!pet && item.Races.Count > 0 && !RaceNames.Allows(item.Races, loadout.Race)) return "Verify race restriction";
         if (item.Deity.Length > 0 && !item.Deity.Equals(loadout.Deity, StringComparison.OrdinalIgnoreCase)) return "Verify deity restriction";
         return "Eligible";
     }

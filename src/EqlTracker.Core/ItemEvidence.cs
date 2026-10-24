@@ -49,7 +49,7 @@ public static class ItemEffects
     public static IEnumerable<string> Active(ItemDefinition item, IEnumerable<string>? removed) => item.Effects.Where(e => !(removed ?? []).Any(r => NameKey(r) == NameKey(e) && (Kind(r) == "Unknown" || Kind(e) == "Unknown" || Kind(r) == Kind(e))));
     public static string Kind(string effect)
     {
-        var explicitKind = Regex.Match(effect, @"^(?:Effect:\s*)?(Focus|Click|Worn|Proc)(?:[_ ]Effect)?\s*:", RegexOptions.IgnoreCase);
+        var explicitKind = Regex.Match(effect, @"^(?:Effect:\s*)?(Focus|Click|Worn|Proc|Ornamentation)(?:[_ ]Effect)?\s*:", RegexOptions.IgnoreCase);
         if (explicitKind.Success) return System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(explicitKind.Groups[1].Value.ToLowerInvariant());
         if (Regex.IsMatch(effect, @"\(\s*(?:Combat|Proc)\b|\bProc Effect\s*:", RegexOptions.IgnoreCase)) return "Proc";
         if (Regex.IsMatch(effect, @"^Focus(?:[_ ]Effect)?\s*:", RegexOptions.IgnoreCase) || effect.Contains("Focus Effect", StringComparison.OrdinalIgnoreCase)) return "Focus";

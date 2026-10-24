@@ -138,6 +138,22 @@ public enum WindowSurface { Theme, Solid }
 public class FrostWindow : Window
 {
     internal WindowResizeController? OuterResize {get;private set;}
+    internal PlanningWindowPlacement? Placement { get; private set; }
+    internal bool IsAttachedWorkspace {get;set;}
+    internal Action? CollapseRequested {get;set;}
+    internal Action? ResizeCommitted {get;set;}
+    internal Action? MoveCommitted {get;set;}
+    internal Action? InteractionStarting {get;set;}
+    internal Action<Point>? PhysicalMoveRequested {get;set;}
+    internal Func<Point> InteractionPointer {get;set;}=Native.CursorPosition;
+    internal WorkspaceFrame WorkspaceSurface => (WorkspaceFrame)Frame;
+    internal WorkspacePanelMotion? WorkspaceMotion {get;private set;}
+    internal void AttachPresentation(string title)
+    {
+        IsAttachedWorkspace=true;dragGrip.Visibility=Visibility.Collapsed;Header.Cursor=Cursors.Arrow;
+        Frame.Padding=new(8,5,8,8);CatalystHeading.Apply(HeadingTitle,title);
+        WorkspaceMotion??=new(Frame);
+    }
     public WindowSurface SurfaceStyle { get; }
     internal CharacterProfile LayoutProfile => Controller.Profile;
     internal void SaveLayout() { if (!Controller.Demo) Controller.Save(); }
@@ -159,33 +175,45 @@ public class FrostWindow : Window
     public Func<bool>? CanHide { get; set; }
     protected readonly TrackerController Controller;
     public bool IsCollapsed { get; private set; }
+    internal event Action? CollapseChanged;
     private readonly Button collapseButton;
     private readonly string panelKey;
     private double expandedHeight, expandedMinimum;
     private Thickness expandedPadding;
+    private Thickness expandedHeaderMargin,expandedTitleMargin;
     private double expandedFont;
     public void ToggleCollapse()
     {
+        if(CollapseRequested!=null){CollapseRequested();return;}
+        CancelInteraction();
         if (!IsCollapsed)
         {
-            expandedHeight = Height; expandedMinimum = MinHeight; expandedPadding = Frame.Padding; expandedFont = HeadingTitle.FontSize;
-            IsCollapsed = true; Body.Visibility = Subtitle.Visibility = Visibility.Collapsed; Frame.Padding = new(2); Header.Margin = new(0);
+            expandedHeight = Height; expandedMinimum = MinHeight; expandedPadding = Frame.Padding; expandedFont = HeadingTitle.FontSize;expandedHeaderMargin=Header.Margin;expandedTitleMargin=HeadingTitle.Margin;
+            IsCollapsed = true; OuterResize?.RefreshState(); Body.Visibility = Subtitle.Visibility = Visibility.Collapsed; Frame.Padding = new(2); Header.Margin = new(0);
             HeadingTitle.FontSize = 11; HeadingTitle.Margin = new(0); HeaderIcon.Width = HeaderIcon.Height = 16;
+            if(this is QuestWindow)HeadingTitle.Text="EQL C - Tracker";
             MinHeight = 28; Height = 28; ResizeMode = ResizeMode.NoResize; collapseButton.Content = "▾"; collapseButton.ToolTip = "Restore panel";
             foreach (var button in HeaderActions.Children.OfType<Button>()) button.Width = button.Height = 20;
         }
         else
         {
-            IsCollapsed = false; Body.Visibility = Visibility.Visible; Frame.Padding = expandedPadding; HeadingTitle.FontSize = expandedFont;
+            IsCollapsed = false; Body.Visibility = Visibility.Visible; Frame.Padding = expandedPadding; HeadingTitle.FontSize = expandedFont;Header.Margin=expandedHeaderMargin;HeadingTitle.Margin=expandedTitleMargin;
+            if(this is QuestWindow)CatalystHeading.Apply(HeadingTitle,"Quest & Gear Tracker");
             MinHeight = expandedMinimum; Height = Math.Max(expandedMinimum, expandedHeight); Subtitle.Visibility = Subtitle.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
             ResizeMode = IsLocked ? ResizeMode.NoResize : Passive?ResizeMode.CanResizeWithGrip:ResizeMode.CanResize; collapseButton.Content = "−"; collapseButton.ToolTip = "Collapse to title bar";
             foreach (var button in HeaderActions.Children.OfType<Button>()) button.Width = button.Height = Passive ? 17 : 24;
         }
-        Controller.Profile.Panels[panelKey] = new() { Collapsed = IsCollapsed, Width = Width, Height = expandedHeight };
+        OuterResize?.RefreshState();
+        if (!Controller.Profile.Panels.TryGetValue(panelKey, out var panelState)) Controller.Profile.Panels[panelKey] = panelState = new();
+        panelState.Collapsed = IsCollapsed;
+        if (Placement == null) { panelState.Width = Width; panelState.Height = expandedHeight; }
+        Placement?.Commit();
         if (!Controller.Demo) Controller.Save();
+        CollapseChanged?.Invoke();
     }
     public FrostWindow(TrackerController controller, string title, string subtitle, double width, double height, bool overlay = false, WindowSurface surface = WindowSurface.Solid)
     {
+        if(this is not DpsWindow && !overlay) PlanningScrollbars.Apply(this);
         Icon = CatalystBranding.Image(controller.Profile.AppIconId);
         Controller = controller; Passive = overlay; panelKey = title; Title = CatalystBranding.Name + " — " + title; Width = width; Height = height; MinWidth = overlay ? 128 : 640; MinHeight = overlay ? 72 : 420;
         WindowStyle = WindowStyle.None; ResizeMode = ResizeMode.CanResizeWithGrip; AllowsTransparency = true; Background = Brushes.Transparent;
@@ -195,10 +223,10 @@ public class FrostWindow : Window
         SurfaceStyle = overlay ? WindowSurface.Theme : surface;
         if (SurfaceStyle == WindowSurface.Solid) Appearance.SolidResources(this);
         if (!overlay) Opacity = 1;
-        Frame = new Border { CornerRadius = new(4), BorderThickness = new(1), Padding = new(8) }; Frame.SetResourceReference(Border.BackgroundProperty, "Surface"); Frame.SetResourceReference(Border.BorderBrushProperty, "Accent");
+        Frame = new WorkspaceFrame { CornerRadius = new(4), BorderThickness = new(1), Padding = new(8) }; Frame.SetResourceReference(Border.BackgroundProperty, "Surface"); Frame.SetResourceReference(Border.BorderBrushProperty, "Accent");
         var content = new Grid(); content.RowDefinitions.Add(new() { Height = GridLength.Auto }); content.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) });
         var header = Header = new DockPanel { Background = Brushes.Transparent, Cursor = Cursors.SizeAll, Margin = new(0, 0, 0, 4), LastChildFill = true };
-        var close = UI.Button("×", () => { if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); }); close.Padding = new(0); close.Margin = new(0); close.Height = 24; close.Width = 24; close.ToolTip = "Hide window";
+        var close = UI.Button("×", () => { if(IsAttachedWorkspace&&CollapseRequested!=null){CollapseRequested();return;}if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); }); close.Padding = new(0); close.Margin = new(0); close.Height = 24; close.Width = 24; close.ToolTip = "Hide window";
         HeaderActions.Children.Add(close); HeaderActions.VerticalAlignment = VerticalAlignment.Top; DockPanel.SetDock(HeaderActions, Dock.Right); header.Children.Add(HeaderActions);
         collapseButton = UI.Button("−", ToggleCollapse); collapseButton.Width = collapseButton.Height = 24; collapseButton.Padding = new(0); collapseButton.Margin = new(0, 0, 2, 0); collapseButton.ToolTip = "Collapse to title bar"; HeaderActions.Children.Insert(0, collapseButton);
         HeadingTitle = UI.Text(title, overlay ? 14 : 18, "Foreground", true); HeadingTitle.TextWrapping = TextWrapping.NoWrap; HeadingTitle.TextTrimming = TextTrimming.CharacterEllipsis;
@@ -208,13 +236,16 @@ public class FrostWindow : Window
         var headingRow = new DockPanel { LastChildFill = true }; DockPanel.SetDock(HeaderIcon, Dock.Left); headingRow.Children.Add(HeaderIcon); headingRow.Children.Add(Heading); header.Children.Add(headingRow);
         header.PreviewMouseLeftButtonDown += (_, e) =>
         {
-            var source = e.OriginalSource as DependencyObject; while (source != null && source != header) { if (source is System.Windows.Controls.Primitives.ButtonBase) return; source = VisualTreeHelper.GetParent(source); }
+            var source = e.OriginalSource as DependencyObject; while (source != null && source != header) { if (source is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.Primitives.Thumb or ComboBox or System.Windows.Controls.Primitives.TextBoxBase or MenuItem) return; source = source is Visual?VisualTreeHelper.GetParent(source):LogicalTreeHelper.GetParent(source); }
+            if(e.ClickCount==2&&this is QuestWindow or DpsWindow){ToggleCollapse();e.Handled=true;return;}
+            if(IsAttachedWorkspace){e.Handled=true;return;}
             if (IsLocked) { e.Handled = true; return; }
+            InteractionStarting?.Invoke();
             priorForeground = Controller.Demo ? IntPtr.Zero : Native.BeginInteraction(this);
-            dragStart = Native.CursorPosition(); windowStart = new(Left, Top); header.CaptureMouse(); e.Handled = true;
+            dragStart = InteractionPointer(); windowStart = Native.WindowTopLeft(this); header.CaptureMouse(); e.Handled = true;
         };
-        header.PreviewMouseMove += (_, e) => { if (dragStart is not { } start || !header.IsMouseCaptured) return; var cursor = Native.CursorPosition(); var dpi = VisualTreeHelper.GetDpi(this); Left = windowStart.X + (cursor.X - start.X) / dpi.DpiScaleX; Top = windowStart.Y + (cursor.Y - start.Y) / dpi.DpiScaleY; e.Handled = true; };
-        void EndDrag() { if (dragStart == null) return; dragStart = null; header.ReleaseMouseCapture(); if (!Controller.Demo) Native.EndInteraction(this, priorForeground, Passive, Passive && (this is OverlayWindow ow && ow.ClickThrough)); }
+        header.PreviewMouseMove += (_, e) => { if (dragStart is not { } start || !header.IsMouseCaptured) return; var cursor = InteractionPointer();var point=new Point(windowStart.X+cursor.X-start.X,windowStart.Y+cursor.Y-start.Y);if(PhysicalMoveRequested is {} move)move(point);else Native.MovePhysical(this,point);e.Handled = true; };
+        void EndDrag() { if (dragStart == null) return; dragStart = null; header.ReleaseMouseCapture(); Placement?.Commit(); MoveCommitted?.Invoke(); if (!Controller.Demo) Native.EndInteraction(this, priorForeground, Passive, Passive && (this is OverlayWindow ow && ow.ClickThrough)); }
         header.PreviewMouseLeftButtonUp += (_, e) => { if (dragStart == null) return; EndDrag(); e.Handled = true; }; header.LostMouseCapture += (_, _) => EndDrag();
         SourceInitialized += (_, _) => { if (!Controller.Demo) Native.SetOverlay(this, false, Passive); };
         DpiChanged += (_, _) => { if (!Controller.Demo) ((App)Application.Current).RefreshIconForDisplay(); };
@@ -224,14 +255,16 @@ public class FrostWindow : Window
         Grid.SetRow(Body, 1); content.Children.Add(header); content.Children.Add(Body);
         if(!overlay){ResizeMode=ResizeMode.CanResize;OuterResize=new(this);Grid.SetRowSpan(OuterResize.Grip,2);content.Children.Add(OuterResize.Grip);}
         Frame.Child = content; Content = Frame;
-        Closing += (_, e) => { if (!App.Exiting) { e.Cancel = true; if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); } };
-        Loaded += (_, _) => { Usability.Tooltips(Body); if (!IsCollapsed && controller.Profile.Panels.TryGetValue(panelKey, out var state) && state.Collapsed) { if (state.Width >= MinWidth) Width = state.Width; if (state.Height > MinHeight) Height = state.Height; ToggleCollapse(); } };
+        if (this is QuestWindow or DpsWindow) Placement = new(this, controller, panelKey);
+        Closing += (_, e) => { if (!App.Exiting) { e.Cancel = true;if(IsAttachedWorkspace&&CollapseRequested!=null){CollapseRequested();return;} if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); } };
+        Loaded += (_, _) => { Usability.Tooltips(Body); if (!IsAttachedWorkspace&&!IsCollapsed && controller.Profile.Panels.TryGetValue(panelKey, out var state) && state.Collapsed) { if (Placement == null) { if (state.Width >= MinWidth) Width = state.Width; if (state.Height > MinHeight) Height = state.Height; } ToggleCollapse(); } };
     }
     private bool locked;
-    public bool IsLocked { get => locked; set { locked = value; Header.Cursor = value ? Cursors.Arrow : Cursors.SizeAll; dragGrip.Text = value ? "▣" : "⠿"; dragGrip.ToolTip = value ? "Position locked · unlock from menu" : "Drag window"; } }
+    public bool IsLocked { get => locked; set { locked = value; Header.Cursor = value ? Cursors.Arrow : Cursors.SizeAll; dragGrip.Text = value ? "▣" : "⠿"; dragGrip.ToolTip = value ? "Position locked · unlock from menu" : "Drag window"; if (!IsCollapsed) ResizeMode = value ? ResizeMode.NoResize : Passive ? ResizeMode.CanResizeWithGrip : ResizeMode.CanResize; OuterResize?.RefreshState(); } }
     public void ShowInteractionState(bool clickThrough) { if (clickThrough) { dragGrip.Text = "⇥"; dragGrip.ToolTip = "Click-through enabled · "+((App)Application.Current).ShortcutLabel(OverlayShortcutAction.ClickThrough)+" restores input"; } else IsLocked = locked; }
     public void CancelInteraction()
     {
+        OuterResize?.InterruptForWorkspace();
         dragStart = null; if (Header.IsMouseCaptured) Header.ReleaseMouseCapture();
         void ClosePopups(DependencyObject node)
         {

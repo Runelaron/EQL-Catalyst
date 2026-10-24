@@ -8,10 +8,10 @@ internal static class EquipmentIconTests
         void Check(bool value){if(!value)throw new Exception("Equipment icon assertion failed");}
         ItemDefinition Weapon(string skill,WeaponShape shape=WeaponShape.Unknown)=>new(){Name="Unreliable item name",Slots=["PRIMARY","SECONDARY","RANGE"],Display=new(){Type=skill,Skill=skill,WeaponShape=shape,WeaponShapeEvidence=shape==WeaponShape.Unknown?"":"Verified structured page field"},Stats=new(){["Damage"]=12,["Delay"]=24,["Ratio"]=.5}};
         test("Legacy cached Armor is refined offline for every body slot",()=>{
-            var expected=new Dictionary<string,string>{{"HEAD","Head armor"},{"FACE","Face armor"},{"SHOULDER","Shoulder armor"},{"ARMS","Arm armor"},{"WRIST","Wrist armor"},{"CHEST","Chest armor"},{"HANDS","Gloves"},{"LEGS","Leg armor"},{"FEET","Boots"}};
+            var expected=new Dictionary<string,string>{{"HEAD","Helm"},{"FACE","Face"},{"SHOULDER","Shoulders"},{"ARMS","Arm armor"},{"WRIST","Wrists"},{"CHEST","Chest armor"},{"HANDS","Gloves"},{"LEGS","Leg armor"},{"FEET","Boots"}};
             foreach(var (slot,label) in expected){var item=new ItemDefinition{Slots=[slot],Display=new(){Type="Armor"},MetadataVersion=5};Check(PetItemRules.Type(item)==label&&ItemEquipmentIcons.For(item).Single().Label==label);}
         });
-        test("Multiple armor slots expose all icons in alphabetical slot order",()=>{var i=new ItemDefinition{Slots=["WRIST","CHEST","ARMS","ARMS"],Display=new(){Type="Armor"}};Check(ItemEquipmentIcons.For(i).Select(x=>x.Role).SequenceEqual(["item-arms","item-armor","item-wrists"])&&PetItemRules.Type(i)=="Arm armor / Chest armor / Wrist armor");});
+        test("Multiple armor slots expose all icons in alphabetical slot order",()=>{var i=new ItemDefinition{Slots=["WRIST","CHEST","ARMS","ARMS"],Display=new(){Type="Armor"}};Check(ItemEquipmentIcons.For(i).Select(x=>x.Role).SequenceEqual(["item-arms","item-armor","item-wrists"])&&PetItemRules.Type(i)=="Arm armor / Chest armor / Wrists");});
         test("Paired accessory slots do not duplicate icons",()=>{var i=new ItemDefinition{Slots=["EAR","EAR","FINGERS"]};Check(ItemEquipmentIcons.For(i).Select(x=>x.Role).SequenceEqual(["item-earring","item-ring"]));});
         test("Multi-slot dagger remains one dagger instead of slot icons",()=>{var icons=ItemEquipmentIcons.For(Weapon("1H Piercing",WeaponShape.Dagger));Check(icons.Count==1&&icons[0].Role=="glyph-dagger"&&icons[0].Label=="1H Piercing · Dagger");});
         test("Sword axe hammer and mace have distinct one/two-hand artwork",()=>{

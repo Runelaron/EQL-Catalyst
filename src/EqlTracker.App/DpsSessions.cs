@@ -27,41 +27,48 @@ public sealed class CombatActionRow : Grid
 }
 public sealed partial class DpsWindow
 {
-    private readonly ComboBox sessionPicker = UI.Select([], "", 260);
-    private readonly Button classButton = UI.Button("Classes: All", () => { });
-    private readonly Button latestFight = UI.Button("Return to latest fight", () => { });
+    private readonly ComboBox sessionPicker = UI.Select([], "", 130);
+    private readonly Button latestFight = UI.Button("Back to session", () => { });
     private readonly StackPanel comparisonDetails = new();
     private string shownSessions = "", shownHistory = "";
     private readonly List<ActorBadge> summaryBadges = [];
     private DpsViewState? badgeView; private string cachedBadgeElement="Unknown";
     private void ConfigureScopes()
     {
-        scope.ItemsSource = null; scope.Items.Clear(); scope.Items.Add("Fight"); scope.Items.Add("Session");
-        scope.Items.Add(new ComboBoxItem { Content = "Class Loadout (In Development)", IsEnabled = false, ToolTip = "Future comparison of class combinations across sessions. No cross-session performance model is implemented." });
-        scope.SelectedItem = "Fight";
-        latestFight.ToolTip = "Unpin the saved encounter and follow the current or newest fight across all Combat Lab subtabs.";
-        latestFight.Click += (_, _) => { Controller.ExitGroupPeriod(true); Controller.Profile.Meter.Scope = "Fight"; Controller.Save(); selectionSignature = ""; lastPresented = null; Refresh(); };
-        sessionPicker.ToolTip = "Choose a retained login session. Last observed activity is not a verified logout time. Sessions remain available while the game is closed.";
-        sessionPicker.SelectionChanged += (_, _) => { if (updating || sessionPicker.SelectedItem is not SessionChoice choice) return; Controller.ExitGroupPeriod(true); Controller.Profile.Meter.SessionId = choice.Id; Controller.Profile.Meter.ClassCombinations.Clear(); Controller.EnsureSessionLoaded(); Controller.Save(); lastPresented = null; shownSessions = ""; Refresh(); };
-        classButton.ToolTip = "Select observed three-class combinations within this session. Unknown and Mixed are explicit; equipment tags and ability names never establish classes.";
-        classButton.Click += (_, _) => OpenClassFilter();
+        Controller.EnableLabBrowsing();
+        latestFight.ToolTip="Return to this session without changing its retained combat records.";
+        latestFight.Click+=(_,_)=>{Controller.ExitGroupPeriod(true);Controller.Profile.Meter.Scope="Session";Controller.Profile.Meter.EncounterId="";Controller.Save();selectionSignature="";lastPresented=null;Refresh();};
+        sessionPicker.ToolTip="Current follows the most recent retained login session. Choose an earlier date to keep that session selected. Counts are fights, not confirmed kills.";
+        System.Windows.Automation.AutomationProperties.SetName(sessionPicker,"Session");
+        sessionPicker.SelectionChanged+=(_,_)=>
+        {
+            if(updating||sessionPicker.SelectedItem is not SessionChoice choice)return;
+            Controller.SetLabSession(choice.Id);lastPresented=null;shownSessions="";shownHistory="";Refresh();
+        };
+        var style=new Style(typeof(ComboBoxItem),(Style)FindResource(typeof(ComboBoxItem)));style.Setters.Add(new Setter(ToolTipProperty,new System.Windows.Data.Binding("Label")));sessionPicker.ItemContainerStyle=style;
+        zoneFilter.ToolTip="Limit the selected session to a recorded zone. Zone aliases are normalized; encounter timing and damage records stay unchanged.";
+        namesOnly.ToolTip="Only encounters containing documented named NPCs in that zone. Mixed fights retain all their targets; unknown classifications are excluded.";
+        zoneFilter.SelectionChanged+=(_,_)=>{if(!updating){Controller.SetLabFilters(zoneFilter.SelectedItem?.ToString() is {} z&&z!="All zones"?z:"",namesOnly.IsChecked==true);lastPresented=null;shownHistory="";Refresh();}};
+        namesOnly.Click+=(_,_)=>{if(!updating){Controller.SetLabFilters(Controller.LabBrowsing.Zone,namesOnly.IsChecked==true);lastPresented=null;shownHistory="";Refresh();}};
     }
-    private string VisibleScope() => scope.SelectedItem?.ToString() == "Session" ? "Session" : Controller.Profile.Meter.Scope == "History" ? "History" : "Fight";
-    private void SetScopeChoice() => scope.SelectedItem = Controller.Profile.Meter.Scope == "Session" ? "Session" : "Fight";
+    private string VisibleScope()=>Controller.Profile.Meter.Scope=="History"?"History":"Session";
     private void RefreshSessionControls()
     {
-        bool session = Controller.Profile.Meter.Scope == "Session";
-        if (sessionPicker.Parent is UIElement parent) parent.Visibility = session ? Visibility.Visible : Visibility.Collapsed;
-        if (classButton.Parent is UIElement classes) classes.Visibility = session ? Visibility.Visible : Visibility.Collapsed;
-        var view = Controller.Sessions; string key = $"{view?.Revision}:{Controller.Profile.Meter.SessionId}:{session}";
-        if (key != shownSessions && !sessionPicker.IsDropDownOpen)
+        var choices=Controller.Sessions?.Choices??[];
+        var rows=new[]{new SessionChoice("",choices.FirstOrDefault() is {} latest?"Current · "+latest.Label:"Current · 0 fights")}.Concat(choices.Skip(1)).ToArray();
+        string key=string.Join('|',rows.Select(c=>c.Id+":"+c.Label))+"|"+Controller.Profile.Meter.SessionId;
+        if(key!=shownSessions&&!sessionPicker.IsDropDownOpen)
         {
-            shownSessions = key; bool prior = updating; updating = true;
-            sessionPicker.ItemsSource = view?.Choices ?? [];
-            sessionPicker.SelectedItem = view?.Choices.FirstOrDefault(c => c.Id == Controller.Profile.Meter.SessionId) ?? view?.Choices.FirstOrDefault();
-            updating = prior;
+            shownSessions=key;bool prior=updating;updating=true;sessionPicker.ItemsSource=rows;
+            sessionPicker.SelectedItem=rows.FirstOrDefault(c=>c.Id==Controller.Profile.Meter.SessionId)??rows[0];updating=prior;
         }
-        var chosen = Controller.Profile.Meter.ClassCombinations; classButton.Content = chosen.Count == 0 ? "Classes: All ▾" : $"Classes: {string.Join(", ", chosen)} ▾";
+        sessionPicker.ToolTip=(sessionPicker.SelectedItem as SessionChoice)?.Label+"\nCurrent follows the most recent retained session; counts are fights, not confirmed kills. Last observed activity is not a verified logout.";
+        bool was=updating;updating=true;
+        var zones=new[]{"All zones"}.Concat(Controller.LabSessionEncounters(Controller.Published?.History).GroupBy(f=>Identity.ZoneKey(f.Zone)).Select(g=>Identity.Zone(g.First().Zone)).Order(StringComparer.OrdinalIgnoreCase)).Distinct().ToList();
+        string selected=Controller.LabBrowsing.Zone;
+        if(selected.Length>0&&!zones.Any(z=>Identity.ZoneKey(z)==Identity.ZoneKey(selected)))zones.Add(selected);
+        if(!zones.SequenceEqual(zoneFilter.Items.Cast<string>()))zoneFilter.ItemsSource=zones;
+        zoneFilter.SelectedItem=selected.Length==0?"All zones":zones.First(z=>Identity.ZoneKey(z)==Identity.ZoneKey(selected));namesOnly.IsChecked=Controller.LabBrowsing.NamesOnly;updating=was;
     }
     private void CorrectClassEvidence()
     {
@@ -69,17 +76,6 @@ public sealed partial class DpsWindow
         var dialog = new EntryDialog("Correct session classes", [("Classes · 1–3 abbreviations", SessionEvidence.ClassesAt(s, s.LastObserved)), ("From · local time", s.Start.ToString("yyyy-MM-dd HH:mm:ss")), ("Until · local time", s.LastObserved.AddSeconds(1).ToString("yyyy-MM-dd HH:mm:ss"))], "Correct class attribution within this saved session only. Damage, healing and encounter boundaries remain unchanged. This overrides class evidence in the selected interval.", ["Examples: SHD/BRD/MAG. Use confirmed active classes, not equipment tags.", "Inclusive start time, within the selected session.", "Exclusive end time. Outside this interval the recorded evidence remains in use."]) { Owner = this };
         if (dialog.ShowDialog() != true) return;
         try { if (!DateTime.TryParse(dialog.Values[1], out var from) || !DateTime.TryParse(dialog.Values[2], out var until)) throw new InvalidDataException("Enter valid local times."); Controller.CorrectClasses(s.Id, from, until, dialog.Values[0].ToUpperInvariant().Split(['/', ',', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)); lastPresented = null; shownSessions = ""; Refresh(); } catch (InvalidDataException error) { filterError.Text = error.Message; }
-    }
-    private void OpenClassFilter()
-    {
-        var menu = new ContextMenu(); var p = Controller.Profile.Meter;
-        OverlayMenus.Choice(menu, "All", () => p.ClassCombinations.Count == 0, () => { p.ClassCombinations.Clear(); Controller.Save(); lastPresented = null; Refresh(); });
-        var combos = (Controller.SelectedSession?.Classes.Select(c => c.Combination) ?? []).Concat(new[] { "Unknown", "Mixed" }).Distinct().Order().ToArray();
-        foreach (var combo in combos)
-        {
-            var item = OverlayMenus.Choice(menu, combo, () => p.ClassCombinations.Contains(combo), () => { if (!p.ClassCombinations.Remove(combo)) p.ClassCombinations.Add(combo); foreach (var entry in menu.Items.OfType<MenuItem>()) entry.IsChecked = entry.Header?.ToString() == "All" ? p.ClassCombinations.Count == 0 : p.ClassCombinations.Contains(entry.Header?.ToString() ?? ""); Controller.Save(); lastPresented = null; Refresh(); }); item.StaysOpenOnClick = true;
-        }
-        classButton.ContextMenu = menu; menu.PlacementTarget = classButton; menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom; OverlayMenus.AutoDismiss(menu, false); OverlayMenus.Toggle(menu,classButton);
     }
     private Border ActorMetric(string label, TextBlock number, string actor)
     {
@@ -95,13 +91,14 @@ public sealed partial class DpsWindow
     private void RefreshScopeContext()
     {
         var view = Controller.DpsView(); var p = Controller.Profile.Meter; var fight = p.Scope == "History" ? (Controller.Published?.History ?? view.Fights).FirstOrDefault(f => f.Id == p.EncounterId) : view.Fights.FirstOrDefault();
-        string text = p.Scope == "Session" ? view.Session is { } saved ? $"Session {saved.Start:MMM/dd HH:mm} · {view.Fights.Count} encounters · {saved.Evidence}" : "Session · saved evidence loading" : fight == null ? "No retained fight in this selection" : $"{(p.Scope == "History" ? "Pinned fight" : "Latest fight")} · {(fight.Targets.Length > 0 ? fight.Targets : "Targets unavailable")} · {fight.Zone} · {fight.Start:MMM/dd HH:mm:ss}";
-        damageStats.SetContext(text + "\n" + Controller.SessionImportStatus);healingStats.SetContext(text + "\n" + Controller.SessionImportStatus);
+        string text = p.Scope == "Session" ? view.Session is { } saved ? $"Session {saved.Start:MMM/dd HH:mm} · {view.Fights.Count} fights · {saved.Evidence}" : "Session · saved evidence loading" : fight == null ? "No retained fight in this selection" : $"{(p.Scope == "History" ? "Pinned fight" : "Latest fight")} · {(fight.Targets.Length > 0 ? fight.Targets : "Targets unavailable")} · {fight.Zone} · {fight.Start:MMM/dd HH:mm:ss}";
+        string ended=Controller.SelectedSession is {} contextSession?Controller.SelectedSessionLive?"Session Ended: In progress":$"Session Ended: {contextSession.LastObserved:yyyy-MM-dd HH:mm:ss} (last observed; logout unverified)":"Session Ended: Unknown";
+        string evidence=text+"\n"+ended+"\n"+Controller.SessionImportStatus+"\n"+Controller.LabNamedCoverage();damageStats.SetContext(evidence);healingStats.SetContext(evidence);
         foreach(var number in new TextBlock[]{combined,player,pet})if(number.Parent is FrameworkElement parent) { string meaning=ReferenceEquals(number,combined)?"Total · Self + verified owned pet":ReferenceEquals(number,player)?"Self · character damage only":"Pet · verified ownership at event time";string help=meaning+"\n"+DisplayCadence.DpsHelp+"\n"+text;number.ToolTip=help;if(parent.Parent is Border card)card.ToolTip=help; }
         latestFight.Visibility = p.Scope == "History" || p.GroupPeriodId.Length>0 ? Visibility.Visible : Visibility.Collapsed;
-        string element = ReferenceEquals(badgeView,view)?cachedBadgeElement:p.Scope=="Fight"?Controller.Profile.EffectivePetElement:p.Scope=="History"?fight?.PetType??"Unknown":view.Fights.Select(e=>e.PetType).Distinct().Count()==1?view.Fights.FirstOrDefault()?.PetType??"Unknown":"Unknown";
+        string element = ReferenceEquals(badgeView,view)?cachedBadgeElement:PetIdentityResolver.DisplayFamily(Controller.Profile,view.Fights,p.Scope=="History"||!Controller.LabBrowsing.FollowCurrent);
         badgeView=view;cachedBadgeElement=element;
-        foreach (var badge in summaryBadges.Where(b => b.Tag?.ToString() == "Pet")) badge.Set("Pet", PetElementDetector.Elements.Contains(element), element=="Unknown"?"Pet type unknown or multiple pet types in this selection":"Pet · "+element, element);
+        foreach (var badge in summaryBadges.Where(b => b.Tag?.ToString() == "Pet")) badge.Set("Pet", PetElementDetector.HasFamilyIcon(element), (element=="Unknown"?"Pet type unknown or multiple pet types in this selection":"Pet · "+element)+"\n"+(p.Scope=="History"||!Controller.LabBrowsing.FollowCurrent?"Recorded pet evidence for this selection":PetIdentityResolver.SessionEvidence(Controller.Profile,view.Fights)), element);
     }
     private void UpdateMaxHit(DpsViewState view)
     {
@@ -114,7 +111,7 @@ public sealed partial class DpsWindow
     {
         var actions = new Grid { Margin = new(0, 8, 0, 0) }; actions.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) }); actions.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) });
         var items = new (string Label, Action Run, string Help)[] {
-            ("Inspect fight", () => { if (history.SelectedItem is EncounterHistoryRow r) { Controller.PinFight(r.Id); SetScopeChoice(); lastPresented = null; ChangeFilters(); } }, "Pin this saved fight across Breakdown, Metrics and Group without modifying it."),
+            ("Inspect fight", () => { if (history.SelectedItem is EncounterHistoryRow r) { Controller.PinFight(r.Id); lastPresented = null; ChangeFilters(); } }, "Pin this saved fight across Breakdown, Metrics and Group without modifying it."),
             ("Load older", () => Controller.LoadOlder(), "Load the next retained encounter page; selected sessions load their full saved range independently."),
             ("Merge previous", () => EditHistory("Merge"), "Merge with the preceding encounter. Existing history Undo reverses this edit."),
             ("Split fight", () => EditHistory("Split"), "Choose an explicit time to split this encounter. Damage and healing records are preserved."),
@@ -126,7 +123,7 @@ public sealed partial class DpsWindow
     private void RefreshHistorySelection()
     {
         if (SelectedTab != CombatLabTab.History) return;
-        var source = Controller.Published?.History ?? Controller.DpsView().Fights; string key = mode + ":" + System.Text.Json.JsonSerializer.Serialize(Controller.Profile.Healing) + ":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(source) + ":" + Controller.Sessions?.ContentRevision;
+        var source = Controller.LabHistory(Controller.Published?.History ?? Controller.DpsView().Fights); string key = mode + ":" + System.Text.Json.JsonSerializer.Serialize(Controller.Profile.Healing) + ":" + string.Join('|',source.Select(f=>f.Id+":"+f.End.Ticks+":"+f.Damage)) + ":" + Controller.Sessions?.ContentRevision;
         if (key == shownHistory && !Controller.Demo) return; shownHistory = key;
         bool prior = updating; updating = true;
         var old = (history.SelectedItem as EncounterHistoryRow)?.Id;

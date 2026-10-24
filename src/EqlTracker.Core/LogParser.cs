@@ -45,7 +45,10 @@ public sealed partial class LogParser(string character)
         if (slain.Success) { result.SlainActor = slain.Groups[1].Value; return result; }
         var who = WhoPattern().Match(message);
         if (who.Success && who.Groups["name"].Value.Equals(character, StringComparison.OrdinalIgnoreCase))
-        { result.Classes = who.Groups["classes"].Value.Split('/').ToList(); result.Level = int.Parse(who.Groups["level"].Value); result.RosterObserved = true; return result; }
+        { result.Classes = who.Groups["classes"].Value.Split('/').ToList(); result.Level = int.Parse(who.Groups["level"].Value); result.RosterObserved = true;
+            var race = Regex.Match(message[who.Length..], @"^\s*\((?<race>[^)]+)\)");
+            if (race.Success && RaceNames.Known(race.Groups["race"].Value)) result.Race = RaceNames.Canonical(race.Groups["race"].Value);
+            return result; }
         if (message.StartsWith("You have gained a level! Welcome to level ", StringComparison.Ordinal) && int.TryParse(message.Split(' ').Last().TrimEnd('!'), out var level)) { result.Level = level; return result; }
         var pet = PetPattern().Match(message);
         if (pet.Success) { result.PetName = pet.Groups["name"].Value; return result; }

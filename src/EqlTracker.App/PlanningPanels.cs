@@ -29,12 +29,12 @@ public sealed partial class QuestWindow
     private string libraryKey = "", petKey = "", exaltKey = "";
     private readonly TextBox petSearch = UI.Input("", 220), petPosition = UI.Input("1", 42);
     private readonly ComboBox petRank = UI.Select(new[]{"Actual"}.Concat(Enumerable.Range(0, 11).Select(i => i.ToString())), "Actual", 68), petLevel = EditablePetNumber(new[] { "Auto", "Unknown" }.Concat(Enumerable.Range(1, 50).Select(i => i.ToString())), "Unknown", 80);
-    private readonly ComboBox petBuild = UI.Select([], "", 170), petElement = UI.Select(["Unknown", "Earth", "Water", "Air", "Fire", "Undead", "Animation", "Warder", "Spirit"], "Unknown", 95);
+    private readonly ComboBox petBuild = UI.Select([], "", 170), petElement = UI.Select(PetDefinition.PlanningChoices, "Unknown", 95);
     private readonly ComboBox petSlot = UI.Select(new[] { "All slots" }.Concat(EquipmentPositions.Names.Where(n => n != "Any Slot")), "All slots", 84);
     private readonly ComboBox petOwnership = UI.Select(["All items", "Inventory Only", "Confirmed pet", "Planned items"], "All items", 130);
     private readonly DataGrid petResults = UI.Table(("Item", "Name", 0, null), ("Slots", "SlotText", 150, null), ("Ownership", "Ownership", 130, null));
     private readonly DataGrid petItems = UI.Table(("#", "Position", 32, null), ("Item", "Name", 0, null), ("Slot", "Slot", 85, null), ("+rank", "Rank", 50, null), ("Status", "State", 230, null));
-    private readonly TextBlock petNote = UI.Text("", 11, "Mint"), petCompare = UI.Text("", 12);
+    private readonly TextBlock petCompare = UI.Text("", 12);
     private readonly TextBox exaltSearch = UI.Input("", 220);
     private readonly ComboBox exaltType = UI.Select(["All effects", "Focus", "Click", "Worn", "Proc", "Ornamentation", "Unknown"], "All effects", 100), exaltOwnership = UI.Select(["All", "Owned effects", "Have source item", "Missing"], "All", 135), exaltExpansion = UI.Select(["All expansions", "Classic", "Kunark", "Velious", "Unknown"], "All expansions", 130), exaltTarget = UI.Select(["Any", "Self", "Pet"], "Any", 75);
     private readonly DataGrid exaltTable = UI.Table(("Source / effect", "Name", 0, null), ("Type", "Type", 65, null), ("Unlock Rank", "UnlockRank", 85, null), ("Ownership", "State", 190, null));
@@ -55,7 +55,7 @@ public sealed partial class QuestWindow
         if (item != null) { if (id == TrackerTab.Gear) { gearSearch.Text = item; GearSelectedPosition = "*"; } if (id == TrackerTab.Progress) SelectProgressQuest(item); if (id == TrackerTab.Quests) librarySearch.Text = item; if (id == TrackerTab.Pet) petSearch.Text = item; if (id == TrackerTab.Exaltations) exaltSearch.Text = item; }
         tabs.SelectedItem = tabById[id]; initializing = wasInitializing;
         if (id != TrackerTab.Gear) { gearViewCancel?.Cancel(); gearFingerprint = null; }
-        if (id != TrackerTab.Pet) { petViewCancel?.Cancel(); petKey = ""; }
+        if (id != TrackerTab.Pet) { ClosePetDetails(); petViewCancel?.Cancel(); petKey = ""; }
         if (id != TrackerTab.Quests) { libraryViewCancel?.Cancel(); libraryKey = ""; }
         if (id != TrackerTab.Items) { questFilterKey = ""; fingerprint = null; }
         Refresh(); if (item != null && id == TrackerTab.Gear && !initializing) ScheduleGearSearch(); if (item != null && id == TrackerTab.Pet && !initializing) SchedulePetSearch(); UpdateLayout();
@@ -263,13 +263,13 @@ public sealed partial class QuestWindow
         {
             assignment.Children.Add(UI.Label("PLAN ON PET BUILD · " + CurrentBuild?.Name)); assignment.Children.Add(exaltDestination);
             var note = UI.Text(CurrentBuild == null ? "Choose a named plan in Pet's Build selector first." : "Choose a destination to validate rank, wearable-slot and class intersection.", 11, "Muted"); assignment.Children.Add(note);
-            var replaceEffect = new CheckBox { Content = "Replace existing effect of this type", ToolTip = "Explicitly replace the effect occupying this type slot in the selected plan. Intrinsic effects remain separate." }; assignment.Children.Add(replaceEffect);
+            var replaceEffect = new CheckBox { Content = "Replace existing effect of this type", ToolTip = "Replace this type's assignment. Catalog defaults require explicit selection." }; assignment.Children.Add(replaceEffect);
             void AssignEffect(string state)
             {
                 if (CurrentBuild is not { } build || exaltDestination.SelectedItem is not PetInventoryItem item || Controller.Catalog.FindKey(item.ItemKey) is not { } definition) return;
                 var proposed = EquipmentPositions.Copy(item);
                 if (!ExaltationPlanner.Assign(proposed,e,definition,item.Rank,item.Slot,GuidedPetBuilds.Context(Controller.Profile.ActiveLoadout,build),Controller.Catalog,state,replaceEffect.IsChecked==true,out string issue)) { note.Text=issue; return; }
-                PetBuildEditing.Remember(build,"Exaltation assignment"); item.Exaltations=proposed.Exaltations; PetEdited(); note.Text=state+" effect saved in “"+build.Name+"” · Undo available in Pet.";
+                PetBuildEditing.Remember(build,"Exaltation assignment"); PetSlotPlanning.SetEffects(build,item.Position,proposed.Exaltations,item.Id); PetEdited(); note.Text=state+" effect saved in “"+build.Name+"” · Undo available in Pet.";
             }
             assignment.Children.Add(UI.Button("Assign to planned item", () => AssignEffect("Planned")));
             var socket = UI.Button("Record socketed effect", () => AssignEffect("Socketed")); socket.ToolTip = "Record an observed socketed effect in this plan. Current build is unchanged until you explicitly use this plan."; assignment.Children.Add(socket);

@@ -81,6 +81,8 @@ public sealed class AbilityInspector : Border
             if (value.Lines.FirstOrDefault(l => l.Label == label) is { } line) Line(line, body);
         var measured = new StackPanel(); foreach (var line in value.Lines.Where(l => l.Label is "Targets" or "Recipients" or "Scope" or "Recorded ability" or "Logged spell rank" or "Caster level" or "Avoidance" or "Resistance amount")) Line(line, measured);
         body.Children.Add(new Expander { Header = "Context, targets & limitations", Content = measured, ToolTip = "Inspect the denominator, logged rank, target totals and limits of inference. A lower hit does not establish partial resistance." });
+        var connected=UI.Stack();foreach(var line in value.Lines.Where(l=>l.Label is "Spell identity" or "Buff evidence" or "Spell parameters" or "Focus evidence"))Line(line,connected);
+        body.Children.Add(FocusedLayout.Disclosure("Spell, buff & focus evidence",connected,"Client/reference parameters and historical effects are separate from measured totals. Current equipment is not historical caster equipment."));
         if (value.Reference is { } r)
         {
             body.Children.Add(UI.Text("Base spell · " + r.Classes.Replace("\n", " · "), 11, "SecondaryText"));

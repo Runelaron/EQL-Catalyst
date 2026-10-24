@@ -17,9 +17,12 @@ public static class CatalogItemMerge
             bool newer = (item.Revision, item.MetadataVersion, item.MetadataComplete).CompareTo((old.Revision, old.MetadataVersion, old.MetadataComplete)) >= 0;
             var selected = EquipmentPositions.Copy(newer ? item : old); var other = newer ? old : item;
             selected.GameId ??= other.GameId;
-            foreach(var stat in other.Stats) selected.Stats.TryAdd(stat.Key,stat.Value);
-            selected.Effects = selected.Effects.Concat(other.Effects).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-            if (selected.Display.Source.Length == 0 && other.Display.Source.Length > 0) selected.Display = EquipmentPositions.Copy(other.Display);
+            if(!WikiContentQuality.TemplateRecord(selected))
+            {
+                foreach(var stat in other.Stats) selected.Stats.TryAdd(stat.Key,stat.Value);
+                selected.Effects = selected.Effects.Concat(other.Effects).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            if (!WikiContentQuality.TemplateRecord(selected)&&selected.Display.Source.Length == 0 && other.Display.Source.Length > 0) selected.Display = EquipmentPositions.Copy(other.Display);
             if (selected.Display.WeaponShape == WeaponShape.Unknown && other.Display.WeaponShape != WeaponShape.Unknown && other.Display.WeaponShapeEvidence.Length > 0)
             { selected.Display.WeaponShape = other.Display.WeaponShape; selected.Display.WeaponShapeEvidence = other.Display.WeaponShapeEvidence; }
             selected.Aliases = selected.Aliases.Concat(other.Aliases).Distinct().ToList();
@@ -30,7 +33,7 @@ public static class CatalogItemMerge
             { selected.IntroducedExpansion = other.IntroducedExpansion; selected.ExpansionEvidence = other.ExpansionEvidence; }
             var sources = old.Sources.Concat(item.Sources).ToList();
             bool curated = sources.Any(s => s.EvidenceId.StartsWith("classic-", StringComparison.Ordinal));
-            selected.Sources = sources.Where(s => !curated || s.EvidenceId.StartsWith("classic-", StringComparison.Ordinal) || s.Availability == "Observed drop")
+            selected.Sources = sources.Where(s => !WikiContentQuality.Placeholder(s.Mob)&&!WikiContentQuality.Placeholder(s.Zone)).Where(s => !curated || s.EvidenceId.StartsWith("classic-", StringComparison.Ordinal) || s.EvidenceId.StartsWith("acquisition-", StringComparison.Ordinal) || s.Availability == "Observed drop")
                 .DistinctBy(s => (s.Zone, s.Mob, s.Method, s.EvidenceId, s.Availability, s.Notes)).ToList();
             ItemExpansionEvidence.Apply(selected);
             if (selected.CraftRecipes.Count == 0 && other.CraftRecipes.Count > 0) selected.CraftRecipes = other.CraftRecipes;

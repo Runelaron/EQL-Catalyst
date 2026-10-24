@@ -84,15 +84,42 @@ public sealed class LoadoutEvaluationSession
         (currentStats, currentEffects, baselineComplete) = Aggregate(before); referenceStats = Aggregate(this.reference).Stats;
     }
     private ItemDefinition? Definition(InventoryEntry entry) => catalog.FindKey(entry.ConfirmedItemKey) ?? catalog.Find(entry.Name, entry.GameId == 0 ? null : entry.GameId);
+    private List<string> RelevantRankUncertainty(IEnumerable<EquipmentPosition> before,IEnumerable<EquipmentPosition> after)
+    {
+        var names=new HashSet<string>();
+        IEnumerable<(string Key,string Stat,string Name,bool Uncertain)> Terms(IEnumerable<EquipmentPosition> positions)
+        {
+            foreach(var p in positions.Where(p=>p.Item!=null))
+            {
+                var item=Definition(p.Item!);if(item==null)continue;var projection=RankedItemStats.Resolve(item,p.Item!.Rank);
+                foreach(string stat in projection.Stats.Keys.Concat(projection.UncertainStats).Distinct())
+                {
+                    if(weights.GetValueOrDefault(stat)==0 || stat is "Ratio" or "Damage" && !(pet?PetItemRules.CombatSlot(p.Slot,theorycraft):p.Slot is "Primary" or "Secondary" or "Range"))continue;
+                    yield return (item.Key+"|"+p.Item.Rank+"|"+stat,stat,item.Name+" ("+stat+")",projection.UncertainStats.Contains(stat));
+                }
+            }
+        }
+        var left=Terms(before).ToArray();var right=Terms(after).ToArray();
+        foreach(var stat in left.Concat(right).Where(t=>t.Uncertain).Select(t=>t.Stat).Distinct())
+        {
+            var a=left.Where(t=>t.Stat==stat).ToArray();var b=right.Where(t=>t.Stat==stat).ToArray();
+            // Haste is a maximum, not a sum: other changed haste can expose the same uncertain item.
+            if(stat=="Haste") {if(!a.Select(t=>t.Key).Distinct().Order().SequenceEqual(b.Select(t=>t.Key).Distinct().Order()))foreach(var t in a.Concat(b).Where(t=>t.Uncertain))names.Add(t.Name);}
+            else foreach(string key in a.Concat(b).Where(t=>t.Uncertain).Select(t=>t.Key).Distinct())
+                if(a.Count(t=>t.Key==key)!=b.Count(t=>t.Key==key))names.Add(a.Concat(b).First(t=>t.Key==key).Name);
+        }
+        return names.Order().ToList();
+    }
     private (Dictionary<string, double> Stats, List<string> Effects, bool Complete) Item(InventoryEntry entry, string slot)
     {
-        string key = RankedItemStats.Version + "|" + slot + "|" + entry.Rank + "|" + entry.Name + "|" + entry.GameId + "|" + entry.ConfirmedItemKey + "|" + string.Join(';', entry.TransferredOutEffects) + "|" + string.Join(';', entry.Augments.Select(a => a.Name + ":" + a.EffectIdentity + ":" + a.EffectText)); if (cache.TryGetValue(key, out var found)) return found;
+        string key = PetEffectPolicy.Version + "|" + RankedItemStats.Version + "|" + slot + "|" + entry.Rank + "|" + entry.Name + "|" + entry.GameId + "|" + entry.ConfirmedItemKey + "|" + string.Join(';', entry.TransferredOutEffects) + "|" + string.Join(';', entry.Augments.Select(a => a.Name + ":" + a.EffectIdentity + ":" + a.EffectText)); if (cache.TryGetValue(key, out var found)) return found;
         var item = Definition(entry); var stats = item == null ? new Dictionary<string, double>() : GearScorer.EffectiveStats(item, entry.Rank);
         if (pet && !theorycraft && item != null && PetItemRules.Unsupported(item).Length > 0) return cache[key] = (new(), [], true);
         if (item?.MetadataComplete != true) missingMetadata.Add(entry.Name);
         if (pet && slot == "Secondary" && petInventory is { DualWield: false } && item?.Stats.GetValueOrDefault("Delay") > 0) return cache[key] = (new(), [], true);
         if (pet ? !PetItemRules.CombatSlot(slot,theorycraft) : slot is not ("Primary" or "Secondary" or "Range")) foreach (string combat in new[] { "Ratio", "Damage", "Delay", "Backstab" }) stats.Remove(combat);
-        var effects = (item?.Effects ?? []).Except(entry.TransferredOutEffects).ToList(); bool complete = item?.MetadataComplete == true;
+        var effects = pet ? PetEffectPolicy.SelectedTexts(entry).ToList() : (item?.Effects ?? []).Except(entry.TransferredOutEffects).ToList(); bool complete = item?.MetadataComplete == true;
+        if (pet) return cache[key] = (stats, effects, complete);
         foreach (var augment in entry.Augments)
         {
             var source = Definition(augment);
@@ -208,11 +235,10 @@ public sealed class LoadoutEvaluationSession
         if (petSelectionConditional) {
             result.Status = "Conditional"; result.WeaponEvidence += " Inventory hand selection has incomplete or user-observed rules; this is a conditional preference comparison, not a DPS winner.";
         }
-        var changed = before.Where(p=>Different(p,after.FirstOrDefault(a=>a.Id==p.Id))).Concat(after.Where(p=>Different(p,before.FirstOrDefault(a=>a.Id==p.Id)))).Where(p=>p.Item!=null).ToList();
-        var uncertainRanks = changed.Where(p=>Definition(p.Item!) is {} d && RankedItemStats.Resolve(d,p.Item!.Rank).UncertainStats.Any(s=>weights.GetValueOrDefault(s)!=0 && (s is not ("Ratio" or "Damage") || (pet ? PetItemRules.CombatSlot(p.Slot,theorycraft) : p.Slot is "Primary" or "Secondary" or "Range")))).Select(p=>p.Item!.Name).Distinct().ToList();
+        var uncertainRanks = RelevantRankUncertainty(before,after);
         if (uncertainRanks.Count > 0) {
             result.Status = "Conditional";
-            string note = "Conditional ranked-stat estimate: " + string.Join(", ",uncertainRanks) + ". Weapon scaling / ranked haste is unverified; estimated points do not establish a confirmed winner.";
+            string note = "Conditional ranked-stat inputs: " + string.Join(", ",uncertainRanks) + ". See per-field rule evidence; known replacement occupancy does not confirm stat scaling. Estimated points do not establish a confirmed winner.";
             result.Unbuffed.Notes.Add(note); result.Buffed.Notes.Add(note); result.WeaponEvidence += " " + note;
         }
         result.IsHypothetical = theorycraft;

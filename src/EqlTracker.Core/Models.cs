@@ -274,6 +274,7 @@ public sealed class LoadoutProfile
     public List<string> Classes { get; set; } = [];
     public int Level { get; set; }
     public string Race { get; set; } = "";
+    public int? RaceLevel { get; set; }
     public string Deity { get; set; } = "";
     public string PetType { get; set; } = "Unknown";
     public string PetName { get; set; } = "";
@@ -363,6 +364,7 @@ public sealed class CharacterProfile
     public DpsSelection Meter { get; set; } = new();
     public OverlayMenuSize OverlayMenus { get; set; } = OverlayMenuSize.Compact;
     public DpsSelection? OverlayMeter { get; set; }
+    public DpsDisplayChoice? OverlayFooterDisplay { get; set; }
     public HealingSelection Healing { get; set; } = new();
     public DateTime? ClassesObservedAt { get; set; }
     public string NativeSetupFolder { get; set; } = "";
@@ -383,13 +385,20 @@ public sealed class CharacterProfile
     public List<PetIdentity> PetIdentities { get; set; } = [];
     public IEnumerable<string> EnabledClasses => CurrentClasses.Concat(Level50Classes).Concat(OptionalClasses).Except(ExcludedClasses).Distinct();
     public LoadoutProfile ActiveLoadout => Loadouts.FirstOrDefault(x => x.Name == SelectedLoadout) ?? Loadouts[0];
-    public string EffectivePetElement => PetElementOverride.Length > 0 ? PetElementOverride : PetIdentities.Where(x => x.Until == null && x.Element.Length > 0).OrderByDescending(x => x.From).FirstOrDefault()?.Element ?? "Unknown";
+    public string EffectivePetElement => PetIdentityResolver.CurrentFamily(this);
 }
 public sealed class PanelState
 {
     public bool Collapsed { get; set; }
     public double Width { get; set; }
     public double Height { get; set; }
+    public double? ScreenLeft { get; set; }
+    public double? ScreenTop { get; set; }
+    public string MonitorDevice { get; set; } = "";
+    public double MonitorLeft { get; set; }
+    public double MonitorTop { get; set; }
+    public double DpiX { get; set; }
+    public double DpiY { get; set; }
 }
 public sealed class GroupMembership
 {
@@ -404,6 +413,12 @@ public sealed class GroupMembership
 }
 public sealed class PetIdentity
 {
+    public string RawSummonSpell { get; set; } = "";
+    public string CanonicalSummonSpell { get; set; } = "";
+    public string SummonCasterClass { get; set; } = "";
+    public int? SummonRank { get; set; }
+    public DateTime? SummonedAt { get; set; }
+    public string SummonEvidence { get; set; } = "";
     public string Name { get; set; } = "";
     public DateTime From { get; set; }
     public DateTime? Until { get; set; }
@@ -477,6 +492,7 @@ public sealed class ParsedLine
     public List<string>? Classes { get; set; }
     public int? Level { get; set; }
     public bool RosterObserved { get; set; }
+    public string? Race { get; set; }
     public bool Boundary { get; set; }
     public string? SlainActor { get; set; }
     public bool PetLost { get; set; }

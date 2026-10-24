@@ -25,7 +25,7 @@ public static class PetEquipmentInference
         var positions = new List<EquipmentPosition>(); EquipmentPositions.Complete(positions); positions.RemoveAll(p => p.Slot == "Any Slot");
         foreach (var p in positions) p.Knowledge = EquipmentKnowledge.Empty;
         var selections = new List<PetEquipmentSelection>(); var notes = new List<string>(); var used = new HashSet<string>();
-        var context = new LoadoutProfile { Classes = owner.Classes, Level = owner.Level, PetType = build.PetType, PetLevel = build.PetLevel, Race = owner.Race, Deity = owner.Deity };
+        var context = new LoadoutProfile { Classes = owner.Classes, Level = owner.Level, PetType = build.PetType, PetLevel = build.PetLevel, Race = owner.Race, RaceLevel = owner.RaceLevel, Deity = owner.Deity };
         var active = build.Items.Where(i => i.Position > 0 && i.Position <= PetEquipmentPlanner.Capacity(owner.Classes)).OrderBy(i => i.Position).ToList();
         ItemDefinition? Def(PetInventoryItem i) => catalog.FindKey(i.ItemKey) ?? catalog.Find(i.Name);
         bool Eligible(PetInventoryItem entry)
@@ -59,7 +59,7 @@ public static class PetEquipmentInference
         foreach (var item in candidates.Where(i => EquipmentPositions.IsSlot(i.Slot)).OrderByDescending(i => i.EquipmentVerified).ThenBy(i => i.Position))
         {
             var p = positions.FirstOrDefault(p => p.Item == null && p.Slot == EquipmentPositions.Normalize(item.Slot) && PetItemRules.Fits(Def(item)!, p, build.IsTheorycraft));
-            if (p != null) Assign(item, p, item.EquipmentVerified ? "Verified in game" : "Manual intended-slot correction"); else notes.Add(item.Name + ": intended slot unavailable; correct conflicting entries.");
+            if (p != null) Assign(item, p, item.EquipmentVerified ? "User-assigned equipment" : "Legacy intended slot; review placement"); else notes.Add(item.Name + ": intended slot unavailable; correct conflicting entries.");
         }
         foreach (var item in candidates.Where(i => inferStorage && !used.Contains(i.Id) && !EquipmentPositions.IsSlot(i.Slot) && Def(i)!.Slots.Any(s => EquipmentPositions.Normalize(s) is "Primary" or "Secondary")))
         {
@@ -86,10 +86,10 @@ public static class PetEquipmentInference
             foreach (var pair in values.Where(s => s.Key is not ("Ratio" or "Damage" or "Delay" or "Backstab"))) stats[pair.Key] = pair.Key == "Haste" ? Math.Max(stats.GetValueOrDefault(pair.Key), pair.Value) : stats.GetValueOrDefault(pair.Key) + pair.Value;
             if (p.Slot is "Primary" or "Secondary" || build.IsTheorycraft && p.Slot == "Range") { if (values.TryGetValue("Ratio", out double ratio)) weapons.Add($"{p.Slot}: {definition.Name} +{p.Item.Rank} · ratio {ratio:0.###}" + (projection.WeaponUncertain ? " (Conditional estimate)" : "")); procs.AddRange(ProcEffects(definition, p.Item).Select(e => p.Slot + ": " + e + (definition.EffectActivationLevel is { } level ? $" · activation {level}" : " · activation unverified"))); }
         }
-        if (selections.Any(s => !s.Verified)) notes.Add("Equipment inferred; inventory ownership is manual. Use Edit item… to correct intended/verified slots.");
+        if (selections.Any(s => !s.Verified)) notes.Add("Equipment inferred from manual loadout; review item placement if needed.");
         return new(positions, selections, new(stats, weapons, procs.Distinct().ToList(), notes));
     }
-    public static IEnumerable<string> ProcEffects(ItemDefinition item, InventoryEntry entry) => ItemEffects.Active(item, entry.TransferredOutEffects).Concat(entry.Augments.Select(a => a.EffectText)).Where(e => ExaltationPlanner.EffectType(e) == "Proc").Distinct();
+    public static IEnumerable<string> ProcEffects(ItemDefinition item, InventoryEntry entry) => PetEffectPolicy.SelectedTexts(entry).Where(e => ExaltationPlanner.EffectType(e) == "Proc").Distinct();
     public static GearComparison? Best(ItemDefinition item, int rank, InventoryEntry? instance, LoadoutEvaluationSession session, IReadOnlyList<EquipmentPosition> positions, string? preferred = null)
     {
         var choices = positions.Where(p => session.Fits(item,p)).ToList();

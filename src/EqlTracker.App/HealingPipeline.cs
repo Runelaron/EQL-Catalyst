@@ -11,6 +11,7 @@ public sealed partial class TrackerController
     private bool healingCaughtUp;
     private string healingZone = "Unknown";
     private DateTime? healingFirst, healingLast;
+    private string HealingProjectionKey=>$"{Combat.Healing.Revision}|{Combat.Revision}|{historicalSnapshotRevision}|{historyRevision}|{JsonSerializer.Serialize(Profile.Healing)}|{JsonSerializer.Serialize(Profile.Meter)}|{Sessions?.ContentRevision}|{Volatile.Read(ref groupRevision)}|{Volatile.Read(ref inspectionIdentityRevision)}|{LabBrowseKey}";
     public Task ValidateHealingImportAsync(string folder) => Task.Run(() =>
     {
         var before = Combat.Encounters.ToDictionary(f => f.Id, f => (f.Start, f.End, f.Damage));
@@ -32,7 +33,7 @@ public sealed partial class TrackerController
     internal HealingViewState BuildHealing(DpsViewState damage)
     {
         var filter = Profile.Healing.Filter(damage.Filter.From, damage.Filter.Until);
-        var outside = Profile.Meter.Scope == "Session" ? Combat.Healing.Events.Where(e => (damage.Session?.NextLogin == null || e.Time < damage.Session.NextLogin) && (Profile.Meter.ClassCombinations.Count == 0 || Profile.Meter.ClassCombinations.Contains(SessionEvidence.ClassesAt(damage.Session, e.Time)))).ToList() : [];
+        var outside = Profile.Meter.Scope == "Session" ? Combat.Healing.Events.Where(e => LabOutsideHealing(e)&&(damage.Session?.NextLogin == null || e.Time < damage.Session.NextLogin) && (Profile.Meter.ClassCombinations.Count == 0 || Profile.Meter.ClassCombinations.Contains(SessionEvidence.ClassesAt(damage.Session, e.Time)))).ToList() : [];
         return HealingMetrics.Build(damage.Fights, outside, filter, Profile.Healing.Sort, string.Join('|', damage.Fights.Select(f => f.Id)) + JsonSerializer.Serialize(filter));
     }
     private static Encounter HealingCopy(Encounter f) => new() { Id = f.Id, Start = f.Start, End = f.End, Zone = f.Zone, Finished = f.Finished, IdleResumable = f.IdleResumable, ResolvedTargets = new(f.ResolvedTargets), Heals = f.Heals.Select(e => e.Copy()).ToList(), HealingSummaries = f.HealingSummaries.ToList(), HealingCoverage = f.HealingCoverage, HealingDetailAvailable = f.HealingDetailAvailable };

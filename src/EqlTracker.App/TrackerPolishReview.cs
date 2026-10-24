@@ -63,7 +63,7 @@ public sealed partial class QuestWindow
         c.Profile.PetExpansions=["Kunark"]; // Recreate only the filter control under test; persisted selection is unchanged by presentation.
         var expansion=BuildPetExpansionFilter();expansion.Measure(new(250,100));expansion.Arrange(new(0,0,250,60));Check(Usability.Tree(expansion).OfType<Button>().Single().Content?.ToString()=="Kunark ▾","Single expansion is shown in full beneath its label");
         c.Profile.PetExpansions=["Classic","Kunark","Velious","Unknown"];
-        var details=Usability.Tree(tabs).OfType<Expander>().First(e=>e.Header?.ToString()=="Pet Details");details.IsExpanded=true;Flush();var hit=Usability.Tree(details).OfType<System.Windows.Controls.Primitives.ToggleButton>().First();Check(hit.ActualWidth<details.ActualWidth*.5,"Pet Details header hit area remains content sized");details.IsExpanded=false;
+        var details=Usability.Tree(tabs).OfType<Button>().First(e=>e.Content?.ToString()=="Pet Details…");OpenPetDetails();Flush();Check(details.ActualHeight==28&&petDetailsPopup!=null,"Pet Details button opens an owned popup");ClosePetDetails();
         ShowView(TrackerTab.Exaltations);Flush();Check(Math.Abs(exaltSearch.ActualHeight-exaltType.ActualHeight)<.5,"Exaltation search matches neighboring input height");
         exaltContent.SelectedItem="All";exaltSearch.Text="Blade of the Swarm";RefreshExaltations();Flush();
         if(exaltTable.Items.OfType<ExaltationOption>().FirstOrDefault(e=>e.Effect.Contains("Swarming Pain")) is {} swarm)

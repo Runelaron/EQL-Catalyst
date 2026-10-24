@@ -1,15 +1,15 @@
-# EQL Catalyst — Beta 1.4
+# EQL Catalyst — Beta 1.6
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.4**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.4.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.6**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.6.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
 ## Features
 
 - **DPS and healing:** compact overlays, Pet/Self/Combined/Group displays, contextual icons, independent filters, and smooth presentation.
-- **Combat Lab:** breakdowns, charts, peaks, retained encounters, login sessions, class filters, exports, and Group/Raid member details with verified pet attribution.
+- **Combat Lab:** breakdowns, charts, peaks, retained encounters, login sessions, zone/named-NPC filters, exports, and Group/Raid member details with verified pet attribution.
 - **Quest planning:** a saved queue, item and quest discovery, walkthroughs, required components, ownership evidence, and reversible progress.
 - **Gear:** Current and named builds, autosave and Undo, inventory reconciliation, valid-slot dragging, classic item details, rank previews, and transparent preference formulas.
 - **Pets:** summon and focus evidence, automatic/manual level context, equipment eligibility, expansion filters, inventory planning, comparisons, and isolated Theorycraft builds.
@@ -19,7 +19,7 @@ An independent Windows companion for **EverQuest Legends**: follow combat, organ
 
 Scores are preference points, **not predicted DPS**. Missing or disputed mechanics stay labeled. Class Loadout comparison is in development. Live-game interaction and physical-monitor DPI acceptance remain separate from automated tests.
 
-Beta 1.4 adds opt-in weekly update checks/downloads, a ready-to-install icon beside Settings, clearer quest browsing and acquisition details, repaired Pet equipment ratings and catalog coverage, and compact controls. See [release notes](CHANGELOG.md), [application updates](docs/application-updates.md), and [Progress help](docs/progress-rewards.md).
+Beta 1.6 brings the shared workspace toolbar, session-first Combat Lab, explicit Pet drafts and character sheets, October content and selected artwork together. See [release notes](CHANGELOG.md), [Beta 1.6 help](docs/beta16.md), and [validation](docs/beta16-validation.md).
 
 ## Install
 

@@ -1,0 +1,17 @@
+# Local Pet research
+
+The local build can show **Pet data…** beside Compare pets. Public builds leave it disabled unless explicitly built with `EnablePrivatePetResearch=true`. Measurements stay in the character's `pet-research.json`, outside catalogs and release fixtures. Nothing is uploaded and research sends no input to the game.
+
+**Samples** backfills finished owned-pet encounters from the existing combat snapshots. Damage and encounter seconds are retained exactly. Select a sample to inspect melee, supported specials, spells, corroborated procs, recorded hits and buff-period coverage. Missing misses do not establish accuracy, and hit cadence is not an exact swing timer. Review summon rank, actual level, gear, buffs, targets and positioning separately. Later observations never silently replace reviewed context.
+
+Expand **Buff evidence** for landing/fade history, interrupted attempts and reviewed inspect values. Burnout's spell-line numeral and upgrade rank are separate. Frenzied Burnout's ability identity does not establish the purchased AA rank. A matching cast can disambiguate a subsequent landing message; a cast by itself never establishes an active buff. Missing transitions remain unresolved. Ordinary haste and overhaste remain separate, and a displayed speed ceiling does not prove their interaction or a DPS multiplier.
+
+**Stat sheets** supports reviewed entry into the observed-value table, screenshot references and local JSON imports. Leave absent values blank. All seven attributes, resources, paired AC/Attack, regeneration, resists, weapon fields, skills and absorption are tracked. Negative HP is retained as invalid evidence and excluded from calculations. Preserve unknown total resists rather than substituting gear contributions. Save a blank template for importing multiple measurements; imported sheets require review.
+
+**Models** holds context-specific STA→HP, INT/WIS→mana and spell-rank growth candidates. Save a candidate with at least three independent controlled baseline/item/restored-baseline runs and an independent holdout. A model must pass its error tolerance and receive explicit local approval before estimating a change within its tested range and exact context. Different families, levels, ranks, patches, buffs, focus, AA, targets or positioning cannot share a coefficient automatically. No universal pet or stat-to-DPS multiplier is supplied.
+
+Comparison cards lead with measured DPS, observed HP/AC and sample conditions. Combat and stat captures can have different conditions. Reviewed cohorts are preferred; mismatched history remains accessible in Samples. Equipment damage/defense points remain in details and continue to use your custom weights and optimization goals. These points describe equipment, not innate pet abilities.
+
+For a haste experiment, capture unchanged equipment and pet statistics before ordinary Burnout, after it lands, during confirmed Frenzied Burnout, and after Frenzied fades. Record displayed attack speed, STR, both Attack/AC values, spell identities and timestamps. Repeat with comparable targets and retain one separate run to check the result. Unbuffed runs are useful follow-ups, not a prerequisite for recording current buffed history.
+
+See the existing [measurement checklist](pet-measurement-guide.md) for inventory exports, screenshots and controlled equipment tests. Keep screenshots and logs private. Include research files and referenced evidence in local backups.

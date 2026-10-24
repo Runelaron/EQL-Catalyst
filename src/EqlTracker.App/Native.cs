@@ -29,6 +29,8 @@ public static partial class Native
     public static object? DisplayDiagnostics { get; private set; }
     public static IntPtr ForegroundHandle => GetForegroundWindow();
     public static Point CursorPosition() { GetCursorPos(out var p); return new(p.X, p.Y); }
+    internal static Point WindowTopLeft(Window window) { GetWindowRect(new WindowInteropHelper(window).Handle,out var r);return new(r.Left,r.Top); }
+    internal static void MovePhysical(Window window,Point point) => SetWindowPos(new WindowInteropHelper(window).Handle,IntPtr.Zero,(int)Math.Round(point.X),(int)Math.Round(point.Y),0,0,0x0001|0x0004|0x0010);
     public static IntPtr BeginInteraction(Window window)
     {
         var prior = GetForegroundWindow(); SetOverlay(window, false, false); SetForegroundWindow(new WindowInteropHelper(window).Handle); return prior;

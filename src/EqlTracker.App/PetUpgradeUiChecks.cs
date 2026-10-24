@@ -23,7 +23,7 @@ internal static class PetUpgradeUiChecks
             var comparison = Usability.Tree(q).OfType<BuildComparisonView>().Single(v => v.IsVisible);
             check(Usability.Tree(comparison).OfType<TextBlock>().Any(t => t.Text.StartsWith("Upgrade rating")) && !Usability.Tree(comparison).OfType<TextBlock>().Any(t => t.IsVisible && t.Text == "Usual buffs"), "Pet comparison reuses the evaluator with a single visible context");
             check(Usability.Tree(q).OfType<TextBlock>().Any(t => t.IsVisible && t.Text.Contains("AC ") && t.Text.Contains("DEX ") && t.Text.Contains("Haste ")), "Pet gear totals include ranked AC, DEX and stacked worn haste");
-            check(tables.Single(g => g.Columns.Any(col => col.Header?.ToString() == "+Rank")).Columns.Any(col => col.Header?.ToString() == "Procs" && col.Visibility == Visibility.Visible), "Pet inventory exposes proc effects beside editable rank");
+            check(tables.Single(g => g.Columns.Any(col => col.Header?.ToString() == "Rank")).Columns.Any(col => col.Header?.ToString() == "Exalt" && col.Visibility == Visibility.Visible), "Pet inventory exposes proc effects beside editable rank");
             var source = candidates.ItemsSource; Flush(); check(ReferenceEquals(source, candidates.ItemsSource), "Unchanged Pet refresh preserves its row collection and selection");
             q.SetGearTarget(true); q.ShowView(TrackerTab.Gear, "Indicolite Breastplate"); q.SelectGearPosition("CHEST:1"); Flush();
             var gear = Usability.Tree(q).OfType<DataGrid>().Single(g => g.IsVisible && g.Columns.Any(col => col.SortMemberPath == "ItemScore"));

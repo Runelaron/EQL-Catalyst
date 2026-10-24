@@ -1,6 +1,6 @@
 # Release verification
 
-The public export contains maintained application source, tests, required data and current artwork. Development history, profiles, inventory captures, private reports and art experiments are excluded. All parser fixtures are synthetic.
+The public export contains maintained application source, tests, required data, current artwork and the explicitly requested synthetic review gallery. Profiles, inventory captures, raw personal evidence and private reports are excluded. All parser fixtures are synthetic. Private Pet research code is present but disabled unless explicitly compiled with the local research flag.
 
 Local release checks scan only the exported tree and runtime payload. They do not scan a whole WSL distro, upload source to a scanning service, restart WSL/services or launch Windows Sandbox. Trivy checks supported dependencies, secrets and applicable configuration; Gitleaks supplements secret detection. Syft supplies an SBOM and bundled .NET/native runtime versions are checked independently where scanners lack coverage.
 

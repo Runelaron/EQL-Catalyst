@@ -61,13 +61,17 @@ internal sealed class PetBuffSetupDialog : FrostDialog
     private PetBuffChoice? selected;
     private bool loading;
     private sealed record Row(PetBuffChoice Choice,string Name){public override string ToString()=>Name;}
-    internal PetBuffSetupDialog(LoadoutProfile owner,PetBuffCatalog catalog,PetComparisonPreferences preferences):base("Pet buff setup",660,620)
+    private readonly bool standard;
+    private readonly StandardPetBuffState? learned;
+    internal PetBuffSetupDialog(LoadoutProfile owner,PetBuffCatalog catalog,PetComparisonPreferences preferences,bool standard=false,StandardPetBuffState? learned=null):base(standard?"Standard pet buffs":"Pet buff setup",660,620)
     {
+        this.standard=standard;this.learned=learned;
         this.catalog=catalog;this.owner=EquipmentPositions.Copy(owner);target=preferences;working=EquipmentPositions.Copy(preferences.Buffs);
         var choices=catalog.Choices(owner,preferences.ExternalBuffs).ToList();add=UI.Select([],"",360);add.ItemsSource=choices;add.DisplayMemberPath="Name";if(choices.Count>0)add.SelectedIndex=0;
         var fields=new WrapPanel();foreach(var c in new UIElement[]{UI.Field("Spell / AA",add),UI.ActionField(UI.Button("Add",Add)),UI.ActionField(UI.Button("Remove",Remove))})fields.Children.Add(c);
-        var settings=new WrapPanel();foreach(var c in new UIElement[]{UI.Field("Rank",rank),UI.Field("Uptime %",uptime),UI.ActionField(enabled),UI.ActionField(owned),UI.ActionField(external)})settings.Children.Add(c);
-        rank.ToolTip="Confirmed spell/AA rank, 0–10; blank remains Unknown.";uptime.ToolTip="Configured uptime 0–100%; blank remains Unknown. Cooldowns are not evidence of actual uptime.";
+        var settings=new WrapPanel();foreach(var c in standard?new UIElement[]{UI.Field("Rank",rank),UI.ActionField(enabled),UI.ActionField(UI.Button("Use learned rank",()=>{var name=selected==null?"":catalog.Find(selected.Id)?.Name;rank.Text=learned?.Buffs.FirstOrDefault(b=>b.Spell==name)?.Rank?.ToString()??"";}))}:new UIElement[]{UI.Field("Rank",rank),UI.Field("Uptime %",uptime),UI.ActionField(enabled),UI.ActionField(owned),UI.ActionField(external)})settings.Children.Add(c);
+        if(standard){uptime.IsEnabled=owned.IsEnabled=external.IsEnabled=false;fields.Visibility=Visibility.Collapsed;}
+        rank.ToolTip=standard?"Latest confirmed rank is learned automatically. Editing overrides it; Use learned rank resumes following it. Above +10 stays recorded, outside the fitted model.":"Confirmed spell/AA rank, 0–10; blank remains Unknown.";uptime.ToolTip="Configured uptime 0–100%; blank remains Unknown. Cooldowns are not evidence of actual uptime.";
         list.SelectionChanged+=(_,_)=>{if(loading)return;if(!Store()){loading=true;list.SelectedItem=list.Items.Cast<Row>().FirstOrDefault(r=>ReferenceEquals(r.Choice,selected));loading=false;return;}Load();};
         Editor.Children.Add(UI.Stack(UI.Text(catalog.Status,11,"SecondaryText"),fields,list,settings,detail,error,UI.Text("Effect-slot checks are computed evidence. Complete conflicting buffs are excluded; bonuses are never cherry-picked. No active buff roster, proc rate or uptime is inferred.",11,"SecondaryText")));
         Actions.Children.Add(UI.Button("Save setup",()=>{if(!Store())return;target.Buffs=EquipmentPositions.Copy(working);DialogResult=true;}));Actions.Children.Add(UI.Button("Cancel",Close));Refresh();
@@ -78,12 +82,14 @@ internal sealed class PetBuffSetupDialog : FrostDialog
     private void Load()
     {
         selected=(list.SelectedItem as Row)?.Choice;loading=true;enabled.IsChecked=selected?.Enabled==true;owned.IsChecked=selected?.OwnershipConfirmed==true;external.IsChecked=selected?.External==true;rank.Text=selected?.Rank?.ToString()??"";uptime.Text=selected?.Uptime is {} up?(up*100).ToString("0.###",CultureInfo.InvariantCulture):"";
-        var d=selected==null?null:catalog.Find(selected.Id);detail.Text=d==null?"Select or add a buff.":d.Name+" · "+string.Join(" / ",d.Classes.Select(c=>c.Key+" "+(c.Value>0?c.Value.ToString():"level unverified")))+"\n"+d.Source+"\n"+(d.ParametersComplete?$"Client: cast {d.CastMs}ms · recovery {d.RecoveryMs}ms · reuse {d.RecastMs}ms · mana {d.Mana}. Server formula and rank response remain unverified.":"Reference only: exact effects, target restrictions and stacking remain unresolved.");loading=false;
+        var d=selected==null?null:catalog.Find(selected.Id);detail.Text=d==null?"Select or add a buff.":d.Name+" · "+string.Join(" / ",d.Classes.Select(c=>c.Key+" "+(c.Value>0?c.Value.ToString():"level unverified")))+"\n"+d.Source+"\n"+(d.ParametersComplete?$"Client: cast {d.CastMs}ms · recovery {d.RecoveryMs}ms · reuse {d.RecastMs}ms · mana {d.Mana}. Server formula and rank response remain unverified.":"Reference only: exact effects, target restrictions and stacking remain unresolved.");
+        if(standard&&learned?.Buffs.FirstOrDefault(b=>b.Spell==d?.Name) is {} observed)detail.Text=$"Learned {observed.Spell} · rank {observed.Rank?.ToString()??"Unknown"} · {observed.At:MMM dd HH:mm:ss}\nCaster: {observed.Caster} · recipient: {observed.Recipient}\n{observed.Evidence}\nExclusions survive new evidence. An edited rank is a scenario override, not a change to recorded evidence.";
+        loading=false;
     }
     private bool Store()
     {
         if(loading||selected==null)return true;int? r=null;double? u=null;
-        if(rank.Text.Trim().Length>0){if(!int.TryParse(rank.Text,out int n)||(catalog.Find(selected.Id)?.Aa==true?n is <1 or >100:n is <0 or >10)){error.Text="Spell rank must be 0–10; confirmed AA rank 1–100; blank remains Unknown.";return false;}r=n;}
+        if(rank.Text.Trim().Length>0){if(!int.TryParse(rank.Text,out int n)||(catalog.Find(selected.Id)?.Aa==true?n is <1 or >100:standard?n is <0 or >1000:n is <0 or >10)){error.Text=standard?"Rank must be 0–1000 or blank for Unknown. Estimates are limited to 0–10.":"Spell rank must be 0–10; confirmed AA rank 1–100; blank remains Unknown.";return false;}r=n;}
         if(uptime.Text.Trim().Length>0){if(!double.TryParse(uptime.Text,NumberStyles.Float,CultureInfo.InvariantCulture,out double n)||!double.IsFinite(n)||n is <0 or >100){error.Text="Uptime must be 0–100% or blank for Unknown.";return false;}u=n/100;}
         selected.Rank=r;selected.Uptime=u;selected.Enabled=enabled.IsChecked==true;selected.OwnershipConfirmed=owned.IsChecked==true;selected.External=external.IsChecked==true;error.Text="";return true;
     }

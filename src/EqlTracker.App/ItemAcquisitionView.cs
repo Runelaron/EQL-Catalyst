@@ -20,10 +20,10 @@ internal sealed class ItemAcquisitionView : StackPanel
             return text;
         }
         foreach (var row in rows.Where(r=>r.Kind is "Inventory" or "Quest")) Children.Add(Fact(row));
-        var sources=QuestPresentationView.Sources(ProgressPresentation.SourcesFor([item.Key],catalog)).ToArray();
+        var sources=QuestPresentationView.Sources(ProgressPresentation.SourcesFor([item.Key],catalog).Where(s=>s.Source.Method!="Quest")).ToArray();
         foreach(var card in sources.Take(2))Children.Add(card);
         if(sources.Length>2)Children.Add(FocusedLayout.Disclosure("More sources ("+(sources.Length-2)+")",UI.Stack(sources.Skip(2).ToArray()),"Additional acquisition zones and evidence"));
-        if (rows.Count == 0) Children.Add(UI.Text("Acquisition source unverified.", 11, "SecondaryText"));
+        if (rows.Count == 0) Children.Add(UI.Text("Acquisition not documented in the reviewed sources.", 11, "SecondaryText"));
         Margin = new(0, 4, 0, 6); Usability.Tooltips(this);
     }
     internal static ItemAcquisitionView Create(ItemDefinition item)

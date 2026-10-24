@@ -51,7 +51,7 @@ internal static class GearBuildUiChecks
             q.ShowView(TrackerTab.Pet,"Bloodmoon");q.SelectPetDestination(PetInventoryDestination.Planned);Flush();
             var buildMenu = Find<Button>().Single(b => b.IsVisible && b.Content?.ToString() == "Build ▾").ContextMenu;
             check(buildMenu.Items.OfType<MenuItem>().Any(m => m.Header?.ToString() == "New build from current") && Find<Button>().Any(b=>b.IsVisible && b.Content?.ToString()=="Undo"),"Focused Pet retains confirmed-to-draft copying in Build and visible item undo");
-            var inventory=Find<DataGrid>().Single(t=>t.IsVisible && t.Columns.Any(col=>col.Header?.ToString()=="+Rank"));
+            var inventory=Find<DataGrid>().Single(t=>t.IsVisible && t.Columns.Any(col=>col.Header?.ToString()=="Rank"));
             check(inventory.Items.Count==PetEquipmentPlanner.Capacity(c.Profile.ActiveLoadout.Classes),"Pet planner displays numbered empty positions as well as equipped items");
             q.Width=640;q.Height=420;Flush();var searchTable=Find<DataGrid>().Single(t=>t.IsVisible && t.Columns.Any(col=>col.Header?.ToString()=="Slots"));
             check(searchTable.ActualHeight>=65 && Find<Button>().Any(b=>b.IsVisible && b.Content?.ToString()=="Compare…"),"Minimum Pet layout retains candidate rows and a separate comparison action");

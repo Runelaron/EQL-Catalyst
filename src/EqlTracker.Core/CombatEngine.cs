@@ -45,6 +45,7 @@ public sealed class CombatEngine(CharacterProfile profile)
         if (line.Classes != null)
         {
             if (!profile.ClassesObservedAt.HasValue || line.Time > profile.ClassesObservedAt) profile.ClassesObservedAt = line.Time;
+            if (line.Race is { Length: > 0 } race) { if(RaceNames.Canonical(profile.ActiveLoadout.Race)!=race)profile.ActiveLoadout.RaceLevel=null;profile.ActiveLoadout.Race = race; }
             profile.CurrentClasses = line.Classes; profile.ActiveLoadout.Classes = line.Classes.ToList(); RosterKnown = true;
             if (line.Level >= 50) foreach (var c in line.Classes) profile.Level50Classes.Add(c);
             ProfileChanged?.Invoke();

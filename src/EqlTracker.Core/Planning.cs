@@ -34,6 +34,8 @@ public static class QuestTracking
 
 public sealed class PetBuild
 {
+    public bool FollowDetectedSummon { get; set; } = true;
+    public bool SummonRankKnown { get; set; } = true;
     public int SlotConfigurationVersion { get; set; }
     public bool DualWield { get; set; }
     public List<PetSlotConfiguration> SlotConfigurations { get; set; } = [];
@@ -79,6 +81,7 @@ public sealed class PetInventoryItem
 }
 public sealed class ExaltationAssignment
 {
+    public string SocketType { get; set; } = "";
     public string DestinationKey { get; set; } = "";
     public string DestinationSlot { get; set; } = "";
     public int DestinationRank { get; set; }
@@ -129,10 +132,12 @@ public static class ExaltationPlanner
     {
         error = Validate(effect, destination, rank, slot, loadout, true, catalog);
         if (error != "Compatible") return false;
-        var occupied = item.Exaltations.Where(a => !effect.MatchesId(a.EffectId) && EffectType(a.Effect) == effect.Type).ToList();
+        var occupied = item.Exaltations.Where(a => !effect.MatchesId(a.EffectId) && PetEffectPolicy.Kind(a) == effect.Type).ToList();
         if (occupied.Count > 0 && !replace) { error = effect.Type + " effect slot occupied by " + string.Join(", ", occupied.Select(a => a.SourceName)) + ". Enable explicit replacement first."; return false; }
-        item.Exaltations.RemoveAll(a => effect.MatchesId(a.EffectId) || replace && EffectType(a.Effect) == effect.Type);
-        item.Exaltations.Add(new() { EffectId = effect.Id, SourceName = effect.Source.Name, Effect = effect.Effect, State = state, DestinationKey = destination.Key, DestinationRank = rank, DestinationSlot = slot, Target = "Pet" });
+        var proposed = item.Exaltations.Where(a => !effect.MatchesId(a.EffectId) && !(replace && PetEffectPolicy.Kind(a) == effect.Type)).ToList();
+        proposed.Add(new() { SocketType = effect.Type, EffectId = effect.Id, SourceName = effect.Source.Name, Effect = effect.Effect, State = state, DestinationKey = destination.Key, DestinationRank = rank, DestinationSlot = slot, Target = "Pet" });
+        error = PetEffectPolicy.Validate(proposed); if (error.Length > 0) return false;
+        item.Exaltations = proposed;
         error = ""; return true;
     }
     public static string EffectId(string itemKey, string effect)
@@ -220,7 +225,7 @@ public static class PetEquipmentPlanner
         if (definition.TwoHanded && active.Any(x => x.Slot.Equals("Secondary", StringComparison.OrdinalIgnoreCase))) return "Two-handed weapon replaces Secondary";
         if (item.Slot.Equals("Secondary", StringComparison.OrdinalIgnoreCase) && active.Any(x => catalog.FindKey(x.ItemKey)?.TwoHanded == true)) return "Secondary occupied by two-handed replacement";
         if (definition.Slots.Count == 1 && definition.Slots[0] == "PRIMARY" && active.Any(x => x.Slot.Equals("Secondary", StringComparison.OrdinalIgnoreCase) && x.Position < item.Position)) return "Primary-only weapon must precede Secondary in storage order";
-        var copy = new LoadoutProfile { Classes = loadout.Classes.ToList(), Level = loadout.Level, Race = loadout.Race, Deity = loadout.Deity, PetType = build.PetType, PetLevel = build.PetLevel };
+        var copy = new LoadoutProfile { Classes = loadout.Classes.ToList(), Level = loadout.Level, Race = loadout.Race, RaceLevel = loadout.RaceLevel, Deity = loadout.Deity, PetType = build.PetType, PetLevel = build.PetLevel };
         return GearScorer.Eligibility(definition, copy, true, item.Entry().Augments, catalog);
     }
 }

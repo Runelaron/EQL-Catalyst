@@ -14,6 +14,7 @@ public static class TrackerPresentation
             var previous = profile.Meter;
             profile.OverlayMeter = new() { Actor = previous.Actor is "Pet" or "Player" or "Combined" ? previous.Actor : "Pet", Sort = previous.Sort is "Damage" or "Hits" or "Average" or "DPS" ? previous.Sort : "Damage", Scope = previous.Scope == "Session" ? "Session" : "Fight" };
         }
+        profile.OverlayFooterDisplay ??= DpsDisplayChoice.From(profile.OverlayMeter);
         profile.SecondaryTextByTheme.TryAdd("Frost", "Candlelight Cream");
         profile.SecondaryTextByTheme.TryAdd("Vellum", "Warm Gold");
         profile.SecondaryTextByTheme.TryAdd("Shadowman", "Ash Silver");

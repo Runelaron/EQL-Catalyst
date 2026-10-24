@@ -23,31 +23,31 @@ public sealed partial class QuestWindow
         if (!ConfirmPetWorkspaceExit()) return;
         var source = PetInventoryEditing.Confirmed(Controller.Profile.ActiveLoadout, Controller.Catalog);
         var draft = GuidedPetBuilds.Clone(source, "From current · " + DateTime.Now.ToString("HH:mm"));
-        Controller.Profile.ActiveLoadout.PetBuilds.Add(draft); RefreshBuildChoices(draft.Id); PetEdited();
+        BeginPetDraft(draft,true);PetEdited();OpenPetDetails();
     }
     private void DuplicatePetBuild()
     {
         if (petTheory != null) { SavePetTheorycraft(); return; }
         if (SelectedPetInventory is not { } build) return;
-        var copy = GuidedPetBuilds.Clone(build, build.Name + " copy"); Controller.Profile.ActiveLoadout.PetBuilds.Add(copy); RefreshBuildChoices(copy.Id); PetEdited();
+        string key=petDraftKey;if(!ConfirmPetWorkspaceExit())return;var source=SavedPetSource(key)??SavedPetSource("current")!;var copy=GuidedPetBuilds.Clone(source,source.Name+" copy");BeginPetDraft(copy,true);PetEdited();
     }
     private void RenamePetBuild()
     {
-        if (PetDestination != PetInventoryDestination.Planned || CurrentBuild is not { } build) { petNote.Text = "Choose a planned build to rename."; return; }
+        if (PetDestination != PetInventoryDestination.Planned || CurrentBuild is not { } build) { PetMessage("Choose a planned build to rename.",true); return; }
         var form = new EntryDialog("Rename pet build", [("Build name", build.Name)], "Renaming affects only this saved plan.") { Owner = this };
         if (form.ShowDialog() != true || form.Values[0].Length == 0) return; build.Name = form.Values[0]; RefreshBuildChoices(build.Id); PetEdited();
     }
     private void UndoPetBuild()
     {
-        if (SelectedPetInventory is not { } build || !PetBuildEditing.Undo(build, out string reason)) { PetMessage("No previous edit to restore."); return; }
-        if (PetDestination == PetInventoryDestination.Confirmed) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now);
-        LoadPetContext(); PetEdited(); PetMessage(reason + " undone.");
+        if(petDraft?.Dirty!=true)return;bool unsavedNew=petDraft.IsNew;petDraft.Undo();
+        if(unsavedNew){petDraft=null;petDraftKey="";RefreshBuildChoices("current");}
+        LoadPetContext();PetEdited();PetMessage("Unsaved changes discarded.");
     }
     private void OpenPetStats()
     {
         if (SelectedPetInventory is not { } build) return;
         var owner = Controller.Profile.ActiveLoadout; var context = GuidedPetBuilds.Context(owner, build);
         var confirmed = PetInventoryEditing.Confirmed(owner, Controller.Catalog); var positions = GuidedPetBuilds.Positions(confirmed, owner, Controller.Catalog);
-        var dialog = new StatProfileDialog(Controller, context, true, positions, () => { if (petTheory != null) PetEdited(); else Changed(); }, build) { Owner = this }; Native.ShowPanel(dialog);
+        var dialog = new StatProfileDialog(Controller, context, true, positions, () => PetEdited(), build) { Owner = this }; Native.ShowPanel(dialog);
     }
 }

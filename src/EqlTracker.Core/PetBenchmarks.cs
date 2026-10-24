@@ -42,6 +42,7 @@ public static class PetBenchmarks
         if (fights.Count == 0) throw new ArgumentException("Select finished encounters with documented pet identity.");
         double seconds = fights.Sum(f => f.Duration); long damage = fights.Sum(f => f.PetDamage);
         return new() { Label = name, Pet = row.Pet, Level = row.Plan.PetLevel, Summon = row.Plan.SummonSpell, Rank = row.Plan.SummonRank, ContextKey = Context(row),
+            MechanicsVersion = fights.All(f => f.Start.Date >= OctoberContent.PatchDate) ? PetDefinition.Version : "Historical / patch unconfirmed",
             EncounterIds = fights.Select(f => f.Id).ToList(), Targets = fights.SelectMany(f => f.Events.Where(e => e.Owner == "Pet").Select(e => e.Target)).Distinct().ToList(),
             PetIdentityEvidence = string.Join("; ", fights.Select(f => f.PetName + ": " + (f.PetElementEvidence.Length > 0 ? f.PetElementEvidence : "Type recorded; summon correlation unverified")).Distinct()),
             Equipment = EquipmentPositions.Fingerprint(row.Equipment.Positions), Buffs = PetComparisonEngine.Key(row.Scenario.Buffs), Dps = damage / seconds, Seconds = seconds, Damage = damage,

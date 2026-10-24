@@ -37,6 +37,7 @@ public sealed class StatProfileDialog : FrostWindow
         long evidenceRevision=-1;bool loading=false,editedContext=false;var editedAAs=new HashSet<string>();
         level.TextChanged+=(_,_)=>{if(!loading)editedContext=true;};classes.TextChanged+=(_,_)=>{if(!loading)editedContext=true;};
         var effects=UI.Table(("Effect / candidates","Name",185,null),("For","Actor",110,null),("Last evidence","State",225,null),("When","At",115,"MMM/dd HH:mm"));
+        var receivedHistory=UI.Text("",11,"SecondaryText");
         var rows = new ObservableCollection<StatRow>(); var limits = new ObservableCollection<StatLimit>(); var aas = new ObservableCollection<GearAaModifier>();
         var totals = UI.Table(("Stat", "Stat", 85, null), ("Total", "Total", 78, null), ("Overflow", "Overflow", 78, null)); totals.IsReadOnly = false;
         totals.Columns[0].IsReadOnly = true; totals.Columns.Add(new DataGridCheckBoxColumn { Header = "Raw known", Binding = new Binding("Raw") { Mode = BindingMode.TwoWay }, Width = 80 }); totals.ItemsSource = rows;
@@ -90,8 +91,9 @@ public sealed class StatProfileDialog : FrostWindow
         }
         void FillEvidence()
         {
-            if(evidenceRevision==controller.StatEvidenceRevision)return;
-            var evidence=controller.StatEvidenceSnapshot();if(evidenceRevision==evidence.Revision)return;evidenceRevision=evidence.Revision;
+            long connectedRevision=controller.StatEvidenceRevision+controller.ConnectedSpellRevision;if(evidenceRevision==connectedRevision)return;
+            var evidence=controller.StatEvidenceSnapshot();evidenceRevision=connectedRevision;
+            receivedHistory.Text=controller.ReceivedSpellEvidence(pet);
             loading=true;int added=StatProfilePrefill.MergeAAs(aas,evidence,pet,editedAAs);loading=false;if(added>0)aaTable.Items.Refresh();
             var relevant=evidence.Effects.Where(e=>e.Owner==(pet?"Pet":"Self")).OrderByDescending(e=>e.At).ToList();string? selectedEffect=(effects.SelectedItem as EffectEvidence)?.Key;UI.SetRows(effects,relevant);effects.SelectedItem=relevant.FirstOrDefault(e=>e.Key==selectedEffect);
             gameStatus.Text=$"Game evidence · {evidence.AAs.Values.Count(a=>a.Rank!=null)} exact AA ranks · {evidence.AAs.Values.Count(a=>a.Rank==null)} learned (rank unknown) · {evidence.Status}";
@@ -114,7 +116,7 @@ public sealed class StatProfileDialog : FrostWindow
         });
         useEffect.ToolTip="Copy this observed effect's name into your usual-buff notes after reviewing it. Does not assert it is currently active or calculate bonuses.";
         effects.ToolTip="Client spell messages can be shared by several spells. Ambiguous candidates remain unresolved. Effect history may include detrimental spells; no active duration or numeric bonus is guessed.";
-        tab.Items.Add(new TabItem{Header="GAME EVIDENCE",Content=Page(UI.Stack(evidenceNote,UI.Row(UI.Button("Refresh game files",()=>{controller.RefreshStatEvidence();evidenceRevision=-1;FillEvidence();}),useEffect)),effects)});
+        tab.Items.Add(new TabItem{Header="GAME EVIDENCE",Content=Page(UI.Stack(evidenceNote,UI.Row(UI.Button("Refresh game files",()=>{controller.RefreshStatEvidence();evidenceRevision=-1;FillEvidence();}),useEffect),FocusedLayout.Disclosure("Received buff history",receivedHistory,"Historical landing/fade transitions and unresolved coverage; never a complete current buff roster.")),effects)});
         var body = new DockPanel();
         var top = new WrapPanel(); foreach (var child in new UIElement[] { pet ? UI.Stack(UI.Label("Context"), UI.Text("Pet stats", 12)) : UI.Field("Context", context), UI.Field("Level", level), UI.Field("Classes", classes), UI.Field("Buff notes", buffs), UI.Field("Observation source", source) }) { if(child is FrameworkElement e)e.Margin=new(0,0,6,0); top.Children.Add(child); }
         if (pet) { buffsIncluded.Visibility = Visibility.Collapsed; buffs.Visibility = Visibility.Collapsed; }

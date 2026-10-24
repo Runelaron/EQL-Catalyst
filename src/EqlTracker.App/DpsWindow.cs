@@ -8,7 +8,9 @@ namespace EqlTracker.App;
 public sealed record LoadoutRow(string Loadout, string Pet, string Weapons, int Samples, double Seconds, double PetDps, double PlayerDps, double CombinedDps) { public string Buffs { get; init; } = ""; }
 public sealed partial class DpsWindow : FrostWindow
 {
-    private readonly ComboBox scope = UI.Select(["Fight", "Session", "History"], "Fight", 130);
+    private readonly ComboBox zoneFilter=UI.Select(["All zones"],"All zones",170);
+    private readonly CheckBox namesOnly=new(){Content="Names only",VerticalAlignment=VerticalAlignment.Center};
+    private readonly System.Windows.Controls.Primitives.ToggleButton filtersToggle=PetFilterToggle.Create();
     private readonly ComboBox owner = UI.Select(["Pet", "Self", "Combined", "Unknown"], "Pet", 130);
     private readonly ComboBox target = UI.Select(["All targets"], "All targets", 200);
     private readonly ComboBox kind = UI.Select(["All damage", "Melee", "Spell", "DoT"], "All damage", 145);
@@ -35,7 +37,7 @@ public sealed partial class DpsWindow : FrostWindow
     private readonly TabControl tabs = new() { MinHeight = 100 };
     private DpsViewState? lastPresented; private bool lastHealingShown;
     private string comparisonKey = "";
-    private Button dateRange = null!; private StackPanel dates = null!; private Grid filterSlot = null!, metricSlot = null!, statusSlot = null!;
+    private MenuItem? dateRangeEntry; private StackPanel dates = null!; private Grid filterSlot = null!, metricSlot = null!, statusSlot = null!;
     private CombatLabMode mode;
     private CombatLabTab SelectedTab => tabs.SelectedItem is TabItem { Tag: CombatLabTab id } ? id : CombatLabTab.Breakdown;
     private readonly Dictionary<CombatLabTab, TabItem> tabItems = [];
@@ -47,13 +49,12 @@ public sealed partial class DpsWindow : FrostWindow
     private CombatInspectionSnapshot? inspected;
     private string selectedInspection = "";
     private readonly Dictionary<CombatLabMode, string> modeSelections = [];
-    public DpsWindow(TrackerController controller) : base(controller, "Combat Lab", "Measured damage, spell by spell and strike by strike.", 1170, 740, surface: WindowSurface.Theme)
+    public DpsWindow(TrackerController controller) : base(controller, "Combat Lab", "Measured damage, spell by spell and strike by strike.", 878, 740, surface: WindowSurface.Theme)
     {
         Appearance.RaisedButtons(Body); CatalystHeading.Apply(HeadingTitle, "Combat Lab");
         mode = controller.Profile.CombatLab.Mode;
         healing = new(controller); group = new(controller); group.PeriodSelected += FollowGroup;
         ConfigureScopes();
-        scope.ToolTip = "Fight shows the latest or explicitly pinned encounter. Session selects a saved login session, including offline data; rates use summed encounter durations.";
         sort.ToolTip = "Order damage abilities by total damage, landed hits, average landed hit or DPS. Filters and totals stay unchanged.";
         owner.ToolTip = "Personal damage attribution: Self, owned Pet, Combined, or unassigned. Group has a separate member projection.";
         target.ToolTip = "Restrict personal and group damage to this logged outgoing target name; identical NPC names remain grouped.";
@@ -75,8 +76,7 @@ public sealed partial class DpsWindow : FrostWindow
         comparisons = UI.Table(("Loadout", "Loadout", 0, null), ("Pet", "Pet", 110, null), ("Weapons", "Weapons", 190, null), ("Fights", "Samples", 65, null), ("Seconds", "Seconds", 85, "N0"), ("Pet DPS", "PetDps", 100, "N1"), ("Self DPS", "PlayerDps", 100, "N1"), ("Total DPS", "CombinedDps", 100, "N1"));
         var controls = new WrapPanel(); foreach (var c in new UIElement[] { UI.Field("Actor", owner), UI.Field("Target", target), UI.Field("Damage type", kind), UI.Field("Spell / strike search", ability), UI.ActionField(critical) }) controls.Children.Add(c); damageFilters = controls;
         var dateFlow = new WrapPanel(); foreach (var item in new UIElement[] { UI.Field("From · local date/time", from), UI.Field("Until · local date/time", until), UI.ActionField(UI.Button("Clear dates", () => { from.Text = until.Text = ""; })) }) dateFlow.Children.Add(item); dates = UI.Stack(dateFlow); dates.Visibility = Visibility.Collapsed;
-        dateRange = UI.Button("Date range", () => { dates.Visibility = dates.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible; UpdateDateState(); });
-        var tools = new ContextMenu(); var corrections = new MenuItem { Header = "Corrections & sample setup" }; tools.Items.Add(corrections);
+        var tools = new ContextMenu();var dateEntry=dateRangeEntry=new MenuItem{Header="Date range",IsCheckable=true,ToolTip="Set date/time limits within the selected session."};dateEntry.Click+=(_,_)=>{dates.Visibility=dateEntry.IsChecked?Visibility.Visible:Visibility.Collapsed;UpdateDateState();};tools.Items.Add(dateEntry); var corrections = new MenuItem { Header = "Corrections & sample setup" }; tools.Items.Add(corrections);
         foreach (var (label, help, action) in new (string, string, Action)[] { ("Tag loadout", "Start a new combat sample segment with loadout, weapon and buff notes. Ends the current segment.", TagLoadout), ("Pet identity", "Correct pet ownership over a selected time range; retained damage and healing are reattributed.", CorrectPet), ("Class evidence", "Correct the recorded classes over a selected session interval without changing combat records.", CorrectClassEvidence), ("Group roster", "Correct group membership and timing coverage without adding group damage to personal totals.", CorrectGroup) })
         { var item = new MenuItem { Header = label, ToolTip = help }; item.Click += (_, _) => action(); corrections.Items.Add(item); }
         var exportMenu = new MenuItem { Header = "Export" }; tools.Items.Add(exportMenu);
@@ -84,9 +84,9 @@ public sealed partial class DpsWindow : FrostWindow
         var contribution = new MenuItem { Header = "Show contribution %", IsCheckable = true, IsChecked = controller.Profile.CombatLab.ShowContribution, StaysOpenOnClick = true, ToolTip = "Show each ability’s share of filtered damage or effective healing beside its total. Wash lengths remain relative to the largest row." }; tools.Items.Add(contribution); contribution.Click += (_, _) => { controller.Profile.CombatLab.ShowContribution = contribution.IsChecked; damageRows.ShowContribution = contribution.IsChecked; healing.SetContribution(contribution.IsChecked); controller.Save(); };
         damageRows.ShowContribution = controller.Profile.CombatLab.ShowContribution; healing.SetContribution(controller.Profile.CombatLab.ShowContribution);
         var toolsButton = OverlayMenus.Button(tools, "Exports, display options and corrections", "Tools ▾", timedDismissal: false); toolsButton.Width = double.NaN; toolsButton.Padding = new(6, 1, 6, 1);
-        var primaryActions = new WrapPanel(); foreach (var action in new UIElement[] { UI.Field("Time scope", scope), UI.Field("Session", sessionPicker), UI.ActionField(classButton), UI.Field("Sort by", sort), UI.Field("Peaks", peaks), UI.ActionField(latestFight) }) primaryActions.Children.Add(action);
-        var actions = new CombatActionRow(primaryActions, UI.Row(UI.ActionField(dateRange), UI.ActionField(toolsButton)));
-        foreach (var button in new[] { dateRange, toolsButton }) { button.FontSize = 11; button.Padding = new(5, 2, 5, 2); }
+        var primaryActions = new WrapPanel(); foreach (var action in new UIElement[] { UI.ActionField(filtersToggle), UI.Field("Session", sessionPicker), UI.Field("Sort by", sort), UI.Field("Peaks", peaks), UI.ActionField(latestFight) }) primaryActions.Children.Add(action);
+        var actions = new CombatActionRow(primaryActions, UI.Row(UI.ActionField(toolsButton)));
+        foreach (var button in new[] { toolsButton }) { button.FontSize = 11; button.Padding = new(5, 2, 5, 2); }
         peaks.SelectedItem = controller.Profile.CombatLab.Peaks.ToString(); timeline.PeakMode = controller.Profile.CombatLab.Peaks;
         peaks.ToolTip = "Off hides chart peaks; Highest marks each visible actor's maximum; All includes local highs. Flat peaks use their earliest sample. Selected ability Peak hit stays separate.";
         peaks.SelectionChanged += (_, _) => { if (Enum.TryParse<ChartPeakMode>(peaks.SelectedItem?.ToString(), out var value)) { timeline.PeakMode = value; controller.Profile.CombatLab.Peaks = value; controller.Save(); } };
@@ -104,7 +104,15 @@ public sealed partial class DpsWindow : FrostWindow
         Tab(CombatLabTab.Comparison, "LOADOUT COMPARISON", new ResponsiveCombatSplit(ComparisonTable(), UI.Card(UI.Scroll(comparisonDetails)), controller.Profile, "combat-comparison-v2"));
         var root = new Grid(); root.RowDefinitions.Add(new() { Height = GridLength.Auto }); root.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) }); root.RowDefinitions.Add(new() { Height = GridLength.Auto });
         filterSlot = new Grid(); filterSlot.Children.Add(controls); filterSlot.Children.Add(healing.FilterControls);
-        var filters = new Expander { Header = "Filters", Content = filterSlot, IsExpanded = true, Margin = new(0, 0, 0, 3), ToolTip = "Damage and Healing retain independent filters. Scope and date range are shared." };
+        var sharedFilters=new WrapPanel();sharedFilters.Children.Add(UI.Field("Zone",zoneFilter));sharedFilters.Children.Add(UI.ActionField(namesOnly));
+        var filters = new Expander { Header = "Filters", Content = UI.Stack(sharedFilters,filterSlot), IsExpanded = Controller.LabBrowsing.FiltersExpanded, Margin = new(0, 0, 0, 3) };
+        filters.Template=(ControlTemplate)System.Windows.Markup.XamlReader.Parse("""
+        <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Expander"><ContentPresenter x:Name="Body" Content="{TemplateBinding Content}"/><ControlTemplate.Triggers><Trigger Property="IsExpanded" Value="False"><Setter TargetName="Body" Property="Visibility" Value="Collapsed"/></Trigger></ControlTemplate.Triggers></ControlTemplate>
+        """);
+        filtersToggle.Content="Filters";filtersToggle.Width=90;filtersToggle.IsChecked=filters.IsExpanded;filtersToggle.ToolTip="Damage and Healing keep their own ability filters; session, zone, named NPCs and dates are shared.";
+        filtersToggle.Checked+=(_,_)=>filters.IsExpanded=true;filtersToggle.Unchecked+=(_,_)=>filters.IsExpanded=false;
+        filters.Expanded+=(_,_)=>{filtersToggle.IsChecked=true;Controller.SetLabFilters(Controller.LabBrowsing.Zone,Controller.LabBrowsing.NamesOnly,true);};
+        filters.Collapsed+=(_,_)=>{filtersToggle.IsChecked=false;Controller.SetLabFilters(Controller.LabBrowsing.Zone,Controller.LabBrowsing.NamesOnly,false);};
         metricSlot = new Grid(); metricSlot.Children.Add(metrics); metricSlot.Children.Add(healing.MetricCards);
         statusSlot = new Grid(); var statsCard=StatsCard(); damageCards.Children.Add(statsCard); healing.SetStatsCard(StatsCardForHealing());
         peakInfo.Height = 14; peakInfo.TextTrimming = TextTrimming.CharacterEllipsis; peakInfo.TextWrapping = TextWrapping.NoWrap;
@@ -120,7 +128,7 @@ public sealed partial class DpsWindow : FrostWindow
         SizeChanged += (_, _) => { overview.Adapt(ActualHeight < 500); bool small = ActualHeight < 580; bool narrow = ActualWidth < 900; tabs.MinHeight = small ? 0 : 100; if (small && !wasSmall) { priorExpanded = filters.IsExpanded; filters.IsExpanded = false; } else if (!small && wasSmall) filters.IsExpanded = priorExpanded; wasSmall = small; timeline.Height = small ? 48 : 96; peakInfo.Visibility = small ? Visibility.Collapsed : Visibility.Visible; Subtitle.Visibility = small ? Visibility.Collapsed : Visibility.Visible; };
         bool narrowFilters=false, restoreFilters=true;
         root.SizeChanged+=(_,_)=>{bool next=root.ActualWidth<900;if(next==narrowFilters)return;narrowFilters=next;if(next){restoreFilters=filters.IsExpanded;filters.IsExpanded=false;}else filters.IsExpanded=restoreFilters;};
-        foreach (var c in new[] { scope, owner, target, kind, sort }) c.SelectionChanged += (_, _) => { if (!updating) { if (ReferenceEquals(c,scope)&&Controller.Profile.Meter.GroupPeriodId.Length>0) { Controller.ExitGroupPeriod(true);updating=true;from.Text=until.Text="";updating=false; } ChangeFilters(); } };
+        foreach (var c in new[] { owner, target, kind, sort }) c.SelectionChanged += (_, _) => { if (!updating) ChangeFilters(); };
         foreach (var c in new[] { ability, from, until }) c.TextChanged += (_, _) => { if (!updating) { if (!ReferenceEquals(c,ability)) manualDateEdit=true; ChangeFilters(); } };
         critical.Click += (_, _) => ChangeFilters(); history.SelectionChanged += (_, _) => { if (!updating) UpdateHistoryDetail(); };
         tabs.SelectionChanged += (_, e) => { if (ReferenceEquals(e.Source, tabs) && !updating) { if (mode == CombatLabMode.Damage) controller.Profile.CombatLab.DamageTab = SelectedTab; else controller.Profile.CombatLab.HealingTab = SelectedTab; lastPresented = null; inspected = null; controller.Save(); Refresh(); } };
@@ -166,7 +174,7 @@ public sealed partial class DpsWindow : FrostWindow
         else { inspector.Set(null); if (breakdown.SelectedItem == null && breakdown.Items.Count > 0) breakdown.SelectedIndex = 0; if (breakdown.SelectedItem is DamageRow row) SelectInspection(row); }
     }
     private static Border Metric(string label, TextBlock number) { var card = UI.Card(UI.Stack(UI.Label(label), number), new(0, 0, 4, 2)); card.Padding = new(4, 1, 4, 1); return card; }
-    private void UpdateDateState() => UI.SetPressed(dateRange, dates.Visibility == Visibility.Visible || from.Text.Length > 0 || until.Text.Length > 0);
+    private void UpdateDateState() {if(dateRangeEntry!=null)dateRangeEntry.IsChecked=dates.Visibility==Visibility.Visible||from.Text.Length>0||until.Text.Length>0;}
     private void ChangeFilters()
     {
         DateTime? begin = null, end = null; filterError.Text = "";
@@ -192,7 +200,7 @@ public sealed partial class DpsWindow : FrostWindow
         if (Monitor.IsEntered(Controller.Sync)) { Dispatcher.BeginInvoke(Refresh); return; }
         if (updating) return;
         RefreshSessionControls(); RefreshScopeContext(); RefreshHistorySelection(); group.RefreshPeriods();
-        if (mode == CombatLabMode.Healing) { Controller.HealingVisible = IsVisible && !IsCollapsed; updating = true; SetScopeChoice(); from.Text = Controller.Profile.Meter.From?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; until.Text = Controller.Profile.Meter.Until?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; UpdateDateState(); updating = false; healing.Refresh(); RefreshInspection(); if (SelectedTab == CombatLabTab.Comparison) QueueComparisons((Controller.Published?.History ?? Controller.DpsView().Fights).ToList(), Controller.Profile.Meter); return; }
+        if (mode == CombatLabMode.Healing) { Controller.HealingVisible = IsVisible && !IsCollapsed; updating = true; from.Text = Controller.Profile.Meter.From?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; until.Text = Controller.Profile.Meter.Until?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; UpdateDateState(); updating = false; healing.Refresh(); RefreshInspection(); if (SelectedTab == CombatLabTab.Comparison) QueueComparisons(Controller.LabHistory(Controller.Published?.History ?? Controller.DpsView().Fights).ToList(), Controller.Profile.Meter); return; }
         updating = true;
         try
         {
@@ -205,7 +213,7 @@ public sealed partial class DpsWindow : FrostWindow
                 var selectedSignature = System.Text.Json.JsonSerializer.Serialize(p);
                 if (selectionSignature != selectedSignature)
                 {
-                    selectionSignature = selectedSignature; SetScopeChoice(); owner.SelectedItem = p.Actor == "Player" ? "Self" : p.Actor;
+                    selectionSignature = selectedSignature; owner.SelectedItem = p.Actor == "Player" ? "Self" : p.Actor;
                     kind.SelectedItem = p.Kind.Length == 0 ? "All damage" : p.Kind; sort.SelectedItem = p.Sort;
                     ability.Text = p.Ability; critical.IsChecked = p.CriticalOnly;
                     from.Text = p.From?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; until.Text = p.Until?.ToString("yyyy-MM-dd HH:mm:ss") ?? "";
@@ -214,7 +222,7 @@ public sealed partial class DpsWindow : FrostWindow
                 RefreshInspection();
                 if (ReferenceEquals(lastPresented, view) && lastHealingShown == Controller.Profile.ShowLinkedHealing && selectionSignature == selectedSignature && !Controller.Demo) return;
                 lastPresented = view; lastHealingShown = Controller.Profile.ShowLinkedHealing;
-                var all = (Controller.Published?.History ?? view.Fights).OrderByDescending(x => x.Start).ToList();
+                var all = Controller.LabHistory(Controller.Published?.History ?? view.Fights).OrderByDescending(x => x.Start).ToList();
                 var targets = new[] { "All targets" }.Concat(view.TargetChoices).ToList();
                 if (p.Target.Length > 0 && !targets.Contains(p.Target, StringComparer.OrdinalIgnoreCase)) { p.Target = ""; Controller.Save(); }
                 if (!targets.SequenceEqual(target.ItemsSource as IEnumerable<string> ?? [])) target.ItemsSource = targets;
@@ -243,7 +251,7 @@ public sealed partial class DpsWindow : FrostWindow
         string key = string.Join('|', samples.Select(x => x.Id + x.End.Ticks + ":" + x.Damage)) + selectionSignature;
         if (comparisonKey == key) return; comparisonKey = key;
         var selected = System.Text.Json.JsonSerializer.Deserialize<DpsSelection>(System.Text.Json.JsonSerializer.Serialize(p))!;
-        var frozen = Controller.Published?.History.ToList() ?? samples.Select(CombatSnapshots.Copy).ToList();
+        var frozen = samples.Select(CombatSnapshots.Copy).ToList();
         _ = Task.Run(() => frozen.GroupBy(x => (x.Loadout, x.PetType, x.Weapons, x.BuffNotes)).Select(g =>
         {
             var subset = g.Where(x => (!selected.From.HasValue || x.End >= selected.From) && (!selected.Until.HasValue || x.Start <= selected.Until)).ToList();
@@ -265,7 +273,7 @@ public sealed partial class DpsWindow : FrostWindow
         EncounterExportDocument document;
         lock (Controller.Sync)
         {
-            var view = DpsViews.Build(Controller.Combat.Encounters, Controller.Combat.Current, Controller.SessionStart, Controller.Profile.Meter, Controller.Sessions?.Sessions);
+            var view = Controller.LabExportView();
             if (!wholeScope) { var selectedId = (history.SelectedItem as EncounterHistoryRow)?.Fight?.Id ?? view.Fights.FirstOrDefault()?.Id; var selected = Controller.Combat.Encounters.Concat(Controller.Combat.Current == null ? [] : [Controller.Combat.Current]).FirstOrDefault(f => f.Id == selectedId); if (selected == null) { filterError.Text = "No encounter to export."; return; } var selection = System.Text.Json.JsonSerializer.Deserialize<DpsSelection>(System.Text.Json.JsonSerializer.Serialize(Controller.Profile.Meter))!; selection.Scope = "History"; selection.EncounterId = selected.Id; view = DpsViews.Build([selected], null, Controller.SessionStart, selection); }
             document = EncounterExporter.Snapshot(view, Controller.Profile, wholeScope ? Controller.BuildHealing(view) : HealingMetrics.Build(view.Fights, [], Controller.Profile.Healing.Filter(view.Filter.From, view.Filter.Until), Controller.Profile.Healing.Sort)) with { Scope = wholeScope ? Controller.Profile.Meter.Scope : "Encounter" };
         }
@@ -285,9 +293,9 @@ public sealed partial class DpsWindow : FrostWindow
     }
     private void TagLoadout()
     {
-        var p = Controller.Profile.ActiveLoadout; var form = new EntryDialog("Tag future combat samples", [("Loadout name", p.Name), ("Pet override (Auto, Earth, Fire, Air, Water, Undead, Animation, Warder, Spirit)", Controller.Profile.PetElementOverride.Length == 0 ? "Auto" : Controller.Profile.PetElementOverride), ("Weapons", p.Weapons), ("Buff notes / test conditions", p.BuffNotes)], "Tag future samples with a loadout, weapons and optional buff notes. Saving ends the current combat segment; historical samples keep their tags.", ["A name for this equipment / buff test setup.", "Auto follows evidence; manual types override pet element detection.", "Weapon names used to label future samples; this does not change confirmed equipment.", "Optional notes about buffs and test conditions."]) { Owner = this };
+        var p = Controller.Profile.ActiveLoadout; var form = new EntryDialog("Tag future combat samples", [("Loadout name", p.Name), ("Pet override (Auto or pet type)", Controller.Profile.PetElementOverride.Length == 0 ? "Auto" : Controller.Profile.PetElementOverride), ("Weapons", p.Weapons), ("Buff notes / test conditions", p.BuffNotes)], "Tag future samples with a loadout, weapons and optional buff notes. Saving ends the current combat segment; historical samples keep their tags.", ["A name for this equipment / buff test setup.", "Auto follows evidence; manual types override pet element detection.", "Weapon names used to label future samples; this does not change confirmed equipment.", "Optional notes about buffs and test conditions."]) { Owner = this };
         if (form.ShowDialog() != true || form.Values[0].Length == 0) return;
-        var petTypes = new[] { "Auto", "Water", "Air", "Earth", "Fire", "Undead", "Animation", "Warder", "Spirit", "Warrior" };
+        var petTypes = PetDefinition.OverrideChoices;
         var selectedPet = petTypes.FirstOrDefault(x => x.Equals(form.Values[1], StringComparison.OrdinalIgnoreCase));
         if (selectedPet == null) { MessageBox.Show("Choose a pet type listed in the form."); return; }
         if (form.Values[0] != Controller.Profile.SelectedLoadout && !((App)Application.Current).CanChangeEquipmentContext()) return;

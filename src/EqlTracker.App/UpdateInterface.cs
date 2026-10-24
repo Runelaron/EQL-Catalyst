@@ -73,7 +73,7 @@ public sealed partial class SettingsWindow
 
 public sealed partial class QuestWindow
 {
-    private static Button UpdateReadyButton()
+    internal static Button UpdateReadyButton()
     {
         var app = (App)Application.Current; var button = UI.Button("↻", app.OpenUpdates);
         button.Width = button.Height = 28; button.Margin = new(5, 5, 0, 0); button.Padding = new(0); button.FontSize = 19;

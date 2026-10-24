@@ -45,7 +45,7 @@ internal static class FocusedWorkspaceChecks
             var gear = Find<DataGrid>().Single(g => g.Columns.Any(col => col.SortMemberPath == "ItemScore"));
             check(gear.Columns.Count(col => col.Visibility == Visibility.Visible) == 4, "Default gear columns prioritize name, both context deltas and ownership");
             q.ShowView(TrackerTab.Pet, "Bloodmoon"); q.SelectPetDestination(PetInventoryDestination.Planned); Flush();
-            var filters = Find<Expander>().Single(e => e.Header?.ToString() == "Filters & Rank"); filters.IsExpanded = true; Flush();
+            var filters = Find<Expander>().Single(e => e.Header?.ToString() == "Filter"); filters.IsExpanded = true; Flush();
             Find<ComboBox>().Single(b => b.Items.Contains("Character stock")).SelectedItem = "All items";
             Find<ComboBox>().Single(b => b.Items.Contains("All slots")).SelectedItem = "All slots"; filters.IsExpanded = false; Flush();
             q.SelectPetInventoryPosition(1); Flush();

@@ -1,0 +1,9 @@
+# Independent DPS selectors — focused local validation
+
+The title and footer menus previously wrote the same OverlayMeter actor/display-mode fields. The title still controls the main breakdown. A separate actor-only footer choice now persists independently, while both readouts share the existing scope and filters. Legacy profiles initialize the footer from their previous display exactly once. Combat Lab remains independent.
+
+Personal footer rates reuse the existing Pet/Self/Combined aggregates and encounter denominator. Group projection is requested in the existing background publisher when either readout needs it. That request participates in snapshot identity and stale-result checks. Missing group coverage stays unavailable; observed zero remains zero. No damage parsing, encounter boundaries, ownership or combat arithmetic changed.
+
+Eight focused core checks passed: all four legacy modes, idempotent/restart persistence, all sixteen actor pairs, scope/filter and Lab isolation, personal rate selection, group unavailable/zero handling, and invalid choices. Three existing migration/filter/denominator regressions passed. The packaged application passed 139 synthetic checks with actual WPF selector/menu events, all sixteen combinations, independent checked/accessibility states, numeric readouts, actual background Group publication, releasing unused Group state, and profile serialization/reload. Normal and minimum-size component renders were inspected. The previous footer review's synchronized-state expectation was corrected to assert independence.
+
+Broad regressions and full theme/DPI reviews remain deferred for this focused iteration. Synthetic component checks are not live-game acceptance. Source, changed-payload and synthetic-preview privacy checks, retained-release hashes, app/profile backup hashes and local startup are verified separately before replacement. Published Beta 1.4, installers and GitHub remain unchanged.

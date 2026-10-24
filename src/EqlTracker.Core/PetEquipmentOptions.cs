@@ -59,7 +59,7 @@ public static class PetEquipmentOptions
     {
         var entry = option.PetItem == null ? new PetInventoryItem { Id = option.Id, ItemKey = option.Item.Key, Name = option.Item.Name, Rank = option.Rank,
             TransferredOutEffects = option.Instance?.TransferredOutEffects.ToList() ?? [],
-            Exaltations = option.Instance?.Augments.Select(a => new ExaltationAssignment { SourceName = Identity.Canonical(a.Name), EffectId = a.EffectIdentity, Effect = a.EffectText, State = "Socketed" }).ToList() ?? [] } : EquipmentPositions.Copy(option.PetItem);
+            Exaltations = PetEffectPolicy.Observed(option.Instance?.Augments ?? []) } : EquipmentPositions.Copy(option.PetItem);
         entry.Id = option.Id; entry.Position = position; entry.Slot = slot; entry.EquipmentVerified = false; return entry;
     }
     public static PetOptimization Optimize(PetBuild source, LoadoutProfile owner, Catalog catalog, IReadOnlyList<PetEquipmentOption> pool, CharacterProfile profile, CancellationToken token)

@@ -6,7 +6,7 @@ using EqlTracker.Core;
 namespace EqlTracker.App;
 
 internal sealed record DamageEmblemChoice(DamageEmblem Id,int Number,string Name,string Role)
-{ public string Label=>Number+" · "+Name; }
+{ public string Label=>Number+" Â· "+Name; }
 internal static class IconArtwork
 {
     internal static IReadOnlyList<DamageEmblemChoice> DamageChoices {get;}=new[]{
@@ -19,6 +19,9 @@ internal static class IconArtwork
     internal static IconArtworkStyle Style {get;private set;}=IconArtworkStyle.Vibrant;
     internal static InventoryBadgeStyle Badge {get;private set;} = InventoryBadgeStyle.Chest;
     internal static DamageEmblem Emblem {get;private set;}=DamageEmblem.Fire;
+    internal static string Undead {get;private set;}="skeleton-a";
+    internal static string Fire {get;private set;}="wizard-staff";
+    private static string character="";
     private static bool initialized;private static int revision;
     internal static readonly DependencyProperty RevisionProperty=DependencyProperty.RegisterAttached("Revision",typeof(int),typeof(IconArtwork),new FrameworkPropertyMetadata(0,FrameworkPropertyMetadataOptions.AffectsRender));
     private static readonly Dictionary<(string,int),BitmapFrame?> painted=[];
@@ -26,11 +29,15 @@ internal static class IconArtwork
     private static readonly int[] sizes=[14,16,20,24,32,40,48,64,128,256];
     internal static int CachedImages=>painted.Count;
     internal static void Observe(FrameworkElement element)=>element.SetResourceReference(RevisionProperty,"IconArtworkRevision");
-    internal static bool Apply(CharacterProfile profile)
+    internal static bool Apply(CharacterProfile profile,string? undead=null,string? fire=null)
     {
         var style=Enum.IsDefined(profile.IconStyle)?profile.IconStyle:IconArtworkStyle.Vibrant;
         var emblem=Enum.IsDefined(profile.DamageEmblem)?profile.DamageEmblem:DamageEmblem.Fire;
-        if(initialized&&Style==style&&Emblem==emblem&&Badge==profile.InventoryBadge)return false;
+        string context=profile.Character+"|"+profile.Server;
+        string selected=PetArtworkPreferences.Resolve(undead??(context==character?Undead:null));
+        string selectedFire=PetArtworkPreferences.ResolveFire(fire??(context==character?Fire:null));
+        if(initialized&&Style==style&&Emblem==emblem&&Badge==profile.InventoryBadge&&Undead==selected&&Fire==selectedFire&&character==context)return false;
+        character=context;Undead=selected;Fire=selectedFire;
         initialized=true;Style=style;Emblem=emblem;Badge=profile.InventoryBadge;
         if(Application.Current!=null)Application.Current.Resources["IconArtworkRevision"]=++revision;
         return true;
@@ -48,11 +55,13 @@ internal static class IconArtwork
     }
     internal static bool DrawPainted(DrawingContext dc,string role,Rect bounds,double dpi,IconArtworkStyle? style=null)
     {
-        if((style??Style)!=IconArtworkStyle.Vibrant||Painted(role,Math.Max(bounds.Width,bounds.Height)*dpi)is not{}image)return false;
+        if(ApprovedPetArtwork.Draw(dc,role,bounds,dpi,style??Style))return true;
+        if((style??Style)!=IconArtworkStyle.Vibrant)return false;
+        if(Painted(role,Math.Max(bounds.Width,bounds.Height)*dpi)is not{}image)return false;
         dc.DrawImage(image,bounds);return true;
     }
     internal static string AppRole(string id)=>id switch{"blue"=>"brand-blue-orb","gold-elements"=>"brand-gold-elements",_=>id};
-    internal static string ActorRole(string actor,string element)=>actor switch{"Group"=>"actor-group","Player"=>"actor-self","Combined"=>"actor-total",_=>element switch{"Earth"=>"pet-earth","Air"=>"pet-air","Fire"=>"pet-fire","Water"=>"pet-water",_=>"pet-generic"}};
+    internal static string ActorRole(string actor,string element)=>actor switch{"Group"=>"actor-group","Player"=>"actor-self","Combined"=>"actor-total",_=>element switch{"Earth"=>"pet-earth","Air"=>"pet-air","Fire"=>Fire=="wizard-crystal"?"pet-fire-crystal":"pet-fire","Water"=>"pet-water","Monster"=>"pet-monster","Undead"=>Undead switch{"wraith-a"=>"pet-undead-wraith-a","wraith-b"=>"pet-undead-wraith-b",_=>"pet-undead-skeleton"},_=>"pet-generic"}};
     internal static string GlyphRole(string shape)=>"glyph-"+shape.ToLowerInvariant();
     internal static void DrawDamage(DrawingContext dc,Rect bounds,double dpi,IconArtworkStyle? style=null,DamageEmblem? emblem=null)
     {

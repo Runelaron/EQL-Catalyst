@@ -61,7 +61,7 @@ public sealed partial class TrackerController
     public CombatInspectionSnapshot? InspectionView(bool healingMode, bool groupView = false)
     {
         var damage = DpsView(); var healing = healingMode ? HealingView() : null;
-        string key = $"{System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(damage)}:{(healing == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(healing))}:{Volatile.Read(ref outcomeRevision)}:{Volatile.Read(ref referenceRevision)}:{healingMode}:{groupView}:{CombatRevision}:{Volatile.Read(ref inspectionIdentityRevision)}:{Volatile.Read(ref groupRevision)}";
+        string key = $"{System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(damage)}:{(healing == null ? 0 : System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(healing))}:{Volatile.Read(ref outcomeRevision)}:{Volatile.Read(ref referenceRevision)}:{healingMode}:{groupView}:{CombatRevision}:{Volatile.Read(ref inspectionIdentityRevision)}:{Volatile.Read(ref groupRevision)}:{ConnectedSpellRevision}:{EquipmentRevision}:{ConnectedSpellIndex.Version}";
         var ready = Volatile.Read(ref inspection); if (!Demo && ready?.Key == key) return ready;
         if (inspectionWorker is { IsCompleted: false } || inspectionRequested == key && !Demo) return ready?.Key == key ? ready : null;
         inspectionRequested = key;
@@ -79,7 +79,7 @@ public sealed partial class TrackerController
             }
             using var timing = UpdateDiagnostics.Measure("Ability + group inspection snapshot");
             var value = CombatInspection.Build(damage, healing, frozen, outcomes, references, key, healingMode, coverage, false, !groupView, cancel.Token);
-            if (!groupView) return value;
+            if (!groupView) return ConnectSpellInspection(value,damage,healing);
             var projection = GroupProjection.Build(damage, healing, frozen, GroupPeriods, key, cancel.Token);
             return value with { Members = projection.Members, Coverage = projection.Coverage };
         }

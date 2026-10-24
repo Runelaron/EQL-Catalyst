@@ -30,6 +30,6 @@ public sealed partial class QuestWindow
             };
             menu.Items.Add(entry);
         }
-        Label(); return (FrameworkElement)UI.Field("Expansion Filter",button);
+        Label(); return (FrameworkElement)UI.Field("Expansion",button);
     }
 }

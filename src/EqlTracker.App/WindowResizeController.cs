@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,8 @@ internal sealed class WindowResizeController
     private Point start,origin;
     private double width,height,scaleX,scaleY,pendingWidth,pendingHeight;
     private bool active,queued;
+    internal bool IsDragging=>active;
+    internal bool HorizontalOnly {get;set;}
     private long generation;
     internal static Action<object>? Observe;
     [StructLayout(LayoutKind.Sequential)]private struct RectNative{public int Left,Top,Right,Bottom;}
@@ -44,8 +47,12 @@ internal sealed class WindowResizeController
         KeyboardNavigation.SetIsTabStop(Grip,false);
         Grip.DragStarted+=(_,e)=>
         {
-            if(window.IsLocked||window.IsCollapsed||window.WindowState!=WindowState.Normal){Grip.CancelDrag();return;}
-            generation++;queued=false;active=true;origin=new(e.HorizontalOffset,e.VerticalOffset);start=Grip.PointToScreen(origin);var dpi=VisualTreeHelper.GetDpi(window);scaleX=dpi.DpiScaleX;scaleY=dpi.DpiScaleY;
+            if(!CanResize){Grip.CancelDrag();return;}
+            // Thumb measured its click in the currently translated visual. Keep
+            // that physical pointer anchor when snapping the visual to rest.
+            var pointer=Grip.PointToScreen(new(e.HorizontalOffset,e.VerticalOffset));
+            window.InteractionStarting?.Invoke();
+            generation++;queued=false;active=true;origin=new(e.HorizontalOffset,e.VerticalOffset);start=pointer;var dpi=VisualTreeHelper.GetDpi(window);scaleX=dpi.DpiScaleX;scaleY=dpi.DpiScaleY;
             width=pendingWidth=window.ActualWidth;height=pendingHeight=window.ActualHeight;Record("start");
         };
         Grip.DragDelta+=(_,e)=>
@@ -54,17 +61,40 @@ internal sealed class WindowResizeController
             // Thumb deltas are relative to its moving local origin. Recover the
             // absolute pointer and apply total displacement to the drag snapshot.
             var point=Grip.PointToScreen(new(origin.X+e.HorizontalChange,origin.Y+e.VerticalChange));
-            var limits=Limits(window);pendingWidth=Math.Clamp(width+(point.X-start.X)/scaleX,Math.Min(window.MinWidth,limits.Width),limits.Width);pendingHeight=Math.Clamp(height+(point.Y-start.Y)/scaleY,Math.Min(window.MinHeight,limits.Height),limits.Height);
+            var limits=Limits(window);pendingWidth=Math.Clamp(width+(point.X-start.X)/scaleX,Math.Min(window.MinWidth,limits.Width),limits.Width);pendingHeight=HorizontalOnly?height:Math.Clamp(height+(point.Y-start.Y)/scaleY,Math.Min(window.MinHeight,limits.Height),limits.Height);
             if(queued)return;queued=true;long revision=generation;
             window.Dispatcher.BeginInvoke(()=>{if(revision==generation){queued=false;if(active)Apply("frame");}},DispatcherPriority.Render);
         };
         Grip.DragCompleted+=(_,e)=>Finish(e.Canceled);
-        Grip.LostMouseCapture+=(_,_)=>{if(active)Finish(true);};
+        Grip.LostMouseCapture+=(_,_)=>
+        {
+            // A normal Thumb mouse-up releases capture BEFORE DragCompleted(false).
+            // Let that completion (or Thumb's cancelled completion) win; only fall
+            // back to cancellation when capture vanished without a completion.
+            long revision=generation;
+            window.Dispatcher.BeginInvoke(()=>{if(active&&revision==generation)Finish(true);},DispatcherPriority.Input);
+        };
         window.AddHandler(Keyboard.PreviewKeyDownEvent,new KeyEventHandler((_,e)=>{if(active&&e.Key==Key.Escape){Finish(true);Grip.CancelDrag();e.Handled=true;}}),true);
-        window.Deactivated+=(_,_)=>{if(active){Finish(false);Grip.CancelDrag();}};
+        window.Deactivated+=(_,_)=>Interrupt("deactivated");
         window.DpiChanged+=(_,_)=>InterruptForDpi();
-        window.IsVisibleChanged+=(_,_)=>{if(!window.IsVisible&&active){Finish(false);Grip.CancelDrag();}};
-        window.SizeChanged+=(_,_)=>Grip.Visibility=window.IsCollapsed||window.ResizeMode==ResizeMode.NoResize?Visibility.Collapsed:Visibility.Visible;
+        window.IsVisibleChanged+=(_,_)=>RefreshState();
+        window.StateChanged+=(_,_)=>RefreshState();
+        window.Loaded+=(_,_)=>RefreshState();
+        window.SizeChanged+=(_,_)=>RefreshState();
+        var resizeMode=DependencyPropertyDescriptor.FromProperty(Window.ResizeModeProperty,typeof(Window));
+        EventHandler changed=(_,_)=>RefreshState();
+        resizeMode.AddValueChanged(window,changed);
+        window.Closed+=(_,_)=>{Interrupt("closed");resizeMode.RemoveValueChanged(window,changed);};
+        RefreshState();
+    }
+    private bool CanResize => window.IsVisible && window.WindowState==WindowState.Normal && !window.IsCollapsed && !window.IsLocked
+        && window.ResizeMode is ResizeMode.CanResize or ResizeMode.CanResizeWithGrip;
+    internal void RefreshState()
+    {
+        bool available=CanResize;
+        if(!available)Interrupt("unavailable");
+        Grip.IsEnabled=Grip.IsHitTestVisible=available;
+        Grip.Visibility=available?Visibility.Visible:Visibility.Collapsed;
     }
     private void Apply(string phase)
     {
@@ -75,13 +105,23 @@ internal sealed class WindowResizeController
     {
         if(!active)return;generation++;queued=false;active=false;
         if(cancel){pendingWidth=width;pendingHeight=height;}Apply(cancel?"cancel":"commit");Record(cancel?"cancelled":"released");
+        if(!cancel){window.UpdateLayout();window.Placement?.CommitResize();window.ResizeCommitted?.Invoke();}
     }
-    internal void InterruptForDpi()
-    { if(!active)return;generation++;queued=false;active=false;Grip.CancelDrag();Record("dpi-interrupted"); }
+    private void Interrupt(string phase)
+    {
+        if(!active&&!queued)return;
+        // Keep the last rendered dimensions. A pending frame must not write its
+        // old drag bounds over a collapsed, hidden or minimized window.
+        generation++;queued=false;active=false;Grip.CancelDrag();
+        if(Grip.IsMouseCaptured)Grip.ReleaseMouseCapture();
+        Record(phase);
+    }
+    internal void InterruptForDpi()=>Interrupt("dpi-interrupted");
+    internal void InterruptForWorkspace()=>Interrupt("workspace-interrupted");
     private void Record(string phase)=>Observe?.Invoke(Geometry(window,phase));
     internal static object Geometry(Window window,string phase)
     {
         GetWindowRect(new WindowInteropHelper(window).Handle,out var rect);var dpi=VisualTreeHelper.GetDpi(window);var surface=window.Content as FrameworkElement;
-        return new{Phase=phase,window.Width,window.Height,window.ActualWidth,window.ActualHeight,NativeWidth=rect.Right-rect.Left,NativeHeight=rect.Bottom-rect.Top,DpiX=dpi.DpiScaleX,DpiY=dpi.DpiScaleY,SurfaceWidth=surface?.ActualWidth,SurfaceHeight=surface?.ActualHeight};
+        return new{Phase=phase,window.Width,window.Height,window.ActualWidth,window.ActualHeight,NativeLeft=rect.Left,NativeTop=rect.Top,NativeWidth=rect.Right-rect.Left,NativeHeight=rect.Bottom-rect.Top,DpiX=dpi.DpiScaleX,DpiY=dpi.DpiScaleY,SurfaceWidth=surface?.ActualWidth,SurfaceHeight=surface?.ActualHeight};
     }
 }

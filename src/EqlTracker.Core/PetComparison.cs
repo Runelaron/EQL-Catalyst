@@ -11,11 +11,14 @@ public enum PetCastingPolicy { CurrentGameBehavior }
 public sealed record PetMechanicValue(double? Value,PetEvidenceKind Evidence,string Source,string Explanation);
 public sealed record PetDefinition(string Type,string SecondClass,string Abilities,bool Backstab=false)
 {
-    public const string Version="EQL-2026-10-13/pet-comparison-v3/"+RankedItemStats.Version;
+    public const string Version="EQL-2026-10-22/pet-comparison-v4/"+RankedItemStats.Version+"/"+PetEffectPolicy.Version;
     public string Source { get; init; }="https://eqlwiki.com/Pet_Guide";
     public string[] Classes=>SecondClass.Length==0?[]:["WAR",SecondClass];
     public IReadOnlyDictionary<string,PetMechanicValue> BaseStats { get; init; }=new Dictionary<string,PetMechanicValue>{["HP"]=new(null,PetEvidenceKind.Unresolved,"","No verified pet/level/rank baseline"),["AC"]=new(null,PetEvidenceKind.Unresolved,"","No verified pet/level/rank baseline"),["Damage"]=new(null,PetEvidenceKind.Unresolved,"","Weapon ratio emphasis does not publish innate damage"),["Delay"]=new(null,PetEvidenceKind.Unresolved,"","Innate cadence and casting interference unverified")};
-    public static readonly PetDefinition[] All=[new("Air","MNK","Monk special attacks; cadence and damage response unresolved"),new("Earth","RNG","Ranger spells and melee; casting frequency and melee interference unresolved"),new("Fire","WIZ","Wizard spells and melee; spell selection and cadence unresolved"),new("Water","ROG","Rogue attacks; backstab requires position",true),new("Undead","SHD","Shadow Knight lifetaps and abilities; activation/cadence unresolved"),new("Warder","BST","Beastlord abilities; spell cadence unresolved"),new("Spirit","BST","Beastlord abilities; spell cadence unresolved"),new("Animation","PAL","Paladin utility/healing; cadence unresolved")];
+    public static readonly PetDefinition[] All=[new("Air","MNK","Monk special attacks; cadence and damage response unresolved"),new("Earth","RNG","Ranger spells and melee; casting frequency and melee interference unresolved"),new("Fire","WIZ","Wizard spells and melee; spell selection and cadence unresolved"),new("Water","ROG","Rogue attacks; backstab requires position",true),new("Undead","SHD","Shadow Knight lifetaps and abilities; activation/cadence unresolved"),new("Warder","BST","Beastlord abilities; spell cadence unresolved"),new("Spirit","BST","Beastlord abilities; spell cadence unresolved"),new("Animation","PAL","Paladin utility/healing; cadence unresolved"),new("Monster","BER","Warrior/Berserker abilities; Frenzy depends on Primary weapon ratio, but coefficients and cadence remain unpublished") { Source = OctoberContent.PatchNotes }];
+    public static string[] Types => All.Select(p => p.Type).ToArray();
+    public static string[] OverrideChoices => new[]{"Auto"}.Concat(Types).Append("Warrior").ToArray();
+    public static string[] PlanningChoices => new[]{"Unknown"}.Concat(Types).ToArray();
     public static PetDefinition For(string type)=>All.FirstOrDefault(p=>p.Type==type)??new(type,"","Pet kit unverified");
 }
 public sealed class PetSummonSetup
@@ -68,6 +71,7 @@ public sealed record PetSupportedOutcome(string ContextKey,string MechanicsVersi
 { public double Dps=>MeleeDps+SpecialDps+SpellDps+ProcDps; }
 public sealed class PetComparisonResult
 {
+    public PetMeasuredSummary? Research { get; set; }
     public required PetDefinition Definition { get; init; }
     public required PetSummonOption Spell { get; init; }
     public required PetBuild Plan { get; init; }
@@ -156,8 +160,8 @@ public static class PetComparisonEngine
                     fits.Add(new(entry.Id,entry.Name+" +"+entry.Rank,entry.Slot,access,why,equipped));
                 }
                 var scenario=new PetComparisonScenario{Goal=preferences.Goal,EquipmentMode=mode,Summon=setup,Encounter=EquipmentPositions.Copy(preferences.Encounter),Buffs=EquipmentPositions.Copy(preferences.Buffs),ExternalBuffs=preferences.ExternalBuffs};
-                scenario.OwnerMechanicsContext=Key(new{owner.Classes,owner.Level,OwnerEquipment=EquipmentPositions.Fingerprint(EquipmentPositions.For(owner,false)),PetAAs=owner.PetStatProfiles.Select(p=>p.AAs)});
-                scenario.InputKey=Key(new{Mechanics=PetDefinition.Version,Summons=summons.Version,Buffs=buffs.Version,owner.Classes,owner.Level,OwnerEquipment=EquipmentPositions.Fingerprint(EquipmentPositions.For(owner,false)),PetAAs=owner.PetStatProfiles.Select(p=>p.AAs),assigned,scenario,profile.PetGoalWeights,DpsWeights=PetRoleRatings.Weights(profile,"DPS")});
+                scenario.OwnerMechanicsContext=Key(new{owner.Classes,owner.Level,owner.Race,owner.RaceLevel,OwnerEquipment=EquipmentPositions.Fingerprint(EquipmentPositions.For(owner,false)),PetAAs=owner.PetStatProfiles.Select(p=>p.AAs)});
+                scenario.InputKey=Key(new{Mechanics=PetDefinition.Version,Summons=summons.Version,Buffs=buffs.Version,owner.Classes,owner.Level,owner.Race,owner.RaceLevel,OwnerEquipment=EquipmentPositions.Fingerprint(EquipmentPositions.For(owner,false)),PetAAs=owner.PetStatProfiles.Select(p=>p.AAs),assigned,scenario,profile.PetGoalWeights,DpsWeights=PetRoleRatings.Weights(profile,"DPS")});
                 var outcome=supported?.FirstOrDefault(s=>s.ContextKey==scenario.InputKey&&s.MechanicsVersion==PetDefinition.Version&&s.Complete&&s.Evidence is PetEvidenceKind.Documented or PetEvidenceKind.Computed&&s.Source.Length>0&&new[]{s.MeleeDps,s.SpecialDps,s.SpellDps,s.ProcDps}.All(v=>double.IsFinite(v)&&v>=0)&&(!s.SurvivalSeconds.HasValue||double.IsFinite(s.SurvivalSeconds.Value)&&s.SurvivalSeconds>0)&&(!s.BehindExtraDps.HasValue||double.IsFinite(s.BehindExtraDps.Value)&&s.BehindExtraDps>=0));
                 var assessments=PetBuffResolver.Resolve(buffs,scenario.Buffs,owner,spell.PetType,scenario.ExternalBuffs);
                 var missing=new List<string>();missing.AddRange(equipment.Totals.Notes.Where(n=>n.StartsWith("Rank estimate")));if(!setup.LearningConfirmed)missing.Add("Summon learning unverified");if(!setup.RankConfirmed)missing.Add("Summon rank unverified; scenario +"+setup.Rank);if(level.Level==null)missing.Add(level.Explanation);
@@ -180,10 +184,10 @@ public static class PetComparisonEngine
     }
     public static List<PetMeasuredSample> History(IEnumerable<Encounter> fights)
     {
-        return fights.Where(f=>f.Finished&&f.PetType.Length>0&&f.PetDamage>0).GroupBy(f=>new{f.PetType,f.Zone,f.Weapons,f.BuffNotes}).Select(g=>
+        return fights.Where(f=>f.Finished&&f.PetType.Length>0&&f.PetDamage>0).GroupBy(f=>new{f.PetType,f.Zone,f.Weapons,f.BuffNotes,Era=OctoberContent.MeasurementEra(f.Start)}).Select(g=>
         {
             var events=g.Where(f=>f.DetailAvailable).SelectMany(f=>f.Events).Where(e=>!e.ActivityOnly&&e.Owner=="Pet").ToList();bool complete=g.All(f=>f.DetailAvailable)&&events.Sum(e=>e.Damage)==g.Sum(f=>f.PetDamage);
-            return new PetMeasuredSample(g.Key.PetType,string.Join(", ",events.Select(e=>e.Target).Distinct().Take(8)),g.Key.Zone,g.Count(),g.Sum(f=>f.Duration),g.Sum(f=>f.PetDamage),complete?events.Where(e=>e.Kind=="Melee").Sum(e=>(double)e.Damage):null,null,complete?events.Where(e=>e.Kind!="Melee").Sum(e=>(double)e.Damage):null,"Recorded weapons: "+g.Key.Weapons+" · buffs: "+g.Key.BuffNotes+" · exact gear/ranks/active buff coverage unverified; historical observation, not current-build prediction");
+            return new PetMeasuredSample(g.Key.PetType,string.Join(", ",events.Select(e=>e.Target).Distinct().Take(8)),g.Key.Zone,g.Count(),g.Sum(f=>f.Duration),g.Sum(f=>f.PetDamage),complete?events.Where(e=>e.Kind=="Melee").Sum(e=>(double)e.Damage):null,null,complete?events.Where(e=>e.Kind!="Melee").Sum(e=>(double)e.Damage):null,g.Key.Era+" · "+g.Min(f=>f.Start).ToString("yyyy-MM-dd")+" to "+g.Max(f=>f.End).ToString("yyyy-MM-dd")+" · Recorded weapons: "+g.Key.Weapons+" · buffs: "+g.Key.BuffNotes+" · exact gear/ranks/active buff coverage unverified; historical observation, not current-build prediction");
         }).ToList();
     }
 }

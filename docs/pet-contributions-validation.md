@@ -1,0 +1,20 @@
+# Pet contributions and compact headers — focused validation
+
+This local iteration separates observed snapshots from direct effective-loadout additions, replaces snapshot-only weapon fields with the shared ranked-equipment projection, and connects existing spell/buff evidence. It adds internal presentation and evidence-cache state; existing profiles, inventory ranks, custom weights and combat arithmetic are preserved.
+
+Focused automated results:
+
+- 23 contribution/evidence cases: ranked weapon values, dormant/empty hands, metadata gaps, longest catalog/alias matching, rank variants, atomic client parsing, interrupted/successful casts, idempotent restart, reused pet names, ownership intervals, Water Backstab, focus eligibility, compact objectives and isolated metadata checkpoints.
+- 24 existing Pet Details/context cases; 16 research regressions; 16 configured-effect policy cases.
+- 41 evidence regressions and 2 pet-death/attribution cases. These include logs/checkpoints, partial metadata, source preservation and observation boundaries.
+- 41 routed/presentation popup checks plus 11 header/objective/build-gate checks in each local and public build configuration. Coverage includes signed negative/zero resists, incomplete coverage, Added defaults/formatting, resource colors, raw AC/speed limitations, effective weapons, all sheet fields, keyboard access, retained content, stale results, independent plans and fixed Close while scrolling.
+
+Synthetic renders use 740×800, 500×580 and 500×420 DIP, plus normal/narrow Tracker headers, collapsed title and compact objectives. Header input uses routed WPF mouse events, with interactive controls excluded; locked state and restored height are asserted. Existing placement identifiers and resize controller remain intact. Broad theme/DPI matrices and live-game acceptance are deferred as requested.
+
+Intermediate failures are retained in local results. A zero-sign formatter initially showed `0` rather than `+0`; it was repaired. An expanded-heading assertion sampled WPF's deferred plain-text property before inline text had synchronized; it now checks the specified branded heading after restore, with exact restored height. An older regression expected the icon to clear after pet death, contrary to the later confirmed most-recent-pet behavior. That assertion now checks closure of active ownership, preserved most-recent family and new ownership evidence. Runtime identity behavior was unchanged. Final timings and earlier outliers remain retained.
+
+Spell parsing validates the existing client layout and uses dictionary identity matching, not a full catalog sort for every record. Buff evidence is bounded and cannot establish a live roster. Private research stays disabled in the public configuration. Focus ranges are applicability-gated reference values, never applied to combat totals or added to observed stats.
+
+Restart validation caught a metadata-backfill isolation fault before delivery was accepted: resetting the shared stat checkpoint assigned a new log generation and sent historical effects through the private research callback. Reviewed sheets, original buff records, inventory and combat totals were intact, but derived buff periods were recalculated. A recovery copy was retained and the verified original research restored. The repair gives connected spell history its own resumable checkpoint, preserves existing log-generation identities, and runs historical lines through a scratch stat state with no research callback. Two focused regressions cover checkpoint isolation and idempotent historical metadata. Final restart validation requires the original research file to remain byte-for-byte unchanged during backfill.
+
+Delivery performs targeted changed-source, local-payload and synthetic-preview privacy checks, verifies published artifact hashes, then verifies app/profile/research backups before graceful local replacement. Restart checks compare saved profiles, inventory, private research and retained combat/observation tables. Published Beta 1.4, installers, Store submission, WSL and Sandbox remain unchanged.

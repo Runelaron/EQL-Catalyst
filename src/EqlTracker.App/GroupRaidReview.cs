@@ -75,7 +75,7 @@ public sealed partial class DpsWindow
         var settingsWindow=new SettingsWindow(c){Left=-15000,Top=-15000,ShowActivated=false,ShowInTaskbar=false};settingsWindow.Show();
         Check(Usability.Tree((DependencyObject)settingsWindow.Content).OfType<TextBlock>().Any(t=>t.Text.Equals("Overlay menu size",StringComparison.OrdinalIgnoreCase)),"Appearance exposes overlay menu size");Capture("settings-appearance",(FrameworkElement)settingsWindow.Content,800,720);settingsWindow.Close();
         var styleGrid=new StackPanel();foreach(var style in Enum.GetValues<IconArtworkStyle>()){c.Profile.IconStyle=style;IconArtwork.Apply(c.Profile);var row=UI.Row(UI.Label(style.ToString()));foreach(int size in new[]{16,24,32,48,64})row.Children.Add(new MaxHitGlyph{PreviewStyle=style,Width=size,Height=size,Margin=new(7)});styleGrid.Children.Add(row);}Capture("max-hit-both-styles",styleGrid,600,190);c.Profile.IconStyle=IconArtworkStyle.Vibrant;IconArtwork.Apply(c.Profile);
-        var original=c.Profile.Meter.Copy();latestFight.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));Check(c.Profile.Meter.GroupPeriodId==""&&c.Profile.Meter.Scope=="Fight"&&c.Profile.Meter.From==null,"Return to latest clears period bounds and follows latest fight");
+        var original=c.Profile.Meter.Copy();latestFight.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));Check(c.Profile.Meter.GroupPeriodId==""&&c.Profile.Meter.Scope=="Session"&&c.Profile.Meter.From==null,"Back to session clears group-period bounds and returns to its saved session");
         c.Profile.Meter=original;Refresh();
         // Three warmed runs use the same immutable retained fixture and preserve every sample.
         for(int run=1;run<=3;run++)

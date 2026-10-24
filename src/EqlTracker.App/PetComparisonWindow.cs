@@ -78,7 +78,29 @@ internal sealed class PetComparisonWindow : FrostDialog
     private readonly CancellationTokenSource lifetime=new();
     private long request;
     private string revision="",evaluatedContext="";
-    private string ContextVersion=>controller.EquipmentRevision+"|"+controller.PetRevision+"|"+controller.Profile.ActiveLoadout.Name+"|"+controller.Profile.Character+"|"+controller.Profile.Server+"|"+(workspaceRevision?.Invoke()??0);
+    private readonly DispatcherTimer updatingDelay=new(){Interval=TimeSpan.FromMilliseconds(150)};
+    private bool pending;
+    private string requestedContext="";
+    private PetBuild ComparisonSource()
+    {
+        var owner=controller.Profile.ActiveLoadout;string choice=(source.SelectedItem as SourceChoice)?.Id??"workspace";
+        return choice=="workspace"?workspace?.Invoke()??openingBuild:choice=="current"?PetInventoryEditing.Confirmed(owner,controller.Catalog):owner.PetBuilds.FirstOrDefault(b=>b.Id==choice)??openingBuild;
+    }
+    private string ContextVersion
+    {
+        get
+        {
+            var profile=controller.Profile;var owner=profile.ActiveLoadout;var build=ComparisonSource();var catalog=controller.EquipmentView?.Catalog??controller.Catalog;
+            var keys=build.Items.Select(i=>i.ItemKey).Concat(build.SlotConfigurations.SelectMany(s=>s.Effects).Select(e=>catalog.Find(e.SourceName)?.Key??e.SourceName)).Concat(owner.Equipment.Select(e=>catalog.Find(e.Name)?.Key??e.Name)).Distinct().ToHashSet();
+            return PetComparisonEngine.Key(new{profile.Character,profile.Server,Build=PetWorkspaceDraft.Key(build),build.PetLevel,owner.Classes,owner.Level,owner.Race,owner.RaceLevel,owner.Deity,
+                OwnerEquipment=EquipmentPositions.Fingerprint(EquipmentPositions.For(owner,false)),PetAAs=owner.PetStatProfiles.Select(p=>p.AAs),preferences,DpsWeights=PetRoleRatings.Weights(profile,"DPS"),DefenseWeights=PetRoleRatings.Weights(profile,"Tank"),mode,buffs.Version,
+                Metadata=catalog.Items.Where(i=>mode==PetEquipmentMode.BestPossible||mode==PetEquipmentMode.Inventory||keys.Contains(i.Key)).OrderBy(i=>i.Key).Select(i=>new{i.Key,i.Name,i.Classes,i.Races,i.Slots,i.Deity,i.RequiredLevel,i.EffectActivationLevel,i.Stats,i.Effects,i.EffectEvidence,i.Display,i.MetadataComplete,i.MetadataVersion,i.TwoHanded,i.IntroducedExpansion,i.ContentAvailability}),
+                Inventory=mode==PetEquipmentMode.Inventory?controller.Inventory.Entries:null,
+                History=(controller.Published?.History??[]).Select(f=>new{f.Id,f.Start,f.End,f.Zone,f.PetType,f.PetName,f.Weapons,f.BuffNotes,f.PetDamage,PetEvents=f.Events.Where(e=>e.Owner=="Pet").Select(e=>new{e.Time,e.Actor,e.Target,e.Ability,e.Damage,e.Outcome})}),controller.PetResearchRevision});
+        }
+    }
+    internal long CompletedRequests {get;private set;}
+    internal bool IsUpdating=>pending;
     private bool loading=true,closed;
     private PetEquipmentMode mode;
     internal List<PetComparisonResult> Rows { get; private set; }=[];
@@ -114,39 +136,44 @@ internal sealed class PetComparisonWindow : FrostDialog
         var selection=summonControls;spell.DisplayMemberPath="Label";spell.SelectedValuePath="Id";
         foreach(var c in new UIElement[]{UI.Field("Summon",spell),UI.Field("Rank",rank),UI.Field("Focus (documented only)",focus),UI.ActionField(learned),UI.ActionField(rankKnown)})selection.Children.Add(c);
         SelectedDetails=FocusedLayout.Disclosure("Selected pet · setup, equipment & evidence",Details,"Select a pet card. Expand to review summon settings, equipment, buffs, weights and measured benchmarks.");root.Children.Add(SelectedDetails);
-        var advanced=UI.Stack(encounter,UI.Row(UI.Button("Buff setup…",EditBuffs),UI.Button("Weights…",EditWeights)),external);
+        var advanced=UI.Stack(encounter,UI.Row(UI.Button("Buff setup",EditBuffs),UI.Button("Weights",EditWeights),UI.Button("Measurement checklist",()=>{new MeasurementGuideDialog{Owner=this}.ShowDialog();})),external);
         root.Children.Add(FocusedLayout.Disclosure("Encounter & buff assumptions",advanced,"Unknown inputs stay unknown. Preference points are not predicted DPS."));
         UpgradeButton.Click+=async(_,_)=>await FindUpgrades();
         upgradeScope.ToolTip="Compare owned replacements for one recorded Pet item, or the whole effective build. At most five results, ordered by additional ranks needed.";
         upgradeItem.ToolTip="Choose the Pet inventory item to replace. Storage items are not treated as equipped.";upgradeItem.DisplayMemberPath="Name";upgradeItem.SelectedValuePath="Id";
         upgradeScope.SelectionChanged+=(_,_)=>{upgradeItem.Visibility=upgradeScope.SelectedIndex==0?Visibility.Visible:Visibility.Collapsed;CancelUpgrades();};upgradeItem.SelectionChanged+=(_,_)=>CancelUpgrades();
         UpgradeDetails=FocusedLayout.Disclosure("Rank-efficient inventory upgrades",UI.Stack(UI.Row(upgradeScope,upgradeItem),UpgradeButton,upgradeResults),"Find up to five preference improvements at recorded rank or +0–10. No motes or inventory changes are performed.");root.Children.Add(UpgradeDetails);
+        if(TrackerController.PetResearchEnabled) root.Children.Add(UI.Button("Pet data",()=>new PetResearchWindow(controller){Owner=this}.Show()));
         Editor.Children.Add(root);
-        saveButton=UI.Button("Save as Pet plan…",SaveSelected);saveButton.IsEnabled=false;Actions.Children.Add(saveButton);Actions.Children.Add(UI.Button("Close",Close));
+        saveButton=UI.Button("Save as Pet plan",SaveSelected);saveButton.IsEnabled=false;Actions.Children.Add(saveButton);Actions.Children.Add(UI.Button("Close",Close));
         source.SelectionChanged+=(_,_)=>Queue();Goal.SelectionChanged+=(_,_)=>{preferences.Goal=Goal.SelectedItem?.ToString()??"DPS";Queue();};
         external.Click+=(_,_)=>{preferences.ExternalBuffs=external.IsChecked==true;Queue();};
         spell.SelectionChanged+=(_,_)=>{if(loading||Results.SelectedItem is not PetComparisonResult row||spell.SelectedItem is not PetSummonOption value)return;preferences.SelectedSummons[row.Pet]=value.Id;Queue();};
         rank.SelectionChanged+=(_,_)=>SetupChanged();focus.LostKeyboardFocus+=(_,_)=>SetupChanged();learned.Click+=(_,_)=>SetupChanged();rankKnown.Click+=(_,_)=>SetupChanged();
         foreach(var t in new[]{duration,defense,resist,incoming,target})t.TextChanged+=(_,_)=>{if(loading)return;try{var candidate=new PetEncounterAssumptions{Seconds=Number(duration),TargetDefense=Number(defense),TargetResist=Number(resist),IncomingDps=Number(incoming),Target=target.Text.Trim()};candidate.Validate();preferences.Encounter=candidate;Queue();}catch(ArgumentException e){Status.Text=e.Message+" Previous results retained.";}};
         debounce.Tick+=async(_,_)=>{debounce.Stop();await Recalculate();};
-        revisionTimer.Tick+=(_,_)=>{string next=ContextVersion;if(next!=revision){revision=next;Queue(false);}};
+        updatingDelay.Tick+=(_,_)=>{updatingDelay.Stop();if(pending)Status.Text="Updating comparison · previous completed results retained.";};
+        revisionTimer.Tick+=(_,_)=>{string next=ContextVersion;if(next!=revision){Queue(false);}};
         Loaded+=async(_,_)=>{loading=false;revisionTimer.Start();await LoadReferences();await Recalculate();};
-        Closed+=(_,_)=>{closed=true;lifetime.Cancel();request++;debounce.Stop();revisionTimer.Stop();cancellation?.Cancel();cancellation?.Dispose();upgradeCancel?.Cancel();upgradeCancel?.Dispose();};
+        Closed+=(_,_)=>{closed=true;lifetime.Cancel();request++;debounce.Stop();revisionTimer.Stop();updatingDelay.Stop();cancellation?.Cancel();cancellation?.Dispose();upgradeCancel?.Cancel();upgradeCancel?.Dispose();};
     }
     private static string N(double? number)=>number?.ToString("0.##",CultureInfo.InvariantCulture)??"";
     private static double? Number(TextBox input){if(input.Text.Trim().Length==0)return null;if(!double.TryParse(input.Text,NumberStyles.Float,CultureInfo.InvariantCulture,out double n)||!double.IsFinite(n))throw new ArgumentException("Enter a finite number, or leave blank for Unknown.");return n;}
     private bool SameCharacter=>controller.Profile.Character+"|"+controller.Profile.Server==character;
     private void Queue(bool persist=true)
     {
-        if(loading||closed)return;if(!SameCharacter){Close();return;}request++;cancellation?.Cancel();saveButton.IsEnabled=false;
+        if(loading||closed)return;if(!SameCharacter){Close();return;}
+        string next=ContextVersion;if(next==requestedContext&&(pending||next==evaluatedContext))return;
+        requestedContext=revision=next;request++;cancellation?.Cancel();saveButton.IsEnabled=false;
+        if(!pending){pending=true;updatingDelay.Start();}
         if(persist){lock(controller.Sync){controller.Profile.PetComparison=EquipmentPositions.Copy(preferences);controller.Save();}}
-        Status.Text="Updating comparison… Previous completed results retained.";debounce.Stop();debounce.Start();
+        debounce.Stop();debounce.Start();
     }
     internal void SetMode(PetEquipmentMode value){mode=value;bool previous=loading;loading=true;optimized.IsChecked=value is PetEquipmentMode.Inventory or PetEquipmentMode.BestPossible;gearPool.SelectedIndex=value==PetEquipmentMode.BestPossible?1:0;if(gearPoolField!=null)gearPoolField.Visibility=optimized.IsChecked==true?Visibility.Visible:Visibility.Collapsed;loading=previous;Queue(false);}
     internal async Task LoadReferences()
     {
         string folder=controller.Profile.GameFolder;
-        var loaded=await Task.Run(()=>{string file=Path.Combine(folder,"spells_us.txt");try{return folder.Length>0&&File.Exists(file)?PetClientSpellAdapter.Parse(File.ReadLines(file),lifetime.Token):PetBuffCatalog.References();}catch(IOException){return PetBuffCatalog.References();}catch(UnauthorizedAccessException){return PetBuffCatalog.References();}catch(OperationCanceledException){return PetBuffCatalog.References();}});
+        var loaded=await Task.Run(()=>{string file=Path.Combine(folder,"spells_us.txt");try{return folder.Length>0&&File.Exists(file)?PetClientSpellAdapter.ParseFile(file,lifetime.Token):PetBuffCatalog.References();}catch(IOException){return PetBuffCatalog.References();}catch(UnauthorizedAccessException){return PetBuffCatalog.References();}catch(OperationCanceledException){return PetBuffCatalog.References();}});
         var relevant=GearMechanicsEvidence.RelevantAAs(true).Select(a=>a.Name).ToHashSet();
         foreach(var aa in controller.StatEvidenceSnapshot().AAs.Values.Where(a=>a.Rank>0&&relevant.Contains(a.Name)))
             if(!loaded.Buffs.Any(b=>b.Name==aa.Name||b.RelatedAa==aa.Name))loaded.Buffs.Add(new(){Id="aa:"+Identity.Key(aa.Name),Name=aa.Name,Aa=true,ConfirmedRank=aa.Rank,Source=GearMechanicsEvidence.AaSource+" · recorded AA rank observation"});
@@ -159,20 +186,20 @@ internal sealed class PetComparisonWindow : FrostDialog
     }
     internal async Task Recalculate()
     {
-        if(closed||!SameCharacter)return;saveButton.IsEnabled=false;debounce.Stop();cancellation?.Cancel();cancellation?.Dispose();cancellation=new();var token=cancellation.Token;long id=++request;
+        if(closed||!SameCharacter)return;if(!pending){pending=true;updatingDelay.Start();}requestedContext=revision=ContextVersion;saveButton.IsEnabled=false;debounce.Stop();cancellation?.Cancel();cancellation?.Dispose();cancellation=new();var token=cancellation.Token;long id=++request;
         CharacterProfile profile;Catalog catalog;PetBuild build;string expectedContext;InventorySnapshot inventory;var frozenBuffs=buffs;
         lock(controller.Sync)
         {
             expectedContext=ContextVersion;inventory=EquipmentPositions.Copy(controller.EquipmentView?.Inventory??controller.Inventory);profile=EquipmentPositions.Copy(controller.Profile);profile.PetComparison=EquipmentPositions.Copy(preferences);
             catalog=controller.EquipmentView?.Catalog??new Catalog{Items=controller.Catalog.Items.Select(EquipmentPositions.Copy).ToList(),Quests=controller.Catalog.Quests.ToList()};
             string choice=(source.SelectedItem as SourceChoice)?.Id??"workspace";
-            if (choice == "workspace" && workspace != null && workspace() == null) { Status.Text = "Source workspace changed. Choose Current or a saved build to continue."; return; }
+            if (choice == "workspace" && workspace != null && workspace() == null) { Status.Text = "Source workspace changed. Choose Current or a saved build to continue."; pending=false;updatingDelay.Stop();return; }
             build=EquipmentPositions.Copy(choice=="workspace"&&workspace!=null?workspace()!:choice=="workspace"?(profile.ActiveLoadout.ConfirmedPetInventory?.Id==openingBuild.Id?profile.ActiveLoadout.ConfirmedPetInventory:profile.ActiveLoadout.PetBuilds.FirstOrDefault(b=>b.Id==openingBuild.Id)??openingBuild):choice=="current"?PetInventoryEditing.Confirmed(profile.ActiveLoadout,catalog):profile.ActiveLoadout.PetBuilds.FirstOrDefault(b=>b.Id==choice)??openingBuild);
             // Historical aggregation is revision-driven, never part of pointer/slider updates.
 
         }
         var historicalInputs=controller.Published?.History??[];if(!ReferenceEquals(historicalInputs,lastHistory)){lastHistory=historicalInputs;historyRevision++;history=[];historyReady=false;}
-        bool ready=historyReady;List<PetMeasuredSample>? hydratedHistory=null;var observed=history.ToList();string key=PetComparisonEngine.Key(new{RankedStats=RankedItemStats.Version,PetUse=PetItemRules.Version,profile.ActiveLoadout,profile.PetComparison,profile.PetGoalWeights,PetDps=PetRoleRatings.Weights(profile,"DPS"),build,mode,frozenBuffs.Version,controller.EquipmentRevision,historyRevision});var clock=Stopwatch.StartNew();
+        bool ready=historyReady;List<PetMeasuredSample>? hydratedHistory=null;var observed=history.ToList();string key=expectedContext;var clock=Stopwatch.StartNew();
         try
         {
             var rows=cache.TryGetValue(key,out var cached)?cached:await Task.Run(()=>{token.ThrowIfCancellationRequested();var measurements=ready?observed:PetComparisonEngine.History(historicalInputs);hydratedHistory=measurements;return PetComparisonEngine.Evaluate(profile,build,catalog,summons,frozenBuffs,measurements,mode,token,inventory:inventory);},token);
@@ -184,14 +211,17 @@ internal sealed class PetComparisonWindow : FrostDialog
             currentPet=(mode==PetEquipmentMode.IntendedSlots?rows:await Task.Run(()=>PetComparisonEngine.Evaluate(profile,build,catalog,summons,frozenBuffs,observed,PetEquipmentMode.IntendedSlots,token),token)).FirstOrDefault(r=>r.Pet==build.PetType);
             if(closed||token.IsCancellationRequested||id!=request||ContextVersion!=expectedContext)return;
             foreach(var row in rows){row.CurrentDps=currentPet?.DisplayDps;row.CurrentHp=currentPet?.Hp;}
+            if(TrackerController.PetResearchEnabled) { var research=controller.PetResearchSnapshot(); foreach(var row in rows) row.Research=PetResearch.Summary(research,row.Pet); }
             var previousItem=upgradeItem.SelectedValue;loading=true;upgradeItem.ItemsSource=evaluatedBuild.Items;upgradeItem.SelectedValue=previousItem??evaluatedBuild.Items.FirstOrDefault()?.Id;loading=false;
             CancelUpgrades();saveButton.IsEnabled=rows.Count>0;string selected=(Results.SelectedItem as PetComparisonResult)?.Pet??build.PetType;
             loading=true;Results.ItemsSource=rows;Results.SelectedItem=rows.FirstOrDefault(r=>r.Pet==selected)??rows.FirstOrDefault();loading=false;ShowSelected();
             Status.Text=rows.Count==0?"No documented summons match the character's confirmed classes and level. Confirm those facts in the active build.":(mode==PetEquipmentMode.IntendedSlots?"Same effective gear · attainable pet levels":"Best supported preference assignments · preview only")+" · "+profile.PetComparison.Goal+" · "+rows.Count+" options. "+(rows.All(r=>r.Outcome==null)?"Insufficient evidence for a predicted DPS winner.":"Supported outcomes are separate from historical observations.");
+            CompletedRequests++;
             Timings.Add(new{Milliseconds=clock.Elapsed.TotalMilliseconds,Goal=profile.PetComparison.Goal,Mode=mode.ToString(),Rows=rows.Count,CacheHit=ReferenceEquals(rows,cached)});
         }
         catch(OperationCanceledException){}
         catch(Exception e) when(e is ArgumentException or InvalidOperationException){if(id==request&&!closed)Status.Text=e.Message+" Previous completed results retained.";}
+        finally{if(id==request){pending=false;updatingDelay.Stop();}}
     }
     private void SetupChanged()
     {
@@ -213,15 +243,21 @@ internal sealed class PetComparisonWindow : FrostDialog
         if(row.Definition.Backstab)Details.Children.Add(FocusedLayout.Disclosure("Additional result · From behind",UI.Text(row.FromBehind+". Baseline grants no positional damage. Use this comparison to decide whether managing position is worthwhile.",12),"Only backstab-capable pets receive this additional scenario."));
         Details.Children.Add(UI.Text(row.Scenario.Goal=="Balanced"?(row.StrongTradeoff?"Supported damage/survival tradeoff":"No supported cross-pet dominance claim; compare strengths and missing evidence"):PetRoleRatings.Explain(row.Scenario.Goal),12,"Melee",true));
         Details.Children.Add(UI.Text("Equipment preference: "+row.Guidance,12));
-        Details.Children.Add(FocusedLayout.Disclosure("Weights & arithmetic",UI.Stack(UI.Text("Damage weights: "+RatingExplanation.Formula(PetRoleRatings.Weights(controller.Profile,"DPS")),11),UI.Text("Defense weights: "+RatingExplanation.Formula(PetRoleRatings.Weights(controller.Profile,"Tank")),11),UI.Text("Equipment totals: "+string.Join(" · ",row.Equipment.Totals.Stats.Select(p=>p.Key+": "+p.Value.ToString("0.##"))),11),UI.Button("Edit weights…",EditWeights)),"Editable preference priorities, separate from measured DPS and HP."));
+        Details.Children.Add(FocusedLayout.Disclosure("Weights & arithmetic",UI.Stack(UI.Text("Damage weights: "+RatingExplanation.Formula(PetRoleRatings.Weights(controller.Profile,"DPS")),11),UI.Text("Defense weights: "+RatingExplanation.Formula(PetRoleRatings.Weights(controller.Profile,"Tank")),11),UI.Text("Equipment totals: "+string.Join(" · ",row.Equipment.Totals.Stats.Select(p=>p.Key+": "+p.Value.ToString("0.##"))),11),UI.Button("Edit weights",EditWeights)),"Editable preference priorities, separate from measured DPS and HP."));
         if(row.EquipmentRequirements.Count>0)Details.Children.Add(FocusedLayout.Disclosure("Equipment needed",UI.Stack(row.EquipmentRequirements.Select(n=>(UIElement)UI.Text(n,11)).Append(UI.Text(row.AssignmentSearchComplete?"Assignment search complete.":"Bounded preference search; global optimum is not established.",11,"SecondaryText")).ToArray()),"Required items, ranks and transfers; saving creates no ownership."));
         if(row.EquipmentTradeoffs.Count>0)Details.Children.Add(FocusedLayout.Disclosure("Balanced equipment tradeoffs",UI.Stack(row.EquipmentTradeoffs.Select(p=>(UIElement)UI.Text(string.Join(" · ",p.Items.Select(i=>i.Slot+": "+i.Name+" +"+i.Rank)),11)).ToArray()),"Other nondominated preference assignments. No combined Balanced score or predicted winner."));
-        Details.Children.Add(UI.Button("Record benchmark…",RecordBenchmark));
-        foreach(var benchmark in preferences.Benchmarks.Where(b=>b.Pet==row.Pet).OrderByDescending(b=>b.RecordedAt).Take(5))Details.Children.Add(UI.Text("Benchmark: "+benchmark.Label+" · DPS "+(benchmark.Dps?.ToString("N1")??"Unknown")+" · HP "+(benchmark.Hp?.ToString("N0")??"Unknown")+" · "+(benchmark.ContextConfirmed?"Confirmed test context":"Context unverified"),11,"SecondaryText"));
+        Details.Children.Add(FocusedLayout.Disclosure("October 22 mechanics", UI.Stack(OctoberContent.Mechanics.Select(m => (UIElement)UI.Text(m.Name+": "+m.Description,11)).Append(UI.Text(OctoberContent.PatchNotes,11)).ToArray()), "Current patch evidence; unpublished coefficients do not become predictions."));
+        Details.Children.Add(UI.Button("Record benchmark",RecordBenchmark));
+        foreach(var benchmark in preferences.Benchmarks.Where(b=>b.Pet==row.Pet).OrderByDescending(b=>b.RecordedAt).Take(5))Details.Children.Add(UI.Text("Benchmark: "+benchmark.Label+" · DPS "+(benchmark.Dps?.ToString("N1")??"Unknown")+" · HP "+(benchmark.Hp?.ToString("N0")??"Unknown")+" · "+(benchmark.MechanicsVersion!=PetDefinition.Version?"Historical / other patch":benchmark.ContextConfirmed?"Confirmed test context":"Context unverified"),11,"SecondaryText"));
         var fit=UI.Stack(row.Fits.Select(f=>(UIElement)UI.Text(f.Item+" · "+f.Slot+" · "+PetComparisonEngine.AccessText(f.Access)+"\n"+(f.Equipped?"In effective equipment · ":"Not equipped · ")+f.Reason,11,f.Reason=="Eligible"?"Foreground":"SecondaryText")).ToArray());
         Details.Children.Add(FocusedLayout.Disclosure("Equipment fit & assignments",fit,"Pet classes and owner classes are separate valid routes; bows, levels, slots and effect constraints still apply.",true));
         Details.Children.Add(FocusedLayout.Disclosure("Buffs & stacking",UI.Stack(row.Buffs.Select(b=>(UIElement)UI.Text(b.Name+" · "+b.State+"\n"+b.Detail+"\n"+b.Source,11)).ToArray()),buffs.Status));
         Details.Children.Add(FocusedLayout.Disclosure("Historical measured DPS",row.Observed.Count==0?UI.Text("No retained pet observations for this type. Missing samples are not zero DPS.",11):UI.Stack(row.Observed.Select(h=>(UIElement)UI.Text($"{h.Dps:N1} observed DPS · {h.Damage:N0} damage / {h.Seconds:N1}s · {h.Fights} fights · {h.Zone}\n{h.Targets}\n{h.Conditions}",11)).ToArray()),"Historical observations have their recorded conditions; unmatched samples never predict the current build."));
+        if(TrackerController.PetResearchEnabled)
+        {
+            var phases=controller.PetResearchSnapshot().Samples.Values.Where(s=>s.Context.Pet==row.Pet).OrderByDescending(s=>s.Start).Take(5);
+            Details.Children.Add(FocusedLayout.Disclosure("Measured buff phases",UI.Stack(phases.Select(s=>(UIElement)UI.Text(s.Start.ToString("MMM dd HH:mm")+" · "+s.Targets+"\n"+string.Join("\n",s.BuffPeriodSeconds.Where(p=>p.Value>0).Select(p=>p.Key+": "+(s.BuffPeriodDamage.GetValueOrDefault(p.Key)/p.Value).ToString("0.0")+" DPS · "+s.BuffPeriodDamage.GetValueOrDefault(p.Key)+" damage / "+p.Value.ToString("0.0")+"s")),11)).Append(UI.Text("Targets and durations can differ. Historical phase DPS does not establish causal buff multipliers or a predicted winner.",11,"SecondaryText")).ToArray()),"Original encounter totals and rate denominators are preserved. Uncertain transitions remain unresolved."));
+        }
         Details.Children.Add(FocusedLayout.Disclosure("Evidence & missing inputs",UI.Stack(row.Missing.Select(m=>(UIElement)UI.Text("• "+m,11,"SecondaryText")).Concat(new[]{(UIElement)UI.Text(row.Definition.Source+"\n"+row.Spell.Url+" revision "+row.Spell.Revision+"\n"+PetDefinition.Version+"\n"+row.Scenario.Encounter.Explanation,11)}).ToArray()),"Documented kits; computed equipment; assumptions and unresolved mechanics remain separate.",false));foreach(var disclosure in Details.Children.OfType<Expander>())if(expanded.TryGetValue(disclosure.Header?.ToString()??"",out bool open))disclosure.IsExpanded=open;Usability.Tooltips(Details);
     }
     private void EditBuffs(){var dialog=new PetBuffSetupDialog(controller.Profile.ActiveLoadout,buffs,preferences){Owner=this};if(dialog.ShowDialog()==true)Queue();}

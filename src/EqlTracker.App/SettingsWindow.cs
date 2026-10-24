@@ -9,6 +9,8 @@ public sealed partial class SettingsWindow : FrostWindow
 {
     private readonly TextBox folder, currentClasses, reached50, priority, timeout, resume;
     private readonly ComboBox secondaryText, theme, petType, loadout, meterStyle;
+    private readonly ComboBox race;
+    private readonly TextBox raceLevel;
     private readonly CheckBox hide, sounds, click, locked, smoothMotion, borderless;
     private readonly TextBlock displayStatus = UI.Text("", 11, "Mint");
     private readonly Slider opacity = new() { Minimum = .3, Maximum = 1, TickFrequency = .05, Width = 250, IsSnapToTickEnabled = true, Margin = new(0, 4, 0, 6) };
@@ -20,25 +22,30 @@ public sealed partial class SettingsWindow : FrostWindow
     public SettingsWindow(TrackerController controller) : base(controller, "Tracker Settings", "", 940, 610)
     {
         var profile = controller.Profile;
+        race = UI.Select(new[]{""}.Concat(RaceNames.Choices).Append(profile.ActiveLoadout.Race).Distinct(),RaceNames.Canonical(profile.ActiveLoadout.Race),170);race.IsEditable=true;race.Text=RaceNames.Canonical(profile.ActiveLoadout.Race);
+        raceLevel=UI.Input(profile.ActiveLoadout.RaceLevel?.ToString()??"",68);
+        string raceDraft=RaceNames.Canonical(race.Text);
+        race.AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((_,_)=>{string next=RaceNames.Canonical(race.Text);if(next!=raceDraft){raceLevel.Clear();raceDraft=next;}}));
         folder = UI.Input(profile.GameFolder); currentClasses = UI.Input(string.Join('/', profile.CurrentClasses)); reached50 = UI.Input(string.Join(',', profile.Level50Classes)); priority = UI.Input(string.Join(',', profile.GoalPriority)); timeout = UI.Input(profile.EncounterTimeoutSeconds.ToString(), 130); resume = UI.Input(profile.EncounterResumeSeconds.ToString(), 130); resume.ToolTip = "Resume an unresolved fight within this many seconds of its last combat activity. Set 0 to disable resumption. The idle timeout still applies.";
         Appearance.RaisedButtons(Body);
         theme = UI.Select(Appearance.Themes, ThemeCatalog.SelectedName(profile.Theme), 250);
         secondaryText = UI.Select(Appearance.SecondaryTextChoices, TrackerPresentation.Secondary(profile,profile.Theme=="Auto"?controller.ThemeName:profile.Theme), 168);
         objectiveMode = UI.Select(["Current zone only", "My queue", "Suggestions"], profile.ObjectiveMode, 160);
         objectiveMode.ToolTip = "Always show local goals first. When none remain, My queue follows your pinned order; Suggestions ranks available goals by class priority and source evidence.";
-        petType = UI.Select(["Auto", "Earth", "Fire", "Air", "Water", "Undead", "Animation", "Warder", "Spirit", "Warrior"], profile.PetElementOverride.Length == 0 ? "Auto" : profile.PetElementOverride, 170);
+        petType = UI.Select(PetDefinition.OverrideChoices, profile.PetElementOverride.Length == 0 ? "Auto" : profile.PetElementOverride, 170);
         petType.ToolTip = "Auto uses correlated summon evidence, then explicitly inferred owned-pet signatures. A manual choice takes precedence.";
         loadout = UI.Select(profile.Loadouts.Select(x => x.Name), profile.SelectedLoadout, 220);
         hide = new() { Content = "Hide overlays outside EverQuest and this companion", IsChecked = profile.HideWhenUnfocused };
         sounds = new() { Content = "Play a sound for needed-item alerts", IsChecked = profile.Sounds };
         click = new() { Content = "Click-through overlays", IsChecked = profile.Objectives.ClickThrough && profile.Dps.ClickThrough };
         locked = new() { Content = "Lock overlay positions and sizes", IsChecked = profile.Objectives.Locked && profile.Dps.Locked };
-        smoothMotion = new() { Content = "Smooth motion", IsChecked = profile.SmoothMeterMotion, ToolTip = "Animate damage totals, bars and row movement. DPS/HPS readings remain exact on their two-second cadence." };
+        smoothMotion = new() { Content = "Smooth motion", IsChecked = profile.SmoothMeterMotion, ToolTip = "Animate workspace opening/closing, damage totals, bars and row movement. DPS/HPS readings remain exact on their two-second cadence. Windows reduced-motion preferences are respected." };
         borderless = new() { Content = "Fit windowed EverQuest borderlessly to its monitor", IsChecked = profile.BorderlessEnabled };
         meterStyle = UI.Select(["Minimal", "Frost", "Luminous"], profile.MeterStyle, 120);
         opacity.Value = profile.Objectives.Opacity;
         iconStyle.SelectedItem = profile.IconStyle.ToString();
         BuildPages(); UpdateStatus(); preview.Apply(profile);
+        loadout.SelectionChanged+=(_,_)=>{var selected=profile.Loadouts.FirstOrDefault(l=>l.Name==loadout.SelectedItem?.ToString());if(selected!=null){race.Text=RaceNames.Canonical(selected.Race);raceLevel.Text=selected.RaceLevel?.ToString()??"";}};
         appearanceSave.Tick += (_, _) => { appearanceSave.Stop(); Controller.Save(); };
         secondaryText.SelectionChanged += (_, _) => { if(changingSecondary)return; string current=profile.Theme; profile.SecondaryTextByTheme[TrackerPresentation.ThemeFamily(current=="Auto"?Controller.ThemeName:current)]=secondaryText.SelectedItem?.ToString()??"Candlelight Cream"; ApplyAppearance(); }; theme.SelectionChanged += (_, _) => { profile.Theme=ThemeCatalog.Choices.First(c=>c.Name==theme.SelectedItem?.ToString()).Id; changingSecondary=true;string current=profile.Theme;secondaryText.SelectedItem=TrackerPresentation.Secondary(profile,current=="Auto"?Controller.ThemeName:current);changingSecondary=false;ApplyAppearance(); }; meterStyle.SelectionChanged += (_, _) => ApplyAppearance();
         iconStyle.SelectionChanged += (_, _) => { ApplyAppearance(); appearanceSave.Stop(); Controller.Save(); };
@@ -76,6 +83,8 @@ public sealed partial class SettingsWindow : FrostWindow
         var current = Parse(currentClasses.Text); var fifty = Parse(reached50.Text); var order = Parse(priority.Text);
         if (current.Count > 3 || current.Concat(fifty).Any(c => !valid.Contains(c))) { Invalid(SettingsSection.Character, "Use up to three valid current class codes; leave blank while unknown."); return; }
         if (order.Any(c => !valid.Contains(c))) { Invalid(SettingsSection.Objectives, "Goal priority requires valid class codes."); return; }
+        int? savedRaceLevel=null;
+        if(raceLevel.Text.Trim().Length>0){if(!int.TryParse(raceLevel.Text.Trim(),out int value)||value<1||value>50){Invalid(SettingsSection.Character,"Race level must be 1–50, or blank for Unknown. Class level is unchanged.");return;}savedRaceLevel=value;}
         if(!timingInputs.TryRead(out int seconds,out int resumeSeconds)){Invalid(SettingsSection.Combat,timingInputs.Error.Text);return;}
         if (loadout.SelectedItem?.ToString() != Controller.Profile.SelectedLoadout && !((App)Application.Current).CanChangeEquipmentContext()) return;
         if(!((App)Application.Current).TryApplyShortcuts(shortcutSettings.Draft,out string shortcutError)){shortcutSettings.Failed(shortcutError);Invalid(SettingsSection.Advanced,shortcutError);return;}
@@ -86,6 +95,7 @@ public sealed partial class SettingsWindow : FrostWindow
             p.HideWhenUnfocused = hide.IsChecked == true; p.Sounds = sounds.IsChecked == true;
             p.SmoothMeterMotion = smoothMotion.IsChecked == true; p.MeterStyle = meterStyle.SelectedItem?.ToString() ?? "Frost";
             p.SelectedLoadout = loadout.SelectedItem?.ToString() ?? "Current"; p.ActiveLoadout.Classes = current;
+            p.ActiveLoadout.Race=RaceNames.Canonical(race.Text);p.ActiveLoadout.RaceLevel=savedRaceLevel;
             p.PetElementOverride = petType.SelectedItem?.ToString() is null or "Auto" ? "" : petType.SelectedItem.ToString()!; p.ActiveLoadout.PetType = p.EffectivePetElement; p.BorderlessEnabled = borderless.IsChecked == true;
             foreach (var overlay in new[] { p.Objectives, p.Dps }) { overlay.Opacity = opacity.Value; overlay.Locked = locked.IsChecked == true; overlay.ClickThrough = click.IsChecked == true; }
             Controller.Save(); ((App)Application.Current).ApplySettings();

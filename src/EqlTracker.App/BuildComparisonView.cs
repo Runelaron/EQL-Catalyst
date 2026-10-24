@@ -66,7 +66,7 @@ public sealed class BuildComparisonView : StackPanel
             foreach (string category in ItemStatGroups.Categories)
             {
                 string group=category;
-                var line=Live(()=>{var values=RatingExplanation.Ordered(Raw()).Where(c=>ItemStatGroups.Category(c.Stat)==group&&(positive?c.ItemChange>0:c.ItemChange<0)).Select(c=>RatingExplanation.GroupedLabel(c.Stat)+" "+RatingExplanation.Signed(c.ItemChange)+(c.Stat=="Delay"?c.ItemChange<0?" (faster)":" (slower)":""));string text=string.Join(" · ",values);return text.Length==0?"":group+": "+text;},11,"Foreground");
+                var line=Live(()=>{var values=RatingExplanation.Ordered(Raw()).Where(c=>ItemStatGroups.Category(c.Stat)==group&&(positive?c.ItemChange>0:c.ItemChange<0)).Select(c=>RatingExplanation.GroupedLabel(c.Stat)+" "+RatingExplanation.Signed(c.ItemChange)+(c.Stat=="Delay"?c.ItemChange<0?" (faster)":" (slower)":""));string text=string.Join(" · ",values);return text.Length==0?"":group+": "+(group=="AC"?text.Replace("AC ","",StringComparison.Ordinal):text);},11,"Foreground");
                 line.ToolTip="Known changes in AC / Resources / Weapons / Stats / Resists order. See rating details for weights and uncertainty.";Children.Add(line);
             }
         }

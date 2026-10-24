@@ -1,0 +1,70 @@
+{
+  "TemplateVersion": 2,
+  "ValuePolicy": "Null means unknown or not shown, never zero. Preserve raw invalid values separately with an explanation. HP/Mana/Endurance denote displayed maximums; keep current values separate. Do not assign meanings to paired AC/Attack fields without evidence.",
+  "RunId": "",
+  "CapturedAtWithUtcOffset": null,
+  "GamePatch": "2026-10-22",
+  "ConfirmedAfterPatch": false,
+  "Experiment": "item-upgrade | pet-stat-ABA | weapon-order | combat",
+  "Context": {
+    "ClassTrio": [], "ClassLevel": null, "Race": "", "RaceLevel": null,
+    "Zone": "", "InstanceDifficulty": "", "PetFamily": "",
+    "SummonSpell": "", "SummonRank": null, "ActualPetLevel": null,
+    "SummonTierProgressNumerator": null, "SummonTierProgressDenominator": null,
+    "OwnerLevelAtSummon": null, "PetClassesDisplayed": [],
+    "PetIdentityEvidence": "", "Focus": [], "RelevantAARanks": {},
+    "OwnerPetAffectingEffects": [], "PetBuffs": [], "BuffListComplete": false,
+    "Taunt": null, "DualWield": null, "Positioning": "", "Target": "",
+    "TargetLevel": null, "TargetDefenseEvidence": ""
+  },
+  "PhysicalItem": {
+    "LocalCopyLabel": "", "CatalogIdentity": "", "GameItemId": null,
+    "IntrinsicEffects": [], "ConfiguredEffects": [], "OtherSimultaneousChanges": []
+  },
+  "Captures": [
+    {
+      "Phase": "before | after | restored-baseline | repeat | holdout",
+      "CapturedAtWithUtcOffset": null, "EvidenceFiles": [],
+      "ItemRank": null, "TierProgressNumerator": null, "TierProgressDenominator": null,
+      "ItemDisplayedValues": { "Damage": null, "Delay": null, "Ratio": null, "DamageBonus": null, "AccuracyPercent": null, "Weight": null, "AC": null, "HP": null, "Mana": null, "Endurance": null, "STR": null, "STA": null, "AGI": null, "DEX": null, "INT": null, "WIS": null, "CHA": null, "ATK": null, "HPRegen": null, "ManaRegen": null, "EnduranceRegen": null, "HastePercent": null, "ResistFire": null, "ResistCold": null, "ResistMagic": null, "ResistDisease": null, "ResistPoison": null, "ResistVoid": null, "ResistCorruption": null },
+      "OtherItemStatsAndResists": {},
+      "PetDisplayedTotals": {
+        "HP": null, "HPCurrent": null, "Mana": null, "ManaCurrent": null,
+        "Endurance": null, "EnduranceCurrent": null,
+        "AC": null, "ACRawPair": [null, null], "AttackRawPair": [null, null],
+        "STR": null, "STA": null, "AGI": null, "DEX": null, "INT": null, "WIS": null, "CHA": null,
+        "AttackSpeedPercent": null, "HPRegen": null, "ManaRegen": null, "EnduranceRegen": null,
+        "ResistFire": null, "ResistCold": null, "ResistMagic": null, "ResistDisease": null,
+        "ResistPoison": null, "ResistVoid": null, "ResistCorruption": null
+      },
+      "AdditionalCombatFields": {
+        "Offense": null, "Accuracy": null, "Mitigation": null, "Evasion": null,
+        "InnateDamage": null, "InnateDelay": null, "DamageBonus": null,
+        "DualWieldSkill": null, "DoubleAttackSkill": null, "BackstabSkill": null,
+        "DamageShield": null, "AbsorptionRemaining": null, "AbsorptionMaximum": null
+      },
+      "RawInvalidDisplayedValues": {}, "StatEvidence": {},
+      "Buffs": [], "BuffListComplete": false,
+      "OtherPetDisplayedTotals": {}, "ActualEquippedItemsInOrder": [],
+      "EffectivePrimary": "", "EffectiveSecondary": "", "ActiveEffects": [],
+      "EncounterIds": [], "Damage": null, "SummedEncounterSeconds": null,
+      "MeleeDamage": null, "SpecialDamage": null, "SpellDamage": null, "ProcDamage": null,
+      "UnreadableOrMissingFields": [], "Notes": ""
+    }
+  ],
+  "SourceEvidence": { "ExportTimes": [], "RelevantLogRanges": [], "ClientFileHashes": {}, "WebSourcesAndRevisions": [], "TranscriptionReviewed": false },
+  "Analysis": {
+    "MeasuredDifferences": {}, "GearContributions": {}, "BuffContributions": {},
+    "EquipmentSubtractedEstimates": {},
+    "LocallyMeasuredCoefficients": { "HPPerSTA": null, "ManaPerINT": null, "ManaPerWIS": null },
+    "CoefficientContext": "Record pet family, exact summon, rank, actual level, stat range, patch, focus, AA, gear and buffs. Coefficients need not be constant between contexts.",
+    "RankGrowth": {
+      "RankA": null, "RankB": null, "ActualLevelA": null, "ActualLevelB": null,
+      "PerStatChanges": {}, "HPRankRule": "unresolved",
+      "HPGainAfterLevelCap": null, "RoundingRule": "unresolved",
+      "LevelFormulaStatus": "Documented estimate: min(summon base level + rank, owner level); focus and observed exceptions remain separate.",
+      "HistoricalGuidance": "The pre-October-22 Pet Guide describes 6% HP, +1 innate base damage and +5 skills per upgraded pet level, and HP gains beyond the level cap. Current coefficients, HP stacking and cap behavior require paired measurements."
+    },
+    "CandidateRule": "", "Confounds": [], "RepeatedRuns": [], "HoldoutRun": "", "Applicability": "", "Confidence": "unresolved"
+  }
+}

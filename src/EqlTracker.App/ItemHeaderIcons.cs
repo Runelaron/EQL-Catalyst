@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Markup;
 using System.Windows.Media;
 using EqlTracker.Core;
 namespace EqlTracker.App;
@@ -105,10 +106,49 @@ internal sealed class ItemHeaderIcons : Grid
 }
 public sealed partial class QuestWindow
 {
+    private static Button PetDetailsAction(Action open)
+    {
+        var button=UI.Button("Pet Details",open);button.Height=28;button.Margin=new(0);button.Padding=new(10,0,10,0);button.FontWeight=FontWeights.SemiBold;
+        button.Template=(ControlTemplate)XamlReader.Parse("""
+        <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button">
+          <Border x:Name="FlatFace" Background="{DynamicResource InnerSurface}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="2" Padding="{TemplateBinding Padding}">
+            <TextBlock Text="{TemplateBinding Content}" Foreground="{DynamicResource SecondaryText}" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="FlatFace" Property="Background" Value="{DynamicResource Selection}"/></Trigger>
+            <Trigger Property="IsPressed" Value="True"><Setter TargetName="FlatFace" Property="Background" Value="{DynamicResource Selection}"/><Setter TargetName="FlatFace" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="FlatFace" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger>
+            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+        """);
+        return button;
+    }
     private static Expander PetDetailsDisclosure(UIElement content, string help)
     {
         var expander = FocusedLayout.Disclosure("Pet Details", content, help);
-        expander.Loaded += (_, _) => { expander.ApplyTemplate(); if (Usability.Tree(expander).OfType<ToggleButton>().FirstOrDefault() is { } header) { header.HorizontalAlignment = HorizontalAlignment.Left; header.Padding = new(2, 0, 8, 0); } };
+        // Toolbar disclosure: the ordinary expander's header margins and fixed
+        // face padding exceed the 28-DIP field row and cannot be overridden by Padding.
+        expander.Margin = new(0);
+        expander.Template = (ControlTemplate)XamlReader.Parse("""
+        <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Expander"><StackPanel>
+          <ToggleButton Height="28" Margin="0" HorizontalAlignment="Left" Cursor="Hand"
+            Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
+            IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+            <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
+              <Border x:Name="Face" Background="{DynamicResource InnerSurface}" BorderBrush="Transparent" BorderThickness="1" Padding="6,0,10,0" CornerRadius="2">
+                <DockPanel VerticalAlignment="Center"><TextBlock x:Name="Arrow" Text="▸" Width="20" Foreground="{TemplateBinding Foreground}"/><ContentPresenter Content="{Binding Header, RelativeSource={RelativeSource AncestorType=Expander}}" ContentTemplate="{Binding HeaderTemplate, RelativeSource={RelativeSource AncestorType=Expander}}"/></DockPanel>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True"><Setter TargetName="Arrow" Property="Text" Value="▾"/></Trigger>
+                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/></Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate></ToggleButton.Template>
+          </ToggleButton>
+          <ContentPresenter x:Name="Details" ContentSource="Content" Visibility="Collapsed"/>
+        </StackPanel><ControlTemplate.Triggers><Trigger Property="IsExpanded" Value="True"><Setter TargetName="Details" Property="Visibility" Value="Visible"/></Trigger></ControlTemplate.Triggers></ControlTemplate>
+        """);
         return expander;
     }
 }

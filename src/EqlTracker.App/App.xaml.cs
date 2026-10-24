@@ -16,6 +16,7 @@ public partial class App : Application
     private SettingsWindow? settings;
     private NativeControlsWindow? nativeControls;
     private IconGallery? iconGallery;
+    private WorkspaceToolbarWindow? workspaceToolbar;
     private System.Windows.Forms.NotifyIcon? tray;
     private System.Drawing.Icon? trayIcon;
     private Native.Hotkeys? hotkeys;
@@ -119,7 +120,7 @@ public partial class App : Application
         { MessageBox.Show("Unable to open this profile. Existing data was not replaced.\n\n" + error.Message, "EQL Catalyst"); Shutdown(1); return; }
         Updates = new(diagnostic?Path.Combine(preview??benchmark??smoke!,".update-state"):DataRoot, ReleaseInfo.Version, !diagnostic && !e.Args.Contains("--offline"));
         if (!diagnostic) _ = UpdateCommands();
-        IconArtwork.Apply(Controller.Profile);
+        IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork);
         RefreshShortcutHints();
         CatalystBranding.SelectedId = CatalystBranding.Resolve(Controller.Profile.AppIconId).Id;
         CatalystBranding.SelectedStyle = IconArtwork.Style;
@@ -182,8 +183,23 @@ public partial class App : Application
             try
             {
                 if (e.Args.Contains("--cascade-pointer")) { CascadingResizeReview.OpenPointer(preview,Controller); return; }
+                if(e.Args.Contains("--workspace-toolbar-only")){await WorkspaceToolbarReview.Run(Controller,quests,dps,DpsOverlay,preview);ExitTracker();return;}
+                if(e.Args.Contains("--pet-art-only")){await PetArtworkReview.Run(Controller,DpsOverlay,preview);ExitTracker();return;}
+                if(e.Args.Contains("--october-content-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await quests.ReviewOctoberContent(preview,DpsOverlay);ExitTracker();return; }
+                if(e.Args.Contains("--local-iteration-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await quests.ReviewLocalIteration(preview,DpsOverlay);ExitTracker();return; }
+                if(e.Args.Contains("--pet-context-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetDetailsPopup(preview);ExitTracker();return; }
+                if(e.Args.Contains("--standard-pet-buffs-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewStandardPetBuffs(preview);ExitTracker();return; }
+                if(e.Args.Contains("--pet-workspace-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetWorkspace(preview);ExitTracker();return; }
+                if(e.Args.Contains("--pet-contributions-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetContributions(preview);ExitTracker();return; }
+                if(e.Args.Contains("--pet-research-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetResearch(preview);ExitTracker();return; }
+                if(e.Args.Contains("--independent-displays-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await DpsOverlay.ReviewIndependentDisplays(preview);ExitTracker();return; }
+                if(e.Args.Contains("--title-selector-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();DpsOverlay.ReviewTitleSelector(preview);ExitTracker();return; }
+                if(e.Args.Contains("--beta16-review")) {await Beta16Review.Run(Controller,quests,dps,DpsOverlay,preview);ExitTracker();return;}
                 if(e.Args.Contains("--beta14-review")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewBeta14(preview);ExitTracker();return; }
                 if(e.Args.Contains("--progress-reward-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewProgressRewards(preview);ExitTracker();return; }
+                if(e.Args.Contains("--placement-effects-only")) { if(Value("--placement-restore") is {} placementFile) { Controller.Profile.Panels=Json.Read<Dictionary<string,PanelState>>(placementFile);quests.Placement!.ReviewEnabled=true;quests.Opacity=0; } quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPlacementEffects(preview);ExitTracker();return; }
+                if(e.Args.Contains("--resize-toolbar-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewResizeToolbar(preview);ExitTracker();return; }
+                if(e.Args.Contains("--pet-flow-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetFlow(preview);ExitTracker();return; }
                 if(e.Args.Contains("--compact-pet-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewCompactPet(preview);ExitTracker();return; }
                 if(e.Args.Contains("--correct-pet-ratings-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewCorrectPetRatings(preview);ExitTracker();return; }
                 if(e.Args.Contains("--quest-pet-slots-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewQuestPetSlots(preview);ExitTracker();return; }
@@ -313,12 +329,14 @@ public partial class App : Application
         if (Value("--update-receipt") is string receipt && Path.GetFullPath(receipt).StartsWith(Path.Combine(DataRoot,"updates")+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase))
             UpdateFiles.WriteJson(receipt,new{Version=ReleaseInfo.Version,Started=DateTimeOffset.UtcNow});
         if (firstSetup || e.Args.Contains("--open-tracker")) { OpenQuests(); if(Enum.TryParse<TrackerTab>(Value("--tracker-tab"),out var requested))quests?.ShowView(requested); }
+        else { var bar=EnsureWorkspaceToolbar();if(bar.State.Visible){bar.RequestedVisible=true;bar.Show();} }
     }
     private readonly List<double> uiSamples = [];
-    private IEnumerable<FrostWindow> Panels() => new FrostWindow?[] { ObjectivesOverlay, DpsOverlay, quests, dps, settings, nativeControls, iconGallery }.OfType<FrostWindow>();
+    private IEnumerable<FrostWindow> Panels() => new FrostWindow?[] { ObjectivesOverlay, DpsOverlay, workspaceToolbar, quests?.IsAttachedWorkspace==true?null:quests, dps?.IsAttachedWorkspace==true?null:dps, settings, nativeControls, iconGallery }.OfType<FrostWindow>();
 
-    public void OpenQuests(string? zoneFilter = null) { quests ??= new(Controller); if (zoneFilter != null) quests.SetZoneFilter(zoneFilter); quests.Refresh(); Native.ShowPanel(quests); }
-    public void OpenDps() { dps ??= new(Controller); dps.Refresh(); Native.ShowPanel(dps); }
+    private WorkspaceToolbarWindow EnsureWorkspaceToolbar()=>workspaceToolbar??=new(Controller,id=>id=="Tracker"?quests??=new(Controller):dps??=new(Controller),OpenSettings);
+    public void OpenQuests(string? zoneFilter = null) { var bar=EnsureWorkspaceToolbar();if(!bar.Open("Tracker"))return;if(zoneFilter!=null)quests!.SetZoneFilter(zoneFilter);quests!.Refresh();if(!NativeSetup.GameRunning())bar.FocusWhenShown("Tracker"); }
+    public void OpenDps() { var bar=EnsureWorkspaceToolbar();if(bar.Open("CombatLab")&&!NativeSetup.GameRunning())bar.FocusWhenShown("CombatLab"); }
     public void OpenSettings() { settings ??= new(Controller); settings.UpdateStatus(); Native.ShowPanel(settings); }
     public void OpenOverlay(bool damage) { var panel=damage?DpsOverlay:ObjectivesOverlay;panel.RequestedVisible=true;panel.Show();Native.SetOverlay(panel,panel.ClickThrough);if(!NativeSetup.GameRunning())panel.Activate(); }
     public void OpenIcons() { iconGallery ??= new(Controller); Native.ShowPanel(iconGallery); }
@@ -343,7 +361,7 @@ public partial class App : Application
         if (id == 2) DpsOverlay.RequestedVisible = !DpsOverlay.RequestedVisible;
         if (id == 3) { bool enabled = !Controller.Profile.Objectives.ClickThrough; Controller.Profile.Objectives.ClickThrough = Controller.Profile.Dps.ClickThrough = enabled; ApplySettings(); Controller.Save(); }
     }
-    public void ApplySettings() { IconArtwork.Apply(Controller.Profile);RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
+    public void ApplySettings() { IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork);workspaceToolbar?.ApplyMotionPreference();RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
     internal string ShortcutLabel(OverlayShortcutAction action)=>OverlayShortcuts.Label(Controller.Profile,action);
     private static string ShortcutActionName(OverlayShortcutAction action)=>action switch{OverlayShortcutAction.Objectives=>"Toggle objectives",OverlayShortcutAction.Dps=>"Toggle DPS",_=>"Toggle click-through"};
     private void RefreshShortcutHints()
@@ -378,6 +396,6 @@ public partial class App : Application
     public void ExitTracker()
     {
         if (!Exiting && !Controller.Demo && (quests?.ConfirmGearWorkspaceExit() == false || quests?.ConfirmPetWorkspaceExit() == false)) return;
-        if (Exiting) return; Exiting = true; updatePipeCancel.Cancel(); Updates?.Dispose(); timer.Stop(); iconRefresh.Stop(); StopCharacterDiscovery(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
+        if (Exiting) return; workspaceToolbar?.SaveBeforeExit(); foreach (var window in Windows.OfType<FrostWindow>()) window.Placement?.Commit(); Exiting = true; updatePipeCancel.Cancel(); Updates?.Dispose(); timer.Stop(); iconRefresh.Stop(); StopCharacterDiscovery(); Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= DisplayChanged; Native.RestoreGameFrame(); hotkeys?.Dispose(); wheelRouter?.Dispose(); tray?.Dispose(); trayIcon?.Dispose(); Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); foreach (var window in Windows.Cast<Window>().ToArray()) window.Close(); Shutdown();
     }
 }

@@ -15,44 +15,33 @@ public sealed partial class QuestWindow
     private DataObject CatalogData(PetSearchRow row)
     { var instance = PetInspectedInstance(row); var data = new DataObject("EQL.CatalogItem", row.Item.Key); data.SetData("EQL.PetCatalog", new PetCatalogDrag(row.Item.Key, instance == null ? null : EquipmentPositions.Copy(instance))); return data; }
     private void PetMessage(string message, bool error = false)
-    { petFeedback.Text = message; petFeedback.SetResourceReference(TextBlock.ForegroundProperty, error ? "Violet" : "Mint"); petFeedback.ToolTip = message; }
+    { petFeedback.Text = message; petFeedback.Visibility=message.Length==0?Visibility.Collapsed:Visibility.Visible; petFeedback.SetResourceReference(TextBlock.ForegroundProperty, error ? "Violet" : "Mint"); petFeedback.ToolTip = message; }
     private void CommitPetInventory()
     {
         // Membership/order is a report, not evidence of the game's automatic equipment choice.
-        if (PetDestination == PetInventoryDestination.Confirmed && SelectedPetInventory is { } inventory)
-            Controller.Profile.ActiveLoadout.ConfirmedPetInventory = EquipmentPositions.Copy(inventory);
         PetEdited();
     }
     private void QuickAddPet(ItemDefinition item, InventoryEntry? instance, int? position)
     {
         if (SelectedPetInventory is not { } build) return;
-        if (PetInventoryEditing.Add(build, item, instance, PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes), position, PetDestination == PetInventoryDestination.Confirmed, out var added, out string error))
-        { petSelectedId = added!.Id; CommitPetInventory(); PetMessage($"Added {added.Name} to position {added.Position} · Undo available."); }
+        int target=position??PetInventoryEditing.NextPosition(build);
+        if (PetPositionEditing.Replace(build,item,instance,target,PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes),out string error,Controller.Profile.ActiveLoadout,Controller.Catalog))
+        { petSelectedId = build.Items.First(i=>i.Position==target).Id; CommitPetInventory(); PetMessage($"Position {target} updated in draft; Exaltations retained."); }
         else PetMessage(error, true);
     }
     private void PlanPetReplacement(GearRow row, int? requestedPosition)
     {
-        if (CurrentBuild is not { } build) return;
-        int capacity = PetEquipmentPlanner.Capacity(Controller.Profile.ActiveLoadout.Classes);
-        int position = requestedPosition ?? Enumerable.Range(1, capacity).FirstOrDefault(p => build.Items.All(i => i.Position != p));
-        if (position < 1 || position > capacity) { PetMessage("Choose a replacement position or free inventory space in this plan.", true); return; }
-        var existing = build.Items.FirstOrDefault(i => i.Position == position);
-        var value = new PetInventoryItem { Id = Guid.NewGuid().ToString("N"), Position = position, Name = row.Item.Name, ItemKey = row.Item.Key, Rank = row.Rank,
-            Slot = existing is { Slot: not "Storage" } ? existing.Slot : EquipmentPositions.Normalize(row.Item.Slots.FirstOrDefault() ?? "Storage") };
-        if (row.Instance != null) value.Exaltations = row.Instance.Augments.Select(a => new ExaltationAssignment { SourceName = Identity.Canonical(a.Name), EffectId = a.EffectIdentity, Effect = a.EffectText, State = "Planned" }).ToList();
-        PetBuildEditing.Remember(build, "Planned replacement");
-        if (!PetInventoryEditing.Put(build, value, existing?.Position, true, out string error)) { PetMessage(error, true); return; }
-        petSelectedId = value.Id; PetEdited();
-        PetMessage("Planned replacement saved · confirmed equipment unchanged · Undo available.");
+        QuickAddPet(row.Item,row.Instance,requestedPosition);
     }
+
     internal bool CommitPetRank(string id, int rank)
     {
         if (SelectedPetInventory is not { } build) return false;
         if (!PetInventoryEditing.SetRank(build, id, rank, Controller.Catalog, out string error)) { PetMessage(error, true); return false; }
         petSelectedId = id;
         // Flush after the grid has completed its cell edit, never replace ItemsSource mid-edit.
-        Dispatcher.BeginInvoke(() => { if (PetDestination == PetInventoryDestination.Confirmed && build.Items.FirstOrDefault(i => i.Id == id) is { EquipmentVerified: true }) PetInventoryEditing.Confirm(Controller.Profile.ActiveLoadout, build, DateTime.Now); else if (PetDestination == PetInventoryDestination.Confirmed) Controller.Profile.ActiveLoadout.ConfirmedPetInventory = EquipmentPositions.Copy(build); PetEdited(); });
-        PetMessage(petTheory != null ? $"+Rank {rank} changed · Save theorycraft explicitly · Undo available." : $"+Rank {rank} saved · Undo available."); return true;
+        Dispatcher.BeginInvoke(() => PetEdited());
+        PetMessage(petTheory != null ? $"+Rank {rank} changed · Save theorycraft explicitly · Undo available." : $"Rank {rank} changed in draft · Save to commit."); return true;
     }
     internal void AddPetCandidateForCheck(string key, int? position = null)
     { if (Controller.Catalog.FindKey(key) is { } item) QuickAddPet(item, null, position); }

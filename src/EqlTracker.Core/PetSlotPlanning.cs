@@ -103,11 +103,16 @@ public static class PetSlotPlanning
     {
         var slot = build.SlotConfigurations.FirstOrDefault(s => s.Position == item.Position);
         var effects = slot?.Effects ?? item.Exaltations;
-        var context = new LoadoutProfile { Classes = owner.Classes.ToList(), Level = owner.Level, PetType = build.PetType, PetLevel = build.PetLevel, Race = owner.Race, Deity = owner.Deity }; var result = new List<ExaltationAssignment>();
+        var conflicts = PetEffectPolicy.Conflicts(effects);
+        foreach (string kind in conflicts) notes?.Add("Inactive · " + item.Name + ": conflicting " + kind + " Exaltations; choose one in Edit selected.");
+        var context = new LoadoutProfile { Classes = owner.Classes.ToList(), Level = owner.Level, PetType = build.PetType, PetLevel = build.PetLevel, Race = owner.Race, RaceLevel = owner.RaceLevel, Deity = owner.Deity }; var result = new List<ExaltationAssignment>();
         foreach (var effect in effects)
         {
+            string kind = PetEffectPolicy.Kind(effect);
+            if (conflicts.Contains(kind)) continue;
+            if (!PetEffectPolicy.Recognized(kind)) { notes?.Add("Inactive · " + effect.SourceName + ": effect type unresolved"); continue; }
             var source = catalog.Find(effect.SourceName);
-            var option = source == null ? null : new ExaltationOption(effect.EffectId, source, ExaltationPlanner.EffectType(effect.Effect), effect.Effect, ExaltationPlanner.Unlock(ExaltationPlanner.EffectType(effect.Effect)), false, false);
+            var option = source == null ? null : new ExaltationOption(effect.EffectId, source, kind, effect.Effect, ExaltationPlanner.Unlock(kind), false, false);
             string reason = option == null ? "Effect source metadata pending" : ExaltationPlanner.Validate(option, definition, item.Rank, intended, context, true, catalog);
             if (reason == "Compatible" && source?.EffectActivationLevel is { } activation && build.PetLevel is { } level && level < activation) reason = "Requires pet level " + activation;
             if (reason != "Compatible") { notes?.Add("Inactive · " + effect.SourceName + ": " + reason); continue; }

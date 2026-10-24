@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("EQLTracker")]
 [assembly: InternalsVisibleTo("EqlTracker.Tests")]
 [assembly: InternalsVisibleTo("EQLUpdater")]
+[assembly: InternalsVisibleTo("EqlCatalogAudit")]
 
 namespace EqlTracker.Core;
 

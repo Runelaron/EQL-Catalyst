@@ -50,6 +50,7 @@ def main():
         shutil.copy2(ROOT/'docs/role-ratings.md',payload/'ROLE-RATINGS.md')
         shutil.copy2(ROOT/'docs/pet-comparison.md',payload/'PET-COMPARISON.md')
         shutil.copy2(ROOT/'docs/application-updates.md',payload/'APPLICATION-UPDATES.md')
+        shutil.copy2(ROOT/'docs/beta16.md',payload/'BETA-1.6.md')
         shutil.copy2(ROOT/'docs/progress-rewards.md',payload/'PROGRESS-REWARDS.md')
         (payload/'licenses').mkdir(exist_ok=True)
         sdks=run([args.dotnet,'--list-sdks'],capture_output=True,text=True).stdout

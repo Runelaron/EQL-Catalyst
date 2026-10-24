@@ -110,6 +110,15 @@ public static class PetClientSpellAdapter
 {
     public const string Version="eql-spells-171-172-v1";
     private static readonly string[] Classes=["WAR","CLR","PAL","RNG","SHD","DRU","MNK","BRD","ROG","SHM","NEC","WIZ","MAG","ENC","BST","BER"];
+    public static PetBuffCatalog ParseFile(string path,CancellationToken token)
+    {
+        byte[] bytes=File.ReadAllBytes(path);token.ThrowIfCancellationRequested();
+        string hash=Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(bytes));
+        var catalog=Parse(System.Text.Encoding.UTF8.GetString(bytes).TrimStart('\uFEFF').Split('\n').Select(s=>s.TrimEnd('\r')),token);
+        catalog.Version+=":sha256:"+hash;
+        catalog.Status+=" File SHA-256: "+hash+" · UTC modified: "+File.GetLastWriteTimeUtc(path).ToString("O");
+        return catalog;
+    }
     public static PetBuffCatalog Parse(IEnumerable<string> lines,CancellationToken token)
     {
         var catalog=PetBuffCatalog.References();int count=0;

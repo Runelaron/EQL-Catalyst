@@ -8,8 +8,8 @@ public static class ItemEquipmentIcons
 {
     private static readonly Dictionary<string, (string Label, string Role)> armor = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Head"]=("Head armor","item-head"), ["Face"]=("Face armor","item-face"), ["Shoulders"]=("Shoulder armor","item-shoulders"),
-        ["Arms"]=("Arm armor","item-arms"), ["Wrist"]=("Wrist armor","item-wrists"), ["Chest"]=("Chest armor","item-armor"),
+        ["Head"]=("Helm","item-head"), ["Face"]=("Face","item-face"), ["Shoulders"]=("Shoulders","item-shoulders"),
+        ["Arms"]=("Arm armor","item-arms"), ["Wrist"]=("Wrists","item-wrists"), ["Chest"]=("Chest armor","item-armor"),
         ["Hands"]=("Gloves","item-gloves"), ["Legs"]=("Leg armor","item-legs"), ["Feet"]=("Boots","item-boots"),
         ["Back"]=("Cloak","item-cloak"), ["Waist"]=("Belt","item-belt"), ["Finger"]=("Ring","item-ring"), ["Ear"]=("Earring","item-earring"), ["Neck"]=("Necklace","item-necklace")
     };

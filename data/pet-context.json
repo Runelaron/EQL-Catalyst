@@ -1,5 +1,5 @@
 {
-  "Version": "2026-10-18.2",
+  "Version": "2026-10-22.1",
   "Spells": [
     {
       "PetType": "Warder",
@@ -1118,6 +1118,32 @@
       ],
       "BasePetLevel": 25,
       "LevelEvidence": "https://eqlwiki.com/Summon_Dead revision 168301"
+    },
+    {
+      "PetType": "Monster",
+      "Name": "Monster Summoning I",
+      "CasterClass": "MAG",
+      "RequiredLevel": 30,
+      "Url": "https://eqlwiki.com/Monster_Summoning_I",
+      "Revision": 168337,
+      "Aliases": [
+        "Summon Monster I"
+      ],
+      "BasePetLevel": 29,
+      "LevelEvidence": "EQLWiki spell revision 168337, August 9 2026: base summon level 29; owner spell requirement 30. October 22 official notes supersede the old pet class with WAR/BER; current HP/mana baselines remain unknown."
+    },
+    {
+      "PetType": "Monster",
+      "Name": "Monster Summoning II",
+      "CasterClass": "MAG",
+      "RequiredLevel": 50,
+      "Url": "https://eqlwiki.com/Monster_Summoning_II",
+      "Revision": 168338,
+      "Aliases": [
+        "Summon Monster II"
+      ],
+      "BasePetLevel": 42,
+      "LevelEvidence": "EQLWiki spell revision 168338, August 9 2026: base summon level 42; owner spell requirement 50. October 22 official notes supersede the old pet class with WAR/BER; current HP/mana baselines remain unknown."
     }
   ],
   "Focuses": [
