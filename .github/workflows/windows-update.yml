@@ -52,7 +52,17 @@ jobs:
           $report=Get-Content (Join-Path $env:RUNNER_TEMP 'eql-signed-updates/upgrade-validation.json') -Raw | ConvertFrom-Json
           $report | Add-Member -NotePropertyName HarnessCommit -NotePropertyValue (git rev-parse HEAD)
           $report | ConvertTo-Json -Depth 10 | Set-Content artifacts/upgrade-validation.json -Encoding utf8
+      - name: Retain bounded synthetic update diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory artifacts -Force | Out-Null
+          foreach($name in @('upgrade-partial.json','startup-diagnostic.json')) {
+            $path=Join-Path $env:RUNNER_TEMP ('eql-signed-updates/'+$name)
+            if(Test-Path $path){Copy-Item $path artifacts/}
+          }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
           name: signed-update-validation
           path: artifacts/*.json

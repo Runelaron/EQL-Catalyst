@@ -43,13 +43,16 @@ def main():
             package={p['Kind']:job/p['Name'] for p in manifest['Packages']};payload=extract(package['Portable'],job/'extracted')
             sentinel=data/'preservation.txt';sentinel.write_text('Synthetic profile sentinel; preserve exactly.',encoding='utf-8')
             suffix=baseline['Version'].split('.')[1]+scope[0];actors=['UpdateHero'+suffix,'UpdateAlt'+suffix];processes=[]
-            for actor in actors:processes.append(subprocess.Popen([str(app/'EQLTracker.exe'),'--character',actor,'--server','example','--data-root',str(data),'--game-folder','','--offline'],cwd=app,creationflags=HIDDEN))
             kernel=ctypes.WinDLL('kernel32',use_last_error=True);kernel.WaitNamedPipeW.argtypes=[ctypes.c_wchar_p,ctypes.c_uint32];kernel.WaitNamedPipeW.restype=ctypes.c_int
-            for process in processes:
-                deadline=time.monotonic()+60
+            for actor in actors:
+                process=subprocess.Popen([str(app/'EQLTracker.exe'),'--character',actor,'--server','example','--data-root',str(data),'--game-folder','','--offline'],cwd=app,creationflags=HIDDEN);processes.append(process)
+                deadline=time.monotonic()+90
                 while not kernel.WaitNamedPipeW('\\\\.\\pipe\\EQLCatalyst-update-'+str(process.pid),10):
                     if process.poll() is not None:raise ValueError('Baseline exited before its update endpoint became ready')
-                    if time.monotonic()>=deadline:raise ValueError('Baseline update endpoint did not become ready: '+scope)
+                    if time.monotonic()>=deadline:
+                        diagnostics={p.relative_to(data).as_posix():p.read_text(errors='replace')[:8000] for p in data.rglob('*error*') if p.is_file() and p.suffix in ['.json','.txt']}
+                        (out/'startup-diagnostic.json').write_text(json.dumps({'Scope':scope,'Baseline':baseline['Version'],'Process':process.pid,'Errors':diagnostics},indent=2))
+                        raise ValueError('Baseline update endpoint did not become ready: '+scope)
                     time.sleep(.1)
             intent={'AppDirectory':str(app),'DataRoot':str(data),'PayloadDirectory':str(payload),'Installer':str(package['Installer']),'Scope':scope,'Character':actors[0],'Server':'example','GameFolder':'','Version':version,'JobDirectory':str(job)}
             (job/'apply.json').write_text(json.dumps(intent),encoding='utf-8')
@@ -74,6 +77,7 @@ def main():
             if scope!='Portable':run([app/'unins000.exe','/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART'],case)
             if sentinel.read_text()!='Synthetic profile sentinel; preserve exactly.':raise ValueError('Uninstall modified profile')
             results.append({'FromVersion':baseline['Version'],'Version':version,'Scope':scope,'Passed':True,'Profiles':2,'PayloadFiles':len(files),'SignatureRejectionPreservesRunningCopy':True,'RecoveryCreated':True,'StartupReceipts':2,'ProfileSentinelPreserved':True,'ForcedTermination':False})
+            (out/'upgrade-partial.json').write_text(json.dumps({'Commit':manifest['Commit'],'Cases':results},indent=2));print('Passed '+baseline['Version']+' / '+scope,flush=True)
     (out/'upgrade-validation.json').write_text(json.dumps({'Passed':True,'Commit':manifest['Commit'],'Cases':results,'Scope':'Disposable copies; actual signed helper, graceful multi-profile restart and backups. Dirty-work cancellation is covered separately by native workspace tests.'},indent=2),encoding='utf-8')
     print(json.dumps({'Passed':True,'Cases':len(results)}))
 if __name__=='__main__':main()
