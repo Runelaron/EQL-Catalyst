@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 HIDDEN=getattr(subprocess,'CREATE_NO_WINDOW',0)
 sha=lambda p:hashlib.file_digest(p.open('rb'),'sha256').hexdigest()
 def run(args,cwd):
-    return subprocess.run([str(a) for a in args],cwd=cwd,check=True,capture_output=True,text=True,encoding='utf-8',creationflags=HIDDEN,timeout=180)
+    return subprocess.run([str(a) for a in args],cwd=cwd,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=HIDDEN,timeout=180)
 def extract(path,destination):
     with zipfile.ZipFile(path) as z:
         for n in z.namelist():
@@ -26,9 +26,12 @@ def main():
     for baseline in baselines:
         for package in baseline['Packages']:
             path=downloads/package['Name']
-            if not path.exists():urllib.request.urlretrieve(package['Url'],path)
+            if not path.exists():
+                print('Download '+package['Name'],flush=True)
+                with urllib.request.urlopen(package['Url'],timeout=120) as response,path.open('wb') as output:shutil.copyfileobj(response,output)
             if sha(path)!=package['Sha256']:raise ValueError('Baseline package digest mismatch')
         for scope in (['Portable'] if args.portable_only else ['Portable','CurrentUser','AllUsers']):
+            print('Update '+baseline['Version']+' / '+scope,flush=True)
             case=out/(baseline['Version']+'-'+scope)
             if case.exists():raise ValueError('Use a new update-test output directory')
             data=case/'profiles';job=data/'updates/test-job';job.mkdir(parents=True)

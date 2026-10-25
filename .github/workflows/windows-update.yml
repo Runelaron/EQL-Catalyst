@@ -20,6 +20,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: windows-release
@@ -31,16 +33,23 @@ jobs:
         env:
           MANIFEST: ${{ inputs.manifest_base64 }}
           SIGNATURE: ${{ inputs.signature_base64 }}
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN: ${{ inputs.candidate_run_id }}
         run: |
           $assets=Join-Path $pwd 'candidate/dist'
           [IO.File]::WriteAllBytes((Join-Path $assets 'update-manifest.json'),[Convert]::FromBase64String($env:MANIFEST))
           [IO.File]::WriteAllBytes((Join-Path $assets 'update-manifest.sig'),[Convert]::FromBase64String($env:SIGNATURE))
           $manifest=Get-Content (Join-Path $assets 'update-manifest.json') -Raw | ConvertFrom-Json
-          if ($manifest.Commit -ne (git rev-parse HEAD)) { throw 'Candidate source is not this workflow commit' }
+          $run=Invoke-RestMethod -Headers @{Authorization=('Bearer '+$env:GH_TOKEN)} -Uri ('https://api.github.com/repos/'+$env:GITHUB_REPOSITORY+'/actions/runs/'+$env:CANDIDATE_RUN)
+          if ($manifest.Commit -ne $run.head_sha) { throw 'Manifest does not identify the candidate build' }
+          git diff --exit-code $manifest.Commit HEAD -- . ':!scripts/windows-upgrade.py' ':!.github/workflows/windows-update.yml'
+          if ($LASTEXITCODE -ne 0) { throw 'Only validation harness files may differ from the frozen candidate' }
           python scripts/windows-upgrade.py --assets $assets --output (Join-Path $env:RUNNER_TEMP 'eql-signed-updates')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           New-Item -ItemType Directory artifacts -Force | Out-Null
-          Copy-Item (Join-Path $env:RUNNER_TEMP 'eql-signed-updates/upgrade-validation.json') artifacts/upgrade-validation.json
+          $report=Get-Content (Join-Path $env:RUNNER_TEMP 'eql-signed-updates/upgrade-validation.json') -Raw | ConvertFrom-Json
+          $report | Add-Member -NotePropertyName HarnessCommit -NotePropertyValue (git rev-parse HEAD)
+          $report | ConvertTo-Json -Depth 10 | Set-Content artifacts/upgrade-validation.json -Encoding utf8
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: signed-update-validation
