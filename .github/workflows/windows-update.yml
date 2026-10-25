@@ -42,6 +42,8 @@ jobs:
           $manifest=Get-Content (Join-Path $assets 'update-manifest.json') -Raw | ConvertFrom-Json
           $run=Invoke-RestMethod -Headers @{Authorization=('Bearer '+$env:GH_TOKEN)} -Uri ('https://api.github.com/repos/'+$env:GITHUB_REPOSITORY+'/actions/runs/'+$env:CANDIDATE_RUN)
           if ($manifest.Commit -ne $run.head_sha) { throw 'Manifest does not identify the candidate build' }
+          git fetch --no-tags --depth=1 origin $manifest.Commit
+          if ($LASTEXITCODE -ne 0) { throw 'Candidate source could not be read' }
           git diff --exit-code $manifest.Commit HEAD -- . ':!scripts/windows-upgrade.py' ':!.github/workflows/windows-update.yml'
           if ($LASTEXITCODE -ne 0) { throw 'Only validation harness files may differ from the frozen candidate' }
           python scripts/windows-upgrade.py --assets $assets --output (Join-Path $env:RUNNER_TEMP 'eql-signed-updates')

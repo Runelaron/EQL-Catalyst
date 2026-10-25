@@ -1,6 +1,6 @@
 """Exercise signed updates on disposable copies; installed cases require a hosted runner."""
 from pathlib import Path
-import argparse, base64, hashlib, json, os, shutil, subprocess, time, urllib.request, zipfile
+import argparse, base64, ctypes, hashlib, json, os, shutil, subprocess, time, urllib.request, zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 HIDDEN=getattr(subprocess,'CREATE_NO_WINDOW',0)
@@ -42,10 +42,15 @@ def main():
             for name in ['update-manifest.json','update-manifest.sig']+[p['Name'] for p in manifest['Packages']]:shutil.copy2(assets/name,job/name)
             package={p['Kind']:job/p['Name'] for p in manifest['Packages']};payload=extract(package['Portable'],job/'extracted')
             sentinel=data/'preservation.txt';sentinel.write_text('Synthetic profile sentinel; preserve exactly.',encoding='utf-8')
-            actors=['UpdateHero','UpdateAlt'];processes=[]
+            suffix=baseline['Version'].split('.')[1]+scope[0];actors=['UpdateHero'+suffix,'UpdateAlt'+suffix];processes=[]
             for actor in actors:processes.append(subprocess.Popen([str(app/'EQLTracker.exe'),'--character',actor,'--server','example','--data-root',str(data),'--game-folder','','--offline'],cwd=app,creationflags=HIDDEN))
-            time.sleep(5)
-            if not all(p.poll() is None for p in processes):raise ValueError('Baseline did not remain running')
+            kernel=ctypes.WinDLL('kernel32',use_last_error=True);kernel.WaitNamedPipeW.argtypes=[ctypes.c_wchar_p,ctypes.c_uint32];kernel.WaitNamedPipeW.restype=ctypes.c_int
+            for process in processes:
+                deadline=time.monotonic()+60
+                while not kernel.WaitNamedPipeW('\\\\.\\pipe\\EQLCatalyst-update-'+str(process.pid),10):
+                    if process.poll() is not None:raise ValueError('Baseline exited before its update endpoint became ready')
+                    if time.monotonic()>=deadline:raise ValueError('Baseline update endpoint did not become ready: '+scope)
+                    time.sleep(.1)
             intent={'AppDirectory':str(app),'DataRoot':str(data),'PayloadDirectory':str(payload),'Installer':str(package['Installer']),'Scope':scope,'Character':actors[0],'Server':'example','GameFolder':'','Version':version,'JobDirectory':str(job)}
             (job/'apply.json').write_text(json.dumps(intent),encoding='utf-8')
             # Invalid signature is rejected before preparing or closing any baseline instance.
