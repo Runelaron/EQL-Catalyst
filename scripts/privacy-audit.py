@@ -48,6 +48,9 @@ def main():
     reviewed=[];unresolved=[]
     for name,rule in sorted(findings):
         relative=name.split('!',1)[-1];proof=None
+        # Portable packages add one product/version root. Approval still requires
+        # the complete inner path, exact rule and exact reviewed file bytes.
+        if '!' in name:relative=re.sub(r'^EQL-Catalyst-\d+\.\d+\.\d+-beta\.\d+-win-x64/', '', relative)
         for entry in exceptions:
             if entry['File']!=relative or entry['Rule']!=rule:continue
             digest=content_hashes[name][1 if entry.get('NormalizeLineEndings',False) else 0]

@@ -29,5 +29,12 @@ class PrivacyReviewTests(unittest.TestCase):
             p=Path(directory)/'source.zip'
             with ZipFile(p,'w') as archive:archive.writestr('safe.txt','safe');archive.comment='.'.join(['10','12','3','4']).encode()
             code,result=self.run_audit(p);self.assertEqual(code,1);self.assertTrue(any('metadata' in x['File'] for x in result['UnresolvedFindings']))
+    def test_portable_root_keeps_exact_path_and_hash_requirements(self):
+        with tempfile.TemporaryDirectory() as directory:
+            p=Path(directory)/'portable.zip';data='.'.join(['10','12','3','4']).encode()
+            record={'File':'library.dll','Rule':'private-ip-literal','Sha256':hashlib.sha256(data).hexdigest(),'Reason':'Synthetic library constant'}
+            for entry,content,expected in [('EQL-Catalyst-1.7.0-beta.1-win-x64/library.dll',data,0),('unrelated/library.dll',data,1),('EQL-Catalyst-1.7.0-beta.1-win-x64/library.dll',data+b'changed',1)]:
+                with ZipFile(p,'w') as archive:archive.writestr(entry,content)
+                code,_=self.run_audit(p,[record]);self.assertEqual(code,expected)
 
 if __name__=='__main__':unittest.main()
