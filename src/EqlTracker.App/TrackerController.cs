@@ -115,13 +115,14 @@ public sealed partial class TrackerController : IDisposable
         Combat.Saved += e => { if (!dirty.Contains(e)) dirty.Add(e); if (e.Finished) { changedHistoricalSnapshots.Add(e.Id); historicalSnapshotRevision++; } };
         if (demo) { Profile.Panels.Clear(); SeedDemo(); }
         else { ReadInventory(); ReadTheme(); }
+        InitializeJournalChanges(); InitializeOverview();
     }
     public IReadOnlyList<ObjectiveRow> Objectives { get { if (viewWorker != null) return Published?.Objectives ?? []; lock (Sync) return PlanObjectives(); } }
     public List<string> PendingGear(string text) => text.Length < 3 ? [] : equipmentCatalog?.SearchPending(text) ?? [];
     public DpsViewState DpsView() { if (viewWorker != null && Published is { } snapshot) return snapshot.Combat; lock (Sync) return BuildLabCombat(Combat.Encounters, Combat.Current, SessionStart, Profile.Meter, SessionRecords); }
     public DpsViewState OverlayDpsView() { if (viewWorker != null && Published?.OverlayCombat is { } snapshot) return snapshot; lock (Sync) return DpsViews.Build(Combat.Encounters, Combat.Current, SessionStart, Profile.OverlayMeter!, SessionRecords); }
     public void QueueMetadata(string name) { lock (Sync) metadataQueue.Add(Identity.Canonical(name)); _ = RefreshWikiAsync(true); }
-    public void Start(bool offline = false) { if (!Demo) { worker = Task.Run(RunAsync); if (!offline) { catalogWorker = Task.Run(SyncEquipmentAsync); wikiRefreshWorker=Task.Run(WikiRefreshLoop); effectReferenceWorker=Task.Run(EffectReferenceLoop); } viewWorker = Task.Run(PublishLoop); } }
+    public void Start(bool offline = false) { if (!Demo) { StartIntegratedEvidence(); worker = Task.Run(async () => { if (integratedWorker != null) await integratedWorker; await RunAsync(); }); if (!offline) { catalogWorker = Task.Run(SyncEquipmentAsync); wikiRefreshWorker=Task.Run(WikiRefreshLoop); effectReferenceWorker=Task.Run(EffectReferenceLoop); } viewWorker = Task.Run(PublishLoop); } }
     private void MergeItems(IEnumerable<ItemDefinition> items)
     {
         var batch = items.ToList(); if (batch.Count == 0) return;
@@ -182,12 +183,15 @@ public sealed partial class TrackerController : IDisposable
     public void Save()
     {
         lock (Sync) {
+            ObserveJournalChanges();
             string equipment = System.Text.Json.JsonSerializer.Serialize(new { Profile.SelectedLoadout, Profile.ActiveLoadout.Equipment, Profile.ActiveLoadout.EquipmentPositions, Profile.ActiveLoadout.EquipmentDraft, Profile.ActiveLoadout.GearBuilds, Profile.ActiveLoadout.SelectedGearBuildId, Profile.UpdateCurrentBuildFromInventory, Profile.SelfRoleVersion, Profile.SelfRoleOverrides, Profile.ActiveLoadout.Classes, Profile.ActiveLoadout.Level, Profile.ActiveLoadout.Deity, Profile.ActiveLoadout.Race, Profile.ActiveLoadout.RaceLevel, OctoberContent.Version, Profile.Weights, Profile.ActiveLoadout.Preset });
             string pets = System.Text.Json.JsonSerializer.Serialize(new { Profile.PetComparison, Profile.PetGoalWeights, Profile.ActiveLoadout.Level, Profile.ActiveLoadout.Classes, Profile.ActiveLoadout.PetPreset, Profile.ActiveLoadout.ConfirmedPetInventory, Profile.ActiveLoadout.PetBuilds, Profile.ActiveLoadout.PetLevel });
             string stats = System.Text.Json.JsonSerializer.Serialize(new { Profile.ActiveLoadout.StatProfiles, Profile.ActiveLoadout.PetStatProfiles });
+            bool mechanicsChanged=equipment!=savedEquipmentSettings||pets!=savedPetSettings||stats!=savedStatSettings;
             if (equipment != savedEquipmentSettings) { savedEquipmentSettings = equipment; equipmentRevision++; }
             if (pets != savedPetSettings) { savedPetSettings = pets; petRevision++; }
             if (stats != savedStatSettings) { savedStatSettings = stats; statProfileRevision++; }
+            if(mechanicsChanged){mechanicsInput="";RefreshMechanicalSetup();}
             string settings = PlanningSettings; if (settings != savedPlanningSettings) { savedPlanningSettings = settings; planningRevision++; plannedKey = ""; } saveRequested = true; profileNeedsPersistence = true; }
         Updated?.Invoke();
     }
@@ -240,6 +244,7 @@ public sealed partial class TrackerController : IDisposable
                                     if (!LastLogActivity.HasValue || parsed.Time > LastLogActivity) LastLogActivity = parsed.Time;
                                     ObserveSync(parsed, line.Id, historical); ObserveAbilityOutcome(parsed.AbilityOutcome);
                                     Combat.Process(parsed); ObservePetResearch(parsed, line.Id);
+                                    ObserveIntegrated(parsed, line.Id, line.Text,historical);
                                     if (parsed.Item is { } item && processedItems.Accept(line.Id))
                                     {
                                         var definition = Catalog.Find(item.Name);
@@ -265,7 +270,7 @@ public sealed partial class TrackerController : IDisposable
                     }
                     lock (Sync)
                     {
-                        if ((DateTime.Now - lastInventory).TotalSeconds > 3) { ReadInventory(); ReadTheme(); lastInventory = DateTime.Now; }
+                        if ((DateTime.Now - lastInventory).TotalSeconds > 3) { ReadInventory(); ReadTheme(); lastInventory = DateTime.Now; if(checkpoint==null)Flush(); }
                         if (retained.Date != DateTime.Now.Date)
                         {
                             var cutoff = DateTime.Now.AddDays(-30); QueuePersistence(() => store.Retain(cutoff)); Combat.Healing.Retain(cutoff); foreach (var f in Combat.Encounters) { if (f.Heals.RemoveAll(e => e.Time < cutoff) > 0) f.HealingDetailAvailable = false; }
@@ -274,6 +279,7 @@ public sealed partial class TrackerController : IDisposable
                         }
                     }
                     Updated?.Invoke();
+                    RefreshHoldings();
                     await Task.Delay(500, cancel.Token);
                 }
                 catch (OperationCanceledException) { break; }
@@ -291,6 +297,11 @@ public sealed partial class TrackerController : IDisposable
     private void Flush()
     {
         FlushAbilityOutcomes();
+        if(checkpoint==null&&saveRequested)
+        {
+            var profile=EquipmentPositions.Copy(Profile);var inventory=EquipmentPositions.Copy(Inventory);var stock=HoldingsSummary.From(profile,inventory,Catalog);
+            QueuePersistence(()=>{store.Set("profile",profile);store.Set("inventory",inventory);HoldingsIndex.Publish(Path.GetDirectoryName(DataFolder)!,stock);});saveRequested=profileNeedsPersistence=false;
+        }
         // Called while capturing ingestion state. Database work runs on one ordered writer.
         if (catalogDirty) { var frozen = new Catalog { Items = Catalog.Items.ToList(), Quests = Catalog.Quests.ToList(), SchemaVersion = Catalog.SchemaVersion, Documents = Catalog.Documents.ToList(), Zones = Catalog.Zones.ToList() }; QueuePersistence(() => store.Set("catalog", frozen)); catalogDirty = false; }
         if (checkpoint != null && (checkpoint.Offset != committedOffset || dirty.Count > 0 || observations.Count > 0 || saveRequested || Combat.Healing.PendingWrites.Count > 0))
@@ -301,12 +312,14 @@ public sealed partial class TrackerController : IDisposable
             var profile = saveProfile ? EquipmentPositions.Copy(Profile) : null;
             var inventory = saveInventory ? EquipmentPositions.Copy(Inventory) : null;
             var point = EquipmentPositions.Copy(checkpoint); var fights = dirty.Select(CombatSnapshots.Copy).ToList(); var current = Combat.Current == null ? null : CombatSnapshots.Copy(Combat.Current);
-            var items = observations.ToArray(); var healingWrites = Combat.Healing.PendingWrites.Select(e => e.Copy()).ToArray();
+            var items = observations.ToArray(); var healingWrites = Combat.Healing.PendingWrites.Select(e => e.Copy()).ToArray(); var activities = pendingJournal.ToArray(); pendingJournal.Clear();
+            var stock = saveInventory ? HoldingsSummary.From(Profile, Inventory, Catalog) : null;
+            var integratedState = EquipmentPositions.Copy(integrated);
             var pending=new PendingPetSummonCheckpoint(point.Generation,point.Offset,Combat.Elements.Pending);
-            QueuePersistence(() => {store.Commit(point, profile!, inventory!, fights, current, items, healingWrites, saveProfile, saveInventory);store.Set("petPendingSummon-v1",pending);});
+            QueuePersistence(() => {store.Commit(point, profile!, inventory!, fights, current, items, healingWrites, saveProfile, saveInventory, activities);store.Set("petPendingSummon-v1",pending);store.Set("integrated-setup-v1",integratedState);if(stock!=null)HoldingsIndex.Publish(Path.GetDirectoryName(DataFolder)!,stock);});
             Combat.Healing.MarkSaved(healingWrites); committedOffset = checkpoint.Offset; saveRequested = profileNeedsPersistence = false; persistedInventoryVersion = inventoryVersion;
         }
-        dirty.Clear(); observations.Clear(); if (storedRosterKnown != Combat.RosterKnown) { bool known = Combat.RosterKnown; QueuePersistence(() => store.Set("rosterKnown", known)); storedRosterKnown = known; }
+        dirty.Clear(); observations.Clear(); PersistLocalJournal(); if (storedRosterKnown != Combat.RosterKnown) { bool known = Combat.RosterKnown; QueuePersistence(() => store.Set("rosterKnown", known)); storedRosterKnown = known; }
     }
     public void ReadInventory()
     {
@@ -326,7 +339,9 @@ public sealed partial class TrackerController : IDisposable
             if (after.Length != size || after.LastWriteTimeUtc != updated || !snapshot.Complete) { Status = "Inventory export incomplete; previous snapshot retained."; return; }
             if (latestExport is { } evidence && Math.Abs((evidence.Time - captured).TotalSeconds) < 10) snapshot.ExportLogId = evidence.Id;
             foreach (var (id, item) in store.ObservationRecordsAfter(captured.AddSeconds(-10)).Concat(recentObservationEvidence.Where(e => e.Item.Time >= captured.AddSeconds(-10))).DistinctBy(e => e.Id)) InventoryParser.Apply(snapshot, item, id);
+            string previousEquipment=EquipmentPositions.Fingerprint(Inventory.EquipmentPositions);bool priorCapture=Inventory.CapturedAt!=default;
             Inventory = snapshot; QuestRecipes.ApplyIdentities(Profile, Inventory); if (AcquiredQuestTracking.Apply(Catalog, Profile, Inventory) > 0) profileNeedsPersistence = true; planningRevision++; GearBuildEditing.ApplyExport(Profile, Inventory);
+            string currentEquipment=EquipmentPositions.Fingerprint(snapshot.EquipmentPositions);if(priorCapture&&previousEquipment!=currentEquipment)Journal(new(){Id="inventory:"+snapshot.CapturedAt.Ticks+":"+currentEquipment,At=snapshot.CapturedAt,Kind="Observed setup",Name="Equipment snapshot changed",Source="Observed inventory export; exact equipment-change time is unknown"});
             if (SyncRequest.Active && SyncRequest.Export && updated > SyncRequest.InventoryWriteUtc && snapshot.ExportLogId.Length > 0 && LogPosition.After(snapshot.ExportLogId, SyncRequest.Generation + ":" + (SyncRequest.BaselineLength - 1))) SyncRequest.Imported = true;
             foreach (var e in Inventory.Entries.Where(x => !x.IsAugment && Catalog.Find(x.Name, x.GameId == 0 ? null : x.GameId) == null)) metadataQueue.Add(Identity.Canonical(e.Name));
             saveRequested = true;
@@ -520,7 +535,8 @@ public sealed partial class TrackerController : IDisposable
     public void Dispose()
     {
         if (Interlocked.Exchange(ref disposeStarted, 1) != 0) return;
-        cancel.Cancel(); try { Task.WaitAll(new[] { worker, catalogWorker, viewWorker, inspectionWorker,wikiRefreshWorker,effectReferenceWorker }.OfType<Task>().ToArray(), TimeSpan.FromSeconds(5)); } catch (AggregateException) { }
+        cancel.Cancel();
+        StopPhone(); try { Task.WaitAll(new[] { worker, catalogWorker, viewWorker, inspectionWorker,wikiRefreshWorker,effectReferenceWorker,integratedWorker }.OfType<Task>().ToArray(), TimeSpan.FromSeconds(5)); } catch (AggregateException) { }
         lock (Sync) { SavePetResearch(); if (!Demo) { Flush(); var finalProfile = EquipmentPositions.Copy(Profile); var finalInventory = EquipmentPositions.Copy(Inventory); bool finalRoster = Combat.RosterKnown; QueuePersistence(() => { store.Set("profile", finalProfile); store.Set("inventory", finalInventory); store.Set("rosterKnown", finalRoster); store.Retain(DateTime.Now.AddDays(-30)); }); } }
         persistence.Writer.TryComplete(); if (persistenceWorker != null) persistenceWorker.GetAwaiter().GetResult();
         wiki.Dispose(); equipmentCatalog?.Dispose(); store.Dispose(); cancel.Dispose();

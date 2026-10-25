@@ -69,6 +69,7 @@ public sealed partial class QuestWindow
         gearInspector.AnimateValues = Controller.Profile.SmoothMeterMotion;
         gearInspector.ShowItem(row.Item, rank, row.Rank, gearPreview.Rank.HasValue, GearInspectedInstance(row), comparison, GearPet ? Controller.Profile.ActiveLoadout.PetPreset : preset.SelectedItem?.ToString() ?? "Balanced Tank", pair, reason, ChangeGearPreviewRank, OpenGearFormula);
         gearInspector.SetOwnership(row.Item, Controller.Inventory);
+        if (!reason.StartsWith("Updating")) gearInspector.SetCompatibility(Controller.EvaluateItemCompatibility(row.Item, rank, false, null, comparison));
         gearInspector.SetCopies(PhysicalItemChoices.Ordered(Controller.Inventory.Evidence(row.Item).Where(i => !i.IsAugment && !i.IsCollection && i.Count > 0)), GearInspectedInstance(row), copy => { gearInspectedCopy = copy; gearPreview = gearPreview with { Rank = null, Revision = gearPreview.Revision + 1 }; gearSelectedKey = ""; ShowSelectedGear(); });
         if (gearAddToBuild != null) { gearAddToBuild.Content = "Add to build (+" + rank + ")"; gearAddToBuild.ToolTip = "Add this inspected +" + rank + " candidate and its effects to the selected build. Current is editable; inventory ownership evidence stays unchanged."; }
         gearDetails.Text = Controller.Inventory.Ownership(row.Item) + "\n" + string.Join("\n", row.Item.Sources.Select(s => s.ToString()).Distinct()) + "\nItem introduction: " + ItemPresentation.Expansion(row.Item) + "\n" + ItemPresentation.ExpansionNote(row.Item) + "\n" + row.Item.ExpansionEvidence;

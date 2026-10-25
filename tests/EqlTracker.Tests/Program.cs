@@ -16,6 +16,7 @@ if (args.Length == 2 && args[0] == "--refresh-item-display") { await ItemDisplay
 if (args.Length == 2 && args[0] == "--audit-item-display") { await ItemDisplayRefresh.Run(args[1], false); return; }
 
 var tests = new List<(string Name, Action Run)>();
+Beta17Tests.Register((name,run)=>tests.Add((name,run)));
 WorkspaceToolbarTests.Register((name,run)=>tests.Add((name,run)));
 UpdateTests.Register((name,run)=>tests.Add((name,run)));
 ProgressRewardTests.Register((name,run)=>tests.Add((name,run)));
@@ -46,7 +47,7 @@ string Line(string text, int seconds = 0) => $"[Tue Oct 13 21:00:{seconds:00} 20
 InventorySnapshot Stock(params (string Name, int Count)[] values) => new() { Entries = values.Select(x => new InventoryEntry { Name = x.Name, GameId = catalog.Find(x.Name)?.GameId ?? 0, Count = x.Count, Location = "Bank1" }).ToList() };
 CharacterProfile Warrior() => new() { CurrentClasses = [], OptionalClasses = ["WAR"] };
 
-Test("Catalog class coverage and attribution", () => { Equal(16, catalog.Quests.Count(q => q.Kind == "Epic")); Assert(catalog.Quests.Where(x => x.Class != "BST"&&!(x.Class=="ALL"&&x.ChecklistCoverage.StartsWith("Partial"))).All(x => x.Requirements.Count > 0)); Assert(catalog.Quests.Single(x => x.Class == "BST").Coverage.Contains("missing")); Assert(catalog.Documents.Count > 800); Assert(catalog.Items.All(x => x.Key.Length > 0)); Equal(catalog.Items.Count, catalog.Items.Select(x => x.Key).Distinct().Count()); });
+Test("Catalog class coverage and attribution", () => { Equal(16, catalog.Quests.Count(q => q.Kind == "Epic")); Assert(catalog.Quests.Where(x => x.Kind=="Epic"&&x.Class != "BST").All(x => x.Requirements.Count > 0)); Assert(catalog.Quests.Where(x=>x.Class=="ALL").All(x=>x.Steps.Count>0)); Assert(catalog.Quests.Single(x => x.Class == "BST").Coverage.Contains("missing")); Assert(catalog.Documents.Count > 800); Assert(catalog.Items.All(x => x.Key.Length > 0)); Equal(catalog.Items.Count, catalog.Items.Select(x => x.Key).Distinct().Count()); });
 Test("Canonical rank and Exaltation identity", () => { Equal("Hand of the Maestro", Identity.Canonical("Hand of the Maestro +6")); Equal("Sword", Identity.Canonical("Sword (Exaltation)")); Equal(6, Identity.Rank("Sword +6")); Assert(Identity.IsAugment("Sword (Exaltation)")); });
 Test("Inventory distinguishes keyring presence and stock", () =>
 {
@@ -147,6 +148,10 @@ PetDetailsPopupTests.Register(Test);
 PetWorkspaceTests.Register((name,run)=>tests.Add((name,run)));
 PetContributionTests.Register(Test);
 StandardPetBuffTests.Register(Test);
+OverviewTests.Register(Test);
+IntegratedCompanionTests.Register(Test);
+BardCompatibilityAcceptance.Register(Test);
+CompanionTransportTests.Register(Test);
 var watch = Stopwatch.StartNew(); int failed = 0;
 var selectedTests = args.Length==2&&args[0]=="--filter"?tests.Where(t=>t.Name.Contains(args[1],StringComparison.OrdinalIgnoreCase)).ToList():tests;
 foreach (var (name, run) in selectedTests) { try { run(); Console.WriteLine("PASS " + name); } catch (Exception e) { failed++; Console.WriteLine("FAIL " + name + ": " + e.Message); } }

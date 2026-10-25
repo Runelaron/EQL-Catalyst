@@ -13,6 +13,7 @@ public sealed partial class TrackerController
         {var saved=EquipmentPositions.Copy(standardPetBuffs);QueuePersistence(()=>store.Set("standardPetBuffs-v1",saved));}
         if(PetResearchEnabled&&!researchUnavailable&&PetResearch.ReprojectBuffMetadata(research,connectedSpells,Profile))
         {researchSource="";SavePetResearch();}
+        RefreshMechanicalSetup();
     }
     internal void SaveStandardPetBuffs(StandardPetBuffState edited)
     {
@@ -26,6 +27,7 @@ public sealed partial class TrackerController
                 current.Excluded=change.Excluded;current.OverrideRank=change.OverrideRank;current.SelectedRank=change.SelectedRank;
             }
             standardPetBuffs.Revision++;var saved=EquipmentPositions.Copy(standardPetBuffs);QueuePersistence(()=>store.Set("standardPetBuffs-v1",saved));
+            RefreshMechanicalSetup();
         }
     }
 }

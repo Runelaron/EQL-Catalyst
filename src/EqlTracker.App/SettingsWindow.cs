@@ -45,6 +45,10 @@ public sealed partial class SettingsWindow : FrostWindow
         opacity.Value = profile.Objectives.Opacity;
         iconStyle.SelectedItem = profile.IconStyle.ToString();
         BuildPages(); UpdateStatus(); preview.Apply(profile);
+        settingsBaseline=SettingsInputsKey();RefreshSettingsSave();
+        AddHandler(TextBox.TextChangedEvent,new TextChangedEventHandler((_,_)=>RefreshSettingsSave()));
+        AddHandler(System.Windows.Controls.Primitives.Selector.SelectionChangedEvent,new SelectionChangedEventHandler((_,_)=>RefreshSettingsSave()));
+        AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent,new RoutedEventHandler((_,_)=>RefreshSettingsSave()));
         loadout.SelectionChanged+=(_,_)=>{var selected=profile.Loadouts.FirstOrDefault(l=>l.Name==loadout.SelectedItem?.ToString());if(selected!=null){race.Text=RaceNames.Canonical(selected.Race);raceLevel.Text=selected.RaceLevel?.ToString()??"";}};
         appearanceSave.Tick += (_, _) => { appearanceSave.Stop(); Controller.Save(); };
         secondaryText.SelectionChanged += (_, _) => { if(changingSecondary)return; string current=profile.Theme; profile.SecondaryTextByTheme[TrackerPresentation.ThemeFamily(current=="Auto"?Controller.ThemeName:current)]=secondaryText.SelectedItem?.ToString()??"Candlelight Cream"; ApplyAppearance(); }; theme.SelectionChanged += (_, _) => { profile.Theme=ThemeCatalog.Choices.First(c=>c.Name==theme.SelectedItem?.ToString()).Id; changingSecondary=true;string current=profile.Theme;secondaryText.SelectedItem=TrackerPresentation.Secondary(profile,current=="Auto"?Controller.ThemeName:current);changingSecondary=false;ApplyAppearance(); }; meterStyle.SelectionChanged += (_, _) => ApplyAppearance();
@@ -101,7 +105,7 @@ public sealed partial class SettingsWindow : FrostWindow
             Controller.Save(); ((App)Application.Current).ApplySettings();
         }
         UpdateStatus();
-        validation.Text = "Settings saved.";
+        validation.Text = "Settings saved.";settingsBaseline=SettingsInputsKey();RefreshSettingsSave();
     }
     private void PrepareDisplay()
     {

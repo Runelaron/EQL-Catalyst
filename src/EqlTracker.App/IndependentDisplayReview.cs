@@ -52,6 +52,24 @@ public sealed partial class OverlayWindow
         Check(Controller.Profile.OverlayMeter!.DisplayMode==OverlayCombatMode.Personal&&Controller.Published!.OverlayGroup!=null,"Footer-only Group has a background group projection");
         Choose(secondary,"Combined");await Wait(()=>Controller.Published?.OverlayGroup==null);Refresh();Flush();
         Check(!DpsDisplayChoice.NeedsGroup(Controller.Profile)&&Controller.Published!.OverlayGroup==null,"Unused group projection is released");
+        var savedIdentities=Controller.Profile.PetIdentities;string savedOverride=Controller.Profile.PetElementOverride;
+        try
+        {
+            Controller.Profile.PetElementOverride="";
+            var start=new DateTime(2026,10,24,10,0,0);
+            Controller.Profile.PetIdentities=[new(){Name="Windling",Element="Air",From=start,Until=start.AddMinutes(1),Confirmed=true},new(){Name="Conjuration",Element="Monster",From=start.AddMinutes(1),Confirmed=true}];
+            var options=HeaderActions.Children.OfType<Button>().Single(b=>b.ContextMenu==HeadingTitle.ContextMenu);
+            var entries=options.ContextMenu!.Items.OfType<MenuItem>().Select(i=>i.Header?.ToString()).ToList();
+            Check(entries.Count(x=>x=="Catalyst Toolbar")==1&&!entries.Contains("Combat Lab")&&!entries.Contains("Quest & Gear Tracker"),"Panel options expose one Catalyst Toolbar destination");
+            var menuPet=primary.ContextMenu!.Items.OfType<MenuItem>().Single(i=>Equals(i.Header,"Pet"));
+            Click(primary);Check(((ActorBadge)menuPet.Icon).Element=="Monster"&&menuPet.ToolTip.ToString()!.Contains("Berserker"),"Pet menu resolves the most recent owned Monster and names its family");
+            Controller.Profile.PetIdentities[^1].Until=start.AddMinutes(2);
+            Controller.Profile.PetIdentities.Add(new(){Name="Unresolved",From=start.AddMinutes(2),Confirmed=true});Refresh();Flush();
+            Check(((ActorBadge)menuPet.Icon).Element=="Unknown","An open menu refreshes to generic for a newer unresolved pet");
+            Controller.Profile.PetIdentities[^1].Element="Air";Refresh();Flush();
+            Check(((ActorBadge)menuPet.Icon).Element=="Air","An open menu immediately follows corrected Air evidence");primary.ContextMenu.IsOpen=false;
+        }
+        finally{Controller.Profile.PetIdentities=savedIdentities;Controller.Profile.PetElementOverride=savedOverride;Refresh();}
         Json.Write(Path.Combine(folder,"independent-display-checks.json"),new{Passed=checks.Count,Checks=checks,Milliseconds=clock.Elapsed.TotalMilliseconds,AppSha256=Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(typeof(App).Assembly.Location))),CoreSha256=Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(typeof(CharacterProfile).Assembly.Location))),Scope="Focused synthetic routed selector/menu events, all 16 combinations, actual background group publication, readout values, persistence and normal/minimum sizing. No live profile or physical game input."});
     }
 }

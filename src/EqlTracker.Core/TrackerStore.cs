@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace EqlTracker.Core;
 
-public sealed class TrackerStore : IDisposable
+public sealed partial class TrackerStore : IDisposable
 {
     private readonly SqliteConnection connection;
     private readonly object sync = new();
@@ -17,6 +17,7 @@ public sealed class TrackerStore : IDisposable
         Execute("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS state (key TEXT PRIMARY KEY, json TEXT NOT NULL); CREATE TABLE IF NOT EXISTS encounters(id TEXT PRIMARY KEY, start TEXT NOT NULL, json TEXT NOT NULL); CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, encounter TEXT NOT NULL, time TEXT NOT NULL, json TEXT NOT NULL); CREATE INDEX IF NOT EXISTS events_encounter ON events(encounter); CREATE INDEX IF NOT EXISTS events_time ON events(time); CREATE TABLE IF NOT EXISTS observations(id TEXT PRIMARY KEY, time TEXT NOT NULL, json TEXT NOT NULL); PRAGMA user_version=2;");
         EnsureHealingSchema();
         Execute("CREATE TABLE IF NOT EXISTS ability_outcomes(id TEXT PRIMARY KEY,time TEXT NOT NULL,json TEXT NOT NULL); CREATE INDEX IF NOT EXISTS ability_outcomes_time ON ability_outcomes(time);");
+        Execute("CREATE TABLE IF NOT EXISTS activity_journal(id TEXT PRIMARY KEY,time TEXT NOT NULL,json TEXT NOT NULL); CREATE INDEX IF NOT EXISTS activity_journal_time ON activity_journal(time DESC,id DESC);");
     }
     public void EnsureHealingSchema() => Execute("CREATE TABLE IF NOT EXISTS healing(id TEXT PRIMARY KEY, encounter TEXT NOT NULL, time TEXT NOT NULL, json TEXT NOT NULL); CREATE INDEX IF NOT EXISTS healing_encounter ON healing(encounter); CREATE INDEX IF NOT EXISTS healing_time ON healing(time); PRAGMA user_version=2;");
     public List<AbilityOutcome> LoadAbilityOutcomes()
@@ -63,7 +64,7 @@ public sealed class TrackerStore : IDisposable
     }
     public void Set<T>(string key, T value)
     { lock (sync) Execute("INSERT INTO state VALUES($key,$json) ON CONFLICT(key) DO UPDATE SET json=excluded.json", null, ("$key", key), ("$json", JsonSerializer.Serialize(value, Json.Options))); }
-    public void Commit(FileCheckpoint checkpoint, CharacterProfile profile, InventorySnapshot inventory, IEnumerable<Encounter> fights, Encounter? current, IEnumerable<(string Id, ItemObservation Item)> observations, IEnumerable<HealingEvent>? healing = null, bool saveProfile = true, bool saveInventory = true)
+    public void Commit(FileCheckpoint checkpoint, CharacterProfile profile, InventorySnapshot inventory, IEnumerable<Encounter> fights, Encounter? current, IEnumerable<(string Id, ItemObservation Item)> observations, IEnumerable<HealingEvent>? healing = null, bool saveProfile = true, bool saveInventory = true, IEnumerable<JournalActivity>? activity = null)
     {
         lock (sync)
         {
@@ -73,6 +74,7 @@ public sealed class TrackerStore : IDisposable
             if (healing != null) foreach (var e in healing) SaveHealing(e, tx);
             State("checkpoint", checkpoint, tx); if (saveProfile) State("profile", profile, tx); if (saveInventory) State("inventory", inventory, tx); State("liveEncounter", current == null ? null : Summary(current), tx);
             foreach (var (id, item) in observations) Execute("INSERT OR IGNORE INTO observations VALUES($id,$time,$json)", tx, ("$id", id), ("$time", item.Time.ToString("O")), ("$json", JsonSerializer.Serialize(item, Json.Options)));
+            if (activity != null) foreach (var item in activity) SaveActivity(item, tx);
             tx.Commit(); CommitHealingVersions();
             foreach (var (id, owner) in pendingOwners) savedOwners[id] = owner;
             pendingOwners.Clear();

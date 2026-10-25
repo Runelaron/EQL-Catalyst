@@ -2,7 +2,7 @@ namespace EqlTracker.Core;
 
 internal sealed class WorkspaceToolbarState
 {
-    public List<string> Order {get;set;}=["Tracker","CombatLab"];
+    public List<string> Order {get;set;}=["Tracker","CombatLab","Overview"];
     public string Active {get;set;}="";
     public string Last {get;set;}="Tracker";
     public bool Visible {get;set;}=true;
@@ -10,7 +10,7 @@ internal sealed class WorkspaceToolbarState
     public PanelState Placement {get;set;}=new(){Width=370,Height=28};
     internal void Normalize()
     {
-        Order=(Order??[]).Where(WorkspaceToolbarLayout.Known).Distinct().Concat(new[]{"Tracker","CombatLab"}).Distinct().ToList();
+        Order=(Order??[]).Where(WorkspaceToolbarLayout.Known).Distinct().Concat(new[]{"Tracker","CombatLab","Overview"}).Distinct().ToList();
         if(!WorkspaceToolbarLayout.Known(Active))Active="";if(!WorkspaceToolbarLayout.Known(Last))Last="Tracker";
         Placement??=new(){Width=370};Placement.Height=28;
     }
@@ -19,7 +19,7 @@ internal sealed record ToolbarWorkArea(double Left,double Top,double Width,doubl
 internal sealed record AttachedWorkspaceBounds(double BarTop,double Left,double Top,double Width,double Height,bool Above);
 internal static class WorkspaceToolbarLayout
 {
-    internal static bool Known(string id)=>id is "Tracker" or "CombatLab";
+    internal static bool Known(string id)=>id is "Tracker" or "CombatLab" or "Overview";
     internal static bool Move(WorkspaceToolbarState state,string id,int direction)
     {
         state.Normalize();int old=state.Order.IndexOf(id),next=old+Math.Sign(direction);

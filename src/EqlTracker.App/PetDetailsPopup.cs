@@ -56,7 +56,7 @@ public sealed partial class QuestWindow
             var setup=Controller.StandardPetBuffSnapshot();var catalog=PetBuffCatalog.References();
             foreach(var learned in setup.Buffs)if(!catalog.Buffs.Any(b=>b.Name==learned.Spell))catalog.Buffs.Add(new(){Id="learned:"+learned.Spell,Name=learned.Spell,Source=learned.Evidence,Classes=new(){["MAG"]=0}});
             var preferences=new PetComparisonPreferences{ExternalBuffs=true,Buffs=setup.Buffs.Select(b=>new PetBuffChoice{Id=catalog.Buffs.First(d=>d.Name==b.Spell).Id,Enabled=!b.Excluded,Rank=b.EffectiveRank,OwnershipConfirmed=true}).ToList()};
-            var dialog=new PetBuffSetupDialog(Controller.Profile.ActiveLoadout,catalog,preferences,true,setup){Owner=popup};
+            var dialog=new PetBuffSetupDialog(Controller.Profile.ActiveLoadout,catalog,preferences,true,setup,Controller){Owner=popup};
             if(dialog.ShowDialog()==true)
             {
                 foreach(var learned in setup.Buffs){var choice=preferences.Buffs.FirstOrDefault(c=>catalog.Find(c.Id)?.Name==learned.Spell);learned.Excluded=choice?.Enabled!=true;if(choice!=null){learned.OverrideRank=choice.Rank!=learned.Rank;learned.SelectedRank=choice.Rank;}}

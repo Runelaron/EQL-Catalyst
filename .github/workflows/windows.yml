@@ -9,7 +9,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
@@ -21,29 +21,45 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory artifacts -Force | Out-Null
-          python scripts/privacy-audit.py . --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-source.json
+          python scripts/privacy-audit.py . --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-source.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           [xml]$versionXml=Get-Content Version.props
           $releaseVersion=$versionXml.Project.PropertyGroup.VersionPrefix+'-'+$versionXml.Project.PropertyGroup.VersionSuffix
-          python scripts/privacy-audit.py "dist/EQL-Catalyst-$releaseVersion-win-x64" --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-payload.json
+          python scripts/privacy-audit.py "dist/EQL-Catalyst-$releaseVersion-win-x64" --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-payload.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           foreach ($package in Get-ChildItem dist/*.zip,dist/*-setup.exe) {
-            python scripts/privacy-audit.py $package.FullName --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report ("artifacts/privacy-"+$package.Name+".json")
+            python scripts/privacy-audit.py $package.FullName --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report ("artifacts/privacy-"+$package.Name+".json")
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Disposable-runner installer checks
         shell: pwsh
         run: ./scripts/windows-smoke.ps1 -Installer (Resolve-Path dist/*-setup.exe)
-      - name: Progress and update interface checks
+      - name: Package policy and privacy scanner regressions
+        run: |
+          python -m unittest discover -s scripts -p "test_*.py"
+      - name: Android protocol unit tests (no APK release)
+        shell: pwsh
+        run: |
+          $env:JAVA_HOME=$env:JAVA_HOME_17_X64
+          ./android/gradlew.bat -p android testDebugUnitTest --no-daemon
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $cases=@(Get-ChildItem android/app/build/test-results/testDebugUnitTest/TEST-*.xml | ForEach-Object { [xml]$test=Get-Content $_.FullName; $test.testsuite })
+          @{Passed=$true;Tests=($cases | Measure-Object tests -Sum).Sum;Failures=($cases | Measure-Object failures -Sum).Sum;ApkPublished=$false} | ConvertTo-Json | Set-Content artifacts/android-protocol.json
+      - name: Native workspace and evidence checks
         shell: pwsh
         run: |
           [xml]$v=Get-Content Version.props
           $version=$v.Project.PropertyGroup.VersionPrefix+'-'+$v.Project.PropertyGroup.VersionSuffix
-          $output=Join-Path $env:RUNNER_TEMP 'eql-beta16-review'
-          $p=Start-Process -FilePath "dist/EQL-Catalyst-$version-win-x64/EQLTracker.exe" -ArgumentList @('--preview',$output,'--beta16-review', '--icon-candidates', (Join-Path $pwd 'docs/previews/pet-icon-candidates'),'--offline','--checks-only') -WindowStyle Hidden -PassThru
-          if (!$p.WaitForExit(240000)) { throw 'UI checks did not finish' }
-          if ($p.ExitCode -ne 0 -or !(Test-Path "$output/beta16-checks.json") -or (Test-Path "$output/validation-failure.json")) { throw 'UI checks failed' }
-          Copy-Item "$output/beta16-checks.json" artifacts/beta16-checks.json
+          $output=Join-Path $env:RUNNER_TEMP 'eql-beta17-review'
+          ./scripts/windows-ui.ps1 -App "dist/EQL-Catalyst-$version-win-x64/EQLTracker.exe" -Output $output
+          Copy-Item "$output/native-validation.json" artifacts/native-validation.json
+          $env:CATALYST_FIXTURE_DIR=Join-Path $output 'integrated'
+          $env:CATALYST_BROWSER_OUT=Join-Path $env:RUNNER_TEMP 'eql-beta17-browser'
+          npm ci --prefix tests/companion-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm test --prefix tests/companion-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item "$env:CATALYST_BROWSER_OUT/checks.json" artifacts/browser-checks.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-release

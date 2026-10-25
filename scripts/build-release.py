@@ -3,6 +3,7 @@ from pathlib import Path
 from zipfile import ZipFile,ZIP_DEFLATED
 import argparse,hashlib,json,os,re,shutil,subprocess,urllib.request,uuid
 import xml.etree.ElementTree as ET
+from package_policy import forbidden,assert_tree,assert_archive
 
 ROOT=Path(__file__).resolve().parents[1]
 DIST=ROOT/'dist'; TOOLS=ROOT/'.tools/installer'
@@ -28,7 +29,7 @@ def bootstrap():
 def source_files():
     for p in sorted(ROOT.rglob('*')):
         rel=p.relative_to(ROOT)
-        if p.is_file() and not any(part in {'.git','.tools','bin','obj','dist','artifacts','__pycache__'} for part in rel.parts) and not p.name.endswith(('.db','.db-wal','.db-shm','.log','.user')):yield p
+        if p.is_file() and not forbidden(rel.as_posix()) and not any(part in {'.git','.tools','bin','obj','dist','artifacts','__pycache__'} for part in rel.parts) and not p.name.endswith(('.db','.db-wal','.db-shm','.log','.user')):yield p
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--dotnet',default=shutil.which('dotnet'));parser.add_argument('--compiler');parser.add_argument('--bootstrap-compiler',action='store_true');parser.add_argument('--skip-tests',action='store_true');parser.add_argument('--package-only',action='store_true');parser.add_argument('--payload-only',action='store_true');args=parser.parse_args()
     props={e.tag:e.text for e in ET.parse(ROOT/'Version.props').getroot().find('PropertyGroup')};version=props['VersionPrefix']+'-'+props['VersionSuffix'];stage=re.fullmatch(r'beta\.(\d+)',props['VersionSuffix'])
@@ -38,7 +39,7 @@ def main():
         if not args.dotnet:raise RuntimeError('Install the SDK from global.json, or pass --dotnet')
         if not args.skip_tests:run([args.dotnet,'run','--project','tests/EqlTracker.Tests','-c','Release','--no-launch-profile'])
         temp=DIST/('.publish-'+uuid.uuid4().hex)
-        run([args.dotnet,'publish','src/EqlTracker.App','-c','Release','-r','win-x64','--self-contained','true','-o',temp,'--nologo','-p:RestorePackagesWithLockFile=true'])
+        run([args.dotnet,'publish','src/EqlTracker.App','-c','Release','-r','win-x64','--self-contained','true','-o',temp,'--nologo','-p:RestorePackagesWithLockFile=true','-p:EnablePrivatePetResearch=false'])
         run([args.dotnet,'publish','src/EqlTracker.Updater','-c','Release','-r','win-x64','--self-contained','true','-o',temp,'--nologo','-p:RestorePackagesWithLockFile=true'])
         if payload.exists():
             if not payload.resolve().is_relative_to(DIST.resolve()):raise RuntimeError('Unsafe payload path')
@@ -50,7 +51,9 @@ def main():
         shutil.copy2(ROOT/'docs/role-ratings.md',payload/'ROLE-RATINGS.md')
         shutil.copy2(ROOT/'docs/pet-comparison.md',payload/'PET-COMPARISON.md')
         shutil.copy2(ROOT/'docs/application-updates.md',payload/'APPLICATION-UPDATES.md')
-        shutil.copy2(ROOT/'docs/beta16.md',payload/'BETA-1.6.md')
+        shutil.copy2(ROOT/'docs/beta17.md',payload/'BETA-1.7.md')
+        shutil.copy2(ROOT/'docs/overview.md',payload/'OVERVIEW.md')
+        shutil.copy2(ROOT/'docs/phone-companion.md',payload/'PHONE-COMPANION.md')
         shutil.copy2(ROOT/'docs/progress-rewards.md',payload/'PROGRESS-REWARDS.md')
         (payload/'licenses').mkdir(exist_ok=True)
         sdks=run([args.dotnet,'--list-sdks'],capture_output=True,text=True).stdout
@@ -70,11 +73,13 @@ def main():
                     shutil.copy2(p,target)
         manifest={p.relative_to(payload).as_posix():sha(p) for p in sorted(payload.rglob('*')) if p.is_file()}
         (payload/'release-manifest.json').write_text(json.dumps({'Product':'EQL Catalyst','Version':props['VersionPrefix']+'-'+props['VersionSuffix'],'WindowsVersion':props['FileVersion'],'Signed':False,'Files':manifest},indent=2),encoding='utf-8')
+        assert_tree(payload)
         if args.payload_only:return
         compiler=Path(args.compiler) if args.compiler else bootstrap() if args.bootstrap_compiler else TOOLS/'compiler/ISCC.exe'
         if not compiler.exists() or '7.1.0' not in run([compiler,'--version'],capture_output=True,text=True).stdout:raise RuntimeError('Verified Inno Setup 7.1.0 required')
         run([compiler,f'--define=Payload={payload}',f'--define=ReleaseVersion={props["VersionPrefix"]}-{props["VersionSuffix"]}',f'--define=ReleaseLabel={props["ReleaseLabel"]}',f'--define=WindowsVersion={props["FileVersion"]}',f'--define=ReleaseOrder={props["VersionPrefix"]}.{stage[1]}','installer/EqlCatalyst.iss'])
     version=props['VersionPrefix']+'-'+props['VersionSuffix']
+    assert_tree(payload)
     manifest=json.loads((payload/'release-manifest.json').read_text(encoding='utf-8'))
     for name,digest in manifest['Files'].items():
         if sha(payload/name)!=digest:raise RuntimeError('Payload changed: '+name)
@@ -85,6 +90,7 @@ def main():
                 if p.is_file():archive.write(p,p.relative_to(base).as_posix())
         with ZipFile(path) as archive:
             if archive.testzip():raise RuntimeError('ZIP CRC failure')
+        assert_archive(path)
     artifacts=[DIST/f'EQL-Catalyst-{version}-win-x64-setup.exe',portable,source]
     checks={p.name:{'Bytes':p.stat().st_size,'Sha256':sha(p)} for p in artifacts}
     (DIST/'SHA256SUMS.txt').write_text(''.join(v['Sha256']+'  '+name+'\n' for name,v in checks.items()),encoding='ascii')

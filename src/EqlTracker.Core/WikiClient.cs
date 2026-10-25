@@ -199,6 +199,8 @@ public sealed class WikiClient : IDisposable
         }
         ItemEffects.Normalize(item); ItemExpansionEvidence.Apply(item);
         ItemAcquisitionEvidence.ParsePurchases(item,text,revision);
+        if(Regex.IsMatch(ItemAcquisitionEvidence.Plain(text),@"\bthis item is (?:a )?quest reward\b",RegexOptions.IgnoreCase)&&item.Sources.Any(s=>s.Method=="Drop"))
+        {item.AvailabilityEvidence=WikiContentQuality.QuestRewardConflict;item.Sources.RemoveAll(s=>s.Method=="Drop");}
         return item;
     }
     private static List<string> ParseSlots(string text)

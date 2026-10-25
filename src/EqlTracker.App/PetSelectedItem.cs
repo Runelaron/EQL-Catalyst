@@ -86,6 +86,7 @@ public sealed partial class QuestWindow
         petComparison.AnimateValues = Controller.Profile.SmoothMeterMotion;
         petComparison.ShowItem(row.Item, rank, petRank.SelectedIndex == 0 ? PetInspectedInstance(row)?.Rank ?? row.Rank : row.Rank, petPreview.Rank.HasValue, PetInspectedInstance(row), comparison, SelectedPetPreset, pair, reason, ChangePetPreviewRank, OpenPetFormula);
         petComparison.SetOwnership(row.Item, Controller.Inventory);
+        if (!reason.StartsWith("Updating")) petComparison.SetCompatibility(Controller.EvaluateItemCompatibility(row.Item, rank, true, SelectedPetInventory, comparison));
         petComparison.SetCopies(PhysicalItemChoices.Ordered(Controller.Inventory.Evidence(row.Item).Where(i => !i.IsAugment && !i.IsCollection && i.Count > 0)), PetInspectedInstance(row), copy => { petInspectedCopy = copy; petPreview = petPreview with { Rank = null, Revision = petPreview.Revision + 1 }; petPreviewKey = ""; ShowPetComparison(); });
     }
     private void OpenPetFormula()

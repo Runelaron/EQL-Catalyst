@@ -415,6 +415,7 @@ public sealed partial class QuestWindow : FrostWindow
     private string queueInputRevision = "";
     private void RefreshQueue()
     {
+        if (queueLootMode) { RefreshLoot(); return; }
         string input = $"{Controller.QuestRevision}|{Controller.Inventory.Revision}|{Controller.Profile.Zone}|{queueSearch.Text}|{queueState.SelectedItem}|{queueSignature.Length}";
         if (!Controller.Demo && queueInputRevision == input) return;
         queueInputRevision = input;

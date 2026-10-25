@@ -10,6 +10,7 @@ public static class PerformanceChecks
 {
     public static async Task Run(TrackerController controller, string folder)
     {
+        await controller.PrepareIntegratedValidation();
         await PipelineChecks.Run(folder);
         await controller.ValidateHealingImportAsync(folder);
         await controller.ValidateStatEvidenceAsync(folder);

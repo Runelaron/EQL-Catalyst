@@ -1,14 +1,15 @@
-# EQL Catalyst — Beta 1.6
+# EQL Catalyst — Beta 1.7
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.6**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.6.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.7**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.7.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
 ## Features
 
 - **DPS and healing:** compact overlays, Pet/Self/Combined/Group displays, contextual icons, independent filters, and smooth presentation.
+- **Overview:** an independent read-only session summary for combat, loot, recorded income and quest actions; contextual links hand off to Tracker or Combat Lab. See [Overview help](docs/overview.md).
 - **Combat Lab:** breakdowns, charts, peaks, retained encounters, login sessions, zone/named-NPC filters, exports, and Group/Raid member details with verified pet attribution.
 - **Quest planning:** a saved queue, item and quest discovery, walkthroughs, required components, ownership evidence, and reversible progress.
 - **Gear:** Current and named builds, autosave and Undo, inventory reconciliation, valid-slot dragging, classic item details, rank previews, and transparent preference formulas.
@@ -19,7 +20,9 @@ An independent Windows companion for **EverQuest Legends**: follow combat, organ
 
 Scores are preference points, **not predicted DPS**. Missing or disputed mechanics stay labeled. Class Loadout comparison is in development. Live-game interaction and physical-monitor DPI acceptance remain separate from automated tests.
 
-Beta 1.6 brings the shared workspace toolbar, session-first Combat Lab, explicit Pet drafts and character sheets, October content and selected artwork together. See [release notes](CHANGELOG.md), [Beta 1.6 help](docs/beta16.md), and [validation](docs/beta16-validation.md).
+Beta 1.7 brings the shared workspace toolbar, session-first Combat Lab, explicit Pet drafts and character sheets, October content and selected artwork together. See [release notes](CHANGELOG.md), [Beta 1.7 help](docs/beta17.md), and [validation](docs/beta16-validation.md).
+
+The local artwork iteration adds independent [Classic and Classes pet appearances](docs/pet-art-r5.md), with an [eight-concept double-axe review gallery](docs/previews/pet-art-r5-review.html). These local changes do not publish a new release.
 
 ## Install
 
@@ -47,3 +50,5 @@ EQL Catalyst is an independent community companion, not an official Daybreak, Da
 See [Gear roles, item comparisons, and tooltip preferences](docs/role-ratings.md) for class-aware rating priorities, custom weights, formula arithmetic, and help settings.
 
 See [Pet comparison and buff planning](docs/pet-comparison.md) for class-gated summons, intended equipment, reassignment, separate DPS/Balanced/Tank goals, and the limits of current prediction evidence.
+
+Beta 1.7 adds read-only Overview, compact Bard/build evidence and optional authenticated LAN sharing (off by default). See [release help](docs/beta17.md), [validation scope](docs/beta17-validation.md) and the [native review](docs/previews/beta17-review.html).

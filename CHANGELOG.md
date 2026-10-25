@@ -1,5 +1,14 @@
 # Changes
 
+## Beta 1.7 — 1.7.0-beta.1
+
+- Add the independent read-only Overview workspace and preserve compact translucent toolbar sizing, native attachment and draft protections.
+- Include reviewed Bard/build compatibility, journals, notebook and holdings, plus authenticated read-only LAN phone/browser sharing disabled by default.
+- Refresh 19,056 item titles and documented new-zone routes; bundle 6,958 item definitions. Preserve checklist identities, unknown statistics and conflicting source evidence.
+- Add independent family appearances and approved paintings at every Vibrant size; retain Clean artwork and historical pet identity.
+- Expand public package/privacy gates, companion security tests and exact-artifact Windows update validation. Private research remains disabled in public builds. No Android APK or Store submission.
+
+
 ## Beta 1.6 — 2026-10-23
 
 - Shared translucent Tracker/Combat Lab toolbar with reorderable workspace buttons, attached movement, separately saved dimensions, repaired resize release, dedicated grip, pointer cursors and tinker-sprocket Settings artwork.

@@ -237,7 +237,7 @@ public class FrostWindow : Window
         header.PreviewMouseLeftButtonDown += (_, e) =>
         {
             var source = e.OriginalSource as DependencyObject; while (source != null && source != header) { if (source is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.Primitives.Thumb or ComboBox or System.Windows.Controls.Primitives.TextBoxBase or MenuItem) return; source = source is Visual?VisualTreeHelper.GetParent(source):LogicalTreeHelper.GetParent(source); }
-            if(e.ClickCount==2&&this is QuestWindow or DpsWindow){ToggleCollapse();e.Handled=true;return;}
+            if(e.ClickCount==2&&this is QuestWindow or DpsWindow or OverviewWindow){ToggleCollapse();e.Handled=true;return;}
             if(IsAttachedWorkspace){e.Handled=true;return;}
             if (IsLocked) { e.Handled = true; return; }
             InteractionStarting?.Invoke();
@@ -255,7 +255,7 @@ public class FrostWindow : Window
         Grid.SetRow(Body, 1); content.Children.Add(header); content.Children.Add(Body);
         if(!overlay){ResizeMode=ResizeMode.CanResize;OuterResize=new(this);Grid.SetRowSpan(OuterResize.Grip,2);content.Children.Add(OuterResize.Grip);}
         Frame.Child = content; Content = Frame;
-        if (this is QuestWindow or DpsWindow) Placement = new(this, controller, panelKey);
+        if (this is QuestWindow or DpsWindow or OverviewWindow) Placement = new(this, controller, panelKey);
         Closing += (_, e) => { if (!App.Exiting) { e.Cancel = true;if(IsAttachedWorkspace&&CollapseRequested!=null){CollapseRequested();return;} if (CanHide?.Invoke() == false) return; RequestedVisible = false; HideRequested?.Invoke(); Hide(); } };
         Loaded += (_, _) => { Usability.Tooltips(Body); if (!IsAttachedWorkspace&&!IsCollapsed && controller.Profile.Panels.TryGetValue(panelKey, out var state) && state.Collapsed) { if (Placement == null) { if (state.Width >= MinWidth) Width = state.Width; if (state.Height > MinHeight) Height = state.Height; } ToggleCollapse(); } };
     }

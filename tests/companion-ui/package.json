@@ -1,0 +1,6 @@
+{
+  "name": "catalyst-companion-component-checks",
+  "private": true,
+  "scripts": { "test": "node verify-browser.cjs" },
+  "devDependencies": { "playwright": "1.62.1" }
+}

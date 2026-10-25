@@ -1,0 +1,29 @@
+[
+  {
+    "File": "android/app/src/test/java/com/eqlcatalyst/companion/ProtocolRulesTest.java",
+    "Rule": "private-ip-literal",
+    "Sha256": "c3f44818d4e16bad27c9226c0bda67d1bae630bd1af0daf22a3478e4362f9a8f",
+    "NormalizeLineEndings": true,
+    "Reason": "Synthetic private-subnet validation cases; never a recorded device address."
+  },
+  {
+    "File": "src/EqlTracker.Companion/CompanionHost.cs",
+    "Rule": "private-ip-literal",
+    "Sha256": "a97df33d7f474a419773d34985df0512f9be04d95bc1c77400d4812aae69a62d",
+    "NormalizeLineEndings": true,
+    "Reason": "Loopback-only TLS fixture subnet-mask constant; no personal address."
+  },
+  {
+    "File": "tests/EqlTracker.Tests/CompanionFixtureServer.cs",
+    "Rule": "private-ip-literal",
+    "Sha256": "2840ba67e131d70b643c1a2d975ad52e591514dbda5993f5a0debc03c5ab38c0",
+    "NormalizeLineEndings": true,
+    "Reason": "Standard Android emulator endpoint used only by the isolated test fixture."
+  },
+  {
+    "File": "Makaretu.Dns.Multicast.dll",
+    "Rule": "private-ip-literal",
+    "Sha256": "023391027c668e58b1ffdf2c37448121979d01c3e2722e697bedcd6819837e8e",
+    "Reason": "Upstream multicast discovery library link-local range constant; dependency bytes reviewed independently."
+  }
+]

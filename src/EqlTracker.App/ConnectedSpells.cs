@@ -18,7 +18,8 @@ public sealed partial class TrackerController
         connectedSpells=saved??new();
         standardPetBuffs=store.Get<StandardPetBuffState>("standardPetBuffs-v1")??new();
         connectedCheckpoint=store.Get<FileCheckpoint>("connectedSpellCheckpoint-v1");
-        if(saved==null||saved.Version!=ConnectedSpellIndex.Version||connectedCheckpoint==null)connectedCheckpoint=ConnectedSpellEvidence.InitialCheckpoint(statCheckpoint);
+        // A new projection version invalidates views without rewinding this independent reader.
+        if(saved==null||connectedCheckpoint==null)connectedCheckpoint=ConnectedSpellEvidence.InitialCheckpoint(statCheckpoint);
         connectedSpells.Version=ConnectedSpellIndex.Version;
     }
     internal ConnectedSpellIndex SpellIndexSnapshot()

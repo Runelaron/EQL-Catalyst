@@ -37,7 +37,7 @@ internal static class WorkspaceToolbarReview
             Check(startup.State.Placement.ScreenLeft.HasValue&&startup.State.Placement.ScreenTop.HasValue&&startup.State.Placement.Height==28,"First explicit open persists placement after deferred WPF Loaded without another interaction");startup.TryHide();
         }
         var initial=restore<0?new WorkspaceToolbarState():Json.Read<WorkspaceToolbarState>(args[restore+1]);
-        var bar=new WorkspaceToolbarWindow(controller,id=>id=="Tracker"?tracker:lab,()=>{},initial){ShowActivated=false,Opacity=0};bar.Show();Flush(bar);
+        var bar=new WorkspaceToolbarWindow(controller,id=>id switch{"Tracker"=>tracker,"CombatLab"=>lab,_=>new OverviewWindow(controller)},()=>{},initial){ShowActivated=false,Opacity=0};bar.Show();Flush(bar);
         if(restore>=0){await Task.Delay(100);Flush(bar);bar.SaveState();Json.Write(Path.Combine(folder,"restored.json"),bar.State);bar.TryHide();return;}
         bar.Left=70;bar.Top=40;bar.Width=420;Flush(bar);bar.SaveState();Check(bar.ActualHeight==28&&bar.OuterResize!.Grip.IsVisible,"Toolbar has fixed 28-DIP height and a pointer-enabled resize handle");
         var app=(App)Application.Current;var ready=Usability.Tree(bar).OfType<Button>().Single(b=>Equals(b.Tag,"tracker-update-ready"));Check(!ready.IsVisible,"Unready updates reserve no toolbar button space");double initialMinimum=bar.MinWidth;
@@ -90,13 +90,16 @@ internal static class WorkspaceToolbarReview
         double barWidth=bar.Width;var resize=bar.OuterResize.Grip;resize.CaptureMouse();resize.RaiseEvent(new DragStartedEventArgs(5,5){RoutedEvent=Thumb.DragStartedEvent});resize.RaiseEvent(new DragDeltaEventArgs(60,0){RoutedEvent=Thumb.DragDeltaEvent});bar.TryHide();Flush(bar);bar.Open("CombatLab");Flush(bar);Check(Math.Abs(bar.Width-barWidth)<1,"Hiding invalidates pending resize callbacks before reopening");
         Check(independent==JsonSerializer.Serialize(controller.Profile.OverlayFooterDisplay)&&main==JsonSerializer.Serialize(controller.Profile.OverlayMeter),"Toolbar operations preserve independent DPS selectors");
         bar.Open("Tracker");tracker.ShowView(TrackerTab.Pet);Flush(tracker);Capture("toolbar",bar);Capture("attached-tracker",tracker);bar.Open("CombatLab");Flush(lab);Capture("attached-combat",lab);bar.ClosePanel();bar.Width=bar.MinWidth;Flush(bar);Capture("toolbar-minimum",bar);Check(bar.ActualHeight==28&&bar.Buttons.Values.All(b=>b.ActualHeight==24),"Minimum toolbar retains full-height buttons");
-        bar.SaveState();var state=EquipmentPositions.Copy(bar.State);state.Order=["CombatLab","Tracker"];state.Active="CombatLab";state.Last="CombatLab";string statePath=Path.Combine(folder,"toolbar-state.json");Json.Write(statePath,state);
+        bar.SaveState();var state=EquipmentPositions.Copy(bar.State);state.Order=["CombatLab","Tracker","Overview"];state.Active="CombatLab";state.Last="CombatLab";string statePath=Path.Combine(folder,"toolbar-state.json");Json.Write(statePath,state);
         var start=new ProcessStartInfo(Environment.ProcessPath!){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden};if(Path.GetFileNameWithoutExtension(Environment.ProcessPath)=="dotnet")start.ArgumentList.Add(typeof(App).Assembly.Location);
         foreach(string arg in new[]{"--preview",Path.Combine(folder,"restart"),"--workspace-toolbar-only","--toolbar-restore",statePath,"--character","Sample","--server","Test","--offline"})start.ArgumentList.Add(arg);
         using(var child=Process.Start(start)!){await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(45));Check(child.ExitCode==0,"Separate process restores toolbar state");}
         var restored=Json.Read<WorkspaceToolbarState>(Path.Combine(folder,"restart/restored.json"));Check(restored.Active=="CombatLab"&&restored.Order.SequenceEqual(state.Order)&&Math.Abs(restored.Placement.Width-state.Placement.Width)<1,"Restart retains width, button order and open workspace");
-        await WorkspacePresentationReview.Run(controller,bar,tracker,lab,folder,Check,Gesture);controller.Profile.SmoothMeterMotion=previousMotion;
+        await WorkspacePresentationReview.Run(controller,bar,tracker,lab,folder,Check,Gesture);
+        ToolbarButtonPresentationReview.Run(controller,bar,folder,Check);
+        ToolbarHeaderPolishReview.Run(controller,bar,tracker,lab,folder,Check);
+        SmallPetArtworkReview.Run(controller,folder,Check);controller.Profile.SmoothMeterMotion=previousMotion;
         bar.TryHide();Json.Write(Path.Combine(folder,"workspace-toolbar-checks.json"),new{Passed=checks.Count,Checks=checks,Timings=timings,Milliseconds=clock.Elapsed.TotalMilliseconds,Scope="Synthetic native WPF windows, real Thumb down/up lifecycle with physical input pumping suppressed, capture, native geometry and separate-process restart. Physical monitor/DPI transitions remain untested.",AppSha256=Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(typeof(App).Assembly.Location))),CoreSha256=Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(typeof(Catalog).Assembly.Location)))});
-        await overlay.ReviewPetIconCandidates(folder);
+        if(Environment.GetCommandLineArgs().Contains("--icon-candidates"))await overlay.ReviewPetIconCandidates(folder);
     }
 }

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using EqlTracker.Core;
 
-if(args.Length==4&&args[0]=="--refresh"){Beta16Content.Run(args[1],args[2],args[3]);return;}
+if(args.Length==4&&args[0]=="--refresh"){Beta17Content.Run(args[1],args[2],args[3]);return;}
 if(args.Length!=3)throw new ArgumentException("Usage: CatalogAudit SOURCE_ROOT WIKI_CACHE OUTPUT_FOLDER");
 string root=Path.GetFullPath(args[0]),output=Path.GetFullPath(args[2]);Directory.CreateDirectory(output);
 var catalog=Json.Read<Catalog>(Path.Combine(root,"data/catalog.json"));var snapshot=Json.Read<EquipmentSnapshot>(Path.Combine(root,"data/equipment.json"));

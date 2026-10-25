@@ -1497,16 +1497,6 @@
       "Provenance": "Upstream font; see accompanying OFL"
     },
     {
-      "Asset": "EqlTracker.App/Assets/Painted/pet-air-256.png",
-      "Sha256": "a0119c73003894ea97e0adaed883a4c8edd453ef28a8866263a099b57fd61084",
-      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
-    },
-    {
-      "Asset": "EqlTracker.App/Assets/Painted/pet-earth-256.png",
-      "Sha256": "9f3394bb6c9ea1dbf27d0632a9ae9b2ecb665b0541772ced5551196c3d5a7476",
-      "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
-    },
-    {
       "Asset": "EqlTracker.App/Assets/Painted/pet-generic-256.png",
       "Sha256": "1a970d61de3fcc4d2cbec91eb51342af56883d7731f71113545bba754f54b0c8",
       "Provenance": "Project production asset; code-native Clean or AI-generated Vibrant fantasy illustration"
@@ -1515,16 +1505,6 @@
       "Asset": "EqlTracker.App/Assets/Painted/actor-group-256.png",
       "Sha256": "b5a66d8090a73231f8eaada0e49ac31890640ef5001a1a783d2dad3c812d1a20",
       "Provenance": "AI-generated Vibrant fantasy party emblem; built-in image generation; docs/dps-title-selector.md"
-    },
-    {
-      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-256.png",
-      "Sha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
-      "Provenance": "Approved Monster D; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
-    },
-    {
-      "Asset": "EqlTracker.App/Assets/Painted/pet-water-256.png",
-      "Sha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
-      "Provenance": "Approved Water C; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
     },
     {
       "Asset": "EqlTracker.App/Assets/Painted/pet-undead-skeleton-256.png",
@@ -1550,6 +1530,76 @@
       "Asset": "EqlTracker.App/Assets/Painted/pet-fire-crystal-256.png",
       "Sha256": "75bea1a1109387bea57e5c095102f3390824ab158501d5a9d38728cade3032bf",
       "Provenance": "Approved Fire Wizard B; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-earth-256.png",
+      "Sha256": "cd98b7dc1150d278485f3ec57a7cd8eef72d326cae23c3798e2e3e814dbb94d0",
+      "Provenance": "Approved Earth; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-air-classic-256.png",
+      "Sha256": "e0f511e0a9769bc2814df5ede44a0c7d5ba191acbe2162e6daf5ac3e43af903f",
+      "Provenance": "Approved Air; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-fire-classic-256.png",
+      "Sha256": "d2a9f2f660d6f4628470e8c4022febec1783c89865307657619038de9e595955",
+      "Provenance": "Approved Fire; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-water-classic-256.png",
+      "Sha256": "5e8286c3bb1c380fbf8053d5e00a2c7e34973bc8c786f15af89e96973de031ab",
+      "Provenance": "Approved Water; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-water-torrent-256.png",
+      "Sha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "Provenance": "Approved Water C; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-air-256.png",
+      "Sha256": "43de9901d9415490874247e963a4b83f4b7004588a8cc72b6a46995bc9345e47",
+      "Provenance": "Approved Air Monk \u00b7 closed fist; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-water-256.png",
+      "Sha256": "4026dcd25cf1e2091bd969e05304d5efe4aa7c6a5886c7693d1b2c15b54ceb95",
+      "Provenance": "Approved Water Rogue \u00b7 corrected anatomy; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-warder-256.png",
+      "Sha256": "e3eddb1b44f7a68c75eaf0bba2a8f9571ed0be8f399883c16c37cba3a3eb2883",
+      "Provenance": "Approved Warder \u00b7 compact mane; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-animation-256.png",
+      "Sha256": "ee5de010ea5e054454b5ef82b8ca5af70e1d0435dbe6cf50bfd9168873072171",
+      "Provenance": "Approved Animation; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-256.png",
+      "Sha256": "c0b5dbb0b79cc6068bb9d18dbaf7db5614116471b91d5d33267dbd0f4455222c",
+      "Provenance": "Approved Monster A; original generated PNG promoted unchanged; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-aviak-c-256.png",
+      "Sha256": "52115a538b72529e99e42531b4616d3487645e6347f831e25f390f4c8372daea",
+      "Provenance": "Selected interim Settings alternative Aviak Berserker \u00b7 double axe C \u2014 Overhead; original PNG unchanged; axe shaft refinement pending; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-aviak-b-256.png",
+      "Sha256": "481bde725a89154679524825974fbe03f94bd9223b3fafa65369711f74bce418",
+      "Provenance": "Selected interim Settings alternative Aviak Berserker \u00b7 double axe B \u2014 Diagonal; original PNG unchanged; axe shaft refinement pending; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-dragon-c-256.png",
+      "Sha256": "05d4e2e1df58a03c773ecfa07f3a8c93b1560be56a5614915ab612e298992d42",
+      "Provenance": "Selected interim Settings alternative Dragon Berserker \u00b7 double axe C \u2014 Overhead; original PNG unchanged; axe shaft refinement pending; docs/previews/pet-icon-candidates/manifest.json"
+    },
+    {
+      "Asset": "EqlTracker.App/Assets/Painted/pet-monster-dragon-b-256.png",
+      "Sha256": "44ec6b5c80f9a026966bc131c76e347cac0645be010f38b3e9b8ffdc70cf3c0c",
+      "Provenance": "Selected interim Settings alternative Dragon Berserker \u00b7 double axe B \u2014 Diagonal; original PNG unchanged; axe shaft refinement pending; docs/previews/pet-icon-candidates/manifest.json"
     }
   ],
   "PrivateReferencesIncluded": false

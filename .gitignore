@@ -11,3 +11,10 @@ data/wiki-cache/
 .env
 .env.*
 !*.example
+
+# Generated companion build/test output
+**/build/
+**/.gradle/
+**/node_modules/
+android/local.properties
+test-results/

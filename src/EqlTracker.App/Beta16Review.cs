@@ -31,8 +31,8 @@ internal static class Beta16Review
         Check(bar.Buttons.Values.All(b=>b.Cursor==Cursors.Hand)&&bar.SettingsButton.Cursor==Cursors.Hand&&close.Cursor==Cursors.Hand,"Workspace and action buttons have explicit pointer cursors");
         Check(grip.Cursor==Cursors.SizeWE&&grip.Width==14,"Toolbar grip retains horizontal resize cursor and a dedicated 14-DIP slot");
         var gr=grip.TransformToAncestor(bar).TransformBounds(new Rect(grip.RenderSize));var cr=close.TransformToAncestor(bar).TransformBounds(new Rect(close.RenderSize));
-        Check(gr.Right+3.9<=cr.Left,"Resize hit region is separated from Close by four DIP");
-        Check(close.Content is FrameworkElement x&&x.Width==16&&bar.SettingsButton.Content is ToolbarActionArtwork,"Close uses 16-DIP artwork and Settings uses original tinker-sprocket vector");
+        Check(cr.Right+3.9<=gr.Left,"Resize hit region sits right of Close, separated by four DIP");
+        Check(close.Content is FrameworkElement x&&x.Width==12&&bar.SettingsButton.Content is ToolbarActionArtwork,"Close uses 12-DIP artwork and Settings uses original tinker-sprocket vector");
         Point pointer=Native.CursorPosition();bar.InteractionPointer=()=>pointer;
         header.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice,Environment.TickCount,MouseButton.Left){RoutedEvent=Mouse.PreviewMouseDownEvent});
         Check(header.IsMouseCaptured,"Routed toolbar mouse-down captures the header drag");
@@ -84,7 +84,7 @@ internal static class Beta16Review
         Capture("fire-settings",settings);settings.Width=640;settings.Height=420;Capture("fire-settings-minimum",settings);settings.Hide();
         using(var store=new TrackerStore(Path.Combine(folder,"appearance-persistence.db"))){new PetArtworkPreferences{Undead="wraith-b",Fire="wizard-crystal"}.Write(store);var read=PetArtworkPreferences.Read(store);Check(read.Undead=="wraith-b"&&read.Fire=="wizard-crystal","Both independent appearance choices survive storage/restart reads");}
         Check(PetArtworkPreferences.ResolveFire(null)=="wizard-staff"&&PetArtworkPreferences.ResolveFire("unsupported")=="wizard-staff","Missing and unsupported Fire values fall back to staff");
-        Check(ApprovedPetArtwork.Detailed(32,IconArtworkStyle.Vibrant)&&!ApprovedPetArtwork.Detailed(24,IconArtworkStyle.Vibrant)&&!ApprovedPetArtwork.Detailed(64,IconArtworkStyle.Clean),"Clean/Vibrant detail remains selected by DIP size");
+        Check(ApprovedPetArtwork.Detailed(13,IconArtworkStyle.Vibrant)&&ApprovedPetArtwork.Detailed(24,IconArtworkStyle.Vibrant)&&!ApprovedPetArtwork.Detailed(64,IconArtworkStyle.Clean),"Vibrant paints every size while Clean retains vectors");
         Check(IconArtwork.Painted("pet-fire",192)?.PixelWidth>=192&&IconArtwork.Painted("pet-fire-crystal",192)?.PixelWidth>=192,"Both approved Fire paintings decode for high-DPI large controls");
         c.SetLabSession("");c.SetLabFilters("Castle",true);c.HealingVisible=true;c.StartProjectionValidation();
         async Task Until(Func<bool> ready){var watch=Stopwatch.StartNew();while(!ready()&&watch.ElapsedMilliseconds<8000)await Task.Delay(25);Check(ready(),"Revisioned damage/healing snapshots reach the latest browsing intent");}

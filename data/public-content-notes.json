@@ -1,0 +1,24 @@
+{
+  "item:schemer's guise": [
+    "Earlier wiki revision 199167 recorded ResistVoid 4; revision 199768 does not document it. Current catalog value is unknown, not zero. Earlier evidence: https://eqlwiki.com/Schemer%27s_Guise; latest: https://eqlwiki.com/Schemer%27s_Guise?oldid=199768"
+  ],
+  "item:pestilence scythe": [
+    "Wiki Damage changed from 10 (revision 144238) to 16 (revision 174300). Exact client/rank observations remain separate. https://eqlwiki.com/Pestilence_Scythe?oldid=174300",
+    "Wiki Delay changed from 50 (revision 144238) to 48 (revision 174300). Exact client/rank observations remain separate. https://eqlwiki.com/Pestilence_Scythe?oldid=174300",
+    "Wiki Ratio changed from 0.2 (revision 144238) to 0.333 (revision 174300). Exact client/rank observations remain separate. https://eqlwiki.com/Pestilence_Scythe?oldid=174300"
+  ],
+  "item:blood's unity": [
+    "Source disagreement: https://eqlwiki.com/Blood%27s_Unity revision 199411 lists Lord Rikantus Everling as a drop source, while explicit walkthroughs describe a quest reward. This drop claim is retained here for review and is not offered as a confirmed drop route.",
+    "Source disagreement: https://eqlwiki.com/Lord_Rikantus_Everling?oldid=199795 revision 199795 lists Lord_Rikantus_Everling as a drop source, while explicit walkthroughs describe a quest reward. This drop claim is retained here for review and is not offered as a confirmed drop route.",
+    "Blood's Unity is the documented reward from The Betrayer during the House Everling chain, not two independently granted copies. The wiki reports a +0 reward even in a +4 instance. https://eqlwiki.com/The_Betrayer?oldid=199714"
+  ],
+  "zone:lake nerius": [
+    "Wiki quest starts and castle approach: Retainer Ozval begins Hate, Betrayal, and Trust. The normal, non-instanced Plane of Hate requirement applies to the blessing, not the Lake Nerius ring-mob suggestion. https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=199712"
+  ],
+  "zone:nektropos castle": [
+    "Wiki access and routes: Hate, Betrayal, and Trust begins with Retainer Ozval in Lake Nerius; the library-key combine in The Tragic Tale of House Everling; then The Betrayer for door keys and the basement. Unknown NPC coordinates remain unknown. https://eqlwiki.com/Nektropos_Castle?oldid=199789"
+  ],
+  "zone:nektropos undercroft": [
+    "Wiki access: tunnel entrance (1620, -930, 0); cellar door (2435, -1155, -10) along the castle's south wall in Lake Nerius. https://eqlwiki.com/The_Nektropos_Undercroft?oldid=199480"
+  ]
+}

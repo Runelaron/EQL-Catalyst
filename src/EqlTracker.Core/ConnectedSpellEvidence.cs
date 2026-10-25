@@ -4,12 +4,13 @@ using System.Text.RegularExpressions;
 namespace EqlTracker.Core;
 
 internal sealed record ConnectedSpell(string Name,int? Id,int? UpgradeRank,string Source,string Effects,
-    bool? Beneficial=null,bool? Instant=null,double? DirectHeal=null,IReadOnlyDictionary<string,int>? Levels=null,int? Target=null,bool? CombatSkill=null);
+    bool? Beneficial=null,bool? Instant=null,double? DirectHeal=null,IReadOnlyDictionary<string,int>? Levels=null,int? Target=null,bool? CombatSkill=null,
+    int? Mana=null,int? RecastMs=null,IReadOnlyList<PetSpellEffect>? Parameters=null);
 internal sealed record ConnectedSpellIdentity(string Canonical,int? Rank,ConnectedSpell? Definition);
 
 internal sealed class ConnectedSpellIndex
 {
-    internal const string Version="connected-spells-v2-canonical-landings";
+    internal const string Version="connected-spells-v3-caster-qualified-bard";
     internal string EvidenceVersion { get; private set; }=Version;
     private readonly Dictionary<string,ConnectedSpell> spells=new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string,string> aliases=new(StringComparer.OrdinalIgnoreCase);
@@ -45,6 +46,7 @@ internal sealed class ConnectedSpellIndex
         }
         return new(raw,null,null);
     }
+    internal IReadOnlyList<ConnectedSpell> BardSongs => spells.Values.Where(s=>s.Levels?.ContainsKey("BRD")==true).DistinctBy(s=>(s.Id,s.Name,s.UpgradeRank)).OrderBy(s=>s.Name).ToArray();
     private static int? Upgrade(string suffix)
     {
         if(suffix.StartsWith('+')&&int.TryParse(suffix[1..],out int n)&&n is >=0 and <=1000)return n;
@@ -76,7 +78,7 @@ internal sealed class ConnectedSpellIndex
                 var healing=effects.Where(e=>e.Spa==0&&e.StaticValue>0).ToArray();
                 double? direct=beneficial&&instant&&healing.Length==1?healing[0].StaticValue:null;
                 pending[fields[1]]=new(identity.Canonical,id,identity.Rank,"Read-only client spell · SHA-256 "+fingerprint,
-                    string.Join("; ",effects.Select(e=>$"slot {e.Slot}: SPA {e.Spa}, base {e.Base}, formula {e.Formula}, max {e.Max}")),beneficial,instant,direct,levels,I(30),identity.Definition?.CombatSkill??spells.GetValueOrDefault(identity.Canonical)?.CombatSkill);
+                    string.Join("; ",effects.Select(e=>$"slot {e.Slot}: SPA {e.Spa}, base {e.Base}, formula {e.Formula}, max {e.Max}")),beneficial,instant,direct,levels,I(30),identity.Definition?.CombatSkill??spells.GetValueOrDefault(identity.Canonical)?.CombatSkill,I(14),I(10),effects);
             }
         }
         catch(Exception error) when(error is FormatException or OverflowException or IndexOutOfRangeException){return this;}
@@ -138,10 +140,11 @@ internal static class ConnectedSpellEvidence
     }
     internal static void Attempt(ConnectedSpellState state,ParsedLine line,string id,string character,IReadOnlyList<PetIdentity> pets,ConnectedSpellIndex index)
     {
-        string raw=line.PlayerCast??line.ActivitySpell??"",caster=line.PlayerCast!=null?character:line.PetActivity??"";
-        if(line.CastFailed){var prior=state.History.Where(e=>e.Caster==character&&e.Transition=="Cast attempt"&&e.At<=line.Time&&e.At>=line.Time.AddSeconds(-30)).MaxBy(e=>e.At);raw=line.FailedSpell??prior?.Raw??"";caster=character;}
-        if(raw.Length==0||caster.Length==0||caster!=character&&!pets.Any(p=>p.Name.Equals(caster,StringComparison.OrdinalIgnoreCase)&&p.From<=line.Time&&(!p.Until.HasValue||line.Time<p.Until)))return;
-        var resolved=index.Resolve(raw);Add(state,new(){Id=id+":spell-attempt",At=line.Time,Raw=raw,Canonical=resolved.Canonical,Rank=resolved.Rank,Caster=caster,Transition=line.CastFailed?"Interrupted / failed":"Cast attempt",Source="Logged cast evidence; recipient and success are not established"});
+        string raw=line.CasterSpell?.Spell??line.PlayerCast??line.ActivitySpell??"",caster=line.CasterSpell?.Caster??(line.PlayerCast!=null?character:line.PetActivity??"");
+        bool failed=line.CastFailed||line.FailedCaster!=null;
+        if(failed){caster=line.FailedCaster??character;var prior=state.History.Where(e=>e.Caster==caster&&e.Transition=="Cast attempt"&&e.At<=line.Time&&e.At>=line.Time.AddSeconds(-30)).MaxBy(e=>e.At);raw=line.FailedSpell??prior?.Raw??"";}
+        if(raw.Length==0||caster.Length==0)return;
+        var resolved=index.Resolve(raw);Add(state,new(){Id=id+":spell-attempt",At=line.Time,Raw=raw,Canonical=resolved.Canonical,Rank=resolved.Rank,Caster=caster,Transition=failed?"Interrupted / failed":"Cast attempt",Source="Logged cast evidence; recipient and success are not established"});
     }
     internal static void Effect(ConnectedSpellState state,EffectEvidence effect,ConnectedSpellIndex index)
     {

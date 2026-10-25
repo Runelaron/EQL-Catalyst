@@ -63,10 +63,14 @@ internal sealed class PetBuffSetupDialog : FrostDialog
     private sealed record Row(PetBuffChoice Choice,string Name){public override string ToString()=>Name;}
     private readonly bool standard;
     private readonly StandardPetBuffState? learned;
-    internal PetBuffSetupDialog(LoadoutProfile owner,PetBuffCatalog catalog,PetComparisonPreferences preferences,bool standard=false,StandardPetBuffState? learned=null):base(standard?"Standard pet buffs":"Pet buff setup",660,620)
+    private Button? saveSetup;
+    private string setupBaseline="";
+    private string SetupKey()=>PetComparisonEngine.Key(working.OrderBy(c=>c.Id).Select(c=>new{c.Id,c.Enabled,c.Rank,c.Uptime,c.OwnershipConfirmed,c.External}).ToArray());
+    private void SetupDirty(){if(loading||saveSetup==null)return;saveSetup.IsEnabled=Store()&&SetupKey()!=setupBaseline;}
+    internal PetBuffSetupDialog(LoadoutProfile owner,PetBuffCatalog catalog,PetComparisonPreferences preferences,bool standard=false,StandardPetBuffState? learned=null,TrackerController? controller=null):base(standard?"Standard pet buffs":"Pet buff setup",660,620)
     {
         this.standard=standard;this.learned=learned;
-        this.catalog=catalog;this.owner=EquipmentPositions.Copy(owner);target=preferences;working=EquipmentPositions.Copy(preferences.Buffs);
+        this.catalog=catalog;this.owner=EquipmentPositions.Copy(owner);target=preferences;working=EquipmentPositions.Copy(preferences.Buffs);setupBaseline=SetupKey();
         var choices=catalog.Choices(owner,preferences.ExternalBuffs).ToList();add=UI.Select([],"",360);add.ItemsSource=choices;add.DisplayMemberPath="Name";if(choices.Count>0)add.SelectedIndex=0;
         var fields=new WrapPanel();foreach(var c in new UIElement[]{UI.Field("Spell / AA",add),UI.ActionField(UI.Button("Add",Add)),UI.ActionField(UI.Button("Remove",Remove))})fields.Children.Add(c);
         var settings=new WrapPanel();foreach(var c in standard?new UIElement[]{UI.Field("Rank",rank),UI.ActionField(enabled),UI.ActionField(UI.Button("Use learned rank",()=>{var name=selected==null?"":catalog.Find(selected.Id)?.Name;rank.Text=learned?.Buffs.FirstOrDefault(b=>b.Spell==name)?.Rank?.ToString()??"";}))}:new UIElement[]{UI.Field("Rank",rank),UI.Field("Uptime %",uptime),UI.ActionField(enabled),UI.ActionField(owned),UI.ActionField(external)})settings.Children.Add(c);
@@ -74,9 +78,11 @@ internal sealed class PetBuffSetupDialog : FrostDialog
         rank.ToolTip=standard?"Latest confirmed rank is learned automatically. Editing overrides it; Use learned rank resumes following it. Above +10 stays recorded, outside the fitted model.":"Confirmed spell/AA rank, 0–10; blank remains Unknown.";uptime.ToolTip="Configured uptime 0–100%; blank remains Unknown. Cooldowns are not evidence of actual uptime.";
         list.SelectionChanged+=(_,_)=>{if(loading)return;if(!Store()){loading=true;list.SelectedItem=list.Items.Cast<Row>().FirstOrDefault(r=>ReferenceEquals(r.Choice,selected));loading=false;return;}Load();};
         Editor.Children.Add(UI.Stack(UI.Text(catalog.Status,11,"SecondaryText"),fields,list,settings,detail,error,UI.Text("Effect-slot checks are computed evidence. Complete conflicting buffs are excluded; bonuses are never cherry-picked. No active buff roster, proc rate or uptime is inferred.",11,"SecondaryText")));
-        Actions.Children.Add(UI.Button("Save setup",()=>{if(!Store())return;target.Buffs=EquipmentPositions.Copy(working);DialogResult=true;}));Actions.Children.Add(UI.Button("Cancel",Close));Refresh();
+        if(controller!=null)Editor.Children.Add(new CompatibilityRuleEditor(controller,true));
+        saveSetup=UI.Button("Save setup",()=>{if(!Store())return;target.Buffs=EquipmentPositions.Copy(working);DialogResult=true;});Actions.Children.Add(saveSetup);Actions.Children.Add(UI.Button("Cancel",Close));Refresh();
+        rank.TextChanged+=(_,_)=>SetupDirty();uptime.TextChanged+=(_,_)=>SetupDirty();foreach(var check in new[]{enabled,owned,external})check.Click+=(_,_)=>SetupDirty();SetupDirty();
     }
-    private void Refresh(){loading=true;list.ItemsSource=working.Select(c=>new Row(c,(catalog.Find(c.Id)?.Name??c.Id)+(c.External?" · external":""))).ToList();list.SelectedIndex=working.Count>0?0:-1;loading=false;Load();}
+    private void Refresh(){loading=true;list.ItemsSource=working.Select(c=>new Row(c,(catalog.Find(c.Id)?.Name??c.Id)+(c.External?" · external":""))).ToList();list.SelectedIndex=working.Count>0?0:-1;loading=false;Load();SetupDirty();}
     private void Add(){if(!Store()||add.SelectedItem is not PetBuffDefinition value)return;var found=working.FirstOrDefault(c=>c.Id==value.Id);if(found==null)working.Add(new(){Id=value.Id,Enabled=true,External=value.SourceItem.Length==0&&!(value.Aa&&value.ConfirmedRank>0)&&!value.Classes.Any(c=>owner.Classes.Select(CastingPriority.Code).Contains(c.Key)&&c.Value<=owner.Level),Rank=value.ConfirmedRank,OwnershipConfirmed=value.ConfirmedRank.HasValue||value.SourceItem.Length>0});Refresh();list.SelectedIndex=working.FindIndex(c=>c.Id==value.Id);}
     private void Remove(){if(selected==null)return;working.Remove(selected);selected=null;Refresh();}
     private void Load()

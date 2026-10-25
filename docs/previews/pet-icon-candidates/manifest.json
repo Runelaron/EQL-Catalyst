@@ -4,11 +4,11 @@
     "File": "earth.png",
     "Prompt": "Use case: stylized-concept. Review-only fantasy game UI EARTH ELEMENTAL emblem. Squat angular living rock beast head, broad jagged shoulders, three crag silhouettes, amber eye slits, ochre stone and gold cracks. Sculpted hand-painted style, chunky silhouette, strong contour and broad facets. Transparent background. No text, people, frame, scene, tiny shards, wisps or sparkles. Fill 88 percent of square; recognizable at 14\u201324 DIP and detailed at 64 DIP.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "cd98b7dc1150d278485f3ec57a7cd8eef72d326cae23c3798e2e3e814dbb94d0",
     "Family": "Earth",
     "Variant": "Original",
-    "Status": "Archived",
+    "Status": "Default",
     "Round": 1,
     "VectorSha256": "a2366fc95400109ceec2915c5aab7502617f2a79f93208acaf8fb1b41d4a11d4",
     "PromptSha256": "fce39375c4ad7dc78558a9fcbe9317ac5a50c139eeabf572ead7626805ede92e"
@@ -18,11 +18,11 @@
     "File": "air.png",
     "Prompt": "Use case: stylized-concept. Asset: review-only fantasy game UI pet icon, square isolated emblem on real transparent alpha background. Primary request: a recognizable silhouette at 14\u201324 DIP with complementary surface detail at 64 DIP. Style: sculpted hand-painted fantasy UI art, chunky forms, deep inner shadow, bright broad highlights, clean substantial outer contour, very few large shapes. Fill 88 percent of the square. Subject: AIR ELEMENTAL: one bold crescent-shaped curling wind beast, broad swept-back crest, a single wide curling tail and one blue-white eye. White/silver with a dark teal inner shadow. Two or three large curls only; no thin wisps. Constraints: no text, letters, numbers, circular badge background, rectangular background, environment, pedestal, separate small overlay badges, particle glitter, thin filigree or fine texture. Emphasize the global outer shape and one defining local feature. Full isolated subject, not cropped.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "e0f511e0a9769bc2814df5ede44a0c7d5ba191acbe2162e6daf5ac3e43af903f",
     "Family": "Air",
     "Variant": "Original",
-    "Status": "Archived",
+    "Status": "Settings alternative",
     "Round": 1,
     "VectorSha256": "2675dd22cb6ad2b58037b2c333988f4c9397e001760f0d23c57adb2659ec1862",
     "PromptSha256": "285d91a15807780f0e057511376c67ca52e60f07d8f8e8be535ebafd547a5f8b"
@@ -32,11 +32,11 @@
     "File": "fire.png",
     "Prompt": "Use case: stylized-concept. Asset: review-only fantasy game UI pet icon, square isolated emblem on real transparent alpha background. Primary request: a recognizable silhouette at 14\u201324 DIP with complementary surface detail at 64 DIP. Style: sculpted hand-painted fantasy UI art, chunky forms, deep inner shadow, bright broad highlights, clean substantial outer contour, very few large shapes. Fill 88 percent of the square. Subject: FIRE ELEMENTAL: one aggressive flame-beast head inside a tall three-point flame silhouette. A strong hooked flame tip, broad ember jaw, bright golden eyes, orange-red and gold. No humanoid body. Constraints: no text, letters, numbers, circular badge background, rectangular background, environment, pedestal, separate small overlay badges, particle glitter, thin filigree or fine texture. Emphasize the global outer shape and one defining local feature. Full isolated subject, not cropped.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "d2a9f2f660d6f4628470e8c4022febec1783c89865307657619038de9e595955",
     "Family": "Fire",
     "Variant": "Original",
-    "Status": "Archived",
+    "Status": "Settings alternative",
     "Round": 1,
     "VectorSha256": "9ecc69f876668e7b1eaa6dbe6048bce71b1ce6609f6b618dc624bbb69a37ce67",
     "PromptSha256": "f69ef865f1d2816d16f1f0f7c90fa94cad818ec45a9f28078e3007856aafcb14"
@@ -46,11 +46,11 @@
     "File": "water.png",
     "Prompt": "Use case: stylized-concept. Asset: review-only fantasy game UI pet icon, square isolated emblem on real transparent alpha background. Primary request: a recognizable silhouette at 14\u201324 DIP with complementary surface detail at 64 DIP. Style: sculpted hand-painted fantasy UI art, chunky forms, deep inner shadow, bright broad highlights, clean substantial outer contour, very few large shapes. Fill 88 percent of the square. Subject: WATER ELEMENTAL: a thick blue water-droplet creature with a large curled wave-fin crest and an obvious hooked wave tail, one bright eye and pale cyan crest. Bold teardrop outer shape with three broad internal surfaces. Constraints: no text, letters, numbers, circular badge background, rectangular background, environment, pedestal, separate small overlay badges, particle glitter, thin filigree or fine texture. Emphasize the global outer shape and one defining local feature. Full isolated subject, not cropped.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "5e8286c3bb1c380fbf8053d5e00a2c7e34973bc8c786f15af89e96973de031ab",
     "Family": "Water",
     "Variant": "Original",
-    "Status": "Archived",
+    "Status": "Settings alternative",
     "Round": 1,
     "VectorSha256": "3986cabd1749e7535977a6f623886d6da9b109f119d4ee433c429db4389e717e",
     "PromptSha256": "c6201915a20ed9490d4b07080b97e86c419aa321022d4b1c21481aea3ee0e1aa"
@@ -102,11 +102,11 @@
     "File": "animation.png",
     "Prompt": "Use case: stylized-concept. Asset: review-only fantasy game UI pet icon, square isolated emblem on real transparent alpha background. Primary request: a recognizable silhouette at 14\u201324 DIP with complementary surface detail at 64 DIP. Style: sculpted hand-painted fantasy UI art, chunky forms, deep inner shadow, bright broad highlights, clean substantial outer contour, very few large shapes. Fill 88 percent of the square. Subject: ANIMATION PET: a floating enchanted sword and broad kite-shaped shield, asymmetrically crossed at a dramatic angle with one thick violet arcane ribbon. Bright steel blade and warm gold trim. No person or face, no runic text, no circle frame. Constraints: no text, letters, numbers, circular badge background, rectangular background, environment, pedestal, separate small overlay badges, particle glitter, thin filigree or fine texture. Emphasize the global outer shape and one defining local feature. Full isolated subject, not cropped.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "ee5de010ea5e054454b5ef82b8ca5af70e1d0435dbe6cf50bfd9168873072171",
     "Family": "Animation",
     "Variant": "Original",
-    "Status": "Archived",
+    "Status": "Default",
     "Round": 1,
     "VectorSha256": "a0d1aecd6cfa281f265dc976bee464491df8adfbc978e8ee77e12a07d6a67974",
     "PromptSha256": "cac8cb90343d02d2ef057d327d82455bbaa8806dd912bd221fc9fd12c5f770db"
@@ -130,11 +130,11 @@
     "File": "monster-a.png",
     "Prompt": "Use case: stylized-concept. Asset: review-only fantasy game UI pet icon, square isolated emblem on real transparent alpha background. Primary request: a recognizable silhouette at 14\u201324 DIP with complementary surface detail at 64 DIP. Style: sculpted hand-painted fantasy UI art, chunky forms, deep inner shadow, bright broad highlights, clean substantial outer contour, very few large shapes. Fill 88 percent of the square. Subject: MONSTER SUMMON CONCEPT A: a non-humanoid horned reptilian monster head with a broad powerful snout and two swept horns, with one large readable battleaxe blade behind one side of its head and a chunky violet conjuration crescent below. Not a humanoid, orc, ogre or person. The axe is an integrated emblem motif, not a claim of actual equipped gear. Distinct asymmetrical silhouette. Constraints: no text, letters, numbers, circular badge background, rectangular background, environment, pedestal, separate small overlay badges, particle glitter, thin filigree or fine texture. Emphasize the global outer shape and one defining local feature. Full isolated subject, not cropped.",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "c0b5dbb0b79cc6068bb9d18dbaf7db5614116471b91d5d33267dbd0f4455222c",
     "Family": "Monster",
     "Variant": "A",
-    "Status": "Archived",
+    "Status": "In use",
     "Round": 1,
     "VectorSha256": "fd7de2ea96ca3833ad2610ce67dcbf0ac4caf7cccee82a946f473eeb9ea73282",
     "PromptSha256": "3be4ca3eabf8cbd33eb2b0dc24ff5b641afda3a15b22b935c5e83dc730b962f8"
@@ -171,13 +171,13 @@
     "Role": "monster-d",
     "Family": "Monster",
     "Variant": "D",
-    "Status": "Default",
+    "Status": "Archived",
     "Round": 2,
     "File": "monster-d.png",
     "Prompt": "Use case: stylized-concept. Asset: one standalone review-only fantasy game UI pet icon on a genuinely transparent alpha background. Sculpted hand-painted fantasy emblem, broad polished highlights and deep inner shadows, substantial clean outer contour, chunky forms with 2\u20134 large readable features. Fill about 88% of a square, no cropping. Strong distinctive silhouette at 14\u201324 DIP with complementary detail at 64 DIP. No text, letters, labels, watermark, rectangular background, circular badge background, scenery, pedestal, fine filigree, particle glitter or detached tiny overlays. Alternate Monster concept D: a non-humanoid broad-snouted horned drake, swept ivory horns and red-brown scales, one conspicuous steel battleaxe blade integrated into the outer silhouette and a bold violet conjuration curl. Keep the reference's painterly material, chunky light and shadow, palette and visual quality; vary the creature's outline and pose. No humanoid person, orc or ogre. The axe is an emblem motif, not a depiction of equipped gear.",
     "PromptSha256": "819a8ff460ce9ded91624558f095b7bba33b1653722fc4d1b8573a1c711efeee",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": false,
+    "ReviewOnly": true,
     "Sha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
     "ReferenceSha256": "c0b5dbb0b79cc6068bb9d18dbaf7db5614116471b91d5d33267dbd0f4455222c",
     "VectorSha256": "4274288c74bc5e58fd59bb8ab61a80306e38214b0bf5c382ad43467014add301"
@@ -261,7 +261,7 @@
     "Role": "water-c",
     "Family": "Water",
     "Variant": "C",
-    "Status": "Default",
+    "Status": "Settings alternative",
     "Round": 2,
     "File": "water-c.png",
     "Prompt": "Use case: stylized-concept. Asset: one standalone review-only fantasy game UI pet icon on a genuinely transparent alpha background. Sculpted hand-painted fantasy emblem, broad polished highlights and deep inner shadows, substantial clean outer contour, chunky forms with 2\u20134 large readable features. Fill about 88% of a square, no cropping. Strong distinctive silhouette at 14\u201324 DIP with complementary detail at 64 DIP. No text, letters, labels, watermark, rectangular background, circular badge background, scenery, pedestal, fine filigree, particle glitter or detached tiny overlays. A WATER ELEMENTAL as an upright surging torrent, two broad rising water arms and a high flowing crest joining a thick water column. Made completely of blue-cyan water with large white foam accents; abstract elemental power rather than flesh or armor. No animal, dragon, reptile, teeth or horns; no detailed human face. Bold forked vertical silhouette.",
@@ -693,13 +693,13 @@
     "Role": "air-monk-fist-v2",
     "Family": "Air",
     "Variant": "Monk fist",
-    "Status": "Review",
+    "Status": "Default",
     "Round": 4,
     "File": "air-monk-fist-v2.png",
     "Prompt": "Edit the FIRST reference air monk icon. The SECOND reference fire wizard is ONLY a style/posture reference: a clear class-shaped figure entirely made from its element. Keep the original painted fantasy UI icon style, white and silver translucent wind, dark negative-space face and bright glints, and completely transparent background. Replace the forward open palm with an anatomically coherent CLOSED FIST punching outward; the other fist stays pulled back in a martial guard. Make the head and broad torso read more like a monk engulfed in wind, with wind-defined robe/shoulders, rather than a generic tornado with floating fists. Two arms only, linked correctly to opposite shoulders. No flesh, no metal armor, no text, no frame, no halo. Strong compact silhouette, subject fills square canvas with transparent margin. Review-only new sibling version; preserve expressive energy.",
     "PromptSha256": "1c73e4e37fa87d2fdc9af03188bc08321d6407f77e12c22c7b6eca7c3ea97544",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "43de9901d9415490874247e963a4b83f4b7004588a8cc72b6a46995bc9345e47",
     "References": [
       {
@@ -718,13 +718,13 @@
     "Role": "water-rogue-anatomy-v2",
     "Family": "Water",
     "Variant": "Rogue corrected",
-    "Status": "Review",
+    "Status": "Default",
     "Round": 4,
     "File": "water-rogue-anatomy-v2.png",
     "Prompt": "Correct this painted blue WATER ROGUE fantasy game icon while preserving its hooded low-ambush pose, watery cloak, fluid body, color, lighting and transparent background. Fix the anatomy: exactly TWO arms, one anatomically left arm from its left shoulder, one anatomically right arm from its right shoulder. Give the foreground arm a coherent left hand with correctly located thumb, holding one broad dagger-shaped torrent; the opposite rear arm and right hand tuck defensively near its other side. Arms must not look duplicated or like two right arms. Keep the entire figure composed of water, not flesh or ordinary clothing. Reduce extraneous hand-like water wisps so the two arms are unambiguous. Strong compact readable silhouette, no frame, words, ground, backdrop or additional limbs. Preserve painterly fantasy UI icon treatment.",
     "PromptSha256": "b67fa78be13a497ed9368cfc4d75e6923307b33138a8eebad404d76bf306015c",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "4026dcd25cf1e2091bd969e05304d5efe4aa7c6a5886c7693d1b2c15b54ceb95",
     "References": [
       {
@@ -739,13 +739,13 @@
     "Role": "warder-attack-trim-v2",
     "Family": "Warder",
     "Variant": "Attack trim",
-    "Status": "Review",
+    "Status": "Default",
     "Round": 4,
     "File": "warder-attack-trim-v2.png",
     "Prompt": "Edit this attacking lion Warder icon. Preserve the roaring three-quarter attack pose, reaching foreground claw, golden fur, expression, painted fantasy game icon style and truly transparent background. Reduce the mane volume by about 40 percent: a compact realistic adult male lion mane close to neck and cheeks, revealing the muscular shoulder and torso. The mane must not dominate the icon or become a giant circular puff. Keep head, body, four legs/paws and tail anatomically coherent; preserve strong clear attack silhouette and the forward swipe. No text, border, frame, background, shadow ground or extra limbs. Single square review icon with transparent margin.",
     "PromptSha256": "9cc0c251e8efb4f9bb93e2bcfaae87ab756d7ff262069525708df9037c34d33b",
     "Generator": "Built-in image_gen",
-    "ReviewOnly": true,
+    "ReviewOnly": false,
     "Sha256": "e3eddb1b44f7a68c75eaf0bba2a8f9571ed0be8f399883c16c37cba3a3eb2883",
     "References": [
       {
@@ -760,7 +760,7 @@
     "Role": "monster-dragon-face-v2",
     "Family": "Monster",
     "Variant": "Dragon face",
-    "Status": "Review",
+    "Status": "Archived",
     "Round": 4,
     "File": "monster-dragon-face-v2.png",
     "Prompt": "Create a NEW review concept, using the reference only for its polished painted fantasy game icon style and palette. A close-up snarling DRAGON berserker FACE framed by one unmistakable battle axe blade beside the face. Keep the broad horned reptilian muzzle, red scales, amber eye and ivory horns; axe steel/gold with a clear single handle. Strong face-and-axe silhouette similar to the reference, fewer tiny spines and less surrounding magical smoke. An original DnD-like conjured dragon berserker emblem, not an ordinary four-legged creature. No circular badge. Transparent background, no scenery, ground, words, logo, border or frame. Broad readable masses that still work at 16\u201324 DIP, clear negative spaces, bold outline lighting; additional painted detail for larger sizes. Center one subject, fill square canvas with a little transparent safety margin. This is a Monster summon FAMILY artwork alternative and does not imply gameplay gear or a new family.",
@@ -781,7 +781,7 @@
     "Role": "monster-dragon-warrior-v2",
     "Family": "Monster",
     "Variant": "Dragon warrior",
-    "Status": "Review",
+    "Status": "Archived",
     "Round": 4,
     "File": "monster-dragon-warrior-v2.png",
     "Prompt": "Create a NEW review concept, using the reference only for its polished painted fantasy game icon style and palette. A powerful DRAGON berserker from the WAIST UP, humanoid dragonborn-like upper-body posture: red scaled snarling dragon head, huge shoulders, muscular arms and TWO anatomically coherent clawed hands gripping a single enormous battle axe diagonally across the chest. The axe must be an actual held axe with visible haft and broad blade, not just a crest or wing shaped like an axe. Compact bold upper-body icon, no legs, no wings filling the silhouette. Ivory horns, amber eye, restrained purple conjuration energy. Class reads berserker first, dragon second. Transparent background, no scenery, ground, words, logo, border or frame. Broad readable masses that still work at 16\u201324 DIP, clear negative spaces, bold outline lighting; additional painted detail for larger sizes. Center one subject, fill square canvas with a little transparent safety margin. This is a Monster summon FAMILY artwork alternative and does not imply gameplay gear or a new family.",
@@ -802,7 +802,7 @@
     "Role": "monster-aviak-face-v2",
     "Family": "Monster",
     "Variant": "Aviak face",
-    "Status": "Review",
+    "Status": "Archived",
     "Round": 4,
     "File": "monster-aviak-face-v2.png",
     "Prompt": "Create a NEW review concept, using the reference only for its polished painted fantasy game icon style and palette. A close-up fierce AVIAK berserker HEAD AND NECK, a classic fantasy avian warrior with a hooked beak and swept-back feather crest, framed beside its cheek by a large clear battle axe blade and a visible short section of haft. Teal/dark feathers, pale neck, amber eye and brass/steel axe. Good face-and-axe silhouette, no full bird body, no wings shaped like an axe, no circular badge. The weapon motif is intentional artwork symbolism. Transparent background, no scenery, ground, words, logo, border or frame. Broad readable masses that still work at 16\u201324 DIP, clear negative spaces, bold outline lighting; additional painted detail for larger sizes. Center one subject, fill square canvas with a little transparent safety margin. This is a Monster summon FAMILY artwork alternative and does not imply gameplay gear or a new family.",
@@ -823,7 +823,7 @@
     "Role": "monster-aviak-warrior-v2",
     "Family": "Monster",
     "Variant": "Aviak warrior",
-    "Status": "Review",
+    "Status": "Archived",
     "Round": 4,
     "File": "monster-aviak-warrior-v2.png",
     "Prompt": "Create a NEW review concept, using the reference only for its polished painted fantasy game icon style and palette. An AVIAK berserker from the WAIST UP in a muscular humanoid avian warrior posture, bird head with hooked beak and short swept crest, broad feathered shoulders and TWO anatomically coherent arms ending in avian clawed hands holding one huge battle axe across the chest. Clear weapon haft and single broad blade. Dark teal feathers, pale neck, brass/steel weapon. Fierce battle cry, sturdy silhouette. No legs, no giant wings replacing arms, no axe-shaped wing, no costume clutter. Class must read berserker with axe, not ordinary bird. Transparent background, no scenery, ground, words, logo, border or frame. Broad readable masses that still work at 16\u201324 DIP, clear negative spaces, bold outline lighting; additional painted detail for larger sizes. Center one subject, fill square canvas with a little transparent safety margin. This is a Monster summon FAMILY artwork alternative and does not imply gameplay gear or a new family.",
@@ -839,5 +839,177 @@
     ],
     "VectorProvenance": "Hand-authored simplified native geometry from reviewed painted silhouette; not an automatic trace",
     "VectorSha256": "3b063c681bd14c066534e1297d5169c8c37babcb01a5b11ce65e47cb88837e6b"
+  },
+  {
+    "Role": "monster-dragon-doubleaxe-braced-r5",
+    "Family": "Monster",
+    "Variant": "Dragon double axe braced",
+    "Status": "Review",
+    "Round": 5,
+    "File": "monster-dragon-doubleaxe-braced-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: red-scaled Dragon berserker, ivory horns, amber eyes and broad powerful shoulders, upper body only, frontal braced stance with the axe held upright beside the head; full axe head visible above the shoulder. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "e7c6c8f400edffb173a77886fac34f9ed14114303c11d3df2199a965abcceea7",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": true,
+    "Sha256": "6e1bdc7fd13e3d6bbac7153fbd40c24cea7c642f113cb57c8231a9932cd79b32",
+    "References": [
+      {
+        "File": "monster-dragon-warrior-v2.png",
+        "Sha256": "ebfe793d5d0377dd9bf69d3edc7247bcf3aa0e80ee4cf5d5d930822c44ab3a65"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "5e1d43dcb42c8473b9101c1a954237412219d863b57cfe7d5187322bca831ae6"
+  },
+  {
+    "Role": "monster-dragon-doubleaxe-diagonal-r5",
+    "Family": "Monster",
+    "Variant": "Dragon double axe diagonal",
+    "Status": "Settings alternative",
+    "Round": 5,
+    "File": "monster-dragon-doubleaxe-diagonal-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: red-scaled Dragon berserker, ivory horns, amber eyes and broad powerful shoulders, upper body only, three-quarter stance with the axe diagonally across the chest; turn its complete double head toward the viewer. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "d742aa82335425f4a2c36873db565bd151a12d0fc9ea2665947d21813f71da75",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": false,
+    "Sha256": "44ec6b5c80f9a026966bc131c76e347cac0645be010f38b3e9b8ffdc70cf3c0c",
+    "References": [
+      {
+        "File": "monster-dragon-warrior-v2.png",
+        "Sha256": "ebfe793d5d0377dd9bf69d3edc7247bcf3aa0e80ee4cf5d5d930822c44ab3a65"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "a470043d8e9ed2598a651af5f9cbab63c0928e54f8685d7e52712e941a82e323",
+    "ShaftAlignmentPending": true
+  },
+  {
+    "Role": "monster-dragon-doubleaxe-overhead-r5",
+    "Family": "Monster",
+    "Variant": "Dragon double axe overhead",
+    "Status": "Settings alternative",
+    "Round": 5,
+    "File": "monster-dragon-doubleaxe-overhead-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: red-scaled Dragon berserker, ivory horns, amber eyes and broad powerful shoulders, upper body only, overhead wind-up with both hands on the haft; keep the face unobstructed and the entire axe head inside the canvas. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "57472f66448687c34d2ae4a1ec68e93593413eca34c356cef474670c0327d296",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": false,
+    "Sha256": "05d4e2e1df58a03c773ecfa07f3a8c93b1560be56a5614915ab612e298992d42",
+    "References": [
+      {
+        "File": "monster-dragon-warrior-v2.png",
+        "Sha256": "ebfe793d5d0377dd9bf69d3edc7247bcf3aa0e80ee4cf5d5d930822c44ab3a65"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "1f27457955f1c14a9c295f1895620ed6cd986e9bc1af4f72b1256221b639cf2d",
+    "ShaftAlignmentPending": true
+  },
+  {
+    "Role": "monster-dragon-doubleaxe-guard-r5",
+    "Family": "Monster",
+    "Variant": "Dragon double axe guard",
+    "Status": "Review",
+    "Round": 5,
+    "File": "monster-dragon-doubleaxe-guard-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: red-scaled Dragon berserker, ivory horns, amber eyes and broad powerful shoulders, upper body only, compact forward guard with the double axe head large in the foreground beside the face; both arms remain readable. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "048657c2ac4dbd36e3965a1dc432427d52ba8074da1513865d546401dca27511",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": true,
+    "Sha256": "42944c15f3696caba4354e7921e6fe5028072accbeb3128041806ae214cc8894",
+    "References": [
+      {
+        "File": "monster-dragon-warrior-v2.png",
+        "Sha256": "ebfe793d5d0377dd9bf69d3edc7247bcf3aa0e80ee4cf5d5d930822c44ab3a65"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "0112069d99e3637731b8a2735c343df8f1b4d963228a85abab11151d64f11a55"
+  },
+  {
+    "Role": "monster-aviak-doubleaxe-braced-r5",
+    "Family": "Monster",
+    "Variant": "Aviak double axe braced",
+    "Status": "Review",
+    "Round": 5,
+    "File": "monster-aviak-doubleaxe-braced-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: dark-teal feathered Aviak berserker, pale neck feathers, hooked beak, amber eyes and broad powerful shoulders, upper body only, frontal braced stance with the axe held upright beside the head; full axe head visible above the shoulder. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "54ed731d8b34730bc5b49cb98781bcad3a8ecae28ae4e79c0c3d4c70d4a44aef",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": true,
+    "Sha256": "563417f4786bf9212ba4c563754d5174eef5364a510e3725e339cc6d53d75c7e",
+    "References": [
+      {
+        "File": "monster-aviak-warrior-v2.png",
+        "Sha256": "98a851c5175c76fadb6f1bc7922c3154dd2910f75ab2b55ecd05f9295f026bca"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "cde2557a9a432f7f2af0959809382c87682451e49b81c98454dcf1a46418e524"
+  },
+  {
+    "Role": "monster-aviak-doubleaxe-diagonal-r5",
+    "Family": "Monster",
+    "Variant": "Aviak double axe diagonal",
+    "Status": "Settings alternative",
+    "Round": 5,
+    "File": "monster-aviak-doubleaxe-diagonal-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: dark-teal feathered Aviak berserker, pale neck feathers, hooked beak, amber eyes and broad powerful shoulders, upper body only, three-quarter stance with the axe diagonally across the chest; turn its complete double head toward the viewer. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "d5768d822a0e3f5e13d90e03aa16995df96c6a328dc15ea9b97bdea1146e5d93",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": false,
+    "Sha256": "481bde725a89154679524825974fbe03f94bd9223b3fafa65369711f74bce418",
+    "References": [
+      {
+        "File": "monster-aviak-warrior-v2.png",
+        "Sha256": "98a851c5175c76fadb6f1bc7922c3154dd2910f75ab2b55ecd05f9295f026bca"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "d531c51f5fd91cefddbd17378540c5fe2879632b28bcb3eb3fe803f6c988f137",
+    "ShaftAlignmentPending": true
+  },
+  {
+    "Role": "monster-aviak-doubleaxe-overhead-r5",
+    "Family": "Monster",
+    "Variant": "Aviak double axe overhead",
+    "Status": "Settings alternative",
+    "Round": 5,
+    "File": "monster-aviak-doubleaxe-overhead-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: dark-teal feathered Aviak berserker, pale neck feathers, hooked beak, amber eyes and broad powerful shoulders, upper body only, overhead wind-up with both hands on the haft; keep the face unobstructed and the entire axe head inside the canvas. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "bcf6fe73e9ea2ef8e8650682591b22ac3892f7739c97a1d0f8959252bb563253",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": false,
+    "Sha256": "52115a538b72529e99e42531b4616d3487645e6347f831e25f390f4c8372daea",
+    "References": [
+      {
+        "File": "monster-aviak-warrior-v2.png",
+        "Sha256": "98a851c5175c76fadb6f1bc7922c3154dd2910f75ab2b55ecd05f9295f026bca"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "425c8faaa5561ee93851c5fbd785e2673a80c51a4ebc91d143da1766f279eb52",
+    "ShaftAlignmentPending": true
+  },
+  {
+    "Role": "monster-aviak-doubleaxe-guard-r5",
+    "Family": "Monster",
+    "Variant": "Aviak double axe guard",
+    "Status": "Review",
+    "Round": 5,
+    "File": "monster-aviak-doubleaxe-guard-r5.png",
+    "Prompt": "Use case: stylized-concept. Create one new fantasy-game pet icon, using the supplied painting as a style, palette and character reference. Subject: dark-teal feathered Aviak berserker, pale neck feathers, hooked beak, amber eyes and broad powerful shoulders, upper body only, compact forward guard with the double axe head large in the foreground beside the face; both arms remain readable. The key correction is ONE enormous DOUBLE-HEADED BATTLE AXE with two broad opposing symmetrical cutting blades, one on EACH side of a central socket. Both cutting edges face OUTWARD, away from the haft. Show the broad FACE of both blades to the viewer, not their back or thin edge. The head is perpendicular to a single sturdy straight haft. The axe silhouette must be at least as visually prominent as the head and shoulders; use contrasting steel and brass, a simple readable blade shape, little ornament. Exactly two anatomically coherent arms and correctly opposed clawed hands with a believable grip on the same haft. No extra limbs, weapons, wing-shaped axe, backwards blade, single-bladed axe or cropped axe head. Polished sculpted hand-painted style matching the reference, broad contour lighting and bold masses, modest detail for recognition at 16-24 DIP, richer surfaces at 64 DIP. Preserve dragon or avian identity and a fierce berserker expression. Transparent alpha background, isolated subject, square composition with a small safety margin, no text, scene, ground, frame or badge. This is symbolic Monster-family artwork; it does not describe actual equipped weapons or a new gameplay family.",
+    "PromptSha256": "427871595760ce35455a542b1a010009ead779962892c3d201fe6b45c30a5d03",
+    "Generator": "Built-in image_gen",
+    "ReviewOnly": true,
+    "Sha256": "c77555db3394df150e082c36119448e8ebd00bfbdaf55188320d4140792b77c1",
+    "References": [
+      {
+        "File": "monster-aviak-warrior-v2.png",
+        "Sha256": "98a851c5175c76fadb6f1bc7922c3154dd2910f75ab2b55ecd05f9295f026bca"
+      }
+    ],
+    "VectorProvenance": "Hand-authored pose-specific simplified geometry after visual review; two opposing axe blades; not an automatic trace",
+    "VectorSha256": "b646b6e7eed9e90a8aad16ba237de61dc217ccba52754ebafa2c2ff0b4f3f57a"
   }
 ]

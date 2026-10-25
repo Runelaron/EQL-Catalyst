@@ -1,0 +1,113 @@
+{
+  "revision": 42,
+  "at": "2026-10-23T23:52:50.1420259+00:00",
+  "contextId": "4710d41efc3c9d7ca3f5ea83fe16a368167064ece12a1359d1666aacc75ad3a6",
+  "contextLabel": "ExampleHero \u00B7 example \u00B7 Current build \u00B7 session 10/23 15:52",
+  "theme": {
+    "background": "#02080D",
+    "surface": "#0C1C29",
+    "text": "#E8F8FC",
+    "secondary": "#EAF4F7",
+    "accent": "#69E1F2",
+    "line": "#5A7180",
+    "mint": "#7BE8C5"
+  },
+  "build": {
+    "title": "Build \u0026 song coverage",
+    "rows": [
+      {
+        "label": "Selected setup",
+        "value": "Current \u00B7 Water",
+        "detail": "No applicable observed capture. Unknown totals remain unknown.",
+        "id": ""
+      },
+      {
+        "label": "Usual-buff scenario",
+        "value": "Standard-buff scenario \u00B7 baseline unavailable \u00B7 No confirmed sustained buffs learned yet",
+        "detail": "A matching unbuffed equipped baseline is unavailable. Captured values below retain their original conditions; standard-buff totals are not calculated.\nHistorical messages do not establish a complete current roster. Captured values below retain the desktop\u2019s unchecked scenario default.",
+        "id": ""
+      },
+      {
+        "label": "Song coverage",
+        "value": "Your instrument, singing, focus, effective level or relevant AA context needs review before comparing song potency.",
+        "detail": "",
+        "id": ""
+      },
+      {
+        "label": "Song coverage",
+        "value": "No fresh, caster-attributed successful coverage for this recipient. Cast attempts and group membership do not establish range.",
+        "detail": "",
+        "id": ""
+      }
+    ]
+  },
+  "goals": {
+    "title": "Goals \u0026 session loot",
+    "rows": [
+      {
+        "label": "Cloak of Flames",
+        "value": "Unresolved",
+        "detail": "",
+        "id": "|cloak of flames"
+      },
+      {
+        "label": "Loot \u00B7 Cloak of Flames",
+        "value": "2 acquired \u00B7 Looted / Sold",
+        "detail": "Cloak of Flames\n10/23/2026 4:02 PM \u00B7 1 \u00D7 \u00B7 Looted \u00B7 Solusek\u0027s Eye (Group) \u00B7 a named camp guardian\n10/23/2026 4:02 PM \u00B7 1 \u00D7 \u00B7 Sold \u00B7 Solusek\u0027s Eye (Group) \u00B7 a named camp guardian",
+        "id": "cloak of flames:0"
+      }
+    ]
+  },
+  "session": {
+    "title": "Session recap",
+    "rows": [
+      {
+        "label": "Session",
+        "value": "10/23/2026 3:52 PM",
+        "detail": "Last observed 10/23/2026 4:52 PM \u00B7 Synthetic verified login marker",
+        "id": ""
+      },
+      {
+        "label": "Recorded combat",
+        "value": "76,087 damage \u00B7 1 encounters",
+        "detail": "Self 18,662 \u00B7 Pet 57,425. Damage differences are not causal build evidence.",
+        "id": ""
+      },
+      {
+        "label": "Recorded income",
+        "value": "Unknown",
+        "detail": "",
+        "id": ""
+      },
+      {
+        "label": "Merchant income",
+        "value": "Unknown",
+        "detail": "",
+        "id": ""
+      },
+      {
+        "label": "Progress",
+        "value": "Player checked a completed quest step",
+        "detail": "",
+        "id": ""
+      },
+      {
+        "label": "Planned setup",
+        "value": "Gem 8: duplicate haste \u2192 missing resistance coverage",
+        "detail": "Saved in Catalyst only",
+        "id": ""
+      }
+    ]
+  },
+  "holdings": {
+    "title": "Other-character holdings",
+    "rows": [
+      {
+        "label": "OtherCharacter \u00B7 Cloak of Flames",
+        "value": "1",
+        "detail": "Bank 1 \u00B7 rank 4 \u00B7 snapshot 10/20/2026 3:52 PM",
+        "id": "a8501bad9a721506f4ca6d97e035dddbc346860bef6345ffbd69b78f4abb8e56"
+      }
+    ]
+  }
+}

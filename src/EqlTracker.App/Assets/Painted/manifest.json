@@ -150,20 +150,6 @@
       "resourceSha256": "1a970d61de3fcc4d2cbec91eb51342af56883d7731f71113545bba754f54b0c8"
     },
     {
-      "role": "pet-earth",
-      "source": "design/painted-icons/v3/masters/pet-earth.png",
-      "sourceSha256": "15d2af29a1176591944ca47bb2523591e16c737455a41f4746cba1c7c592bf0e",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-earth-256.png",
-      "resourceSha256": "9f3394bb6c9ea1dbf27d0632a9ae9b2ecb665b0541772ced5551196c3d5a7476"
-    },
-    {
-      "role": "pet-air",
-      "source": "design/painted-icons/v3/masters/pet-air.png",
-      "sourceSha256": "a6493670253b94004fbff4b0fb7fe4c163c5d9bd30411604c7c299e89537e116",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-air-256.png",
-      "resourceSha256": "a0119c73003894ea97e0adaed883a4c8edd453ef28a8866263a099b57fd61084"
-    },
-    {
       "role": "glyph-healing",
       "source": "design/painted-icons/v3/masters/glyph-healing.png",
       "sourceSha256": "a6aa3ccf70c9c7d857253bafb2ea77e210098a131f926a957f59595b78ceff83",
@@ -390,22 +376,6 @@
       "provenance": "AI-generated project artwork; built-in image generation; prompt in docs/dps-title-selector.md"
     },
     {
-      "role": "pet-monster",
-      "source": "docs/previews/pet-icon-candidates/monster-d.png",
-      "sourceSha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-256.png",
-      "resourceSha256": "ed1ba56078f55c3761a3d177e2c4f4ee342e1d3f7b5ab3fcf86be7bd4761c97d",
-      "provenance": "Approved Monster D; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
-    },
-    {
-      "role": "pet-water",
-      "source": "docs/previews/pet-icon-candidates/water-c.png",
-      "sourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
-      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-256.png",
-      "resourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
-      "provenance": "Approved Water C; original alpha and pixels unchanged; simplified native vectors through 24 DIP and all Clean sizes."
-    },
-    {
       "role": "pet-undead-skeleton",
       "source": "docs/previews/pet-icon-candidates/undead-skeleton-a.png",
       "sourceSha256": "f5590e436c3ffd331f1717042e41e1ea349ca5fddd2209d6220b9f47febb3cf1",
@@ -444,6 +414,118 @@
       "resource": "src/EqlTracker.App/Assets/Painted/pet-fire-crystal-256.png",
       "resourceSha256": "75bea1a1109387bea57e5c095102f3390824ab158501d5a9d38728cade3032bf",
       "provenance": "Approved Fire Wizard B; original pixels and alpha unchanged; simplified native vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-earth",
+      "source": "docs/previews/pet-icon-candidates/earth.png",
+      "sourceSha256": "cd98b7dc1150d278485f3ec57a7cd8eef72d326cae23c3798e2e3e814dbb94d0",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-earth-256.png",
+      "resourceSha256": "cd98b7dc1150d278485f3ec57a7cd8eef72d326cae23c3798e2e3e814dbb94d0",
+      "provenance": "Approved Earth; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-air-classic",
+      "source": "docs/previews/pet-icon-candidates/air.png",
+      "sourceSha256": "e0f511e0a9769bc2814df5ede44a0c7d5ba191acbe2162e6daf5ac3e43af903f",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-air-classic-256.png",
+      "resourceSha256": "e0f511e0a9769bc2814df5ede44a0c7d5ba191acbe2162e6daf5ac3e43af903f",
+      "provenance": "Approved Air; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-fire-classic",
+      "source": "docs/previews/pet-icon-candidates/fire.png",
+      "sourceSha256": "d2a9f2f660d6f4628470e8c4022febec1783c89865307657619038de9e595955",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-fire-classic-256.png",
+      "resourceSha256": "d2a9f2f660d6f4628470e8c4022febec1783c89865307657619038de9e595955",
+      "provenance": "Approved Fire; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-water-classic",
+      "source": "docs/previews/pet-icon-candidates/water.png",
+      "sourceSha256": "5e8286c3bb1c380fbf8053d5e00a2c7e34973bc8c786f15af89e96973de031ab",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-classic-256.png",
+      "resourceSha256": "5e8286c3bb1c380fbf8053d5e00a2c7e34973bc8c786f15af89e96973de031ab",
+      "provenance": "Approved Water; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-water-torrent",
+      "source": "docs/previews/pet-icon-candidates/water-c.png",
+      "sourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-torrent-256.png",
+      "resourceSha256": "ff60188d6c2ee1901d0113862714acd0e57ef1b982f7a9b6d132bb4fc145bef4",
+      "provenance": "Approved Water C; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-air",
+      "source": "docs/previews/pet-icon-candidates/air-monk-fist-v2.png",
+      "sourceSha256": "43de9901d9415490874247e963a4b83f4b7004588a8cc72b6a46995bc9345e47",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-air-256.png",
+      "resourceSha256": "43de9901d9415490874247e963a4b83f4b7004588a8cc72b6a46995bc9345e47",
+      "provenance": "Approved Air Monk \u00b7 closed fist; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-water",
+      "source": "docs/previews/pet-icon-candidates/water-rogue-anatomy-v2.png",
+      "sourceSha256": "4026dcd25cf1e2091bd969e05304d5efe4aa7c6a5886c7693d1b2c15b54ceb95",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-water-256.png",
+      "resourceSha256": "4026dcd25cf1e2091bd969e05304d5efe4aa7c6a5886c7693d1b2c15b54ceb95",
+      "provenance": "Approved Water Rogue \u00b7 corrected anatomy; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-warder",
+      "source": "docs/previews/pet-icon-candidates/warder-attack-trim-v2.png",
+      "sourceSha256": "e3eddb1b44f7a68c75eaf0bba2a8f9571ed0be8f399883c16c37cba3a3eb2883",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-warder-256.png",
+      "resourceSha256": "e3eddb1b44f7a68c75eaf0bba2a8f9571ed0be8f399883c16c37cba3a3eb2883",
+      "provenance": "Approved Warder \u00b7 compact mane; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-animation",
+      "source": "docs/previews/pet-icon-candidates/animation.png",
+      "sourceSha256": "ee5de010ea5e054454b5ef82b8ca5af70e1d0435dbe6cf50bfd9168873072171",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-animation-256.png",
+      "resourceSha256": "ee5de010ea5e054454b5ef82b8ca5af70e1d0435dbe6cf50bfd9168873072171",
+      "provenance": "Approved Animation; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-monster",
+      "source": "docs/previews/pet-icon-candidates/monster-a.png",
+      "sourceSha256": "c0b5dbb0b79cc6068bb9d18dbaf7db5614116471b91d5d33267dbd0f4455222c",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-256.png",
+      "resourceSha256": "c0b5dbb0b79cc6068bb9d18dbaf7db5614116471b91d5d33267dbd0f4455222c",
+      "provenance": "Approved Monster A; pixels and alpha unchanged; native simplified vector through 24 DIP and all Clean sizes."
+    },
+    {
+      "role": "pet-monster-aviak-c",
+      "source": "docs/previews/pet-icon-candidates/monster-aviak-doubleaxe-overhead-r5.png",
+      "sourceSha256": "52115a538b72529e99e42531b4616d3487645e6347f831e25f390f4c8372daea",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-aviak-c-256.png",
+      "resourceSha256": "52115a538b72529e99e42531b4616d3487645e6347f831e25f390f4c8372daea",
+      "provenance": "Selected interim Aviak Berserker \u00b7 double axe C \u2014 Overhead; original pixels and vector geometry unchanged; shaft alignment refinement pending."
+    },
+    {
+      "role": "pet-monster-aviak-b",
+      "source": "docs/previews/pet-icon-candidates/monster-aviak-doubleaxe-diagonal-r5.png",
+      "sourceSha256": "481bde725a89154679524825974fbe03f94bd9223b3fafa65369711f74bce418",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-aviak-b-256.png",
+      "resourceSha256": "481bde725a89154679524825974fbe03f94bd9223b3fafa65369711f74bce418",
+      "provenance": "Selected interim Aviak Berserker \u00b7 double axe B \u2014 Diagonal; original pixels and vector geometry unchanged; shaft alignment refinement pending."
+    },
+    {
+      "role": "pet-monster-dragon-c",
+      "source": "docs/previews/pet-icon-candidates/monster-dragon-doubleaxe-overhead-r5.png",
+      "sourceSha256": "05d4e2e1df58a03c773ecfa07f3a8c93b1560be56a5614915ab612e298992d42",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-dragon-c-256.png",
+      "resourceSha256": "05d4e2e1df58a03c773ecfa07f3a8c93b1560be56a5614915ab612e298992d42",
+      "provenance": "Selected interim Dragon Berserker \u00b7 double axe C \u2014 Overhead; original pixels and vector geometry unchanged; shaft alignment refinement pending."
+    },
+    {
+      "role": "pet-monster-dragon-b",
+      "source": "docs/previews/pet-icon-candidates/monster-dragon-doubleaxe-diagonal-r5.png",
+      "sourceSha256": "44ec6b5c80f9a026966bc131c76e347cac0645be010f38b3e9b8ffdc70cf3c0c",
+      "resource": "src/EqlTracker.App/Assets/Painted/pet-monster-dragon-b-256.png",
+      "resourceSha256": "44ec6b5c80f9a026966bc131c76e347cac0645be010f38b3e9b8ffdc70cf3c0c",
+      "provenance": "Selected interim Dragon Berserker \u00b7 double axe B \u2014 Diagonal; original pixels and vector geometry unchanged; shaft alignment refinement pending."
     }
   ],
   "icoFrames": [

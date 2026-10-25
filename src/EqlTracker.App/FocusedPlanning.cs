@@ -16,7 +16,10 @@ public sealed partial class QuestWindow
     private UIElement BuildFocusedQueue()
     {
         var root = new DockPanel();
-        var actions = new WrapPanel();
+        var actions = new WrapPanel(); var mode = UI.Select(["Goals", "Loot"], "Goals", 75);
+        var toolbar = new WrapPanel(); toolbar.Children.Add(mode); toolbar.Children.Add(actions); toolbar.Children.Add(BuildLootActions());
+        mode.SelectionChanged += (_, _) => SwitchQueueMode(mode.SelectedIndex == 1, actions);
+        queueModeChoice = mode;
         actions.Children.Add(FocusedLayout.Search(queueSearch, "Search goals, items or zones…"));
         actions.Children.Add(FocusedLayout.Menu("+ Add goal ▾",
             ("Browse quests", () => ShowView(TrackerTab.Quests), "Choose a quest or individual armor reward, then add it to your queue."),
@@ -29,13 +32,14 @@ public sealed partial class QuestWindow
             ("Pause / resume quest", ToggleQueuedQuest, "Pausing untracks the quest while preserving its pin and progress."),
             ("Remove pin", RemovePin, "Remove this queue entry. Quest tracking and inventory remain intact."));
         actions.Children.Add(more);
-        var heading = UI.Stack(actions);
+        var heading = UI.Stack(toolbar);
         DockPanel.SetDock(heading, Dock.Top); root.Children.Add(heading);
         
         var emptyActions = new WrapPanel(); emptyActions.Children.Add(UI.Button("Browse quests", () => ShowView(TrackerTab.Quests))); emptyActions.Children.Add(UI.Button("Search items", () => ShowView(TrackerTab.Gear)));
         var empty = UI.Stack(queueNoteState, emptyActions); empty.Margin = new(6); queueEmptyActions = emptyActions;
         var body = new DockPanel(); DockPanel.SetDock(empty, Dock.Top); body.Children.Add(empty); DockPanel.SetDock(queueSummary,Dock.Bottom);body.Children.Add(queueSummary); body.Children.Add(queueList);
-        root.Children.Add(UI.Split(TrackerLeftPane(body), FocusedLayout.FloatingInspector("Next action & sources", queueInspector), 320, Controller.Profile, "queue-focused", 280, 180));
+        queueGoalsBody = body; var left = new Grid(); left.Children.Add(body); left.Children.Add(BuildLootBody());
+        root.Children.Add(UI.Split(TrackerLeftPane(left), FocusedLayout.FloatingInspector("Details & sources", queueInspector), 320, Controller.Profile, "queue-focused", 280, 180));
         queueSearch.ToolTip = "Search your pinned goals and their remaining ingredients. Clearing the search restores your saved order.";
         queueState.ToolTip = "Filter the view without pausing goals or changing saved queue order.";
         queueList.SelectionChanged += (_, _) => { queueSelectedItem = ""; ShowQueueInspector(); };
@@ -91,6 +95,7 @@ public sealed partial class QuestWindow
     }
     private void ShowQueueInspector()
     {
+        if (queueLootMode) { ShowLootInspector(); return; }
         queueInspector.Children.Clear();
         if (queueList.SelectedItem is not QueueEntry entry) { queueInspector.Children.Add(UI.Text("Select a goal to see its next requirement and sources.", 12, "Muted")); return; }
         var row = entry.Ingredients.FirstOrDefault(i => i.QuestId + "|" + i.Key == queueSelectedItem)

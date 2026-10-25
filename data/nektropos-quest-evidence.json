@@ -1,0 +1,819 @@
+{
+  "Version": "nektropos-routes-v17",
+  "ReviewedPages": {
+    "Hate, Betrayal, and Trust": {
+      "Revision": 199712,
+      "Timestamp": "2026-10-25T11:52:50Z"
+    },
+    "The Tragic Tale of House Everling": {
+      "Revision": 199713,
+      "Timestamp": "2026-10-25T11:53:00Z"
+    },
+    "The Betrayer": {
+      "Revision": 199714,
+      "Timestamp": "2026-10-25T11:53:00Z"
+    },
+    "Something Fishy": {
+      "Revision": 199300,
+      "Timestamp": "2026-10-23T20:56:01Z"
+    },
+    "Alchemical Solution": {
+      "Revision": 199336,
+      "Timestamp": "2026-10-24T00:40:10Z"
+    },
+    "What's going on here": {
+      "Revision": 199700,
+      "Timestamp": "2026-10-25T10:10:33Z"
+    },
+    "Call for Aid": {
+      "Revision": 199614,
+      "Timestamp": "2026-10-25T04:12:39Z"
+    },
+    "Unfortunate News": {
+      "Revision": 199699,
+      "Timestamp": "2026-10-25T10:04:56Z"
+    }
+  },
+  "Quests": {
+    "Hate, Betrayal, and Trust": [
+      {
+        "Key": "meet-ozval",
+        "Name": "Speak with Retainer Ozval",
+        "Instructions": "Meet Retainer Ozval at the central huts in Lake Nerius, near (201, -97, -7).",
+        "PriorId": "nektropos-hate-betrayal-and-trust:FCF0E7D5A78B",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Retainer Ozval",
+          "201, -97, -7"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "recover-signet",
+        "Name": "Recover the damaged signet ring",
+        "Instructions": "Loot Ancient Signet Ring of House Everling from Corrupted Kedgespawn in the northwest lake at (2662, 1238, -119). The source suggests a Lake Nerius /pick or private instance if needed.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:B5C3AC482FCE",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Ancient Signet Ring of House Everling",
+          "2662, 1238, -119"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "return-signet",
+        "Name": "Return the damaged ring",
+        "Instructions": "Give Ancient Signet Ring of House Everling to Retainer Ozval.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:D29E3131F4AF",
+        "Inputs": {
+          "Ancient Signet Ring of House Everling": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Hand",
+          "Ancient Signet Ring of House Everling"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "obtain-sapphire",
+        "Name": "Obtain Peerless Sapphire",
+        "Instructions": "Speak to Merchant Tyslin in Northern Felwithe at (107, -438): \"Ozval sent me\". Put the sapphire in your bags.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:9FEB3E646D99",
+        "Inputs": {},
+        "Outputs": {
+          "Peerless Sapphire": 1
+        },
+        "Terms": [
+          "Peerless Sapphire",
+          "107, -438"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "obtain-gem-setter",
+        "Name": "Obtain Exquisite Gem Setter",
+        "Instructions": "Speak to Rylin Coil in Ak'Anon at (1469, -190): \"Ozval sent me\". Put the gem setter in your bags.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:F63B3A56CF40",
+        "Inputs": {},
+        "Outputs": {
+          "Exquisite Gem Setter": 1
+        },
+        "Terms": [
+          "Exquisite Gem Setter",
+          "1469, -190"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "deliver-components",
+        "Name": "Deliver the sapphire and gem setter",
+        "Instructions": "Give Peerless Sapphire and Exquisite Gem Setter to Retainer Ozval.",
+        "PriorId": "",
+        "Inputs": {
+          "Peerless Sapphire": 1,
+          "Exquisite Gem Setter": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Hand",
+          "Exquisite Gem Setter",
+          "Peerless Sapphire"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "obtain-blessing",
+        "Name": "Obtain Blessing of the Betrayer",
+        "Instructions": "In the normal, non-instanced Plane of Hate, find High Priestess of Ulkorruuk on the second floor near (-90, 287, 127). Hail and say \"swear\" without hiding or sneaking; put the blessing in your bags.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:7B86633C40CD",
+        "Inputs": {},
+        "Outputs": {
+          "Blessing of the Betrayer": 1
+        },
+        "Terms": [
+          "Blessing of the Betrayer",
+          "-90,287,127",
+          "not in an instance"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "deliver-blessing",
+        "Name": "Deliver the blessing and enter the castle",
+        "Instructions": "Give Blessing of the Betrayer to Retainer Ozval, then follow the road north and click the castle gates.",
+        "PriorId": "nektropos-hate-betrayal-and-trust:52FBB40675FF",
+        "Inputs": {
+          "Blessing of the Betrayer": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Blessing of the Betrayer",
+          "click the gates"
+        ],
+        "Container": ""
+      }
+    ],
+    "The Tragic Tale of House Everling": [
+      {
+        "Key": "hail-ollix",
+        "Name": "Hear Lord Ollix Everling's request",
+        "Instructions": "Inside the castle, hail Lord Ollix Everling near the ruined harpsichord and ask about \"dead\". His exact coordinates remain undocumented.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Lord Ollix Everling",
+          "dead"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "collect-black-key",
+        "Name": "Collect Harpsichord Black Key",
+        "Instructions": "Pick up Harpsichord Black Key at (-37, 130) in Nektropos Castle. Southwest chessboard, in front of The Game Master. Coordinates describe the ground item, not the nearby NPC.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Harpsichord Black Key": 1
+        },
+        "Terms": [
+          "Harpsichord Black Key",
+          "(-37, 130)"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "collect-white-key",
+        "Name": "Collect Harpsichord White Key",
+        "Instructions": "Pick up Harpsichord White Key at (710, 105) in Nektropos Castle. Northwest storage area with boxes. Coordinates describe the ground item, not the nearby NPC.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Harpsichord White Key": 1
+        },
+        "Terms": [
+          "Harpsichord White Key",
+          "(710, 105)"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "collect-string",
+        "Name": "Collect Harpsichord String",
+        "Instructions": "Pick up Harpsichord String at (120, -151) in Nektropos Castle. Southeast Tormentor room. Coordinates describe the ground item, not the nearby NPC.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Harpsichord String": 1
+        },
+        "Terms": [
+          "Harpsichord String",
+          "(120, -151)"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "collect-plectrum",
+        "Name": "Collect Harpsichord Plectrum",
+        "Instructions": "Pick up Harpsichord Plectrum at (-23, -100) in Nektropos Castle. Southeast Priestess room. Coordinates describe the ground item, not the nearby NPC.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Harpsichord Plectrum": 1
+        },
+        "Terms": [
+          "Harpsichord Plectrum",
+          "(-23, -100)"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "combine-library-key",
+        "Name": "Combine the Nektropos Library Key",
+        "Instructions": "At the ruined harpsichord in the main lobby, (368, 65), combine the four harpsichord components. This is a quest-object combine, not evidence of a tradeskill recipe.",
+        "PriorId": "",
+        "Inputs": {
+          "Harpsichord Black Key": 1,
+          "Harpsichord White Key": 1,
+          "Harpsichord String": 1,
+          "Harpsichord Plectrum": 1
+        },
+        "Outputs": {
+          "Nektropos Library Key": 1
+        },
+        "Terms": [
+          "368, 65",
+          "Combine the four components"
+        ],
+        "Container": "Ruined harpsichord"
+      },
+      {
+        "Key": "find-lady",
+        "Name": "Make contact with Ollix's mother",
+        "Instructions": "Find Lady Sileniu Everling in the northeast second-floor chambers at (552, -132, 17).",
+        "PriorId": "nektropos-the-tragic-tale-of-house-everling:14FF0C6D47F0",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Lady Sileniu Everling",
+          "552, -132, 17"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "hear-plea",
+        "Name": "Hear Lady Everling's plea",
+        "Instructions": "Ask Lady Sileniu Everling about \"He\", then \"swear\". This starts The Betrayer.",
+        "PriorId": "nektropos-the-tragic-tale-of-house-everling:4EBB778A1E9C",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "swear",
+          "The Betrayer"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "finish-betrayer",
+        "Name": "Complete The Betrayer",
+        "Instructions": "Follow The Betrayer's separately documented route through the sisters, Alexa and Lord Rikantus, then say \"end\" to Plimptos. The nested quest grants Blood's Unity; the parent does not establish a second copy.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Complete",
+          "The Betrayer"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "confess",
+        "Name": "Confess to Lady Sileniu Everling",
+        "Instructions": "Tell Lady Sileniu Everling \"dead\", then \"confess\". Defeat her after she turns hostile.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "confess",
+          "Kill"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "return-ollix",
+        "Name": "Return to Lord Ollix Everling",
+        "Instructions": "Return to Lord Ollix Everling and say \"tragic\". The source records completion of the House Everling achievement.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "tragic",
+          "achievement"
+        ],
+        "Container": ""
+      }
+    ],
+    "The Betrayer": [
+      {
+        "Key": "swear",
+        "Name": "Accept Lady Everling's task",
+        "Instructions": "Speak to Lady Sileniu Everling near (552, -132, 17): \"He\", then \"swear\".",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "552, -132, 17",
+          "swear"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "sword-hilt",
+        "Name": "Hear Plimptos' account",
+        "Instructions": "Find Plimptos downstairs at (102, -151, 7); say \"crimes\", then \"brought back\" for the sword hilt.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "102, -151, 7",
+          "brought back"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "handmaiden",
+        "Name": "Speak to Alexa's Handmaiden",
+        "Instructions": "Hail Alexa's Handmaiden in the southeast second-floor area near (172, -178).",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Handmaiden",
+          "172, -178"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "sisters",
+        "Name": "Defeat the six sisters",
+        "Instructions": "Defeat Jenni, Melanie, Crysta, Shelia, Elise and Deirdre Everling. Recorded locations: Jenni (342, -423, 17); Crysta (859, 311, 18); Shelia (352, 428, 17); Elise (-157, 321, 17). Exact Melanie/Deirdre coordinates remain undocumented.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Jenni Everling",
+          "Melanie Everling",
+          "Crysta Everling",
+          "Shelia Everling",
+          "Elise Everling",
+          "Deirdre Everling"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "great-room-key",
+        "Name": "Return for the Great Room Key",
+        "Instructions": "Hail Alexa's Handmaiden again to receive Nektropos Great Room Key.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Nektropos Great Room Key": 1
+        },
+        "Terms": [
+          "Nektropos Great Room Key"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "alexa",
+        "Name": "Defeat Alexa Everling",
+        "Instructions": "Defeat Alexa in the southwest second-floor great room to obtain Nektropos Private Chamber Key. Her exact coordinates remain undocumented.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Nektropos Private Chamber Key": 1
+        },
+        "Terms": [
+          "Nektropos Private Chamber Key",
+          "southwest great room"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "bookshelf",
+        "Name": "Find the basement entrance",
+        "Instructions": "Use the secret entrance behind the bookshelf in the Guard Captain's northwest second-floor room. Exact captain coordinates remain undocumented.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "bookshelf",
+          "Guard Captain"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "juggernaught",
+        "Name": "Defeat The Juggernaught",
+        "Instructions": "Follow the basement corridor southwest to The Juggernaught at (-331, 310, -112) for Nektropos Basement Key.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Nektropos Basement Key": 1
+        },
+        "Terms": [
+          "Nektropos Basement Key",
+          "-331, 310, -112"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "rikantus",
+        "Name": "Defeat Lord Rikantus Everling",
+        "Instructions": "Defeat Lord Rikantus Everling beside the Juggernaught room at (-382, 181, -112). Wiki combat notes describe golem phases; these are guidance, not a Catalyst damage formula.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "-382, 181, -112",
+          "golem"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "end",
+        "Name": "Return to Plimptos",
+        "Instructions": "Say \"end\" to Plimptos. Blood's Unity is the documented quest reward. Then resume the House Everling quest.",
+        "PriorId": "",
+        "Inputs": {},
+        "Outputs": {
+          "Blood's Unity": 1
+        },
+        "Terms": [
+          "end",
+          "Blood's Unity"
+        ],
+        "Container": ""
+      }
+    ],
+    "Something Fishy": [
+      {
+        "Key": "documented-action-1",
+        "Name": "Hail Nikko Canti in Lake Nerius and say \"not\", \"haven't seen\", \"feed\", and \"help\"",
+        "Instructions": "Hail Nikko Canti in Lake Nerius and say \"not\", \"haven't seen\", \"feed\", and \"help\"",
+        "PriorId": "nektropos-something-fishy:EEBCD93616C0",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Hail"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-2",
+        "Name": "Fish up 3 Fresh Fish in Lake Nerius and give them to Nikko",
+        "Instructions": "Fish up 3 Fresh Fish in Lake Nerius and give them to Nikko",
+        "PriorId": "nektropos-something-fishy:DE7A025B6265",
+        "Inputs": {
+          "Fresh Fish": 3
+        },
+        "Outputs": {},
+        "Terms": [
+          "Fresh Fish"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-3",
+        "Name": "Kill 2 A large piranha in the river and return to Nikko",
+        "Instructions": "Kill 2 A large piranha in the river and return to Nikko",
+        "PriorId": "nektropos-something-fishy:C0FA92A953FF",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Kill"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-4",
+        "Name": "Kill a ghost gill for Defiled Fish Scales and give them to Nikko",
+        "Instructions": "Kill a ghost gill for Defiled Fish Scales and give them to Nikko",
+        "PriorId": "nektropos-something-fishy:40E2A87138B6",
+        "Inputs": {
+          "Defiled Fish Scales": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Defiled Fish Scales"
+        ],
+        "Container": ""
+      }
+    ],
+    "Alchemical Solution": [
+      {
+        "Key": "documented-action-1",
+        "Name": "Obtain Defiled Fish Scales from the quest Something Fishy.",
+        "Instructions": "Obtain Defiled Fish Scales from the quest Something Fishy.",
+        "PriorId": "nektropos-alchemical-solution:55FA08574303",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Obtain"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-2",
+        "Name": "Give Defiled Fish Scales to Dorian G`Wyn in Lake Nerius.",
+        "Instructions": "Give Defiled Fish Scales to Dorian G`Wyn in Lake Nerius.",
+        "PriorId": "nektropos-alchemical-solution:62611BBF07A1",
+        "Inputs": {
+          "Defiled Fish Scales": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Defiled Fish Scales"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-3",
+        "Name": "Loot Putrid Bile from a fire drake in Lavastorm Mountains.",
+        "Instructions": "Loot Putrid Bile from a fire drake in Lavastorm Mountains.",
+        "PriorId": "nektropos-alchemical-solution:69D5CF5BADBC",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Loot"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-4",
+        "Name": "Loot Imp Blood from a fire imp in Lavastorm Mountains ( or an imp protector in Nagafen's Lair. )",
+        "Instructions": "Loot Imp Blood from a fire imp in Lavastorm Mountains ( or an imp protector in Nagafen's Lair. )",
+        "PriorId": "nektropos-alchemical-solution:154B4C719FF7",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Loot"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-5",
+        "Name": "Return to Dorian G`Wyn and give them Putrid Bile and Imp Blood",
+        "Instructions": "Return to Dorian G`Wyn and give them Putrid Bile and Imp Blood",
+        "PriorId": "nektropos-alchemical-solution:6D14D341C9E5",
+        "Inputs": {
+          "Putrid Bile": 1,
+          "Imp Blood": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Putrid Bile"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-6",
+        "Name": "Tell Dorian G`Wyn \"assist\" and \"two things\"",
+        "Instructions": "Tell Dorian G`Wyn \"assist\" and \"two things\"",
+        "PriorId": "nektropos-alchemical-solution:1D51F40B2242",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Tell"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-7",
+        "Name": "Pick up Dusty Scroll Case in West Freeport from the table in the guard house on the wall of the West Commonlands gate",
+        "Instructions": "Pick up Dusty Scroll Case in West Freeport from the table in the guard house on the wall of the West Commonlands gate",
+        "PriorId": "nektropos-alchemical-solution:4708D9771459",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Pick"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-8",
+        "Name": "Tell Ty`Klerr in Neriak - Foreign Quarter \"Dorian\", \"ready\", and \"report\" to receive Encoded Missive",
+        "Instructions": "Tell Ty`Klerr in Neriak - Foreign Quarter \"Dorian\", \"ready\", and \"report\" to receive Encoded Missive",
+        "PriorId": "nektropos-alchemical-solution:88C76410725F",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Tell"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-9",
+        "Name": "Return to Lake Nerius and give Dorian G`Wyn both Dusty Scroll Case and Encoded Missive",
+        "Instructions": "Return to Lake Nerius and give Dorian G`Wyn both Dusty Scroll Case and Encoded Missive",
+        "PriorId": "nektropos-alchemical-solution:DA5EE673C5D4",
+        "Inputs": {
+          "Dusty Scroll Case": 1,
+          "Encoded Missive": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Dusty Scroll Case"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-10",
+        "Name": "Fish for a Fetid Lake Muck in Lake Nerius",
+        "Instructions": "Fish for a Fetid Lake Muck in Lake Nerius",
+        "PriorId": "nektropos-alchemical-solution:C01E03448924",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Fish"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-11",
+        "Name": "Give the Fetid Lake Muck to Dorian G`Wyn",
+        "Instructions": "Give the Fetid Lake Muck to Dorian G`Wyn",
+        "PriorId": "nektropos-alchemical-solution:96847FAC3C49",
+        "Inputs": {
+          "Fetid Lake Muck": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "Fetid Lake Muck"
+        ],
+        "Container": ""
+      }
+    ],
+    "What's going on here": [
+      {
+        "Key": "documented-action-1",
+        "Name": "See what information about the [undead] you can gather from Yelayna",
+        "Instructions": "See what information about the [undead] you can gather from Yelayna",
+        "PriorId": "nektropos-what-s-going-on-here:6F9CDA143A6C",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "See"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-2",
+        "Name": "What insights about [Lake Nerius] might Konro have?",
+        "Instructions": "What insights about [Lake Nerius] might Konro have?",
+        "PriorId": "nektropos-what-s-going-on-here:E531C01CE307",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "What"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-3",
+        "Name": "Blergagh seems like he [knows more] than hes letting on about. Ask him about [Dorian]",
+        "Instructions": "Blergagh seems like he [knows more] than hes letting on about. Ask him about [Dorian]",
+        "PriorId": "nektropos-what-s-going-on-here:556549AF0F8B",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Blergagh"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-4",
+        "Name": "The banker, Neuven F`Lok, probably knows a lot if he knows how the [money] flows",
+        "Instructions": "The banker, Neuven F`Lok, probably knows a lot if he knows how the [money] flows",
+        "PriorId": "nektropos-what-s-going-on-here:B527A6BE7DB0",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "The"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-5",
+        "Name": "The long winded 'The Great Zultor' may let slip useful info",
+        "Instructions": "The long winded 'The Great Zultor' may let slip useful info",
+        "PriorId": "nektropos-what-s-going-on-here:965F710E83A2",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "The"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-6",
+        "Name": "Ask Nikko Canti about [Dorian]",
+        "Instructions": "Ask Nikko Canti about [Dorian]",
+        "PriorId": "nektropos-what-s-going-on-here:F51307D37651",
+        "Inputs": {},
+        "Outputs": {},
+        "Terms": [
+          "Ask"
+        ],
+        "Container": ""
+      }
+    ],
+    "Call for Aid": [
+      {
+        "Key": "documented-action-1",
+        "Name": "Say \"who\", \"Half Dark Elf\", \"Jeopardized\", and \"alleviate the threat\" to Dorian G`Wyn in Lake Nerius to receive Plea to Freeport, Appeal of Neriak, and Solusek Petition",
+        "Instructions": "Say \"who\", \"Half Dark Elf\", \"Jeopardized\", and \"alleviate the threat\" to Dorian G`Wyn in Lake Nerius to receive Plea to Freeport, Appeal of Neriak, and Solusek Petition",
+        "PriorId": "nektropos-call-for-aid:5DFF9EE17FBB",
+        "Inputs": {},
+        "Outputs": {
+          "Plea to Freeport": 1,
+          "Appeal of Neriak": 1,
+          "Solusek Petition": 1
+        },
+        "Terms": [
+          "Say"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-2",
+        "Name": "Give the Plea to Freeport to Sir Mollin in North Freeport to get A Curt Dismissal",
+        "Instructions": "Give the Plea to Freeport to Sir Mollin in North Freeport to get A Curt Dismissal",
+        "PriorId": "nektropos-call-for-aid:0A6BA807A31A",
+        "Inputs": {
+          "Plea to Freeport": 1
+        },
+        "Outputs": {
+          "A Curt Dismissal": 1
+        },
+        "Terms": [
+          "Plea to Freeport"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-3",
+        "Name": "Give the Appeal of Neriak to Pishtian F`Lok in Neriak - Commons to get Exorbitant Commission",
+        "Instructions": "Give the Appeal of Neriak to Pishtian F`Lok in Neriak - Commons to get Exorbitant Commission",
+        "PriorId": "nektropos-call-for-aid:2D1146BA06D9",
+        "Inputs": {
+          "Appeal of Neriak": 1
+        },
+        "Outputs": {
+          "Exorbitant Commission": 1
+        },
+        "Terms": [
+          "Appeal of Neriak"
+        ],
+        "Container": ""
+      },
+      {
+        "Key": "documented-action-4",
+        "Name": "Give the Solusek Petition to Lord Lyfyx of Burwood to get Ordination of Might",
+        "Instructions": "Give the Solusek Petition to Lord Lyfyx of Burwood to get Ordination of Might",
+        "PriorId": "nektropos-call-for-aid:F585F8AD602D",
+        "Inputs": {
+          "Solusek Petition": 1
+        },
+        "Outputs": {
+          "Ordination of Might": 1
+        },
+        "Terms": [
+          "Solusek Petition"
+        ],
+        "Container": ""
+      }
+    ],
+    "Unfortunate News": [
+      {
+        "Key": "documented-action-1",
+        "Name": "Deliver the responses back to Dorian in Lake Nerius",
+        "Instructions": "Deliver the responses back to Dorian in Lake Nerius",
+        "PriorId": "nektropos-unfortunate-news:E839ED53E667",
+        "Inputs": {
+          "A Curt Dismissal": 1,
+          "Exorbitant Commission": 1,
+          "Ordination of Might": 1
+        },
+        "Outputs": {},
+        "Terms": [
+          "A Curt Dismissal"
+        ],
+        "Container": ""
+      }
+    ]
+  }
+}

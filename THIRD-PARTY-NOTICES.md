@@ -19,3 +19,7 @@ The independently implemented read-only Pet spell adapter follows the format res
 ## Installer tooling
 
 Built using Inno Setup 7.1.0, maintained by JRSoftware/Pyrsys. The compiler is a build tool, not an application dependency. Its distribution remains governed by its upstream license. No Authenticode signature is applied to the EQL Catalyst installer.
+
+## Optional companion dependencies
+
+QR pairing uses QRCoder 1.6.0 (MIT). Local discovery uses Makaretu.Dns.Multicast 0.27.0 and its upstream dependencies. Windows secret storage uses System.Security.Cryptography.ProtectedData 10.0.0. The exact resolved dependency versions and supplied upstream license/nuspec files are retained in the package notices; these libraries do not change Catalyst’s GPL or the read-only sharing protocol.

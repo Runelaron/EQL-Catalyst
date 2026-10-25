@@ -113,17 +113,17 @@
   },
   {
     "Name": "Call for Aid",
-    "Revision": 199332,
+    "Revision": 199614,
     "StartZone": "Lake Nerius",
     "StartNpc": "Nikko Canti",
-    "Source": "https://eqlwiki.com/Call_for_Aid?oldid=199332 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Call_for_Aid?oldid=199614 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "Hate, Betrayal, and Trust",
-    "Revision": 199327,
+    "Revision": 199712,
     "StartZone": "Lake Nerius",
     "StartNpc": "Retainer Ozval",
-    "Source": "https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=199327 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=199712 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "Something Fishy",
@@ -134,23 +134,30 @@
   },
   {
     "Name": "The Tragic Tale of House Everling",
-    "Revision": 199326,
+    "Revision": 199713,
     "StartZone": "Nektropos Castle",
     "StartNpc": "Lord Ollix Everling",
-    "Source": "https://eqlwiki.com/The_Tragic_Tale_of_House_Everling?oldid=199326 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/The_Tragic_Tale_of_House_Everling?oldid=199713 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "Unfortunate News",
-    "Revision": 199301,
+    "Revision": 199699,
     "StartZone": "Finishing the quest Call for Aid",
     "StartNpc": "",
-    "Source": "https://eqlwiki.com/Unfortunate_News?oldid=199301 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Unfortunate_News?oldid=199699 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "What\u0027s going on here",
-    "Revision": 199299,
+    "Revision": 199700,
     "StartZone": "Lake Nerius",
     "StartNpc": "Dorian G\u0060Wyn",
-    "Source": "https://eqlwiki.com/What%27s_going_on_here?oldid=199299 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/What%27s_going_on_here?oldid=199700 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "The Betrayer",
+    "Revision": 199714,
+    "StartZone": "Nektropos Castle",
+    "StartNpc": "Lady Sileniu Everling",
+    "Source": "https://eqlwiki.com/The_Betrayer?oldid=199714 \u00B7 structured quest-start fields \u00B7 parser v2"
   }
 ]

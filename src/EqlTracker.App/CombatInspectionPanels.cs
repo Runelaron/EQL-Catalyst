@@ -94,7 +94,7 @@ public sealed class AbilityInspector : Border
         Usability.Tooltips(body);
     }
 }
-public sealed class CombatGroupPanel : Grid
+public sealed partial class CombatGroupPanel : Grid
 {
     private readonly DataGrid members = UI.Table(("Member", "Name", 130, null), ("Total", "Total", 75, "N0"), ("Rate", "Rate", 65, "N1"), ("Share", "Share", 60, "0.#'%'"));
     private readonly System.Collections.ObjectModel.ObservableCollection<GroupPeriod> periodRows=[];
@@ -122,8 +122,9 @@ public sealed class CombatGroupPanel : Grid
         moreDestinations.Content=remainingDestinations;moreDestinations.ToolTip="Show the remaining target or recipient entries in this member inspector. The whole inspector scrolls; this list has no separate scrollbar.";
         moreDestinations.Expanded+=(_,_)=>moreDestinations.Header="View Less <";moreDestinations.Collapsed+=(_,_)=>moreDestinations.Header="View More >";
         detail.Children.Add(UI.Stack(title,evidence,splitTotals));var targetsLabel=UI.Label("Targets / recipients");Grid.SetRow(targetsLabel,1);detail.Children.Add(targetsLabel);var targets=UI.Stack(destinations,moreDestinations);Grid.SetRow(targets,2);detail.Children.Add(targets);Grid.SetRow(abilityTitle,3);detail.Children.Add(abilityTitle);Grid.SetRow(abilities,4);detail.Children.Add(abilities);
-        RowDefinitions.Add(new(){Height=GridLength.Auto});RowDefinitions.Add(new(){Height=new(1,GridUnitType.Star)});Children.Add(coverage);
-        detail.MinHeight=330;detail.RowDefinitions[4].Height=new(220);var all = new GroupPaneLayout(history,members,UI.Card(UI.Scroll(detail)),profile,controller.Save);
+        RowDefinitions.Add(new(){Height=GridLength.Auto});RowDefinitions.Add(new(){Height=new(1,GridUnitType.Star)});Children.Add(UI.Row(coverage,UI.Button("Song coverage",()=>ToggleSongCoverage(true))));
+        memberDetail = detail; var inspector = new Grid(); inspector.Children.Add(detail); inspector.Children.Add(songInspector);
+        detail.MinHeight=330;detail.RowDefinitions[4].Height=new(220);var all = groupPanes = new GroupPaneLayout(history,members,UI.Card(UI.Scroll(inspector)),profile,controller.Save);
         var viewport=new ScrollViewer{Content=all,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,CanContentScroll=false};
         void FitPanes(){double width=viewport.ViewportWidth>0?viewport.ViewportWidth:viewport.ActualWidth;double min=width>=980?180:width>=620?260:380;double height=Math.Max(min,viewport.ViewportHeight);if(Math.Abs(all.Height-height)>.5||double.IsNaN(all.Height))all.Height=height;}
         viewport.SizeChanged+=(_,_)=>FitPanes();viewport.ScrollChanged+=(_,e)=>{if(e.ViewportHeightChange!=0||e.ViewportWidthChange!=0)FitPanes();};Grid.SetRow(viewport,1);Children.Add(viewport);
@@ -132,6 +133,7 @@ public sealed class CombatGroupPanel : Grid
     }
     public void RefreshPeriods()
     {
+        if(songInspector.Visibility==Visibility.Visible)RefreshSongCoverage();
         if(ReferenceEquals(priorPeriods,controller.GroupPeriods)&&priorPeriodId==controller.Profile.Meter.GroupPeriodId)return;
         priorPeriods=controller.GroupPeriods;priorPeriodId=controller.Profile.Meter.GroupPeriodId;updating=true;
         string? prior=(periods.SelectedItem as GroupPeriod)?.Id;

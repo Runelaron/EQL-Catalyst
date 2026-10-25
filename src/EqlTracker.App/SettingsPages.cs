@@ -7,7 +7,7 @@ using EqlTracker.Core;
 
 namespace EqlTracker.App;
 
-public enum SettingsSection { Appearance, Character, Combat, Objectives, Sync, Advanced }
+public enum SettingsSection { Appearance, Character, Combat, Objectives, Sync, Phone, Advanced }
 public sealed partial class SettingsWindow
 {
     private readonly Dictionary<SettingsSection, ScrollViewer> pages = [];
@@ -72,6 +72,7 @@ public sealed partial class SettingsWindow
         Page(SettingsSection.Combat,"Combat",UI.Stack(Group("Encounter timing",timingInputs),Group("Pet identity",Field("Pet type override",petType,petType.ToolTip!.ToString()!),UI.Text("Auto uses summon and owned-pet evidence. A manual override takes precedence.",12,"Muted"))));
         Page(SettingsSection.Objectives, "Objectives", UI.Stack(Group("Planning & fallback", Field("When this zone has no goals", objectiveMode, objectiveMode.ToolTip!.ToString()!), Field("Allocation priority", priority, "Class codes, highest priority first. Shared physical stock is allocated once; queue order is independent.")), UI.Text("Manage tracked quests and your ordered queue in Quest & Gear Tracker.", 12, "Muted"), UI.Button("Open tracker", () => ((App)Application.Current).OpenQuests())));
         folder.Width = double.NaN;
+        Page(SettingsSection.Phone, "Phone", BuildPhoneSettings());
         captures=new(Controller);
         var wikiRefresh=UI.Select(["Daily","On startup","Manual"],Controller.Profile.WikiRefresh switch{WikiRefreshMode.Startup=>"On startup",WikiRefreshMode.Manual=>"Manual",_=>"Daily"},150);
         wikiRefresh.SelectionChanged+=(_,_)=>{Controller.Profile.WikiRefresh=wikiRefresh.SelectedIndex switch{1=>WikiRefreshMode.Startup,2=>WikiRefreshMode.Manual,_=>WikiRefreshMode.Daily};Controller.Save();};
@@ -82,7 +83,7 @@ public sealed partial class SettingsWindow
         var displayActions = Flow(UI.Button("Prepare setup", PrepareDisplay), UI.Button("Apply · game closed", () => ApplyDisplay(false)), UI.Button("Restore", () => ApplyDisplay(true)));
         shortcutSettings=new(Controller.Profile);
         Page(SettingsSection.Advanced,"Advanced",UI.Stack(Group("Display setup · reversible",borderless,UI.Text("Prepare a reviewable backup. Apply and restore only while EverQuest is closed; the game is never closed automatically.",12),displayActions,displayStatus),Group("Hotkeys",shortcutSettings),new Expander{Header="Diagnostics & coverage",Content=Group("Observed status",status)},Flow(UI.Button("Quest tracker",()=>((App)Application.Current).OpenQuests()),UI.Button("Combat Lab",()=>((App)Application.Current).OpenDps()))));
-        var footer = new DockPanel { Margin = new(0, 6, 0, 0) }; var save = UI.Button("Save changes", Save, true); save.ToolTip = "Validate and save non-appearance changes. Appearance saves automatically."; DockPanel.SetDock(save, Dock.Right); footer.Children.Add(save);
+        var footer = new DockPanel { Margin = new(0, 6, 0, 0) }; var save = settingsSave = WorkspaceForms.Control(UI.Button("Save changes", Save, true)); save.ToolTip = "Validate and save non-appearance changes. Appearance saves automatically."; DockPanel.SetDock(save, Dock.Right); footer.Children.Add(save);
         var footerText = UI.Text(Controller.Profile.Character + " · " + Controller.Profile.Server + "  |  " + ReleaseInfo.Label + "  |  Appearance saves instantly", 11, "Muted"); footerText.TextTrimming = TextTrimming.CharacterEllipsis; footerText.TextWrapping = TextWrapping.NoWrap;
         footer.Children.Add(UI.Stack(footerText, validation)); Grid.SetRow(footer, 1); root.Children.Add(footer); Body.Children.Add(root); SelectSection(SettingsSection.Appearance);
         Usability.Tooltips(Body);

@@ -46,15 +46,15 @@ internal sealed class WorkspaceToolbarWindow : FrostWindow
         var fixedActions=new StackPanel{Orientation=Orientation.Horizontal,VerticalAlignment=VerticalAlignment.Center};DockPanel.SetDock(fixedActions,Dock.Right);content.Children.Add(fixedActions);
         SettingsButton=UI.Button("",settings);SettingsButton.Content=new ToolbarActionArtwork(false){Width=18,Height=18};SettingsButton.Width=SettingsButton.Height=24;SettingsButton.Padding=new(0);SettingsButton.Margin=new(4,0,0,0);SettingsButton.ToolTip="Settings";AutomationProperties.SetName(SettingsButton,"Settings");fixedActions.Children.Add(SettingsButton);
         var update=QuestWindow.UpdateReadyButton();update.Width=update.Height=24;update.Margin=new(2,0,0,0);fixedActions.Children.Add(update);update.IsVisibleChanged+=(_,_)=>{if(ready){MeasureMinimum();ArrangePanel();QueueSave();}};
-        var grip=OuterResize!.Grip;if(grip.Parent is Panel resizeHost)resizeHost.Children.Remove(grip);grip.Width=14;grip.Height=24;grip.Margin=new(2,0,4,0);grip.VerticalAlignment=VerticalAlignment.Center;grip.ToolTip="Resize toolbar width";fixedActions.Children.Add(grip);
-        var hide=UI.Button("",()=>TryHide());hide.Content=new ToolbarActionArtwork(true){Width=16,Height=16};hide.Tag="toolbar-close";AutomationProperties.SetName(hide,"Hide toolbar");hide.Width=hide.Height=24;hide.Padding=new(0);hide.Margin=new(0);hide.ToolTip="Hide toolbar and workspace · reopen from the tray";fixedActions.Children.Add(hide);
+        var hide=UI.Button("",()=>TryHide());hide.Content=new ToolbarActionArtwork(true){Width=12,Height=12};hide.Tag="toolbar-close";AutomationProperties.SetName(hide,"Hide toolbar");hide.Width=hide.Height=24;hide.Padding=new(0);hide.Margin=new(0);hide.ToolTip="Hide toolbar and workspace · reopen from the tray";fixedActions.Children.Add(hide);
+        var grip=OuterResize!.Grip;if(grip.Parent is Panel resizeHost)resizeHost.Children.Remove(grip);grip.Width=14;grip.Height=24;grip.Margin=new(4,0,2,0);grip.VerticalAlignment=VerticalAlignment.Center;grip.ToolTip="Resize toolbar width";fixedActions.Children.Add(grip);
         foreach(var action in new[]{SettingsButton,update,hide})action.Cursor=Cursors.Hand;
         SettingsButton.Template=FlatActionTemplate();hide.Template=FlatActionTemplate();update.Template=FlatActionTemplate();
         DockPanel.SetDock(logo,Dock.Left);content.Children.Add(logo);DockPanel.SetDock(WorkspaceButtons,Dock.Left);content.Children.Add(WorkspaceButtons);content.Children.Add(new Border{Background=Brushes.Transparent,MinWidth=12});
         Header.Children.Add(content);Header.Cursor=Cursors.SizeAll;
-        foreach(string id in new[]{"Tracker","CombatLab"})
+        foreach(string id in new[]{"Tracker","CombatLab","Overview"})
         {
-            var label=UI.Text(id=="Tracker"?"Tracker":"Combat Lab",11,"Foreground",true);var glyph=new ToolbarGlyph(id){Width=16,Height=16,Margin=new(0,0,4,0)};
+            var label=UI.Text(Label(id),11,"Foreground",true);var glyph=new ToolbarGlyph(id){Width=16,Height=16,Margin=new(0,0,4,0)};
             label.Margin=new(0);
             var button=new ToggleButton{Content=UI.Row(glyph,label),Cursor=Cursors.Hand,Height=24,Padding=new(5,0,5,0),Margin=new(0,0,3,0),ToolTip="Open / close "+label.Text,Tag=id,VerticalContentAlignment=VerticalAlignment.Center};
             button.Style=ToolbarButtonStyle();AutomationProperties.SetName(button,label.Text);button.Click+=(_,_)=>{if(reordered){reordered=false;UpdateButtons();return;}Open(id,true);};
@@ -116,9 +116,13 @@ internal sealed class WorkspaceToolbarWindow : FrostWindow
     {
         if(reorder.Length==0)return false;
         if(!reordered&&Math.Abs(point.X-reorderStart.X)<SystemParameters.MinimumHorizontalDragDistance)return false;
-        reordered=true;var other=Buttons.First(p=>p.Key!=reorder).Value;var bounds=other.TransformToAncestor(this).TransformBounds(new Rect(other.RenderSize));
-        int direction=point.X<bounds.Left+bounds.Width/2?-1:1,target=State.Order.IndexOf(reorder)+direction;
-        if(target>=0&&target<State.Order.Count&&bounds.Contains(point))Move(reorder,direction);return true;
+        reordered=true;Buttons[reorder].CaptureMouse();
+        foreach(var (id,other) in Buttons.Where(p=>p.Key!=reorder))
+        {
+            var bounds=other.TransformToAncestor(this).TransformBounds(new Rect(other.RenderSize));
+            if(bounds.Contains(point)){Move(reorder,Math.Sign(State.Order.IndexOf(id)-State.Order.IndexOf(reorder)));break;}
+        }
+        return true;
     }
     private void RestorePosition()
     {
@@ -171,11 +175,17 @@ internal sealed class WorkspaceToolbarWindow : FrostWindow
         State.Active=State.Last=id;State.Visible=true;RequestedVisible=true;WindowState=WindowState.Normal;
         if(!IsVisible)Show();ShowActive();UpdateButtons();SaveState();return true;
     }
+    internal void Reveal()
+    {
+        State.Visible=true;RequestedVisible=true;WindowState=WindowState.Normal;
+        if(!IsVisible)Show();ShowActive();UpdateButtons();SaveState();
+        if(!NativeSetup.GameRunning()){if(State.Active.Length>0)FocusWhenShown(State.Active);else Activate();}
+    }
     private FrostWindow Panel(string id)
     {
         if(panels.TryGetValue(id,out var existing))return existing;
         new WindowInteropHelper(this).EnsureHandle();
-        var panel=getPanel(id);panels[id]=panel;panel.AttachPresentation(id=="Tracker"?"Tracker":"Combat Lab");panel.Owner=this;panel.WindowStartupLocation=WindowStartupLocation.Manual;
+        var panel=getPanel(id);panels[id]=panel;panel.AttachPresentation(Label(id));panel.Owner=this;panel.WindowStartupLocation=WindowStartupLocation.Manual;
         if(panel is QuestWindow tracker)tracker.AttachToToolbar();
         panel.CollapseRequested=()=>{ClosePanel();};panel.HideRequested=()=>{if(State.Active==id){State.Active="";SnapTransitions(false);UpdateButtons();SaveState();}};
         panel.InteractionStarting=()=>SnapTransitions(true);
@@ -264,23 +274,42 @@ internal sealed class WorkspaceToolbarWindow : FrostWindow
         finally{placing=false;}
     }
     internal void Move(string id,int direction){if(WorkspaceToolbarLayout.Move(State,id,direction)){OrderButtons();UpdateButtons();SaveState();}}
+    internal static string Label(string id)=>id switch{"Tracker"=>"Tracker","CombatLab"=>"Combat Lab",_=>"Overview"};
     private void OrderButtons()
     {
-        foreach(string id in State.Order)if(!WorkspaceButtons.Children.Contains(Buttons[id]))WorkspaceButtons.Children.Add(Buttons[id]);
-        if(!Equals(WorkspaceButtons.Children[0],Buttons[State.Order[0]]))
-        {var move=Buttons[State.Order[0]];if(move.IsMouseCaptured){var other=Buttons[State.Order[1]];WorkspaceButtons.Children.Remove(other);WorkspaceButtons.Children.Add(other);}else{WorkspaceButtons.Children.Remove(move);WorkspaceButtons.Children.Insert(0,move);}}
+        var held=Buttons.Values.FirstOrDefault(b=>b.IsMouseCaptured);
+        foreach(var button in WorkspaceButtons.Children.OfType<ToggleButton>().Where(b=>b!=held).ToArray())WorkspaceButtons.Children.Remove(button);
+        for(int i=0;i<State.Order.Count;i++){var button=Buttons[State.Order[i]];if(button!=held)WorkspaceButtons.Children.Insert(i,button);}
     }
     private static Style ToolbarButtonStyle()
     {
         var style=new Style(typeof(ToggleButton));style.Setters.Add(new Setter(ForegroundProperty,UI.Brush("Foreground")));
+        style.Setters.Add(new Setter(FocusVisualStyleProperty,null));
         style.Setters.Add(new Setter(TemplateProperty,(ControlTemplate)System.Windows.Markup.XamlReader.Parse("""
-        <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="ToggleButton"><Border x:Name="Face" CornerRadius="2" BorderThickness="1" BorderBrush="Transparent" Background="{DynamicResource InnerSurface}" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/></Trigger><Trigger Property="IsChecked" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Gold}"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate>
+        <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="ToggleButton">
+          <Grid Background="Transparent">
+            <Border x:Name="Face" CornerRadius="2" BorderThickness="1" BorderBrush="Transparent" Background="Transparent" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <Grid x:Name="HoverCue" IsHitTestVisible="False" Opacity="0">
+              <Border Width="5" Height="5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="3,3,0,0" BorderThickness="1,1,0,0" BorderBrush="{DynamicResource Melee}"/>
+              <Border Width="5" Height="5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,3,3" BorderThickness="0,0,1,1" BorderBrush="{DynamicResource Melee}"/>
+            </Grid>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="HoverCue" Property="Opacity" Value="1"/></Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="HoverCue" Property="Opacity" Value="1"/></Trigger>
+            <Trigger Property="IsPressed" Value="True"><Setter TargetName="HoverCue" Property="Opacity" Value="1"/></Trigger>
+            <Trigger Property="IsChecked" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Spell}"/></Trigger>
+            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
         """)));return style;
     }
     private static ControlTemplate FlatActionTemplate()=>(ControlTemplate)System.Windows.Markup.XamlReader.Parse("""
-    <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button"><Border x:Name="Face" Background="{DynamicResource InnerSurface}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="2" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate>
+    <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button"><Border x:Name="Face" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="2" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Melee}"/></Trigger><Trigger Property="IsPressed" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger><Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45"/></Trigger></ControlTemplate.Triggers></ControlTemplate>
     """);
-    private void UpdateButtons(){foreach(var (id,button) in Buttons){button.IsChecked=State.Active==id;button.ToolTip=(button.IsChecked==true?"Close ":"Open ")+(id=="Tracker"?"Tracker":"Combat Lab")+" · drag to reorder; Alt+Left/Right moves this button";}}
+    private void UpdateButtons(){foreach(var (id,button) in Buttons){button.IsChecked=State.Active==id;button.ToolTip=(button.IsChecked==true?"Close ":"Open ")+(Label(id))+" · drag to reorder; Alt+Left/Right moves this button";}}
     internal void SaveState()
     {
         if(!ready||placing||WindowState!=WindowState.Normal||App.Exiting&&!exitSaved)return;
@@ -297,6 +326,6 @@ internal sealed class ToolbarGlyph(string id):FrameworkElement
     protected override void OnRender(DrawingContext dc)
     {
         dc.PushTransform(new ScaleTransform(ActualWidth/16,ActualHeight/16));var pen=new Pen(UI.Brush("Melee"),1.3){LineJoin=PenLineJoin.Round};
-        dc.DrawGeometry(null,pen,Geometry.Parse(id=="Tracker"?"M2,1L14,1L14,15L2,15Z M4,5L6,7L9,3 M4,11L6,13L9,9 M10,6L12,6 M10,12L12,12":"M2,14L2,10L5,10L5,14Z M7,14L7,6L10,6L10,14Z M12,14L12,2L15,2L15,14Z"));dc.Pop();
+        dc.DrawGeometry(null,pen,Geometry.Parse(id switch{"Tracker"=>"M2,1L14,1L14,15L2,15Z M4,5L6,7L9,3 M4,11L6,13L9,9 M10,6L12,6 M10,12L12,12","CombatLab"=>"M2,14L2,10L5,10L5,14Z M7,14L7,6L10,6L10,14Z M12,14L12,2L15,2L15,14Z",_=>"M1,1L7,1L7,7L1,7Z M9,1L15,1L15,5L9,5Z M1,9L7,9L7,15L1,15Z M9,7L15,7L15,15L9,15Z"}));dc.Pop();
     }
 }

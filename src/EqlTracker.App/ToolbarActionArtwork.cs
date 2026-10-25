@@ -11,7 +11,7 @@ internal sealed class ToolbarActionArtwork(bool close):FrameworkElement
         dc.PushTransform(new ScaleTransform(ActualWidth/18,ActualHeight/18));
         if(close)
         {
-            var pen=new Pen(UI.Brush("Foreground"),1.8){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round};
+            var pen=new Pen(UI.Brush("Melee"),1.8){StartLineCap=PenLineCap.Round,EndLineCap=PenLineCap.Round};
             dc.DrawLine(pen,new(1,1),new(17,17));dc.DrawLine(pen,new(17,1),new(1,17));
         }
         else

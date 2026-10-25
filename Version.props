@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <VersionPrefix>1.6.0</VersionPrefix>
+    <VersionPrefix>1.7.0</VersionPrefix>
     <VersionSuffix>beta.1</VersionSuffix>
-    <AssemblyVersion>1.6.0.0</AssemblyVersion>
-    <FileVersion>1.6.0.0</FileVersion>
-    <ReleaseLabel>Beta 1.6</ReleaseLabel>
+    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
+    <ReleaseLabel>Beta 1.7</ReleaseLabel>
     <Company>EQL Catalyst</Company>
   </PropertyGroup>
 </Project>

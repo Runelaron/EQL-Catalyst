@@ -44,6 +44,7 @@ internal static class WorkspacePresentationReview
         controller.Profile.SmoothMeterMotion=true;bar.ClosePanel();bar.SnapTransitions(true);bar.Open("Tracker");
         var watch=Stopwatch.StartNew();await Task.Delay(35);Flush();double opening=tracker.WorkspaceMotion.Progress;
         measured.Add(new{Phase="Opening",Milliseconds=watch.Elapsed.TotalMilliseconds,Progress=opening});
+        Json.Write(Path.Combine(folder,"presentation-opening-sample.json"),new{Milliseconds=watch.Elapsed.TotalMilliseconds,Progress=opening,bar.IsTransitioning,WindowsAnimations=SystemParameters.ClientAreaAnimation});
         if(SystemParameters.ClientAreaAnimation)
         {
             check(opening>0&&opening<1&&bar.IsTransitioning,"Opening progresses through a visual fade/slide without layout animation");
@@ -71,7 +72,7 @@ internal static class WorkspacePresentationReview
         bar.ClosePanel();bar.Open("CombatLab");bar.Hide();Flush();await Task.Delay(150);bar.Show();Flush();check(lab.IsVisible&&!tracker.IsVisible&&!bar.IsTransitioning,"Temporary focus visibility hiding snaps and restores the latest panel");
         bar.ClosePanel();bar.Open("CombatLab");controller.Profile.SmoothMeterMotion=false;bar.ApplyMotionPreference();check(lab.IsVisible&&!bar.IsTransitioning,"Disabling app motion snaps an in-flight transition");bar.ClosePanel();check(!lab.IsVisible&&!bar.IsTransitioning,"App reduced-motion preference closes immediately");bar.Open("Tracker");check(tracker.IsVisible&&tracker.WorkspaceMotion.Progress==1&&!bar.IsTransitioning,"App reduced-motion preference opens immediately");
         // Rendering policy is based on DIP size, independent of physical raster decode size.
-        check(!MonsterArtwork.Detailed(24,Core.IconArtworkStyle.Vibrant)&&MonsterArtwork.Detailed(32,Core.IconArtworkStyle.Vibrant)&&!MonsterArtwork.Detailed(64,Core.IconArtworkStyle.Clean),"Approved Monster uses its selected simplified treatment through 24 DIP and all Clean sizes");
+        check(MonsterArtwork.Detailed(13,Core.IconArtworkStyle.Vibrant)&&MonsterArtwork.Detailed(24,Core.IconArtworkStyle.Vibrant)&&!MonsterArtwork.Detailed(64,Core.IconArtworkStyle.Clean),"Approved Monster uses paintings at every Vibrant size and vectors in Clean");
         check(IconArtwork.Painted("pet-monster",192)!=null&&IconArtwork.ActorRole("Pet","Monster")=="pet-monster"&&IconArtwork.ActorRole("Pet","Unknown")=="pet-generic","Approved Monster uses shared painted routing and keeps unresolved generic fallback");
         Json.Write(Path.Combine(folder,"presentation-timings.json"),new{Samples=measured,WindowsAnimations=SystemParameters.ClientAreaAnimation,OpenMilliseconds=120,CloseMilliseconds=90,SlideDIP=4});
     }

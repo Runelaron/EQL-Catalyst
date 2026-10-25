@@ -24,6 +24,7 @@ internal sealed class ItemAcquisitionView : StackPanel
         foreach(var card in sources.Take(2))Children.Add(card);
         if(sources.Length>2)Children.Add(FocusedLayout.Disclosure("More sources ("+(sources.Length-2)+")",UI.Stack(sources.Skip(2).ToArray()),"Additional acquisition zones and evidence"));
         if (rows.Count == 0) Children.Add(UI.Text("Acquisition not documented in the reviewed sources.", 11, "SecondaryText"));
+        var notes=PublicContentNotes.Item(item.Key).ToList();if(item.AvailabilityEvidence==WikiContentQuality.QuestRewardConflict&&!notes.Any(n=>n.Contains("Source disagreement")))notes.Add(item.AvailabilityEvidence+" "+item.WikiUrl);if(notes.Count>0)Children.Add(FocusedLayout.Disclosure("Source notes",UI.Stack(notes.Select(n=>(UIElement)UI.Text(n,11,"SecondaryText")).ToArray()),"Revision differences and unresolved acquisition claims"));
         Margin = new(0, 4, 0, 6); Usability.Tooltips(this);
     }
     internal static ItemAcquisitionView Create(ItemDefinition item)

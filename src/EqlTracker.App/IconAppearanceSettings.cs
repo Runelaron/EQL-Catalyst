@@ -21,7 +21,7 @@ public sealed partial class SettingsWindow
         badge.SelectionChanged += (_, _) => { Controller.Profile.InventoryBadge = badge.SelectedIndex == 1 ? InventoryBadgeStyle.FrierenMimic : InventoryBadgeStyle.Chest; ApplyAppearance(); appearanceSave.Stop(); Controller.Save(); };
         var styleGroup=UI.Stack(UI.Field("Icon style · per character",iconStyle),previews);
         var badgeGroup=UI.Stack(UI.Field("Inventory badge",badge),UI.Row(new ItemRoleGlyph{Role="inventory-chest"},new ItemRoleGlyph{Role="inventory-mimic-frieren"}));
-        styleGroup.Margin=new(0,0,12,6);badgeGroup.Margin=new(0,0,12,6);return Flow(styleGroup,badgeGroup,BuildUndeadAppearance(),BuildFireAppearance());
+        styleGroup.Margin=new(0,0,12,6);badgeGroup.Margin=new(0,0,12,6);return Flow(styleGroup,badgeGroup,BuildElementalAppearance("Earth",EarthChoice,EarthChoices),BuildElementalAppearance("Air",AirChoice,AirChoices),BuildElementalAppearance("Water",WaterChoice,WaterChoices),BuildFireAppearance(),BuildElementalAppearance("Monster",MonsterChoice,MonsterChoices),BuildUndeadAppearance());
     }
     internal void RefreshIconPresentation()
     {

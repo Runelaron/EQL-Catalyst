@@ -19,7 +19,8 @@ public static class CatalogItemMerge
             selected.GameId ??= other.GameId;
             if(!WikiContentQuality.TemplateRecord(selected))
             {
-                foreach(var stat in other.Stats) selected.Stats.TryAdd(stat.Key,stat.Value);
+                bool newerWiki=selected.MetadataVersion>=12&&selected.Revision>other.Revision&&selected.WikiUrl.StartsWith("https://eqlwiki.com/",StringComparison.OrdinalIgnoreCase)&&other.WikiUrl.StartsWith("https://eqlwiki.com/",StringComparison.OrdinalIgnoreCase);
+                if(!newerWiki)foreach(var stat in other.Stats) selected.Stats.TryAdd(stat.Key,stat.Value);
                 selected.Effects = selected.Effects.Concat(other.Effects).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             }
             if (!WikiContentQuality.TemplateRecord(selected)&&selected.Display.Source.Length == 0 && other.Display.Source.Length > 0) selected.Display = EquipmentPositions.Copy(other.Display);
@@ -34,6 +35,7 @@ public static class CatalogItemMerge
             var sources = old.Sources.Concat(item.Sources).ToList();
             bool curated = sources.Any(s => s.EvidenceId.StartsWith("classic-", StringComparison.Ordinal));
             selected.Sources = sources.Where(s => !WikiContentQuality.Placeholder(s.Mob)&&!WikiContentQuality.Placeholder(s.Zone)).Where(s => !curated || s.EvidenceId.StartsWith("classic-", StringComparison.Ordinal) || s.EvidenceId.StartsWith("acquisition-", StringComparison.Ordinal) || s.Availability == "Observed drop")
+                .Where(s=>selected.AvailabilityEvidence!=WikiContentQuality.QuestRewardConflict||s.Method!="Drop"||s.Availability.Equals("Observed drop",StringComparison.OrdinalIgnoreCase))
                 .DistinctBy(s => (s.Zone, s.Mob, s.Method, s.EvidenceId, s.Availability, s.Notes)).ToList();
             ItemExpansionEvidence.Apply(selected);
             if (selected.CraftRecipes.Count == 0 && other.CraftRecipes.Count > 0) selected.CraftRecipes = other.CraftRecipes;

@@ -39,6 +39,8 @@ public sealed partial class OverlayWindow : FrostWindow
     private readonly ComboBox miniActor, miniScope;
     private bool updatingChoices;
     private string objectiveSignature = "";
+    private readonly List<Action> refreshDisplayChoices=[];
+    private string displayChoiceFamily="";
     public OverlayWindow(TrackerController controller, bool dps) : base(controller, dps ? "Pet damage" : "Zone Objectives", "", dps ? controller.Profile.Dps.Width : controller.Profile.Objectives.Width, dps ? controller.Profile.Dps.Height : controller.Profile.Objectives.Height, true)
     {
         IsDps = dps; settings = dps ? controller.Profile.Dps : controller.Profile.Objectives;
@@ -85,9 +87,8 @@ public sealed partial class OverlayWindow : FrostWindow
             var displayChoices=new MenuItem{Header="Display",ToolTip="Choose whose outgoing DPS is shown. Group combines characters with verified pets and stays separate from personal totals."};FillDisplayChoices(displayChoices);menu.Items.Add(displayChoices);
             foreach (var scopeName in new[] { "Fight", "Session" }) OverlayMenus.Choice(menu, scopeName + " scope", () => Controller.Profile.OverlayMeter!.Scope == scopeName, () => { Controller.Profile.OverlayMeter!.Scope = scopeName; Changed(); });
             menu.Items.Add(new Separator());
-            Entry("Combat Lab", () => ((App)Application.Current).OpenDps());
+            Entry("Catalyst Toolbar", () => ((App)Application.Current).OpenCatalystToolbar());
             Entry("Objective panel",()=>((App)Application.Current).OpenOverlay(false));
-            Entry("Quest & Gear Tracker",()=>((App)Application.Current).OpenQuests());
             Entry("Settings",()=>((App)Application.Current).OpenSettings());
             menu.Items.Add(new Separator());
             Entry("Lock / unlock", () => lockButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)));
@@ -113,9 +114,8 @@ public sealed partial class OverlayWindow : FrostWindow
             var scroll = UI.Scroll(objectives); Grid.SetRow(scroll, 1); root.Children.Add(scroll);
             var menu = new ContextMenu();
             void Entry(string label,Action action) { var item=new MenuItem { Header=label.StartsWith("Click-through")?OverlayMenus.ClickThroughHeader():label };item.Click+=(_,_)=>action();menu.Items.Add(item); }
-            Entry("Combat Lab",()=>((App)Application.Current).OpenDps());
+            Entry("Catalyst Toolbar",()=>((App)Application.Current).OpenCatalystToolbar());
             Entry("Damage tracker",()=>((App)Application.Current).OpenOverlay(true));
-            Entry("Quest & Gear Tracker",()=>((App)Application.Current).OpenQuests());
             Entry("Settings",()=>((App)Application.Current).OpenSettings());
             menu.Items.Add(new Separator());
             Entry("Lock / unlock",()=>lockButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)));
@@ -166,12 +166,15 @@ public sealed partial class OverlayWindow : FrostWindow
         {
             var glyph=new ActorBadge{Width=16,Height=16};
             var item=OverlayMenus.Choice(parent,value=="Player"?"Self":value,()=>SelectedDisplay(secondary)==value,()=>SelectDisplay(value,secondary));item.Icon=glyph;
-            void Update(){string help=value switch {"Pet"=>"DPS from timestamp-verified owned pets.","Player"=>"DPS from your character only.","Combined"=>"Total DPS from Self and the verified owned pet; group members are excluded.",_=>"DPS from known group/raid characters and verified pets. Missing log coverage remains unknown."};string element=DisplayPetElement();glyph.Set(value,value=="Pet"&&PetElementDetector.HasFamilyIcon(element),help,element);item.ToolTip=help+" Uses this tracker's independent scope and filters.";}
+            void Update(){string help=value switch {"Pet"=>"DPS from timestamp-verified owned pets.","Player"=>"DPS from your character only.","Combined"=>"Total DPS from Self and the verified owned pet; group members are excluded.",_=>"DPS from known group/raid characters and verified pets. Missing log coverage remains unknown."};string element=DisplayPetElement();if(value=="Pet")help+=" Detected family: "+(element=="Monster"?"Monster / Berserker":element)+". "+(Controller.Profile.OverlayMeter!.Scope=="History"?"Recorded encounter identity.":"Current or most recent confirmed owned pet.");glyph.Set(value,value=="Pet"&&PetElementDetector.HasFamilyIcon(element),help,element);item.ToolTip=help+" Uses this tracker's independent scope and filters.";}
+            refreshDisplayChoices.Add(Update);
             Update();if(parent is ContextMenu menu)menu.Opened+=(_,_)=>Update();else if(parent is MenuItem group)group.SubmenuOpened+=(_,_)=>Update();
         }
     }
     private string DisplayPetElement()
     { var view=Controller.Published?.OverlayCombat??lastMeterView; return PetIdentityResolver.DisplayFamily(Controller.Profile,view?.Fights??[],Controller.Profile.OverlayMeter!.Scope=="History"); }
+    private void RefreshDisplayChoiceIcons()
+    {string family=DisplayPetElement();if(family==displayChoiceFamily)return;displayChoiceFamily=family;foreach(var update in refreshDisplayChoices)update();}
     private void FooterDisplay(string actor,string help)
     {
         string element=DisplayPetElement();displayBadge.Set(actor,actor=="Pet"&&PetElementDetector.HasFamilyIcon(element),"Display · "+(actor=="Player"?"Self":actor),element);
@@ -253,6 +256,7 @@ public sealed partial class OverlayWindow : FrostWindow
             OverlayMenuDensity.Update(Controller.Profile);
             if (IsDps)
             {
+                RefreshDisplayChoiceIcons();
                 RefreshTitleDisplaySelector();
                 var view = Controller.OverlayDpsView(); var p = Controller.Profile.OverlayMeter!;
                 RefreshSecondaryDisplay(view);

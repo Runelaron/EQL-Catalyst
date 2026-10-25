@@ -20,6 +20,8 @@ public sealed class ContextRating
 }
 public sealed class LoadoutComparison
 {
+    public CompatibilityComparison? UnbuffedCompatibility { get; set; }
+    public CompatibilityComparison? BuffedCompatibility { get; set; }
     public string PetGoal { get; set; } = "";
     public ContextRating? PetDefense { get; set; }
     public SelfRoleResolution? Role { get; init; }
@@ -30,8 +32,8 @@ public sealed class LoadoutComparison
     public string WeaponNote { get; set; } = "";
     public string WeaponEvidence { get; set; } = "";
     public string ActivationNote { get; set; } = "";
-    public ContextRating Unbuffed { get; init; } = new() { Name = "Unbuffed" };
-    public ContextRating Buffed { get; init; } = new() { Name = "Usual buffs" };
+    public ContextRating Unbuffed { get; set; } = new() { Name = "Unbuffed" };
+    public ContextRating Buffed { get; set; } = new() { Name = "Usual buffs" };
     public string PositionId { get; init; } = "";
     public List<string> Replaced { get; init; } = [];
     public List<string> EffectsGained { get; init; } = [];
@@ -42,7 +44,7 @@ public sealed class LoadoutComparison
 }
 
 /// <summary>One immutable, cached baseline for a batch of candidates. No ingestion locks or game access.</summary>
-public sealed class LoadoutEvaluationSession
+public sealed partial class LoadoutEvaluationSession
 {
     private readonly Catalog catalog;
     private readonly PetBuild? petInventory;
@@ -82,6 +84,7 @@ public sealed class LoadoutEvaluationSession
         }
         referenceFingerprint = EquipmentPositions.Fingerprint(this.reference);
         (currentStats, currentEffects, baselineComplete) = Aggregate(before); referenceStats = Aggregate(this.reference).Stats;
+        mechanicsFingerprint=EquipmentPositions.Fingerprint(before);
     }
     private ItemDefinition? Definition(InventoryEntry entry) => catalog.FindKey(entry.ConfirmedItemKey) ?? catalog.Find(entry.Name, entry.GameId == 0 ? null : entry.GameId);
     private List<string> RelevantRankUncertainty(IEnumerable<EquipmentPosition> before,IEnumerable<EquipmentPosition> after)
@@ -204,7 +207,7 @@ public sealed class LoadoutEvaluationSession
         if (observed) { notes.Add($"{profile!.Source} · {profile.ConfirmedAt:g} · " + (profile.AAsIncludedInTotals ? "AA bonuses already included" : "Only confirmed flat AA bonuses added")); if (profile.Buffs.Length > 0) notes.Add("Buffs: " + profile.Buffs); foreach (var limit in profile.Limits.Where(l => l.Kind == StatLimitKind.ProcLimit)) notes.Add($"Proc limit {limit.Stat} {limit.Value}: separate from attribute caps; not used for predicted procs · {limit.Source}"); }
         return new() { Name = name, CurrentScore = fullTotals ? oldScore : null, CandidateScore = fullTotals ? newScore : null, MarginalEstimate = fullTotals ? null : newScore-oldScore, Changes = changes, Notes = notes, Quality = !fullTotals ? "Partial marginal estimate · whole-build totals incomplete" : observed ? "Confirmed context · preference estimate; effects and unverified mechanics separate" : "Gear-only estimate" };
     }
-    public LoadoutComparison CompareBuild(List<EquipmentPosition> after, string id = "", string eligibility = "Eligible", bool includeAAs = true)
+    public LoadoutComparison CompareBuild(List<EquipmentPosition> after, string id = "", string eligibility = "Eligible", bool includeAAs = true, bool evaluateMechanics = true)
     {
         var aggregate = Aggregate(after);
         static string Signature(InventoryEntry? item) => item==null?"":item.Rank+"|"+item.Name+"|"+item.GameId+"|"+item.ConfirmedItemKey+"|"+string.Join(';',item.TransferredOutEffects)+"|"+string.Join(';',item.Augments.Select(a=>a.Name+":"+a.EffectIdentity+":"+a.EffectText));
@@ -243,12 +246,20 @@ public sealed class LoadoutEvaluationSession
         }
         result.IsHypothetical = theorycraft;
         result.PetGoal=petGoal;
-        if(pet && petGoal=="Balanced") result.PetDefense=new LoadoutEvaluationSession(catalog,loadout,true,new(petDefenseWeights ?? PetRoleRatings.Tank),before,reference,theorycraft).CompareBuild(after,id,eligibility,includeAAs).Unbuffed;
+        if(pet && petGoal=="Balanced") result.PetDefense=new LoadoutEvaluationSession(catalog,loadout,true,new(petDefenseWeights ?? PetRoleRatings.Tank),before,reference,theorycraft).CompareBuild(after,id,eligibility,includeAAs,false).Unbuffed;
         if (theorycraft)
         {
             result.Assumptions = after.Where(p => p.Item != null).Select(p => Definition(p.Item!) is { } d ? d.Name + ": " + GearScorer.Eligibility(d, loadout, pet, p.Item!.Augments, catalog) : "").Where(s => !s.EndsWith(": Eligible") && s.Length > 0).Distinct().ToList();
             if (result.Status == "Rated") result.Status = "Hypothetical";
         }
+        if (!evaluateMechanics) return result;
+        result.UnbuffedCompatibility = Mechanics(after, "Unbuffed");
+        bool separateBuffs=loadout.Mechanics is {} evidence&&((pet?evidence.PetUsualBuffs:evidence.SelfUsualBuffs).Count>0||evidence.Anchors.Any(a=>a.Pet==pet&&a.EquipmentFingerprint==mechanicsFingerprint&&a.Context.Scenario=="Usual buffs"));
+        result.BuffedCompatibility = separateBuffs?Mechanics(after, "Usual buffs"):result.UnbuffedCompatibility;
+        result.Unbuffed = ApplyMechanics(result.Unbuffed, result.UnbuffedCompatibility);
+        if(result.PetDefense!=null) result.PetDefense=ApplyMechanics(result.PetDefense,result.UnbuffedCompatibility);
+        result.Buffed = ApplyMechanics(result.Buffed, result.BuffedCompatibility);
+        // Unresolved mechanics qualify the mechanical conclusion; equipment preference points and eligibility keep their existing meaning.
         return result;
     }
     public LoadoutComparison Compare(ItemDefinition candidate, int rank, string id, InventoryEntry? instance = null, bool includeAAs = true)

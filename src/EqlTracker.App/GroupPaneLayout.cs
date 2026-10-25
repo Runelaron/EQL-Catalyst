@@ -13,6 +13,8 @@ public sealed class GroupPaneLayout : Grid
     private readonly GridSplitter first=new(){Background=Brushes.Transparent,HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Stretch},second=new(){Background=Brushes.Transparent,HorizontalAlignment=HorizontalAlignment.Stretch,VerticalAlignment=VerticalAlignment.Stretch};
     private readonly CharacterProfile profile; private readonly Action changed;
     private int layout=-1;
+    private bool focusedDetails;
+    internal void FocusDetails(bool focused) { focusedDetails=focused; ArrangePanes(); }
     public GroupPaneLayout(UIElement recent,UIElement members,UIElement details,CharacterProfile profile,Action changed)
     {
         this.recent=recent;this.members=members;this.details=details;this.profile=profile;this.changed=changed;
@@ -27,9 +29,11 @@ public sealed class GroupPaneLayout : Grid
     }
     private void ArrangePanes()
     {
-        int next=ActualWidth>=980?0:ActualWidth>=620?1:2;if(next==layout)return;PaneLayout.Cancel(this);layout=next;ColumnDefinitions.Clear();RowDefinitions.Clear();
+        int next=focusedDetails&&ActualWidth<620?3:ActualWidth>=980?0:ActualWidth>=620?1:2;if(next==layout)return;PaneLayout.Cancel(this);layout=next;ColumnDefinitions.Clear();RowDefinitions.Clear();
+        foreach(var child in new[]{recent,first,members,second})child.Visibility=layout==3?Visibility.Collapsed:Visibility.Visible;
         void Place(UIElement child,int column,int row,int span=1){SetColumn(child,column);SetRow(child,row);SetColumnSpan(child,span);}
-        if(layout==0)
+        if(layout==3) { RowDefinitions.Add(new(){Height=new(1,GridUnitType.Star)}); Place(details,0,0); PaneLayout.Register(this,[],[],[]); }
+        else if(layout==0)
         {
             double a=Math.Clamp(profile.PanelSplits.GetValueOrDefault("group-recent-width",.22),.14,.32),b=Math.Clamp(profile.PanelSplits.GetValueOrDefault("group-members-width",.37),.22,.45);
             foreach(double width in new[]{a,-5d,b,-5d,1-a-b})ColumnDefinitions.Add(new(){Width=width<0?new(-width):new(width,GridUnitType.Star)});

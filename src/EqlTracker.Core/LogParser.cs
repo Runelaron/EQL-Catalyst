@@ -27,9 +27,13 @@ public sealed partial class LogParser(string character)
         if (message.StartsWith("Outputfile Complete: ", StringComparison.OrdinalIgnoreCase)) result.InventoryExport = message[21..].Trim();
         result.LoggingEnabled = message.StartsWith("Logging to ", StringComparison.Ordinal) && message.Contains("*ON*", StringComparison.Ordinal);
         if (message.StartsWith("You begin casting ", StringComparison.Ordinal)) result.PlayerCast = message[18..].TrimEnd('.');
+        if (result.PlayerCast != null) result.CasterSpell = new(character, result.PlayerCast);
         result.CastFailed = message.StartsWith("Your ", StringComparison.Ordinal) && (message.Contains("spell is interrupted", StringComparison.Ordinal) || message.Contains("spell fizzles", StringComparison.Ordinal)) || message.StartsWith("Insufficient Mana", StringComparison.Ordinal) || message.Contains("already have a pet", StringComparison.OrdinalIgnoreCase) || message.StartsWith("You cannot summon", StringComparison.OrdinalIgnoreCase);
         var failedSpell = Regex.Match(message, @"^Your (.+?) spell (?:is interrupted|fizzles)");
         if (failedSpell.Success) result.FailedSpell = failedSpell.Groups[1].Value;
+        var otherFailure=Regex.Match(message,@"^(?<caster>\S+)'s (?:(?<spell>.+?) )?spell (?:is interrupted|fizzles)");
+        if(otherFailure.Success){result.FailedCaster=otherFailure.Groups["caster"].Value;if(otherFailure.Groups["spell"].Success)result.FailedSpell=otherFailure.Groups["spell"].Value;}
+        if(message.StartsWith("Your target is out of range",StringComparison.Ordinal)||message.StartsWith("Your spell did not take hold",StringComparison.Ordinal)||message.StartsWith("Your spell would not have taken hold",StringComparison.Ordinal))result.CastFailed=true;
         if (message == "You have joined the group.") result.JoinedGroup = true;
         if (message is "Welcome to EverQuest Legends!" or "Welcome to EverQuest!") result.GroupRosterReset = true;
         if (message is "You have left the group." or "You are no longer in a group." or "Your group has been disbanded." or "You have been removed from the group." or "You have disbanded the group.") result.LeftGroup = true;
@@ -38,7 +42,8 @@ public sealed partial class LogParser(string character)
         var joined = Regex.Match(message, @"^(\S+) has joined the group\.$"); if (joined.Success) result.GroupJoined = joined.Groups[1].Value;
         var left = Regex.Match(message, @"^(\S+) has left the group\.$"); if (left.Success) result.GroupLeft = left.Groups[1].Value;
         var activity = Regex.Match(message, @"^(\S+) begins casting (.+)\.$"); if (activity.Success) { result.PetActivity = activity.Groups[1].Value; result.ActivitySpell = activity.Groups[2].Value; }
-        if (message.StartsWith("You have entered ", StringComparison.Ordinal) && !message.StartsWith("You have entered an area where ", StringComparison.OrdinalIgnoreCase)) { result.Zone = Identity.Zone(message[17..].TrimEnd('.')); result.Boundary = true; return result; }
+        if (activity.Success) result.CasterSpell = new(activity.Groups[1].Value, activity.Groups[2].Value);
+        if (message.StartsWith("You have entered ", StringComparison.Ordinal) && !message.StartsWith("You have entered an area where ", StringComparison.OrdinalIgnoreCase)) { result.ZoneVariant=message[17..].TrimEnd('.');result.Zone = Identity.Zone(result.ZoneVariant); result.Boundary = true; return result; }
         if (message == "LOADING, PLEASE WAIT..." || message.StartsWith("You have been slain", StringComparison.Ordinal)) { result.Boundary = true; return result; }
         if (message.StartsWith("Your pet has been slain", StringComparison.Ordinal) || message.StartsWith("Your pet disperses", StringComparison.Ordinal)) { result.PetLost = true; return result; }
         var slain = Regex.Match(message, @"^(.+?) has been slain by ");

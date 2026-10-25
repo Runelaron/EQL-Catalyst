@@ -18,7 +18,7 @@ internal sealed class PetIconCandidateView(PetIconCandidate art,string folder,bo
 {
     private static readonly Dictionary<(string,int),BitmapImage> decoded=[];
     internal static int DevicePixels(double dip,double dpi)=>(int)Math.Ceiling(dip*dpi);
-    internal static bool Detailed(double dip,bool vibrant)=>vibrant&&dip>24;
+    internal static bool Detailed(double dip,bool vibrant)=>ApprovedPetArtwork.Detailed(dip,vibrant?IconArtworkStyle.Vibrant:IconArtworkStyle.Clean);
     protected override void OnRender(DrawingContext dc)
     {
         double size=Math.Min(ActualWidth,ActualHeight);if(size<=0)return;
@@ -73,6 +73,6 @@ public sealed partial class OverlayWindow
         var samples=new List<object>();foreach(double dpi in new[]{1d,1.5,2d,3d})foreach(int dip in new[]{13,14,16,20,24,32,64})samples.Add(new{DIP=dip,DPI=dpi,DevicePixels=PetIconCandidateView.DevicePixels(dip,dpi),Detailed=PetIconCandidateView.Detailed(dip,true)});
         button.Content=original;button.Width=button.Height=double.NaN;SizeTitleDisplaySelector(false);Refresh();Hide();
         if(selector!=PetResearch.Hash(Controller.Profile.OverlayMeter!)||footer!=PetResearch.Hash(Controller.Profile.OverlayFooterDisplay!))throw new InvalidOperationException("Review changed a DPS selection");
-        Json.Write(Path.Combine(folder,"pet-icon-review-checks.json"),new{Passed=true,Families=choices.GroupBy(c=>c.Family).Select(g=>new{Family=g.Key,Variants=g.Select(c=>new{c.Variant,c.Status,c.Round})}),Generic=true,NewConcepts=choices.Count(c=>c.Status=="Review"),ProductionArtwork=choices.Where(c=>c.Status is "Default" or "Settings alternative").Select(c=>new{c.Role,c.Family,c.Status}),SelectorsUnchanged=true,Files=files,SizePolicy=samples,Milliseconds=watch.Elapsed.TotalMilliseconds,Scope="Metadata-driven family boards. Candidate content temporarily inserted in actual WPF DPS selector in synthetic preview; 2x render samples shown at DIP sizes. Vectors at <=24 DIP, DPI-sized painted decode above."});return Task.CompletedTask;
+        Json.Write(Path.Combine(folder,"pet-icon-review-checks.json"),new{Passed=true,Families=choices.GroupBy(c=>c.Family).Select(g=>new{Family=g.Key,Variants=g.Select(c=>new{c.Variant,c.Status,c.Round})}),Generic=true,NewConcepts=choices.Count(c=>c.Status=="Review"),ProductionArtwork=choices.Where(c=>c.Status is "Default" or "Settings alternative" or "In use").Select(c=>new{c.Role,c.Family,c.Status}),SelectorsUnchanged=true,Files=files,SizePolicy=samples,Milliseconds=watch.Elapsed.TotalMilliseconds,Scope="Metadata-driven family boards. Candidate content temporarily inserted in actual WPF DPS selector in synthetic preview; 2x render samples shown at DIP sizes. Vibrant uses DPI-sized paintings at every size; Clean and silhouette studies retain vectors."});return Task.CompletedTask;
     }
 }

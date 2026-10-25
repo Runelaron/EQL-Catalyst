@@ -252,6 +252,7 @@ public sealed class WishlistGoal
 }
 public sealed class LoadoutProfile
 {
+    public LoadoutMechanics? Mechanics { get; set; }
     public string PreviousSelfRole { get; set; } = "";
     public int GearBuildVersion { get; set; }
     public List<GearDraft> GearBuilds { get; set; } = [];
@@ -481,6 +482,9 @@ public sealed class Encounter
 public sealed record ItemObservation(DateTime Time, string Name, string Action, int Count, string Source, string Result = "");
 public sealed class ParsedLine
 {
+    public CasterSpellEvidence? CasterSpell { get; set; }
+    public string? FailedCaster { get; set; }
+    public string? ZoneVariant { get; set; }
     public AbilityOutcome? AbilityOutcome { get; set; }
     public DateTime Time { get; set; }
     public string? ParseWarning { get; set; }

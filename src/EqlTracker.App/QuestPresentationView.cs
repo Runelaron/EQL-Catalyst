@@ -29,6 +29,7 @@ internal static class QuestPresentationView
         foreach(string note in block.Additional)content.Children.Add(UI.Text(note,11,"SecondaryText"));
         var evidence=SourcePresentation.Evidence(block.Evidence);
         content.Children.Add(Evidence(block.Evidence));
+        if(Application.Current is App app)content.Children.Add(new CampNotebookView(app.Controller,source));
         var card=UI.Card(content);card.Tag=source;card.ToolTip=evidence;return card;
     }
     private static Expander Evidence(IEnumerable<ItemSource> records)
@@ -48,7 +49,7 @@ internal static class QuestPresentationView
                 if(!compact||actors[0].Method is not ("Drop" or "Purchase")){foreach(var actor in actors)yield return Source(actor);continue;}
                 var content=new StackPanel();content.Children.Add(UI.Text(actors[0].Zone,13,"Foreground",true));
                 var details=new StackPanel();
-                void Show(QuestSourceBlock selected){details.Children.Clear();details.Children.Add(UI.Text(selected.Method=="Purchase"?"Purchase":"Drop",11,"SecondaryText"));foreach(string note in selected.Additional)details.Children.Add(UI.Text(note,11,"SecondaryText"));details.Children.Add(Evidence(selected.Evidence));Usability.Tooltips(details);}
+                void Show(QuestSourceBlock selected){details.Children.Clear();details.Children.Add(UI.Text(selected.Method=="Purchase"?"Purchase":"Drop",11,"SecondaryText"));foreach(string note in selected.Additional)details.Children.Add(UI.Text(note,11,"SecondaryText"));details.Children.Add(Evidence(selected.Evidence));if(Application.Current is App app)details.Children.Add(new CampNotebookView(app.Controller,selected.Source));Usability.Tooltips(details);}
                 if(actors.Length>1)
                 {
                     var select=new ComboBox{Width=165,Height=28,HorizontalAlignment=HorizontalAlignment.Left,ItemsSource=actors.OrderBy(a=>a.Actor,StringComparer.OrdinalIgnoreCase).ToArray(),DisplayMemberPath="Actor",ToolTip=actors[0].Method=="Purchase"?"Choose a documented vendor":"Choose a documented mob"};

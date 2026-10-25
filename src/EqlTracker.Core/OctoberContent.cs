@@ -9,7 +9,7 @@ public sealed record PatchMechanicEvidence(string Name, string Description, doub
 // are deliberately separate from the adopted ranked-item preview model.
 public static class OctoberContent
 {
-    public const string Version = "EQL-2026-10-22/content-v1";
+    public const string Version = "EQL-2026-10-22/content-v17";
     public const string Announcement = "https://www.everquestlegends.com/news/eql-nektropos-castle";
     public const string PatchNotes = "https://www.everquestlegends.com/patch-notes/eql-update-notes-10-22-2026";
     public static readonly DateTime PatchDate = new(2026, 10, 22);
@@ -37,7 +37,7 @@ public static class OctoberContent
     public static string RaceDescription => "Ayr'Haeth (Half Dark Elf) · home: Nektropos Undercroft. Cursed Heritage: 10% increased tap/rune effectiveness; 20% reduced base health regeneration outdoors during the day. Life Tracking: increased sensory range for living NPCs. Hide, Sneak and Infravision. Unlock quest begins in Lake Nerius. New race levels start at 1; existing races remain at 50. Individual race level and equipment restrictions require confirmation; racial effects are not applied to logged totals or pet predictions.";
     public static string MeasurementEra(DateTime at) => at==default ? "Patch date unknown" : at.Date<PatchDate ? "Before October 22 update" : at.Date==PatchDate ? "October 22 release day · installed patch unconfirmed" : "After October 22 · installed patch unconfirmed";
     public static ZoneContentEvidence? Zone(string name) => Zones.FirstOrDefault(z => Identity.ZoneKey(z.Name) == Identity.ZoneKey(name));
-    public static string ZoneHelp(string name) => Zone(name) is { } z ? z.Description + "\n" + z.Access + "\nClassic filter: inferred current-era classification.\n" + z.Source : "Filter goals by zone.";
+    public static string ZoneHelp(string name) => Zone(name) is { } z ? z.Description + "\n" + (PublicContentNotes.Zone(name).Count>0?string.Join("\n",PublicContentNotes.Zone(name)):z.Access) + "\nClassic filter: inferred current-era classification.\nOfficial introduction: " + z.Source : "Filter goals by zone.";
     public static void Apply(Catalog catalog)
     {
         foreach (var zone in Zones) if (!catalog.Zones.Any(z => Identity.ZoneKey(z) == Identity.ZoneKey(zone.Name))) catalog.Zones.Add(zone.Name);

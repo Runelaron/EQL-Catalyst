@@ -2,7 +2,7 @@
 
 Artwork update: the current defaults and Undead appearance choices are described in [round-three help](pet-art-r3.md). The Monster A discussion below records the earlier approval; it has since been superseded by Monster D.
 
-The shared toolbar remains 28 DIP high and uses the same translucent theme surface as the workspace, open or closed. Its text and artwork retain full opacity. Tracker and Combat Lab use dark, flat buttons with stable hover, selected and keyboard-focus borders.
+The shared toolbar remains 28 DIP high and uses the same translucent theme surface as the workspace, open or closed. Its text and artwork retain full opacity. Tracker, Combat Lab and Overview use transparent navigation faces. A blue outline marks selection; two gold corner brackets indicate hover, pressing or keyboard focus. Button bounds remain stable.
 
 The open workspace joins the bar along their shared edge. Only exposed outer edges are outlined, including when their widths differ or the panel opens above the bar. The toolbar keeps its own saved width; Tracker and Combat Lab keep their separate expanded sizes and pane proportions. The branded EQL Catalyst — Tracker or Combat Lab heading remains beneath the bar, with a 6-DIP top inset. Move the group using the bar; attached headers retain collapse and close actions.
 
@@ -12,7 +12,7 @@ Save / Discard / Cancel is checked before transitions. Cancel leaves the current
 
 ## Monster A and round-two review
 
-Approved Monster A now represents Monster through the shared renderer in DPS selectors, summaries, comparisons and Pet Details. Clean uses its matching simplified vector. Vibrant uses that simplified treatment at 24 DIP and below and the original approved painting at larger sizes, decoded for the monitor's pixel density. This artwork represents a conjured family with an axe motif; it does not establish the creature's equipped weapon or alter detected identity. Unresolved pets retain the generic fallback.
+Approved Monster A now represents Monster through the shared renderer in DPS selectors, summaries, comparisons and Pet Details. Clean uses its matching simplified vector. Vibrant uses the original approved painting at every size, decoded for the monitor's pixel density. This artwork represents a conjured family with an axe motif; it does not establish the creature's equipped weapon or alter detected identity. Unresolved pets retain the generic fallback.
 
 Open [the round-two gallery](previews/translucent-art-review.html) for the 18 additional review-only concepts: four Monster, four Water forces, two Skeletons, two Wraiths, four flame-bodied Efreeti/ifrits and two lion Warders. Monster A is marked In use. Earlier concepts remain under Archived. Every concept has painted and simplified treatments, 13/14/16/20/24/32/64-DIP examples, all three theme backgrounds, grayscale, silhouette and actual synthetic DPS selector captures. Shortlisting in the gallery does not change the app.
 

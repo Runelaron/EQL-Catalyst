@@ -26,12 +26,14 @@ foreach ($scope in @('CURRENTUSER','ALLUSERS')) {
   # bookkeeping intentionally contains the disposable user's install path.
   $expanded=Join-Path $root ('expanded-'+$scope)
   foreach($file in $manifest.Files.PSObject.Properties){$target=Join-Path $expanded $file.Name;New-Item -ItemType Directory -Path (Split-Path $target) -Force | Out-Null;Copy-Item -LiteralPath (Join-Path $app $file.Name) -Destination $target}
-  python (Join-Path $PSScriptRoot 'privacy-audit.py') $expanded --private-root "$pwd" --private-root "$env:RUNNER_TEMP" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report (Join-Path $root ("installed-privacy-"+$scope+".json"))
+  python (Join-Path $PSScriptRoot 'privacy-audit.py') $expanded --exceptions (Join-Path $PSScriptRoot 'privacy-exceptions.json') --private-root "$pwd" --private-root "$env:RUNNER_TEMP" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report (Join-Path $root ("installed-privacy-"+$scope+".json"))
   Check ($LASTEXITCODE -eq 0) "$scope expanded installer payload passes privacy audit"
   Check ((Run "$app\EQLTracker.exe" @('--data-root',$data,'--character','ExampleHero','--server','example','--launch-audit')) -eq 0) 'Offline first profile starts'
   $audit=Get-Content "$data\ExampleHero_example\launch-audit.json" -Raw | ConvertFrom-Json
   Check (!$audit.GameFolder -and $audit.Level -eq 0 -and !$audit.Race -and $audit.CurrentClasses.Count -eq 0) 'New facts remain unknown'
   Check (!$audit.NativeSync.Login -and !$audit.NativeSync.Periodic -and !$audit.NativeSync.Verified) 'Captures remain opt-in'
+  Check (!$audit.PrivateResearch) 'Private research is disabled in the public build'
+  Check (!$audit.SharingEnabled -and !$audit.SharingConfigured -and !$audit.SharingListening) 'Fresh-profile phone sharing is disabled, unconfigured and has no listener'
   Check ((Run "$app\EQLTracker.exe" @('--data-root',$data,'--launch-audit')) -eq 0) 'Restart remembers the last profile'
   $before=Snapshot
   Remove-Item -LiteralPath "$app\README.md"

@@ -9,7 +9,7 @@ using EqlTracker.Core;
 
 namespace EqlTracker.App;
 
-internal static class PetArtworkReview
+internal static partial class PetArtworkReview
 {
     internal static async Task Run(TrackerController controller,OverlayWindow overlay,string folder)
     {
@@ -17,7 +17,7 @@ internal static class PetArtworkReview
         var checks=new List<string>();var timer=Stopwatch.StartNew();
         void Check(bool value,string label){if(!value){Json.Write(Path.Combine(folder,"partial-pet-art-checks.json"),new{Checks=checks,Failed=label});throw new InvalidOperationException(label);}checks.Add(label);}
         if(Environment.GetCommandLineArgs().Contains("--art-restore-only"))
-        {Check(controller.UndeadArtwork=="wraith-b"&&IconArtwork.Undead=="wraith-b","Separate process applies the saved character's Wraith B before rendering");Json.Write(Path.Combine(folder,"art-restored.json"),new{Passed=true,controller.UndeadArtwork});return;}
+        {Check(controller.UndeadArtwork=="wraith-b"&&IconArtwork.Undead=="wraith-b"&&IconArtwork.Fire=="classic"&&IconArtwork.Air=="classic"&&IconArtwork.Water=="torrent"&&IconArtwork.Monster=="aviak-overhead","Separate process restores all saved family choices before first render");Json.Write(Path.Combine(folder,"art-restored.json"),new{Passed=true,controller.UndeadArtwork});return;}
         string identity=PetResearch.Hash(controller.Profile.PetIdentities),main=PetResearch.Hash(controller.Profile.OverlayMeter!),footer=PetResearch.Hash(controller.Profile.OverlayFooterDisplay!),combat=PetResearch.Hash(controller.Combat.Encounters);
         string original=controller.UndeadArtwork;var priorStyle=controller.Profile.IconStyle;
         void Flush(Window window){window.UpdateLayout();window.Dispatcher.Invoke(()=>{},DispatcherPriority.ApplicationIdle);window.UpdateLayout();}
@@ -29,7 +29,7 @@ internal static class PetArtworkReview
             var bitmap=PreviewRenderer.Capture(badge,dip,dip,1);byte[] buffer=new byte[bitmap.PixelWidth*bitmap.PixelHeight*4];bitmap.CopyPixels(buffer,bitmap.PixelWidth*4,0);return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(buffer));
         }
         Check(PetArtworkPreferences.Resolve(null)=="skeleton-a"&&PetArtworkPreferences.Resolve("unsupported")=="skeleton-a","Missing and unsupported Undead choices use Skeleton A");
-        string stateFolder=Path.Combine(folder,"state-tests");Directory.CreateDirectory(stateFolder);string statePath=Path.Combine(stateFolder,"character-a.db");
+        string stateFolder=Path.Combine(folder,"state-tests");Directory.CreateDirectory(stateFolder);string statePath=Path.Combine(stateFolder,"character-a-"+Guid.NewGuid().ToString("N")+".db");
         using(var store=new TrackerStore(statePath))
         {
             Check(PetArtworkPreferences.Read(store).Undead=="skeleton-a","A new character needs no preference migration");
@@ -40,6 +40,7 @@ internal static class PetArtworkReview
         using(var store=new TrackerStore(statePath))Check(PetArtworkPreferences.Read(store).Undead=="wraith-b","Reopening the character database retains Wraith B");
         using(var store=new TrackerStore(Path.Combine(stateFolder,"character-b.db")))Check(PetArtworkPreferences.Read(store).Undead=="skeleton-a","A separate character does not inherit another character's appearance");
         var settings=new SettingsWindow(controller){Opacity=0,ShowActivated=false};settings.Show();Flush(settings);
+        ReviewFamilies(controller,settings,folder,Check);
         Check(settings.UndeadChoice.Items.Count==3&&Equals(settings.UndeadChoice.SelectedValue,original),"Settings offers exactly Skeleton A, Wraith A and Wraith B with the saved choice selected");
         Check(settings.UndeadChoice.Focusable&&KeyboardNavigation.GetIsTabStop(settings.UndeadChoice)&&System.Windows.Automation.AutomationProperties.GetName(settings.UndeadChoice)=="Undead appearance","Undead choice remains a labeled keyboard tab stop");
         settings.UndeadChoice.Focus();settings.UndeadChoice.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice,PresentationSource.FromVisual(settings)!,Environment.TickCount,Key.F4){RoutedEvent=Keyboard.KeyDownEvent});Flush(settings);
@@ -56,7 +57,8 @@ internal static class PetArtworkReview
         foreach(var option in SettingsWindow.UndeadChoices){settings.UndeadChoice.SelectedValue=option.Id;Flush(settings);hashes.Add(Pixels("Undead",24));}
         Check(hashes.Count==3,"Clean preserves three distinct Undead silhouettes");
         controller.Profile.IconStyle=IconArtworkStyle.Vibrant;IconArtwork.Apply(controller.Profile,controller.UndeadArtwork);Flush(settings);int cache=IconArtwork.CachedImages;_=Pixels("Undead",13);
-        Check(IconArtwork.CachedImages==cache,"Small approved artwork renders without decoding an additional painted bitmap");
+        int decoded=IconArtwork.CachedImages;_=Pixels("Undead",13);
+        Check(decoded<=cache+1&&IconArtwork.CachedImages==decoded,"Small painted artwork reuses its bounded DPI decode cache");
         Check(SettingsWindow.UndeadChoices.All(c=>IconArtwork.Painted(c.Role,192)?.PixelWidth>=192),"Larger high-DPI Undead artwork decodes at the required device resolution");
         var other=new CharacterProfile{Character="Other",Server="Test",IconStyle=controller.Profile.IconStyle};
         Check(IconArtwork.Apply(other,"skeleton-a")&&IconArtwork.Undead=="skeleton-a","Character changes invalidate artwork even when the overall icon style is unchanged");
@@ -73,7 +75,8 @@ internal static class PetArtworkReview
             }
         }
         Check(IconArtwork.ActorRole("Pet","Unknown")=="pet-generic"&&IconArtwork.ActorRole("Player","Undead")=="actor-self","Unknown pets retain generic artwork and player selectors retain player artwork");
-        Check(!ApprovedPetArtwork.Detailed(24,IconArtworkStyle.Vibrant)&&ApprovedPetArtwork.Detailed(32,IconArtworkStyle.Vibrant)&&!ApprovedPetArtwork.Detailed(64,IconArtworkStyle.Clean),"Approved families choose detail by DIP size independently of DPI");
+        Check(new[]{13,14,16,20,24,32,64}.All(d=>ApprovedPetArtwork.Detailed(d,IconArtworkStyle.Vibrant)&&!ApprovedPetArtwork.Detailed(d,IconArtworkStyle.Clean)),"Vibrant uses paintings at every size while Clean retains vectors");
+        PetPaintingReview.Run(folder,Check);
         var decode=new List<object>();foreach(double dpi in new[]{1d,1.5,2d,3d})foreach(int dip in new[]{13,14,16,20,24,32,64})decode.Add(new{DIP=dip,DPI=dpi,Pixels=PetIconCandidateView.DevicePixels(dip,dpi),Detailed=ApprovedPetArtwork.Detailed(dip,IconArtworkStyle.Vibrant)});
         controller.Profile.IconStyle=priorStyle;settings.UndeadChoice.SelectedValue=original;IconArtwork.Apply(controller.Profile,controller.UndeadArtwork);
         settings.Width=940;settings.Height=610;Flush(settings);Save("undead-settings",(FrameworkElement)settings.Content,settings.ActualWidth,settings.ActualHeight);
@@ -82,7 +85,7 @@ internal static class PetArtworkReview
         settings.Hide();controller.SetUndeadArtwork(original);controller.Profile.IconStyle=priorStyle;IconArtwork.Apply(controller.Profile,controller.UndeadArtwork);
         Check(identity==PetResearch.Hash(controller.Profile.PetIdentities)&&combat==PetResearch.Hash(controller.Combat.Encounters),"Appearance changes preserve detected identities and historical combat snapshots");
         Check(main==PetResearch.Hash(controller.Profile.OverlayMeter!)&&footer==PetResearch.Hash(controller.Profile.OverlayFooterDisplay!),"Appearance changes preserve both independent DPS selectors");
-        string restart=Path.Combine(folder,"restart");Directory.CreateDirectory(Path.Combine(restart,".preview-state"));using(var store=new TrackerStore(Path.Combine(restart,".preview-state","tracker.db")))new PetArtworkPreferences{Undead="wraith-b"}.Write(store);
+        string restart=Path.Combine(folder,"restart");Directory.CreateDirectory(Path.Combine(restart,".preview-state"));using(var store=new TrackerStore(Path.Combine(restart,".preview-state","tracker.db")))new PetArtworkPreferences{Undead="wraith-b",Fire="classic",Air="classic",Water="torrent",Monster="aviak-overhead"}.Write(store);
         var start=new ProcessStartInfo(Environment.ProcessPath!){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden};if(Path.GetFileNameWithoutExtension(Environment.ProcessPath)=="dotnet")start.ArgumentList.Add(typeof(App).Assembly.Location);
         foreach(string arg in new[]{"--preview",restart,"--pet-art-only","--art-restore-only","--character","Sample","--server","Test","--offline"})start.ArgumentList.Add(arg);
         using(var child=Process.Start(start)!){await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(45));Check(child.ExitCode==0&&Json.Read<Dictionary<string,object>>(Path.Combine(restart,"art-restored.json")).ContainsKey("Passed"),"Separate-process restart loads the stored appearance before first render");}

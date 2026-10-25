@@ -25,6 +25,7 @@ public static class Appearance
         else { token = new() { Value = value }; colors["SecondaryText"] = token; var brush = new SolidColorBrush(); BindingOperations.SetBinding(brush, SolidColorBrush.ColorProperty, new Binding(nameof(ThemeColor.Value)) { Source = token }); Application.Current.Resources["SecondaryText"] = brush; }
     }
     public static readonly string[] Themes = ThemeCatalog.Choices.Select(c => c.Name).ToArray();
+    internal static IReadOnlyDictionary<string,string> PhoneTokens { get; private set; } = new Dictionary<string,string>();
     public static void Apply(string theme)
     {
         ApplySecondaryText(SecondaryText);
@@ -61,6 +62,7 @@ public static class Appearance
             }) palette[pair.Key] = pair.Value;
         }
         foreach (string name in new[] { "InnerSurface", "DetailSurface" }) palette[name] = "#BF" + palette[name][^6..];
+        PhoneTokens = new Dictionary<string,string> { ["background"]="#"+palette["Surface"][^6..], ["surface"]="#"+palette["InnerSurface"][^6..], ["text"]="#"+palette["Foreground"][^6..], ["secondary"]="#"+palette["ReadableNote"][^6..], ["accent"]="#"+palette["Accent"][^6..], ["line"]="#"+palette["Edge"][^6..], ["mint"]="#"+palette["Mint"][^6..] };
         foreach (string name in new[] { "Surface", "InnerSurface", "DetailSurface", "Selection" }) palette["Solid" + name] = "#FF" + palette[name][^6..];
         foreach (var (name, hex) in palette)
         {

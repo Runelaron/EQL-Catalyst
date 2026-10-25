@@ -13,6 +13,7 @@ public partial class App : Application
     public OverlayWindow DpsOverlay { get; private set; } = null!;
     private QuestWindow? quests;
     private DpsWindow? dps;
+    private OverviewWindow? overview;
     private SettingsWindow? settings;
     private NativeControlsWindow? nativeControls;
     private IconGallery? iconGallery;
@@ -120,7 +121,7 @@ public partial class App : Application
         { MessageBox.Show("Unable to open this profile. Existing data was not replaced.\n\n" + error.Message, "EQL Catalyst"); Shutdown(1); return; }
         Updates = new(diagnostic?Path.Combine(preview??benchmark??smoke!,".update-state"):DataRoot, ReleaseInfo.Version, !diagnostic && !e.Args.Contains("--offline"));
         if (!diagnostic) _ = UpdateCommands();
-        IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork);
+        IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork,Controller.ArtworkPreferences);
         RefreshShortcutHints();
         CatalystBranding.SelectedId = CatalystBranding.Resolve(Controller.Profile.AppIconId).Id;
         CatalystBranding.SelectedStyle = IconArtwork.Style;
@@ -162,7 +163,7 @@ public partial class App : Application
         if (e.Args.Contains("--launch-audit"))
         {
             Controller.Save();
-            Json.Write(Path.Combine(Controller.DataFolder, "launch-audit.json"), new { Controller.Profile.Character, Controller.Profile.Server, Controller.Profile.GameFolder, Controller.Profile.Theme, Controller.Profile.CurrentClasses, Controller.Profile.NativeSync, Controller.Profile.ActiveLoadout.Level, Controller.Profile.ActiveLoadout.Race, DataRoot, Runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, Version = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).Cast<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion });
+            Json.Write(Path.Combine(Controller.DataFolder, "launch-audit.json"), new { Controller.Profile.Character, Controller.Profile.Server, Controller.Profile.GameFolder, Controller.Profile.Theme, Controller.Profile.CurrentClasses, Controller.Profile.NativeSync, Controller.Profile.ActiveLoadout.Level, Controller.Profile.ActiveLoadout.Race, PrivateResearch = TrackerController.PetResearchEnabled, SharingEnabled = Controller.PhoneSettings.Enabled, SharingConfigured = Controller.PhoneSettings.Address.Length > 0, SharingListening = Controller.PhoneHost != null, DataRoot, Runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, Version = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).Cast<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion });
             Exiting = true; Controller.Dispose(); stopSignal?.Dispose(); singleton?.Dispose(); applicationPresence?.Dispose(); Shutdown(); return;
         }
         if (preview != null && e.Args.Contains("--mode-buttons-only"))
@@ -194,6 +195,8 @@ public partial class App : Application
                 if(e.Args.Contains("--pet-research-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetResearch(preview);ExitTracker();return; }
                 if(e.Args.Contains("--independent-displays-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await DpsOverlay.ReviewIndependentDisplays(preview);ExitTracker();return; }
                 if(e.Args.Contains("--title-selector-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();DpsOverlay.ReviewTitleSelector(preview);ExitTracker();return; }
+                if(e.Args.Contains("--ui-repair-only")){await UiRepairReview.Run(preview,Controller,quests,dps);ExitTracker();return;}
+                if(e.Args.Contains("--integrated-companions-only")){await IntegratedReview.Run(preview,Controller,quests,dps);ExitTracker();return;}
                 if(e.Args.Contains("--beta16-review")) {await Beta16Review.Run(Controller,quests,dps,DpsOverlay,preview);ExitTracker();return;}
                 if(e.Args.Contains("--beta14-review")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewBeta14(preview);ExitTracker();return; }
                 if(e.Args.Contains("--progress-reward-only")) { quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewProgressRewards(preview);ExitTracker();return; }
@@ -295,7 +298,7 @@ public partial class App : Application
         tray = new System.Windows.Forms.NotifyIcon { Icon = trayIcon, Text = CatalystBranding.Name, Visible = true };
         iconRefresh.Tick += (_, _) => { iconRefresh.Stop(); ApplyIcon(true); };
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += DisplayChanged;
-        var menu = new System.Windows.Forms.ContextMenuStrip();menu.Items.Add(CatalystBranding.Name).Enabled=false;menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());menu.Items.Add("Quest && Gear Tracker",null,(_,_)=>OpenQuests());menu.Items.Add("Combat lab",null,(_,_)=>OpenDps());
+        var menu = new System.Windows.Forms.ContextMenuStrip();menu.Items.Add(CatalystBranding.Name).Enabled=false;menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());menu.Items.Add("Quest && Gear Tracker",null,(_,_)=>OpenQuests());menu.Items.Add("Combat lab",null,(_,_)=>OpenDps());menu.Items.Add("Overview",null,(_,_)=>OpenOverview());
         foreach(var action in Enum.GetValues<OverlayShortcutAction>()){var item=menu.Items.Add(ShortcutActionName(action),null,(_,_)=>Toggle((int)action));item.Tag=action;}
         menu.Items.Add("Native game controls",null,(_,_)=>OpenNativeControls());menu.Items.Add("Settings",null,(_,_)=>OpenSettings());menu.Items.Add("Exit tracker",null,(_,_)=>ExitTracker());tray.ContextMenuStrip=menu;tray.DoubleClick+=(_,_)=>OpenQuests();RefreshShortcutHints();
         hotkeys = new(Toggle,Controller.Profile); if (hotkeys.Failed.Count > 0) tray.ShowBalloonTip(7000, "Some hotkeys are already in use", string.Join(", ", hotkeys.Failed) + ". Use the tray menu.", System.Windows.Forms.ToolTipIcon.Info);
@@ -332,9 +335,10 @@ public partial class App : Application
         else { var bar=EnsureWorkspaceToolbar();if(bar.State.Visible){bar.RequestedVisible=true;bar.Show();} }
     }
     private readonly List<double> uiSamples = [];
-    private IEnumerable<FrostWindow> Panels() => new FrostWindow?[] { ObjectivesOverlay, DpsOverlay, workspaceToolbar, quests?.IsAttachedWorkspace==true?null:quests, dps?.IsAttachedWorkspace==true?null:dps, settings, nativeControls, iconGallery }.OfType<FrostWindow>();
+    private IEnumerable<FrostWindow> Panels() => new FrostWindow?[] { ObjectivesOverlay, DpsOverlay, workspaceToolbar, quests?.IsAttachedWorkspace==true?null:quests, dps?.IsAttachedWorkspace==true?null:dps, overview?.IsAttachedWorkspace==true?null:overview, settings, nativeControls, iconGallery }.OfType<FrostWindow>();
 
-    private WorkspaceToolbarWindow EnsureWorkspaceToolbar()=>workspaceToolbar??=new(Controller,id=>id=="Tracker"?quests??=new(Controller):dps??=new(Controller),OpenSettings);
+    private WorkspaceToolbarWindow EnsureWorkspaceToolbar()=>workspaceToolbar??=new(Controller,id=>id switch {"Tracker"=>quests??=new(Controller),"CombatLab"=>dps??=new(Controller),_=>overview??=new(Controller)},OpenSettings);
+    public void OpenCatalystToolbar()=>EnsureWorkspaceToolbar().Reveal();
     public void OpenQuests(string? zoneFilter = null) { var bar=EnsureWorkspaceToolbar();if(!bar.Open("Tracker"))return;if(zoneFilter!=null)quests!.SetZoneFilter(zoneFilter);quests!.Refresh();if(!NativeSetup.GameRunning())bar.FocusWhenShown("Tracker"); }
     public void OpenDps() { var bar=EnsureWorkspaceToolbar();if(bar.Open("CombatLab")&&!NativeSetup.GameRunning())bar.FocusWhenShown("CombatLab"); }
     public void OpenSettings() { settings ??= new(Controller); settings.UpdateStatus(); Native.ShowPanel(settings); }
@@ -352,6 +356,7 @@ public partial class App : Application
             if (DpsOverlay.IsVisible && !DpsOverlay.IsCollapsed) DpsOverlay.Refresh();
             if (quests?.IsVisible == true && !quests.IsCollapsed) quests.Refresh();
             if (dps?.IsVisible == true && !dps.IsCollapsed) dps.Refresh();
+            if (overview?.IsVisible == true && !overview.IsCollapsed) overview.Refresh();
             if (tick % 4 == 0) { if (settings?.IsVisible == true) settings.UpdateStatus(); if (nativeControls?.IsVisible == true) nativeControls.UpdateStatus(); }
         }
     }
@@ -361,7 +366,7 @@ public partial class App : Application
         if (id == 2) DpsOverlay.RequestedVisible = !DpsOverlay.RequestedVisible;
         if (id == 3) { bool enabled = !Controller.Profile.Objectives.ClickThrough; Controller.Profile.Objectives.ClickThrough = Controller.Profile.Dps.ClickThrough = enabled; ApplySettings(); Controller.Save(); }
     }
-    public void ApplySettings() { IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork);workspaceToolbar?.ApplyMotionPreference();RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
+    public void ApplySettings() { IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork,Controller.ArtworkPreferences);workspaceToolbar?.ApplyMotionPreference();RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
     internal string ShortcutLabel(OverlayShortcutAction action)=>OverlayShortcuts.Label(Controller.Profile,action);
     private static string ShortcutActionName(OverlayShortcutAction action)=>action switch{OverlayShortcutAction.Objectives=>"Toggle objectives",OverlayShortcutAction.Dps=>"Toggle DPS",_=>"Toggle click-through"};
     private void RefreshShortcutHints()

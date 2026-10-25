@@ -4,6 +4,7 @@ namespace EqlTracker.Core;
 
 internal static class WikiContentQuality
 {
+    internal const string QuestRewardConflict="Wiki prose explicitly identifies a quest reward; the page's mob-drop field is disputed. Resolve the linked walkthrough before treating it as a drop route.";
     internal const string Version="wiki-quality-v1";
     internal const string IncompleteTemplate="Unfilled source template; equipment fields undocumented";
     private static readonly HashSet<string> placeholders=new(StringComparer.OrdinalIgnoreCase){"item name","npc name","zone name","quest name","vendor name","effect name","faction name","quest item","quest giver name","related quest","camp name","zone line","none","unknown","item_name","npc_name"};

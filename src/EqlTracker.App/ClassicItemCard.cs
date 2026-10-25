@@ -77,7 +77,7 @@ internal sealed class ClassicItemCard : Border
         if (item.ContentAvailability == ContentAvailability.Future) Line("Future content · " + item.AvailabilityEvidence, "Melee");
         while (text.Children.Count > line) text.Children.RemoveAt(text.Children.Count - 1);
         if (Child == null) Child = text;
-        ToolTip = "Known item facts at +" + rank + ".\n" + projection.Evidence + "\n" + (item.Display.Source.Length > 0 ? item.Display.Source + " revision " + item.Display.Revision : "Display metadata incomplete; undocumented facts are omitted.");
+        ToolTip = "Known item facts at +" + rank + ".\n" + projection.Evidence + "\n" + (item.Display.Source.Length > 0 ? item.Display.Source + " revision " + item.Display.Revision : "Display metadata incomplete; undocumented facts are omitted.")+"\n"+string.Join("\n",PublicContentNotes.Item(item.Key));
     }
 }
 
@@ -92,6 +92,8 @@ internal sealed class ItemDetailsInspector : StackPanel
     private readonly ComboBox copies = new() { DisplayMemberPath = "Label", MinWidth = 120, HorizontalAlignment = HorizontalAlignment.Stretch };
     private Action<InventoryEntry?>? copyChanged;
     private readonly ItemAcquisitionView acquisition = new();
+    private readonly CompatibilityInspector compatibility = new();
+    private readonly OtherHoldingsView otherHoldings = new();
     private string copiesKey = "";
     private sealed record CopyChoice(string Label, InventoryEntry? Instance) { public override string ToString() => Label; }
     internal bool AnimateValues { get; set; }
@@ -112,14 +114,15 @@ internal sealed class ItemDetailsInspector : StackPanel
         rankArea = UI.Stack(previewRow, RankSlider);
         copies.Visibility = Visibility.Collapsed;
         copies.SelectionChanged += (_, _) => { if (!updating && copies.SelectedItem is CopyChoice copy) copyChanged?.Invoke(copy.Instance); };
-        headerIcons=new(title);Children.Add(headerIcons); Children.Add(copies); Children.Add(facts); Children.Add(acquisition); Children.Add(rankArea); Children.Add(pending); Children.Add(rating);
+        headerIcons=new(title);Children.Add(headerIcons); Children.Add(copies); Children.Add(facts); Children.Add(acquisition); Children.Add(otherHoldings); Children.Add(rankArea); Children.Add(pending); Children.Add(compatibility); Children.Add(rating);
         RankSlider.AddHandler(System.Windows.Controls.Primitives.Thumb.DragCompletedEvent, new System.Windows.Controls.Primitives.DragCompletedEventHandler((_, _) => PreviewCommitted?.Invoke()));
         RankSlider.PreviewKeyUp += (_, _) => PreviewCommitted?.Invoke();
         RankSlider.ValueChanged += (_, _) => { if (!updating) rankChanged?.Invoke((int)RankSlider.Value); };
         Clear();
     }
-    internal void Clear() { headerIcons.Clear(); copiesKey = ""; itemKey = ""; pending.Text = ""; copies.Visibility = Visibility.Collapsed; title.Text = "Select an item to view its stats and comparison."; facts.Content = null; acquisition.Visibility = rankArea.Visibility = rating.Visibility = Visibility.Collapsed; }
-    internal void SetOwnership(ItemDefinition item, InventorySnapshot inventory) { headerIcons.Show(item, ItemOwnership.For(item, inventory)); acquisition.Visibility=Visibility.Visible;if(Application.Current is App app)acquisition.Show(item,app.Controller.Catalog,inventory); }
+    internal void Clear() { headerIcons.Clear(); copiesKey = ""; itemKey = ""; pending.Text = ""; copies.Visibility = Visibility.Collapsed; title.Text = "Select an item to view its stats and comparison."; facts.Content = null; acquisition.Visibility = rankArea.Visibility = rating.Visibility = compatibility.Visibility = otherHoldings.Visibility = Visibility.Collapsed; }
+    internal void SetCompatibility(CompatibilityComparison? result) => compatibility.Show(result);
+    internal void SetOwnership(ItemDefinition item, InventorySnapshot inventory) { headerIcons.Show(item, ItemOwnership.For(item, inventory)); acquisition.Visibility=Visibility.Visible;if(Application.Current is App app){acquisition.Show(item,app.Controller.Catalog,inventory);otherHoldings.Show(app.Controller,item);} }
     internal void ShowItem(ItemDefinition item, int rank, int listRank, bool preview, InventoryEntry? instance, GearComparison? comparison, string role, ItemPairComparison? pair, string reason, Action<int?> changed, Action formula)
     {
         rankChanged = changed; updating = true;

@@ -51,7 +51,7 @@ public sealed partial class DpsWindow : FrostWindow
     private readonly Dictionary<CombatLabMode, string> modeSelections = [];
     public DpsWindow(TrackerController controller) : base(controller, "Combat Lab", "Measured damage, spell by spell and strike by strike.", 878, 740, surface: WindowSurface.Theme)
     {
-        Appearance.RaisedButtons(Body); CatalystHeading.Apply(HeadingTitle, "Combat Lab");
+        Appearance.RaisedButtons(Body); CatalystHeading.Apply(HeadingTitle, "Combat Lab");WorkspaceHeaderBand.Install(this);
         mode = controller.Profile.CombatLab.Mode;
         healing = new(controller); group = new(controller); group.PeriodSelected += FollowGroup;
         ConfigureScopes();
@@ -125,7 +125,7 @@ public sealed partial class DpsWindow : FrostWindow
         healing.AbilitySelected += row => { if (row != null) { selectedAbility = row; MarkHealing(row); } };
         Body.Children.Add(root);
         bool wasSmall = false, priorExpanded = true;
-        SizeChanged += (_, _) => { overview.Adapt(ActualHeight < 500); bool small = ActualHeight < 580; bool narrow = ActualWidth < 900; tabs.MinHeight = small ? 0 : 100; if (small && !wasSmall) { priorExpanded = filters.IsExpanded; filters.IsExpanded = false; } else if (!small && wasSmall) filters.IsExpanded = priorExpanded; wasSmall = small; timeline.Height = small ? 48 : 96; peakInfo.Visibility = small ? Visibility.Collapsed : Visibility.Visible; Subtitle.Visibility = small ? Visibility.Collapsed : Visibility.Visible; };
+        SizeChanged += (_, _) => { overview.Adapt(ActualHeight < 500); bool small = ActualHeight < 580; bool narrow = ActualWidth < 900; tabs.MinHeight = small ? 0 : 100; if (small && !wasSmall) { priorExpanded = filters.IsExpanded; filters.IsExpanded = false; } else if (!small && wasSmall) filters.IsExpanded = priorExpanded; wasSmall = small; timeline.Height = small ? 48 : 96; peakInfo.Visibility = small ? Visibility.Collapsed : Visibility.Visible; };
         bool narrowFilters=false, restoreFilters=true;
         root.SizeChanged+=(_,_)=>{bool next=root.ActualWidth<900;if(next==narrowFilters)return;narrowFilters=next;if(next){restoreFilters=filters.IsExpanded;filters.IsExpanded=false;}else filters.IsExpanded=restoreFilters;};
         foreach (var c in new[] { owner, target, kind, sort }) c.SelectionChanged += (_, _) => { if (!updating) ChangeFilters(); };
