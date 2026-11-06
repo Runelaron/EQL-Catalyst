@@ -1,4 +1,9 @@
-# Beta 1.8 (candidate)
+# Beta 1.8 — 1.8.0-beta.2
+
+- Keep observed Bard ranks separate from nominal wiki baselines when rebuilding saved EQ song sets; preserve the exact client ID's upgraded version and explicit +0.
+- Preserve beta.1 artifacts and the .NET 10.0.14 security runtime. Linux remains an unpublished preview pending parity and acceptance.
+
+## Beta 1.8 — 1.8.0-beta.1
 
 - Fresh revisioned item/quest/spell catalog and current castle-access evidence.
 - Completed Overview, Bard rotation, charged-click and reward-font improvements.

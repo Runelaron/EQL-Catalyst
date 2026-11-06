@@ -32,3 +32,5 @@ The first hosted candidates stopped at privacy gates before publication. Release
 The first complete Windows candidate was rejected by the final SBOM scan: CVE-2026-70197 affects its 10.0.13 Windows runtime. The replacement pins SDK 10.0.403 and bundles 10.0.14, with an explicit package-time runtime assertion. Initial findings remain recorded; they were not suppressed. Both platform SBOM app filenames and generated lock inputs are now checked.
 
 Privacy version reviews keep Microsoft.Data.Sqlite package metadata 10.0.13.0 separate from bundled framework 10.0.14.0. The SQLite package version is not a .NET runtime version; approving that vendor metadata does not relax the runtime security floor or suppress the CVE finding.
+
+Beta.2 follows a local retained-data check that detected nominal wiki rank +0 leaking into saved EQ sets. The corrective pass tests bare names, version-specific client IDs and explicit +0, while preserving manual Bard preferences, known-song evidence and independent checkpoints. Untouched native layouts retain the verified beta.1 baseline; affected Songs and companion fixture views receive the final native pass.

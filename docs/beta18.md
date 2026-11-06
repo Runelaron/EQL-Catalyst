@@ -43,3 +43,5 @@ remain in the bundled catalog. Official sources:
 - [October 29](https://www.everquestlegends.com/patch-notes/eql-update-notes-10-29-2026)
 - [November 3 hotfix](https://www.everquestlegends.com/patch-notes/eql-hotfix-notes-11-3-2026)
 - [November 4](https://www.everquestlegends.com/patch-notes/eql-hotfix-notes-11-4-2026)
+
+Beta.2 corrects saved Bard-set reconstruction: new wiki catalog coverage cannot turn an unknown learned rank into +0. Version-specific client IDs retain explicit positive ranks and +0. No ingestion or reader checkpoints are replayed.

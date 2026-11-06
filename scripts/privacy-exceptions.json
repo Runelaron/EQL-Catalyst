@@ -49,5 +49,11 @@
     "Rule": "private-path-or-secret-pattern",
     "Sha256": "2538ec6f3c24e901a90e33c37788b9a4e4b6ae8158cab7328a00a00bb28eab9e",
     "Reason": "Exact assembly bytes match the public MicroCom.Runtime 0.11.6 NuGet package. Its sole path is the upstream PE CodeView producer record, not this workstation, a profile or a credential."
+  },
+  {
+    "File": "usr/lib/eql-catalyst/Makaretu.Dns.Multicast.dll",
+    "Rule": "private-ip-literal",
+    "Sha256": "023391027c668e58b1ffdf2c37448121979d01c3e2722e697bedcd6819837e8e",
+    "Reason": "Exact Debian payload copy of the independently reviewed Makaretu.Dns.Multicast 0.27.0 assembly. Its standard link-local constant is unchanged; complete inner path and file bytes are bound separately."
   }
 ]

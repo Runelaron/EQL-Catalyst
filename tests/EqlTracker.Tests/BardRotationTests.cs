@@ -27,6 +27,30 @@ internal static class BardRotationTests
         test("Bard backfill must wait for a validated song catalog before consuming log metadata",()=>{Check(!BardRotations.MetadataReady(new ConnectedSpellIndex([])));Check(BardRotations.MetadataReady(index));});
         test("Bard memorization proves knowledge and rank without proving a rotation",()=>{var s=new BardResearchState();Check(BardRotations.Memorized(s,"You have finished memorizing Reviewed Song VI.",at,index));Check(s.Known.Single().Value.Song.Identity.UpgradeRank==6&&s.Current==null);Check(!BardRotations.Memorized(s,"You begin casting Reviewed Song VI.",at,index));});
         test("Bard bare memorization preserves unknown rank while explicit zero remains recorded",()=>{var s=new BardResearchState();BardRotations.Memorized(s,"You have finished memorizing Reviewed Song.",at,index);Check(s.Known.Single().Value.Song.Identity.UpgradeRank==null);Check(BardRotations.ObservedIdentity(index,"Reviewed Song +0").Rank==0);});
+        test("Bard saved IDs do not learn nominal wiki rank zero after catalog refresh",()=>
+        {
+            string ini="[SpellLoadouts]\nSpellLoadout1.inuse=1\nSpellLoadout1.name=Fixture\nSpellLoadout1.slot5=7";
+            var before=new ConnectedSpellIndex([]).WithClientLines([Client(7,"Reviewed Song")],"fixture");
+            var after=new ConnectedSpellIndex([new SpellReference("Reviewed Song","https://example.invalid/song",1,at,"BRD","","","","")]).WithClientLines([Client(7,"Reviewed Song")],"fixture");
+            var a=BardRotations.SavedLoadouts(ini,before,"read-only fixture").Single();var b=BardRotations.SavedLoadouts(ini,after,"read-only fixture").Single();
+            Check(a.Id==b.Id&&a.Name==b.Name&&a.Songs.Single().Gem==5&&b.Songs.Single().Gem==5);
+            Check(a.Songs.Single().Identity==b.Songs.Single().Identity&&b.Songs.Single().Identity.UpgradeRank==null);
+        });
+        test("Bard saved IDs retain their specific upgraded client record",()=>
+        {
+            var ready=new ConnectedSpellIndex([new SpellReference("Reviewed Song","https://example.invalid/song",1,at,"BRD","","","","")]).WithClientLines([Client(7,"Reviewed Song"),Client(8,"Reviewed Song IV")],"fixture");
+            var set=BardRotations.SavedLoadouts("[SpellLoadouts]\nSpellLoadout1.inuse=1\nSpellLoadout1.slot4=8",ready,"fixture").Single();
+            Check(set.Songs.Single().Identity.UpgradeRank==4&&set.Songs.Single().Identity.SpellId=="8"&&set.Songs.Single().Gem==4);
+            var ambiguous=new ConnectedSpellIndex([]).WithClientLines([Client(7,"First song"),Client(7,"Second song")],"fixture");
+            Check(ambiguous.FindObservedId(7)==null);
+        });
+        test("Bard explicit zero remains observed even when the exact client record exists",()=>
+        {
+            var ready=new ConnectedSpellIndex([new SpellReference("Reviewed Song","https://example.invalid/song",1,at,"BRD","","","","")]).WithClientLines([Client(7,"Reviewed Song"),Client(9,"Reviewed Song +0")],"fixture");
+            Check(BardRotations.ObservedIdentity(ready,"Reviewed Song").Rank==null&&BardRotations.ObservedIdentity(ready,"Reviewed Song +0").Rank==0);
+            var set=BardRotations.SavedLoadouts("[SpellLoadouts]\nSpellLoadout1.inuse=1\nSpellLoadout1.slot3=9",ready,"fixture").Single();
+            Check(set.Songs.Single().Identity.UpgradeRank==0&&set.Songs.Single().Identity.SpellId=="9");
+        });
         test("Bard current 174-field client layout preserves class skill and effect offsets",()=>{var old=Client(3,"Current Song").Split('^');var row=Enumerable.Repeat("0",174).ToArray();Array.Copy(old,row,166);row[12]="20.5";row[165]="0.0";row[166]="-99";row[167]="1";row[168]="177700";row[169]=row[170]=row[171]="-1";row[172]="1";row[173]=old[170];var ready=new ConnectedSpellIndex([]).WithClientLines([string.Join('^',row)],"current");Check(ready.BardSongs.Count==1&&ready.BardSongs[0].Skill=="Singing"&&ready.BardSongs[0].Parameters!.Single().Base==30&&ready.BardSongs[0].Instant==false);row[167]="bad";Check(!BardRotations.MetadataReady(new ConnectedSpellIndex([]).WithClientLines([string.Join('^',row)],"rejected")));});
         test("Bard saved inuse is not an active set; Self remains eligible",()=>{var sets=BardRotations.SavedLoadouts("[SpellLoadouts]\nSpellLoadout1.inuse=1\nSpellLoadout1.name=Saved fixture\nSpellLoadout1.slot14=2\nSpellLoadout1.slot13=1\nSpellLoadout2.inuse=0\nSpellLoadout2.slot14=1",index,"fixture hash");Check(sets.Count==1&&sets[0].Songs.Count==2&&sets[0].Origin.Contains("unconfirmed")&&BardRotations.Select(sets[0],1).Single().Identity.Name=="Amplification");});
         test("Bard unresolved saved spell IDs block unsafe reverse selection",()=>{var sets=BardRotations.SavedLoadouts("[SpellLoadouts]\nSpellLoadout1.inuse=1\nSpellLoadout1.slot14=999\nSpellLoadout1.slot13=1",index,"fixture");Check(BardRotations.Select(sets.Single(),1).Count==0);});

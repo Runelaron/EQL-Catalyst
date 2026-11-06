@@ -10,7 +10,7 @@ internal sealed record ConnectedSpellIdentity(string Canonical,int? Rank,Connect
 
 internal sealed class ConnectedSpellIndex
 {
-    internal const string Version="connected-spells-v4-bard-skill-context";
+    internal const string Version="connected-spells-v5-observed-rank-context";
     internal string EvidenceVersion { get; private set; }=Version;
     private readonly Dictionary<string,ConnectedSpell> spells=new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string,string> aliases=new(StringComparer.OrdinalIgnoreCase);
@@ -45,6 +45,17 @@ internal sealed class ConnectedSpellIndex
             if(spells.TryGetValue(name,out var baseline))return new(baseline.Name,rank,null); // Base parameters do not establish this rank's power.
         }
         return new(raw,null,null);
+    }
+    internal ConnectedSpellIdentity ResolveObserved(string raw)
+    {
+        var identity=Resolve(raw);return identity with{Rank=ObservedRank(raw,identity.Rank)};
+    }
+    private static int? ObservedRank(string raw,int? rank)=>rank==0&&!Regex.IsMatch(raw.Trim(),@"(?:^|\s)\+0+$")?null:rank;
+    internal ConnectedSpellIdentity? FindObservedId(int id)
+    {
+        var matches=spells.Where(pair=>pair.Value.Id==id).Take(2).ToArray();
+        if(matches.Length!=1)return null;
+        var pair=matches[0];return new(pair.Value.Name,ObservedRank(pair.Key,pair.Value.UpgradeRank),pair.Value);
     }
     internal ConnectedSpell? FindId(int id)=>spells.Values.FirstOrDefault(s=>s.Id==id);
     internal IReadOnlyList<ConnectedSpell> BardSongs => spells.Values.Where(s=>s.Levels?.ContainsKey("BRD")==true).DistinctBy(s=>(s.Id,s.Name,s.UpgradeRank)).OrderBy(s=>s.Name).ToArray();

@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>1.8.0</VersionPrefix>
-    <VersionSuffix>beta.1</VersionSuffix>
+    <VersionSuffix>beta.2</VersionSuffix>
     <AssemblyVersion>1.8.0.0</AssemblyVersion>
-    <FileVersion>1.8.0.0</FileVersion>
+    <FileVersion>1.8.0.2</FileVersion>
     <ReleaseLabel>Beta 1.8</ReleaseLabel>
     <Company>EQL Catalyst</Company>
   <BundledRuntimeVersion>10.0.14</BundledRuntimeVersion></PropertyGroup>

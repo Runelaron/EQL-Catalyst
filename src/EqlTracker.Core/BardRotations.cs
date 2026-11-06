@@ -71,10 +71,9 @@ internal static class BardRotations
     }
     internal static ConnectedSpellIdentity ObservedIdentity(ConnectedSpellIndex index,string raw)
     {
-        var identity=index.Resolve(raw);
-        // A bare logged name often omits the upgrade suffix. Catalog base rank
-        // is not a recorded +0; an explicit parsed suffix (including +0) is.
-        return identity.Definition!=null&&identity.Rank is null or 0?identity with{Rank=null}:identity;
+        // Catalog baselines are nominal. Only an explicit observed suffix,
+        // including +0, establishes the learned version.
+        return index.ResolveObserved(raw);
     }
     internal static BardSong? Song(ConnectedSpellIndex index,ConnectedSpellIdentity identity)
     {
@@ -144,7 +143,7 @@ internal static class BardRotations
         {
             var songs=new List<BardSong>();foreach(var (gem,id) in set.Slots.Where(s=>s.Value>0))
             {
-                var definition=index.FindId(id);if(definition==null){songs.Add(new(){Identity=new(id.ToString(),"Unknown spell #"+id,null),Gem=gem,Source="Saved spell ID has no validated metadata"});continue;}if(definition.Levels?.ContainsKey("BRD")!=true)continue;var song=Song(index,index.Resolve(definition.Name));if(song!=null){song.Gem=gem;songs.Add(song);}
+                var identity=index.FindObservedId(id);var definition=identity?.Definition;if(definition==null){songs.Add(new(){Identity=new(id.ToString(),"Unknown spell #"+id,null),Gem=gem,Source="Saved spell ID has no unique validated metadata"});continue;}if(definition.Levels?.ContainsKey("BRD")!=true)continue;var song=Song(index,identity!);if(song!=null){song.Gem=gem;songs.Add(song);}
             }
             if(songs.Count>0)result.Add(new(){Id="eq:"+number,Name=set.Fields.GetValueOrDefault("name","Saved set "+number),Origin="Saved in EQ · current use unconfirmed",Songs=songs,GemCount=set.Slots.Keys.DefaultIfEmpty(0).Max(),Evidence=evidence+" · inuse means saved, not active"});
         }

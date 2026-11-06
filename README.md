@@ -2,7 +2,7 @@
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.8**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.8.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.8**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.8.0-beta.2) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
