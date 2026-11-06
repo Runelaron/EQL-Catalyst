@@ -16,7 +16,7 @@
   "BundledBefore": 6958,
   "BundledAfter": 7001,
   "MissingAcquisitionBefore": 2565,
-  "MissingAcquisitionAfter": 2571,
+  "MissingAcquisitionAfter": 2570,
   "AddedQuests": 0,
   "NamedRecords": 924,
   "Sources": [
@@ -86116,11 +86116,6 @@
       "Status": "No bundled acquisition; unchanged or on-demand page not re-reviewed"
     },
     {
-      "Key": "petamorph wand: werewolf",
-      "Name": "Petamorph Wand: Werewolf",
-      "Status": "Reviewed source has no proven acquisition"
-    },
-    {
       "Key": "phenocryst's focus",
       "Name": "Phenocryst's Focus",
       "Status": "No bundled acquisition; unchanged or on-demand page not re-reviewed"
@@ -90625,5 +90620,6 @@
       "Name": "Zephyrwind",
       "Status": "No bundled acquisition; unchanged or on-demand page not re-reviewed"
     }
-  ]
+  ],
+  "SeasonalAcquisitionReview": "Official Halloween offers ended 2026-11-03; owned copies preserved; other acquisition remains unknown."
 }

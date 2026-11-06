@@ -1,7 +1,7 @@
 """Inspect release inputs without printing matching private values. Nonzero means review required."""
 from pathlib import Path
-from zipfile import ZipFile
-import argparse,hashlib,ipaddress,json,re,struct
+from archive_contents import archive_entries,is_archive
+import argparse,hashlib,ipaddress,json,re,struct,tarfile,zipfile
 
 PRIVATE=[re.compile(r'(?i)[a-z]:[/\\]+users[/\\]+(?!public\b|default\b)[^/\\\s"<>]+'),re.compile(r'/(?:home|Users)/[A-Za-z][A-Za-z0-9_.-]+/'),re.compile(r'(?i)codex-clipboard-[a-f0-9-]+'),re.compile(r'(?i)(?:gh[pousr]_[a-z0-9]{30,}|github_pat_[a-z0-9_]{30,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)')]
 SKIP={'.git','.tools','bin','obj','dist','artifacts','__pycache__'}
@@ -34,15 +34,14 @@ def main():
     for p in paths:
         name=p.name if args.path.is_file() else p.relative_to(args.path).as_posix();data=p.read_bytes();count+=1
         remember(name,data)
-        if p.suffix=='.zip':
-            with ZipFile(p) as archive:
-                inspect(name+'!archive-metadata',archive.comment,roots,findings,args.software_version)
-                for entry in archive.infolist():
-                    if entry.is_dir():continue
-                    if entry.filename.startswith(('/','\\')) or '..' in Path(entry.filename).parts:findings.add((name,'unsafe-archive-entry'))
-                    inspect(name+'!'+entry.filename+'#metadata',entry.filename.encode()+entry.comment+entry.extra,roots,findings,args.software_version)
-                    inspect(name+'!'+entry.filename,archive.read(entry),roots,findings,args.software_version);count+=1
-                    remember(name+'!'+entry.filename,archive.read(entry))
+        if is_archive(p):
+            try:
+                for entry,data,metadata in archive_entries(p):
+                    inner=name+'!'+entry
+                    inspect(inner,data,roots,findings,args.software_version);count+=1
+                    remember(inner,data)
+            except (ValueError, OSError, tarfile.TarError, zipfile.BadZipFile):
+                findings.add((name,'unsafe-or-unreadable-archive'))
         else:inspect(name,data,roots,findings,args.software_version)
     exceptions=json.loads(args.exceptions.read_text(encoding='utf-8')) if args.exceptions else []
     reviewed=[];unresolved=[]
@@ -50,7 +49,7 @@ def main():
         relative=name.split('!',1)[-1];proof=None
         # Portable packages add one product/version root. Approval still requires
         # the complete inner path, exact rule and exact reviewed file bytes.
-        if '!' in name:relative=re.sub(r'^EQL-Catalyst-\d+\.\d+\.\d+-beta\.\d+-win-x64/', '', relative)
+        if '!' in name:relative=re.sub(r'^EQL-Catalyst-\d+\.\d+\.\d+-beta\.\d+-(?:win-x64|linux-x64-preview)/', '', relative)
         for entry in exceptions:
             if entry['File']!=relative or entry['Rule']!=rule:continue
             digest=content_hashes[name][1 if entry.get('NormalizeLineEndings',False) else 0]

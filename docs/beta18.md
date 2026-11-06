@@ -12,7 +12,7 @@ equipment definitions. Missing acquisition metadata remains explicit.
 
 Castle access now describes normal and non-raid personal Plane of Hate instances.
 The blessing hand-in's documented level restriction and additional Everling
-coordinates are included. Reviewed checklist identities remain stable. Official
+coordinates are included. Halloween acquisition offers are explicitly historical after November 3; owned copies are preserved. Reviewed checklist identities remain stable. Official
 October 27/29 and November 3/4 changes are retained with sources; undocumented
 coefficients do not become calculation formulas.
 

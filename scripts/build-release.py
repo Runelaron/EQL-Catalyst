@@ -32,6 +32,10 @@ def source_files():
         if p.is_file() and not forbidden(rel.as_posix()) and not any(part in {'.git','.tools','bin','obj','dist','artifacts','__pycache__'} for part in rel.parts) and not p.name.endswith(('.db','.db-wal','.db-shm','.log','.user')):yield p
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--dotnet',default=shutil.which('dotnet'));parser.add_argument('--compiler');parser.add_argument('--bootstrap-compiler',action='store_true');parser.add_argument('--skip-tests',action='store_true');parser.add_argument('--package-only',action='store_true');parser.add_argument('--payload-only',action='store_true');args=parser.parse_args()
+    required_sdk=json.loads((ROOT/'global.json').read_text())['sdk']['version']
+    actual_sdk=run([args.dotnet,'--version'],capture_output=True,text=True).stdout.strip() if args.dotnet else ''
+    if not args.package_only and actual_sdk!=required_sdk:raise RuntimeError('Release requires exact SDK '+required_sdk+'; resolved '+actual_sdk)
+    print('Release SDK: '+actual_sdk,flush=True)
     props={e.tag:e.text for e in ET.parse(ROOT/'Version.props').getroot().find('PropertyGroup')};version=props['VersionPrefix']+'-'+props['VersionSuffix'];stage=re.fullmatch(r'beta\.(\d+)',props['VersionSuffix'])
     if not stage:raise RuntimeError('Expected beta.N version')
     DIST.mkdir(exist_ok=True);payload=DIST/f'EQL-Catalyst-{version}-win-x64'
@@ -72,7 +76,7 @@ def main():
                     target=payload/'licenses'/(package+'-'+version_number+'-'+p.name)
                     shutil.copy2(p,target)
         manifest={p.relative_to(payload).as_posix():sha(p) for p in sorted(payload.rglob('*')) if p.is_file()}
-        (payload/'release-manifest.json').write_text(json.dumps({'Product':'EQL Catalyst','Version':props['VersionPrefix']+'-'+props['VersionSuffix'],'WindowsVersion':props['FileVersion'],'Signed':False,'Files':manifest},indent=2),encoding='utf-8')
+        (payload/'release-manifest.json').write_text(json.dumps({'Product':'EQL Catalyst','Version':props['VersionPrefix']+'-'+props['VersionSuffix'],'WindowsVersion':props['FileVersion'],'Signed':False,'SdkVersion':actual_sdk,'SourceCommit':run(['git','rev-parse','HEAD'],capture_output=True,text=True).stdout.strip(),'Files':manifest},indent=2),encoding='utf-8')
         assert_tree(payload)
         if args.payload_only:return
         compiler=Path(args.compiler) if args.compiler else bootstrap() if args.bootstrap_compiler else TOOLS/'compiler/ISCC.exe'

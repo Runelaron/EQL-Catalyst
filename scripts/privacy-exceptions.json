@@ -25,5 +25,17 @@
     "Rule": "private-ip-literal",
     "Sha256": "023391027c668e58b1ffdf2c37448121979d01c3e2722e697bedcd6819837e8e",
     "Reason": "Upstream multicast discovery library link-local range constant; dependency bytes reviewed independently."
+  },
+  {
+    "File": "Tmds.LibC.dll",
+    "Rule": "private-path-or-secret-pattern",
+    "Sha256": "cac56e35128b55dd84291c7378aa3dfb52f1808d3f2c427b3dfe697f2d79c10b",
+    "Reason": "Exact linux-x64 assembly bytes match the published Tmds.LibC 0.2.0 NuGet package. Its sole path finding is the upstream PE CodeView producer build path, not this workstation, a profile, address, credential or private key."
+  },
+  {
+    "File": "usr/lib/eql-catalyst/Tmds.LibC.dll",
+    "Rule": "private-path-or-secret-pattern",
+    "Sha256": "cac56e35128b55dd84291c7378aa3dfb52f1808d3f2c427b3dfe697f2d79c10b",
+    "Reason": "Exact linux-x64 assembly bytes match the published Tmds.LibC 0.2.0 NuGet package. Its sole path finding is the upstream PE CodeView producer build path, not this workstation, a profile, address, credential or private key."
   }
 ]

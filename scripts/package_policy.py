@@ -1,6 +1,6 @@
 """Shared package-content gate. Local development instructions are never product files."""
 from pathlib import Path, PurePosixPath
-from zipfile import ZipFile
+from archive_contents import archive_entries
 
 def forbidden(name):
     parts=PurePosixPath(str(name).replace('\\','/').lower()).parts
@@ -17,4 +17,4 @@ def assert_tree(folder):
     assert_names(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file())
 
 def assert_archive(path):
-    with ZipFile(path) as archive:assert_names(archive.namelist())
+    assert_names(name.removesuffix('#metadata') for name,_,metadata in archive_entries(path) if name!='archive-metadata')

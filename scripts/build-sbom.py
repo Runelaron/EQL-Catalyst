@@ -15,14 +15,15 @@ def add(name,version,purl,evidence=''):
     c={'type':'library','bom-ref':purl,'name':name,'version':version,'purl':purl}
     if evidence:c['properties']=[{'name':'eql:evidence','value':evidence}]
     s['components'].append(c);known.add((name.lower(),version))
-deps=json.loads((a.payload/'EQLTracker.deps.json').read_text())
+app='EQLTracker' if (a.payload/(app+'.deps.json')).exists() else 'EqlTracker.Linux'
+deps=json.loads((a.payload/(app+'.deps.json')).read_text())
 for identity,library in deps['libraries'].items():
     if library.get('type')=='package':
         name,version=identity.rsplit('/',1);add(name,version,f'pkg:nuget/{name}@{version}')
-for framework in json.loads((a.payload/'EQLTracker.runtimeconfig.json').read_text())['runtimeOptions']['includedFrameworks']:
-    rid=json.loads((a.payload/'EQLTracker.deps.json').read_text()).get('runtimeTarget',{}).get('name','').split('/')[-1];name=framework['name']+'.Runtime.'+rid;version=framework['version'];add(name,version,f'pkg:nuget/{name}@{version}','Bundled self-contained runtime declaration, cross-checked against core/WPF file ProductVersion. PE file observations are retained separately.')
+for framework in json.loads((a.payload/(app+'.runtimeconfig.json')).read_text())['runtimeOptions']['includedFrameworks']:
+    rid=json.loads((a.payload/(app+'.deps.json')).read_text()).get('runtimeTarget',{}).get('name','').split('/')[-1];name=framework['name']+'.Runtime.'+rid;version=framework['version'];add(name,version,f'pkg:nuget/{name}@{version}','Bundled self-contained runtime declaration, cross-checked against runtime file metadata. PE file observations are retained separately.')
 lib=ctypes.CDLL(str(a.payload/('e_sqlite3.dll' if (a.payload/'e_sqlite3.dll').exists() else 'libe_sqlite3.so')));lib.sqlite3_libversion.restype=ctypes.c_char_p;sqlite=lib.sqlite3_libversion().decode()
-add('SQLite',sqlite,'pkg:generic/sqlite@'+sqlite,'Verified through sqlite3_libversion from the exact bundled e_sqlite3.dll.')
+add('SQLite',sqlite,'pkg:generic/sqlite@'+sqlite,'Verified through sqlite3_libversion from the exact bundled SQLite native library.')
 s['metadata'].setdefault('properties',[]).append({'name':'eql:runtime-manifest-sha256','value':hashlib.sha256((a.payload/'release-manifest.json').read_bytes()).hexdigest()})
 a.output.parent.mkdir(parents=True,exist_ok=True);a.output.write_text(json.dumps(s,indent=2)+'\n',encoding='utf-8')
 print(json.dumps({'Components':len(s['components']),'NativeSqlite':sqlite}))

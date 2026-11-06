@@ -7,7 +7,7 @@ publication approval.
 The current fresh content audit checked 23,026 revisions, indexed 19,117 item
 titles, added 63 titles, refreshed 61 bundled definitions and identified 199 zone
 connections. There are 7,001 bundled items and 2,015 spell references. Missing
-acquisition coverage remains 2,571 definitions; this is a documented gap, not a
+acquisition coverage remains 2,570 definitions; this is a documented gap, not a
 claim that the items have no source.
 
 The older Hilt acquisition assertion exposed a real duplicate: a structured Loc
@@ -26,3 +26,5 @@ Linux preview gates include compilation, Core tests and synthetic native
 rendering. Desktop parity and physical Ubuntu/Steam Deck acceptance remain
 separate and must pass before a supported Linux download is published. Gaming
 Mode overlays remain experimental. WSL was not restarted or reconfigured.
+
+The first hosted candidates stopped at privacy gates before publication. Release SDK resolution is now pinned exactly. One Linux dependency producer path is reviewed against its exact published package bytes and complete inner path; changed bytes remain blocked. ZIP, tar and Debian members and metadata are inspected without host extraction. Linux packages remain preview-only.

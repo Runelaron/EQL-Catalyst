@@ -915146,7 +915146,7 @@
         "source": ""
       },
       "contentAvailability": 0,
-      "availabilityEvidence": "",
+      "availabilityEvidence": "The advertised free Marketplace offer ended November 3, 2026; other current acquisition is unconfirmed. Existing copies remain owned.",
       "display": {
         "type": "Ammunition",
         "skill": "",
@@ -915183,7 +915183,20 @@
       "effects": [
         "Summon Familiar: Werewolf  (Clicky, Can Equip, Casting Time: 5.0, Cooldown: 10 seconds)"
       ],
-      "sources": [],
+      "sources": [
+        {
+          "evidenceId": "seasonal-2026:werewolf-market",
+          "revision": 0,
+          "wikiUrl": "https://www.everquestlegends.com/news/eql-halloween-pet-illusions-event-2026",
+          "zone": "Marketplace",
+          "mob": "In-game Marketplace",
+          "method": "Marketplace",
+          "coordinates": "",
+          "era": "Classic",
+          "availability": "Expired offer: ended 2026-11-03",
+          "notes": "Official event announcement; advertised free acquisition through November 3. Does not imply loss of owned items."
+        }
+      ],
       "wikiUrl": "https://eqlwiki.com/Petamorph_Wand%3A_Werewolf",
       "revision": 198888,
       "metadataComplete": true,

@@ -21,7 +21,8 @@
     "Blood's Unity is the documented reward from The Betrayer during the House Everling chain, not two independently granted copies. The wiki reports a +0 reward even in a +4 instance. https://eqlwiki.com/The_Betrayer?oldid=200014"
   ],
   "zone:lake nerius": [
-    "Wiki quest starts and castle approach: Retainer Ozval begins Hate, Betrayal, and Trust. The blessing supports normal zones and solo/multiplayer non-raid personal instances as of October 27; raid instances remain excluded. The final blessing hand-in requires level 46 in the current wiki walkthrough. https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=200308"
+    "Wiki quest starts and castle approach: Retainer Ozval begins Hate, Betrayal, and Trust. The blessing supports normal zones and solo/multiplayer non-raid personal instances as of October 27; raid instances remain excluded. The final blessing hand-in requires level 46 in the current wiki walkthrough. https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=200308",
+    "The 2026 Halloween quest and advertised Petamorph Marketplace offers ended November 3. Vlad Sterovich offered a one-time wand choice for the documented ingredient types; this is historical acquisition, not a currently available route. Existing copies are not removed. https://www.everquestlegends.com/news/eql-halloween-pet-illusions-event-2026"
   ],
   "zone:nektropos castle": [
     "Wiki access and routes: Hate, Betrayal, and Trust begins with Retainer Ozval in Lake Nerius; the library-key combine in The Tragic Tale of House Everling; then The Betrayer for door keys and the basement. Unknown NPC coordinates remain unknown. https://eqlwiki.com/Nektropos_Castle?oldid=200257",
@@ -31,5 +32,8 @@
   ],
   "zone:nektropos undercroft": [
     "Wiki access: tunnel entrance (1620, -930, 0); cellar door (2435, -1155, -10) along the castle's south wall in Lake Nerius. https://eqlwiki.com/The_Nektropos_Undercroft?oldid=199480"
+  ],
+  "item:petamorph wand: werewolf": [
+    "The advertised free Marketplace offer ended November 3, 2026; other current acquisition is unconfirmed. Existing copies remain owned. https://www.everquestlegends.com/news/eql-halloween-pet-illusions-event-2026"
   ]
 }
