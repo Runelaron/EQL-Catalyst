@@ -66,6 +66,7 @@ public sealed partial class TrackerController
         string message = raw[(raw.IndexOf("] ", StringComparison.Ordinal) + 2)..];
         if (message.StartsWith("You receive ", StringComparison.Ordinal) || message.Contains("sold it for", StringComparison.Ordinal) || message.StartsWith("You sold ", StringComparison.Ordinal))
             if (ActivityJournal.ParseCopper(message) is {} copper) Journal(new() { Id = id + ":coin", At = parsed.Time, Kind = message.Contains("sold", StringComparison.Ordinal) ? "Merchant" : "Coin", Copper = copper, Name = "Recorded income" });
+        if(PurchaseEvidence.Parse(parsed.Time,id,message,zone) is {} purchase) Journal(purchase);
         if (parsed.Boundary || parsed.SlainActor != null || parsed.LeftGroup || parsed.GroupLeft != null || parsed.GroupRosterReset)
         {
             foreach (var coverage in integrated.Coverage.Where(c => !c.InvalidatedAt.HasValue && (parsed.Boundary || parsed.LeftGroup || parsed.GroupRosterReset || c.Caster == parsed.SlainActor || c.Recipient == parsed.SlainActor || c.Caster == parsed.GroupLeft))) {coverage.Until = parsed.Time;coverage.InvalidatedAt=parsed.Time;}
@@ -119,7 +120,7 @@ public sealed partial class TrackerController
     internal string BardContextFingerprint(DateTime? at=null) {lock(Sync)return PetComparisonEngine.Key(new{integrated.Bard.Instrument,integrated.Bard.Singing,integrated.Bard.Focus,integrated.Bard.EffectiveCasterLevel,integrated.Bard.AaContext,Coverage=integrated.Coverage.Where(c=>c.Fresh(at??DateTime.Now,Profile.Character)).Select(c=>new{c.Song,c.Caster,c.Recipient,c.Instrument,c.Singing,c.Focus,c.EffectiveCasterLevel,c.AaContext}).Distinct().OrderBy(c=>c.Caster).ThenBy(c=>c.Song.SpellId).ToArray()});}
     internal IReadOnlyList<BardSong> KnownBardSongs()
     {
-        lock (Sync) return SpellIndexSnapshot().BardSongs.Select(s => new BardSong { Identity = new(s.Id?.ToString(CultureInfo.InvariantCulture) ?? s.Name, s.Name, s.UpgradeRank), Mana = s.Mana, CooldownMs = s.RecastMs,RequiredLevel=s.Levels?.GetValueOrDefault("BRD"), NonTargetedArea = s.Target is 4 or 39 or 40 or 41 or 43 ? true : s.Target is 1 or 5 or 6 or 8 or 14 ? false : null, Source = s.Source+" · Symphonic Aura eligibility: "+BardCoverage.AuraSource }).ToArray();
+        lock (Sync) return SpellIndexSnapshot().BardSongs.Select(s => new BardSong { Identity = new(s.Id?.ToString(CultureInfo.InvariantCulture) ?? s.Name, s.Name, s.UpgradeRank), Mana = s.Mana, CooldownMs = s.RecastMs,RequiredLevel=s.Levels?.GetValueOrDefault("BRD"), NonTargetedArea = s.Target is 4 or 6 or 39 or 40 or 41 or 43 ? true : s.Target is 1 or 5 or 8 or 14 ? false : null, Source = s.Source+" · Symphonic Aura eligibility: "+BardCoverage.AuraSource }).ToArray();
     }
     internal CompatibilityComparison? EvaluateItemCompatibility(ItemDefinition item, int rank, bool pet, PetBuild? build, GearComparison? comparison)
     {

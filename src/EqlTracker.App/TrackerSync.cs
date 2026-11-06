@@ -9,8 +9,8 @@ public sealed partial class TrackerController
     public DateTime? WorldEvidenceAt { get; private set; }
     public long WorldSession { get; private set; }
     private ExportEvidence? latestExport;
-    public string GameLogPath => string.IsNullOrWhiteSpace(Profile.GameFolder) ? "" : Path.Combine(Profile.GameFolder, "Logs", $"eqlog_{Profile.Character}_{Profile.Server}.txt");
-    public string InventoryPath => string.IsNullOrWhiteSpace(Profile.GameFolder) ? "" : Path.Combine(Profile.GameFolder, $"{Profile.Character}_{Profile.Server}-Inventory.txt");
+    public string GameLogPath => string.IsNullOrWhiteSpace(Profile.GameFolder) ? "" : DesktopPaths.Resolve(Profile.GameFolder, "Logs", $"eqlog_{Profile.Character}_{Profile.Server}.txt");
+    public string InventoryPath => string.IsNullOrWhiteSpace(Profile.GameFolder) ? "" : DesktopPaths.Resolve(Profile.GameFolder, $"{Profile.Character}_{Profile.Server}-Inventory.txt");
     public void BeginSync()
     {
         lock (Sync)

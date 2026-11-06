@@ -1,115 +1,10 @@
 [
   {
-    "Name": "Bard Epic Quest",
-    "Revision": 176792,
-    "StartZone": "Dreadlands",
-    "StartNpc": "Baldric Slezaf",
-    "Source": "https://eqlwiki.com/Bard_Epic_Quest?oldid=176792 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Berserker Epic Quest",
-    "Revision": 131435,
-    "StartZone": "Lake of Ill Omen",
-    "StartNpc": "Keras McArik",
-    "Source": "https://eqlwiki.com/Berserker_Epic_Quest?oldid=131435 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Cleric Epic Quest",
-    "Revision": 124170,
-    "StartZone": "Lake Rathetear",
-    "StartNpc": "Shmendrik Lavawalker",
-    "Source": "https://eqlwiki.com/Cleric_Epic_Quest?oldid=124170 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Druid Epic Quest",
-    "Revision": 162921,
-    "StartZone": "Burning Woods",
-    "StartNpc": "",
-    "Source": "https://eqlwiki.com/Druid_Epic_Quest?oldid=162921 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Enchanter Epic Quest",
-    "Revision": 162922,
-    "StartZone": "Erudin",
-    "StartNpc": "Stofo Olan",
-    "Source": "https://eqlwiki.com/Enchanter_Epic_Quest?oldid=162922 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Magician Epic Quest",
-    "Revision": 177221,
-    "StartZone": "Lake Rathetear",
-    "StartNpc": "Rykas",
-    "Source": "https://eqlwiki.com/Magician_Epic_Quest?oldid=177221 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Monk Epic Quest",
-    "Revision": 162924,
-    "StartZone": "Erudin",
-    "StartNpc": "Tomekeeper Danl",
-    "Source": "https://eqlwiki.com/Monk_Epic_Quest?oldid=162924 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Necromancer Epic Quest",
-    "Revision": 162925,
-    "StartZone": "Nektulos Forest",
-    "StartNpc": "Venenzi Oberzendi",
-    "Source": "https://eqlwiki.com/Necromancer_Epic_Quest?oldid=162925 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Paladin Epic Quest",
-    "Revision": 162926,
-    "StartZone": "Plane of Fear",
-    "StartNpc": "Irak Altil",
-    "Source": "https://eqlwiki.com/Paladin_Epic_Quest?oldid=162926 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Ranger Epic Quest",
-    "Revision": 162927,
-    "StartZone": "Burning Woods",
-    "StartNpc": "Telin Darkforest",
-    "Source": "https://eqlwiki.com/Ranger_Epic_Quest?oldid=162927 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Rogue Epic Quest",
-    "Revision": 162928,
-    "StartZone": "Qeynos Aqueducts",
-    "StartNpc": "Malka Rale",
-    "Source": "https://eqlwiki.com/Rogue_Epic_Quest?oldid=162928 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Shadow Knight Epic Quest",
-    "Revision": 162929,
-    "StartZone": "The Overthere",
-    "StartNpc": "Kurron Ni",
-    "Source": "https://eqlwiki.com/Shadow_Knight_Epic_Quest?oldid=162929 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Shaman Epic Quest",
-    "Revision": 133418,
-    "StartZone": "Various",
-    "StartNpc": "a lesser spirit",
-    "Source": "https://eqlwiki.com/Shaman_Epic_Quest?oldid=133418 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Warrior Epic Quest",
-    "Revision": 162930,
-    "StartZone": "East Freeport",
-    "StartNpc": "Kargek Redblade, Wenden Blackhammer",
-    "Source": "https://eqlwiki.com/Warrior_Epic_Quest?oldid=162930 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
-    "Name": "Wizard Epic Quest",
-    "Revision": 162931,
-    "StartZone": "Temple of Solusek Ro",
-    "StartNpc": "Solomen",
-    "Source": "https://eqlwiki.com/Wizard_Epic_Quest?oldid=162931 \u00B7 structured quest-start fields \u00B7 parser v1"
-  },
-  {
     "Name": "Alchemical Solution",
-    "Revision": 199336,
+    "Revision": 200300,
     "StartZone": "Lake Nerius",
-    "StartNpc": "Dorian G\u0060Wym",
-    "Source": "https://eqlwiki.com/Alchemical_Solution?oldid=199336 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "StartNpc": "Dorian G\u0060Wyn",
+    "Source": "https://eqlwiki.com/Alchemical_Solution?oldid=200300 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "Call for Aid",
@@ -120,17 +15,17 @@
   },
   {
     "Name": "Hate, Betrayal, and Trust",
-    "Revision": 199712,
+    "Revision": 200308,
     "StartZone": "Lake Nerius",
     "StartNpc": "Retainer Ozval",
-    "Source": "https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=199712 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=200308 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "Something Fishy",
-    "Revision": 199300,
+    "Revision": 200272,
     "StartZone": "Lake Nerius",
     "StartNpc": "Nikko Canti",
-    "Source": "https://eqlwiki.com/Something_Fishy?oldid=199300 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Something_Fishy?oldid=200272 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "The Tragic Tale of House Everling",
@@ -141,23 +36,128 @@
   },
   {
     "Name": "Unfortunate News",
-    "Revision": 199699,
-    "StartZone": "Finishing the quest Call for Aid",
+    "Revision": 200322,
+    "StartZone": "Lake Nerius",
     "StartNpc": "",
-    "Source": "https://eqlwiki.com/Unfortunate_News?oldid=199699 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/Unfortunate_News?oldid=200322 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "What\u0027s going on here",
-    "Revision": 199700,
+    "Revision": 200150,
     "StartZone": "Lake Nerius",
     "StartNpc": "Dorian G\u0060Wyn",
-    "Source": "https://eqlwiki.com/What%27s_going_on_here?oldid=199700 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/What%27s_going_on_here?oldid=200150 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Druid Epic Quest",
+    "Revision": 162921,
+    "StartZone": "Burning Woods",
+    "StartNpc": "",
+    "Source": "https://eqlwiki.com/Druid_Epic_Quest?oldid=162921 \u00B7 structured quest-start fields \u00B7 parser v2"
   },
   {
     "Name": "The Betrayer",
-    "Revision": 199714,
+    "Revision": 200014,
     "StartZone": "Nektropos Castle",
     "StartNpc": "Lady Sileniu Everling",
-    "Source": "https://eqlwiki.com/The_Betrayer?oldid=199714 \u00B7 structured quest-start fields \u00B7 parser v2"
+    "Source": "https://eqlwiki.com/The_Betrayer?oldid=200014 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Bard Epic Quest",
+    "Revision": 176792,
+    "StartZone": "Dreadlands",
+    "StartNpc": "Baldric Slezaf",
+    "Source": "https://eqlwiki.com/Bard_Epic_Quest?oldid=176792 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Berserker Epic Quest",
+    "Revision": 131435,
+    "StartZone": "Lake of Ill Omen",
+    "StartNpc": "Keras McArik",
+    "Source": "https://eqlwiki.com/Berserker_Epic_Quest?oldid=131435 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Cleric Epic Quest",
+    "Revision": 124170,
+    "StartZone": "Lake Rathetear",
+    "StartNpc": "Shmendrik Lavawalker",
+    "Source": "https://eqlwiki.com/Cleric_Epic_Quest?oldid=124170 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Enchanter Epic Quest",
+    "Revision": 162922,
+    "StartZone": "Erudin",
+    "StartNpc": "Stofo Olan",
+    "Source": "https://eqlwiki.com/Enchanter_Epic_Quest?oldid=162922 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Magician Epic Quest",
+    "Revision": 177221,
+    "StartZone": "Lake Rathetear",
+    "StartNpc": "Rykas",
+    "Source": "https://eqlwiki.com/Magician_Epic_Quest?oldid=177221 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Monk Epic Quest",
+    "Revision": 162924,
+    "StartZone": "Erudin",
+    "StartNpc": "Tomekeeper Danl",
+    "Source": "https://eqlwiki.com/Monk_Epic_Quest?oldid=162924 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Necromancer Epic Quest",
+    "Revision": 162925,
+    "StartZone": "Nektulos Forest",
+    "StartNpc": "Venenzi Oberzendi",
+    "Source": "https://eqlwiki.com/Necromancer_Epic_Quest?oldid=162925 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Paladin Epic Quest",
+    "Revision": 162926,
+    "StartZone": "Plane of Fear",
+    "StartNpc": "Irak Altil",
+    "Source": "https://eqlwiki.com/Paladin_Epic_Quest?oldid=162926 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Ranger Epic Quest",
+    "Revision": 162927,
+    "StartZone": "Burning Woods",
+    "StartNpc": "Telin Darkforest",
+    "Source": "https://eqlwiki.com/Ranger_Epic_Quest?oldid=162927 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Rogue Epic Quest",
+    "Revision": 162928,
+    "StartZone": "Qeynos Aqueducts",
+    "StartNpc": "Malka Rale",
+    "Source": "https://eqlwiki.com/Rogue_Epic_Quest?oldid=162928 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Shadow Knight Epic Quest",
+    "Revision": 162929,
+    "StartZone": "The Overthere",
+    "StartNpc": "Kurron Ni",
+    "Source": "https://eqlwiki.com/Shadow_Knight_Epic_Quest?oldid=162929 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Shaman Epic Quest",
+    "Revision": 133418,
+    "StartZone": "Various",
+    "StartNpc": "a lesser spirit",
+    "Source": "https://eqlwiki.com/Shaman_Epic_Quest?oldid=133418 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Warrior Epic Quest",
+    "Revision": 162930,
+    "StartZone": "East Freeport",
+    "StartNpc": "Kargek Redblade, Wenden Blackhammer",
+    "Source": "https://eqlwiki.com/Warrior_Epic_Quest?oldid=162930 \u00B7 structured quest-start fields \u00B7 parser v2"
+  },
+  {
+    "Name": "Wizard Epic Quest",
+    "Revision": 162931,
+    "StartZone": "Temple of Solusek Ro",
+    "StartNpc": "Solomen",
+    "Source": "https://eqlwiki.com/Wizard_Epic_Quest?oldid=162931 \u00B7 structured quest-start fields \u00B7 parser v2"
   }
 ]

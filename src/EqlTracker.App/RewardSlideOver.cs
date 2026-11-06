@@ -148,21 +148,7 @@ public sealed partial class QuestWindow
             progressRewardButtons=signature;progressReward.Children.Clear();rewardActions.Clear();
             foreach(string key in keys)
             {
-                var item=Controller.Catalog.FindKey(key);var action=new ToggleButton{Content=item?.Name??key,Tag=key,FontSize=12,FontWeight=FontWeights.SemiBold,Cursor=Cursors.Hand,HorizontalAlignment=HorizontalAlignment.Left,HorizontalContentAlignment=HorizontalAlignment.Left,Margin=new(0,0,0,3),Padding=new(2,2,2,2),ToolTip="Show or hide reward details"};
-                // Text-only chrome, with native toggle semantics for keyboard and assistive technology.
-                action.Template=(ControlTemplate)XamlReader.Parse("""
-                <ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="ToggleButton">
-                  <Border x:Name="Face" Background="Transparent" Padding="{TemplateBinding Padding}" BorderThickness="0,0,0,1" BorderBrush="Transparent">
-                    <TextBlock x:Name="Name" Text="{TemplateBinding Content}" Foreground="{DynamicResource Accent}" TextWrapping="Wrap"/>
-                  </Border>
-                  <ControlTemplate.Triggers>
-                    <Trigger Property="IsChecked" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Accent}"/></Trigger>
-                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Name" Property="TextDecorations" Value="Underline"/></Trigger>
-                    <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Face" Property="BorderBrush" Value="{DynamicResource Foreground}"/></Trigger>
-                    <Trigger Property="IsPressed" Value="True"><Setter TargetName="Face" Property="Background" Value="{DynamicResource Selection}"/></Trigger>
-                  </ControlTemplate.Triggers>
-                </ControlTemplate>
-                """);
+                var item=Controller.Catalog.FindKey(key);var action=RewardNameButton.Create(item?.Name??key);action.Tag=key;
                 action.Checked+=(_,_)=>{if(!syncingRewardActions)progressRewardSlide?.Open(quest,key,action);};
                 action.Unchecked+=(_,_)=>{if(!syncingRewardActions&&progressRewardSlide?.IsOpen==true&&progressRewardSlide.ItemKey==key)progressRewardSlide.Dismiss();};
                 action.PreviewKeyDown+=(_,e)=>{if(e.Key==Key.Enter){action.IsChecked=action.IsChecked!=true;e.Handled=true;}};

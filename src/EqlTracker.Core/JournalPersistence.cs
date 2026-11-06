@@ -20,6 +20,8 @@ public sealed partial class TrackerStore
     private void SaveActivity(JournalActivity activity, SqliteTransaction? tx) => Execute("INSERT OR IGNORE INTO activity_journal VALUES($id,$time,$json)", tx, ("$id", activity.Id), ("$time", activity.At.ToString("O")), ("$json", JsonSerializer.Serialize(activity, Json.Options)));
     public void SaveActivities(IEnumerable<JournalActivity> activities)
     { lock (sync) { using var tx = connection.BeginTransaction(); foreach (var item in activities) SaveActivity(item, tx); tx.Commit(); } }
+    internal void SavePurchaseEvidence(IEnumerable<JournalActivity> activities,FileCheckpoint checkpoint)
+    {lock(sync){using var tx=connection.BeginTransaction();foreach(var item in activities)SaveActivity(item,tx);State(PurchaseEvidence.Version,checkpoint,tx);tx.Commit();}}
     public List<JournalActivity> LoadActivities(DateTime? before = null, string beforeId = "", int limit = 2000)
     {
         lock (sync)

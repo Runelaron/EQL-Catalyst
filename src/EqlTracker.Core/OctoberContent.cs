@@ -9,7 +9,7 @@ public sealed record PatchMechanicEvidence(string Name, string Description, doub
 // are deliberately separate from the adopted ranked-item preview model.
 public static class OctoberContent
 {
-    public const string Version = "EQL-2026-10-22/content-v17";
+    public const string Version = "EQL-2026-10-22/content-v18";
     public const string Announcement = "https://www.everquestlegends.com/news/eql-nektropos-castle";
     public const string PatchNotes = "https://www.everquestlegends.com/patch-notes/eql-update-notes-10-22-2026";
     public static readonly DateTime PatchDate = new(2026, 10, 22);
@@ -40,6 +40,7 @@ public static class OctoberContent
     public static string ZoneHelp(string name) => Zone(name) is { } z ? z.Description + "\n" + (PublicContentNotes.Zone(name).Count>0?string.Join("\n",PublicContentNotes.Zone(name)):z.Access) + "\nClassic filter: inferred current-era classification.\nOfficial introduction: " + z.Source : "Filter goals by zone.";
     public static void Apply(Catalog catalog)
     {
+        PatchUpdates.Apply(catalog);
         foreach (var zone in Zones) if (!catalog.Zones.Any(z => Identity.ZoneKey(z) == Identity.ZoneKey(zone.Name))) catalog.Zones.Add(zone.Name);
         foreach (var (url, title, date) in new[] { (Announcement, "Nektropos content announcement", "2026-10-20"), (PatchNotes, "October 22 update notes", "2026-10-22") })
             if (!catalog.Documents.Any(d => d.Url == url)) catalog.Documents.Add(new() { Url = url, Title = title, Timestamp = date });

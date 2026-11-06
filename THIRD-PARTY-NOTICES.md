@@ -4,9 +4,11 @@
 
 Bundled catalog, quest, item and spell text is derived from [EverQuest Legends Wiki](https://eqlwiki.com/), its contributors, and their attributed upstream sources. The wiki documents [CC BY-SA 4.0](https://eqlwiki.com/EQLWiki%3AAbout) for original text unless otherwise noted. This data remains under [Creative Commons Attribution–ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/); it is not relicensed as application code. Parsing, normalization, classification and checklist curation are modifications. Source page URLs, revision IDs and evidence notes are retained in the bundled JSON. Follow those records for page history and per-page exceptions. Credit also belongs to Project 1999 Wiki contributors where acknowledged by the source wiki. Game trademarks and game assets retain their owners' rights.
 
-## Font
+## Fonts
 
 Cinzel Decorative by Natanael Gama is distributed under SIL Open Font License 1.1. Its original copyright, reserved font name and complete terms are retained in `src/EqlTracker.App/Assets/Fonts/OFL.txt` and the installed `Assets/Fonts/OFL.txt`.
+
+EQL Quest Display is a reconstruction of user-supplied EverQuest lettering PNGs, using the separated letter strip for all 52 letters. The source designs retain their owners' rights; this conversion does not assert a new license for them and is not an official game font. Its source/output hashes and conversion details are recorded in `src/EqlTracker.App/Assets/Fonts/EqlQuestDisplay.manifest.json`; its notice is retained in `Assets/Fonts/EqlQuestDisplay-NOTICE.txt`. Neither the application GPL nor Cinzel's OFL relicenses those source designs.
 
 ## Runtime and database
 
@@ -23,3 +25,5 @@ Built using Inno Setup 7.1.0, maintained by JRSoftware/Pyrsys. The compiler is a
 ## Optional companion dependencies
 
 QR pairing uses QRCoder 1.6.0 (MIT). Local discovery uses Makaretu.Dns.Multicast 0.27.0 and its upstream dependencies. Windows secret storage uses System.Security.Cryptography.ProtectedData 10.0.0. The exact resolved dependency versions and supplied upstream license/nuspec files are retained in the package notices; these libraries do not change Catalyst’s GPL or the read-only sharing protocol.
+
+EQL Quest Display: locally generated Font Software; contributor rights licensed under SIL OFL 1.1. See bundled EqlQuestDisplay-OFL.txt and the provenance/third-party-rights notice. This does not license Daybreak trademarks or claim endorsement.

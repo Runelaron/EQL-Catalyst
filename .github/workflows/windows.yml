@@ -50,11 +50,11 @@ jobs:
         run: |
           [xml]$v=Get-Content Version.props
           $version=$v.Project.PropertyGroup.VersionPrefix+'-'+$v.Project.PropertyGroup.VersionSuffix
-          $output=Join-Path $env:RUNNER_TEMP 'eql-beta17-review'
+          $output=Join-Path $env:RUNNER_TEMP 'eql-beta18-review'
           ./scripts/windows-ui.ps1 -App "dist/EQL-Catalyst-$version-win-x64/EQLTracker.exe" -Output $output
           Copy-Item "$output/native-validation.json" artifacts/native-validation.json
           $env:CATALYST_FIXTURE_DIR=Join-Path $output 'integrated'
-          $env:CATALYST_BROWSER_OUT=Join-Path $env:RUNNER_TEMP 'eql-beta17-browser'
+          $env:CATALYST_BROWSER_OUT=Join-Path $env:RUNNER_TEMP 'eql-beta18-browser'
           npm ci --prefix tests/companion-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm test --prefix tests/companion-ui

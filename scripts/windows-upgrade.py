@@ -1,12 +1,12 @@
 """Exercise signed updates on disposable copies; installed cases require a hosted runner."""
 from pathlib import Path
-import argparse, base64, hashlib, json, os, shutil, subprocess, time, urllib.request, zipfile
+import argparse, base64, ctypes, hashlib, json, os, shutil, subprocess, time, urllib.request, zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 HIDDEN=getattr(subprocess,'CREATE_NO_WINDOW',0)
 sha=lambda p:hashlib.file_digest(p.open('rb'),'sha256').hexdigest()
 def run(args,cwd):
-    return subprocess.run([str(a) for a in args],cwd=cwd,check=True,capture_output=True,text=True,encoding='utf-8',creationflags=HIDDEN,timeout=180)
+    return subprocess.run([str(a) for a in args],cwd=cwd,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=HIDDEN,timeout=180)
 def extract(path,destination):
     with zipfile.ZipFile(path) as z:
         for n in z.namelist():
@@ -26,9 +26,12 @@ def main():
     for baseline in baselines:
         for package in baseline['Packages']:
             path=downloads/package['Name']
-            if not path.exists():urllib.request.urlretrieve(package['Url'],path)
+            if not path.exists():
+                print('Download '+package['Name'],flush=True)
+                with urllib.request.urlopen(package['Url'],timeout=120) as response,path.open('wb') as output:shutil.copyfileobj(response,output)
             if sha(path)!=package['Sha256']:raise ValueError('Baseline package digest mismatch')
         for scope in (['Portable'] if args.portable_only else ['Portable','CurrentUser','AllUsers']):
+            print('Update '+baseline['Version']+' / '+scope,flush=True)
             case=out/(baseline['Version']+'-'+scope)
             if case.exists():raise ValueError('Use a new update-test output directory')
             data=case/'profiles';job=data/'updates/test-job';job.mkdir(parents=True)
@@ -39,10 +42,18 @@ def main():
             for name in ['update-manifest.json','update-manifest.sig']+[p['Name'] for p in manifest['Packages']]:shutil.copy2(assets/name,job/name)
             package={p['Kind']:job/p['Name'] for p in manifest['Packages']};payload=extract(package['Portable'],job/'extracted')
             sentinel=data/'preservation.txt';sentinel.write_text('Synthetic profile sentinel; preserve exactly.',encoding='utf-8')
-            actors=['UpdateHero','UpdateAlt'];processes=[]
-            for actor in actors:processes.append(subprocess.Popen([str(app/'EQLTracker.exe'),'--character',actor,'--server','example','--data-root',str(data),'--game-folder','','--offline'],cwd=app,creationflags=HIDDEN))
-            time.sleep(5)
-            if not all(p.poll() is None for p in processes):raise ValueError('Baseline did not remain running')
+            suffix=baseline['Version'].split('.')[1]+scope[0];actors=['UpdateHero'+suffix,'UpdateAlt'+suffix];processes=[]
+            kernel=ctypes.WinDLL('kernel32',use_last_error=True);kernel.WaitNamedPipeW.argtypes=[ctypes.c_wchar_p,ctypes.c_uint32];kernel.WaitNamedPipeW.restype=ctypes.c_int
+            for actor in actors:
+                process=subprocess.Popen([str(app/'EQLTracker.exe'),'--character',actor,'--server','example','--data-root',str(data),'--game-folder','','--offline'],cwd=app,creationflags=HIDDEN);processes.append(process)
+                deadline=time.monotonic()+90
+                while not kernel.WaitNamedPipeW('\\\\.\\pipe\\EQLCatalyst-update-'+str(process.pid),10):
+                    if process.poll() is not None:raise ValueError('Baseline exited before its update endpoint became ready')
+                    if time.monotonic()>=deadline:
+                        diagnostics={p.relative_to(data).as_posix():p.read_text(errors='replace')[:8000] for p in data.rglob('*error*') if p.is_file() and p.suffix in ['.json','.txt']}
+                        (out/'startup-diagnostic.json').write_text(json.dumps({'Scope':scope,'Baseline':baseline['Version'],'Process':process.pid,'Errors':diagnostics},indent=2))
+                        raise ValueError('Baseline update endpoint did not become ready: '+scope)
+                    time.sleep(.1)
             intent={'AppDirectory':str(app),'DataRoot':str(data),'PayloadDirectory':str(payload),'Installer':str(package['Installer']),'Scope':scope,'Character':actors[0],'Server':'example','GameFolder':'','Version':version,'JobDirectory':str(job)}
             (job/'apply.json').write_text(json.dumps(intent),encoding='utf-8')
             # Invalid signature is rejected before preparing or closing any baseline instance.
@@ -66,6 +77,7 @@ def main():
             if scope!='Portable':run([app/'unins000.exe','/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART'],case)
             if sentinel.read_text()!='Synthetic profile sentinel; preserve exactly.':raise ValueError('Uninstall modified profile')
             results.append({'FromVersion':baseline['Version'],'Version':version,'Scope':scope,'Passed':True,'Profiles':2,'PayloadFiles':len(files),'SignatureRejectionPreservesRunningCopy':True,'RecoveryCreated':True,'StartupReceipts':2,'ProfileSentinelPreserved':True,'ForcedTermination':False})
+            (out/'upgrade-partial.json').write_text(json.dumps({'Commit':manifest['Commit'],'Cases':results},indent=2));print('Passed '+baseline['Version']+' / '+scope,flush=True)
     (out/'upgrade-validation.json').write_text(json.dumps({'Passed':True,'Commit':manifest['Commit'],'Cases':results,'Scope':'Disposable copies; actual signed helper, graceful multi-profile restart and backups. Dirty-work cancellation is covered separately by native workspace tests.'},indent=2),encoding='utf-8')
     print(json.dumps({'Passed':True,'Cases':len(results)}))
 if __name__=='__main__':main()

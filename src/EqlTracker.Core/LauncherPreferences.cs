@@ -69,9 +69,9 @@ public sealed class LauncherPreferences
     {
         var result = new Dictionary<string, LaunchProfile>(StringComparer.OrdinalIgnoreCase);
         if (!Directory.Exists(folder)) return [];
-        IEnumerable<string> files = Directory.EnumerateFiles(folder, "UI_*_LO*.ini").Concat(Directory.EnumerateFiles(folder, "*-Inventory.txt"));
-        string logs = Path.Combine(folder, "Logs");
-        if (Directory.Exists(logs)) files = files.Concat(Directory.EnumerateFiles(logs, "eqlog_*.txt"));
+        IEnumerable<string> files = DesktopPaths.GameFiles(folder, "UI_*_LO*.ini").Concat(DesktopPaths.GameFiles(folder, "*-Inventory.txt"));
+        string logs = DesktopPaths.Resolve(folder, "Logs");
+        if (Directory.Exists(logs)) files = files.Concat(DesktopPaths.GameFiles(logs, "eqlog_*.txt"));
         foreach (string file in files)
         {
             var match = Regex.Match(Path.GetFileName(file), @"^(?:eqlog_|UI_)?(?<character>[A-Za-z][A-Za-z0-9-]*)_(?<server>[A-Za-z][A-Za-z0-9_-]*?)(?:_LO\d+\.ini|-Inventory\.txt|\.txt)$", RegexOptions.IgnoreCase);

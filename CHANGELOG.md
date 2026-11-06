@@ -1,3 +1,10 @@
+# Beta 1.8 (candidate)
+
+- Fresh revisioned item/quest/spell catalog and current castle-access evidence.
+- Completed Overview, Bard rotation, charged-click and reward-font improvements.
+- Separate Classic branding; OFL contributor-rights metadata for locally generated font software.
+- Shared desktop orchestration and a native Linux preview, held for platform/parity acceptance.
+
 # Changes
 
 ## Beta 1.7 — 1.7.0-beta.1

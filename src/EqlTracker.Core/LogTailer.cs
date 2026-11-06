@@ -8,6 +8,7 @@ public sealed class FileCheckpoint
     public string Path { get; set; } = "";
     public long Offset { get; set; }
     public long CreationTicks { get; set; }
+    public string PlatformIdentity {get;set;}="";
     public string PrefixHash { get; set; } = "";
     public int PrefixLength { get; set; }
     public string Generation { get; set; } = Guid.NewGuid().ToString("N");
@@ -21,12 +22,13 @@ public static class LogTailer
     public static TailBatch Read(string path, FileCheckpoint? saved, int limit = 512 * 1024)
     {
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-        var created = File.GetCreationTimeUtc(path).Ticks;
+        var identity=LinuxFileIdentity.Read(file);
+        var created = OperatingSystem.IsLinux() ? saved?.CreationTicks??0 : File.GetCreationTimeUtc(path).Ticks;
         int prefixLength = saved?.PrefixLength ?? (int)Math.Min(256, file.Length);
         var prefix = new byte[Math.Min(prefixLength, (int)Math.Min(int.MaxValue, file.Length))]; file.ReadExactly(prefix);
         var hash = Convert.ToHexString(SHA256.HashData(prefix));
-        var reset = saved != null && (saved.Path != path || saved.CreationTicks != created || saved.Offset > file.Length || saved.PrefixHash != hash);
-        var checkpoint = saved == null || reset ? new FileCheckpoint { Path = path, CreationTicks = created, PrefixHash = hash, PrefixLength = prefix.Length } : new FileCheckpoint { Path = path, CreationTicks = created, PrefixHash = hash, PrefixLength = prefix.Length, Offset = saved.Offset, Generation = saved.Generation };
+        var reset = saved != null && (saved.Path != path || (!OperatingSystem.IsLinux()&&saved.CreationTicks != created) || (identity.Length>0&&saved.PlatformIdentity.Length>0&&identity!=saved.PlatformIdentity) || saved.Offset > file.Length || saved.PrefixHash != hash);
+        var checkpoint = saved == null || reset ? new FileCheckpoint { Path = path, CreationTicks = created, PlatformIdentity=identity, PrefixHash = hash, PrefixLength = prefix.Length } : new FileCheckpoint { Path = path, CreationTicks = created, PlatformIdentity=identity, PrefixHash = hash, PrefixLength = prefix.Length, Offset = saved.Offset, Generation = saved.Generation };
         file.Position = checkpoint.Offset;
         var buffer = new byte[Math.Min(limit, (int)Math.Min(int.MaxValue, file.Length - checkpoint.Offset))]; file.ReadExactly(buffer);
         var lines = new List<TailLine>(); int start = 0;

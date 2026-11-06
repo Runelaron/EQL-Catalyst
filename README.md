@@ -1,8 +1,8 @@
-# EQL Catalyst — Beta 1.7
+# EQL Catalyst — Beta 1.8
 
 An independent Windows companion for **EverQuest Legends**: follow combat, organize quests, and compare Gear and Pet builds using local game evidence.
 
-[**Download Beta 1.7**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.7.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
+[**Download Beta 1.8**](https://github.com/Runelaron/EQL-Catalyst/releases/tag/v1.8.0-beta.1) · [Screenshots & installation](https://runelaron.github.io/EQL-Catalyst/) · [Installation help](docs/installation.md) · [Report an issue](https://github.com/Runelaron/EQL-Catalyst/issues)
 
 ![Combat Lab with synthetic sample data](site/images/coldain-combat.webp)
 
@@ -20,7 +20,7 @@ An independent Windows companion for **EverQuest Legends**: follow combat, organ
 
 Scores are preference points, **not predicted DPS**. Missing or disputed mechanics stay labeled. Class Loadout comparison is in development. Live-game interaction and physical-monitor DPI acceptance remain separate from automated tests.
 
-Beta 1.7 brings the shared workspace toolbar, session-first Combat Lab, explicit Pet drafts and character sheets, October content and selected artwork together. See [release notes](CHANGELOG.md), [Beta 1.7 help](docs/beta17.md), and [validation](docs/beta16-validation.md).
+Beta 1.8 brings the shared workspace toolbar, session-first Combat Lab, explicit Pet drafts and character sheets, October content and selected artwork together. See [release notes](CHANGELOG.md), [Beta 1.8 help](docs/beta17.md), and [validation](docs/beta16-validation.md).
 
 The local artwork iteration adds independent [Classic and Classes pet appearances](docs/pet-art-r5.md), with an [eight-concept double-axe review gallery](docs/previews/pet-art-r5-review.html). These local changes do not publish a new release.
 
@@ -43,7 +43,7 @@ The build script downloads a checksum-pinned, publisher-verified Inno Setup **7.
 
 ## Licensing and credits
 
-Application code and first-party project material: **GPL-3.0-only**, copyright 2026 Runelaron. See [LICENSE](LICENSE). Wiki-derived content remains **CC BY-SA 4.0**, the bundled font remains **SIL OFL 1.1**, and dependencies keep their own licenses. See [third-party notices](THIRD-PARTY-NOTICES.md) and [artwork notices](ASSET-NOTICES.md).
+Application code and first-party project material: **GPL-3.0-only**, copyright 2026 Runelaron. See [LICENSE](LICENSE). Wiki-derived content remains **CC BY-SA 4.0**, the bundled Cinzel font remains **SIL OFL 1.1**, and dependencies keep their own licenses. The reconstructed EQL Quest Display lettering retains its source-design rights and separate notice. See [third-party notices](THIRD-PARTY-NOTICES.md) and [artwork notices](ASSET-NOTICES.md).
 
 EQL Catalyst is an independent community companion, not an official Daybreak, Darkpaw, or Game Jawn product. EverQuest and other referenced characters/trademarks remain the property of their respective owners.
 
@@ -51,4 +51,6 @@ See [Gear roles, item comparisons, and tooltip preferences](docs/role-ratings.md
 
 See [Pet comparison and buff planning](docs/pet-comparison.md) for class-gated summons, intended equipment, reassignment, separate DPS/Balanced/Tank goals, and the limits of current prediction evidence.
 
-Beta 1.7 adds read-only Overview, compact Bard/build evidence and optional authenticated LAN sharing (off by default). See [release help](docs/beta17.md), [validation scope](docs/beta17-validation.md) and the [native review](docs/previews/beta17-review.html).
+Beta 1.8 adds read-only Overview, compact Bard/build evidence and optional authenticated LAN sharing (off by default). See [release help](docs/beta17.md), [validation scope](docs/beta17-validation.md) and the [native review](docs/previews/beta17-review.html).
+
+Native Linux development shares the desktop controller and Core with Windows. It remains preview-only pending feature parity and Ubuntu/Steam Deck Desktop Mode acceptance; see docs/linux-desktop.md. No supported Linux download is claimed yet.

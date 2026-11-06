@@ -213,6 +213,22 @@ public sealed class CompanionHost : IAsyncDisposable
     { if (limits.Count > 512) foreach (var old in limits.Where(p => p.Value.From + window < DateTimeOffset.UtcNow).Select(p => p.Key).ToArray()) limits.TryRemove(old, out _); var now = DateTimeOffset.UtcNow; var entry = limits.AddOrUpdate(key, (now, 1), (_, previous) => previous.From + window < now ? (now, 1) : (previous.From, previous.Count + 1)); return entry.Count <= limit; }
     private async Task RequirePrivateNetwork(CancellationToken token)
     {
+        if (OperatingSystem.IsLinux())
+        {
+            // An explicitly trusted NetworkManager connection plus the existing
+            // per-request same-subnet checks; unknown/unmanaged networks fail closed.
+            var linux = new System.Diagnostics.ProcessStartInfo("nmcli") {UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true,CreateNoWindow=true};
+            foreach(string arg in new[]{"-t","-f","IP4.ADDRESS,GENERAL.CONNECTION","device","show"})linux.ArgumentList.Add(arg);
+            using var p=System.Diagnostics.Process.Start(linux)??throw new InvalidOperationException("Cannot verify Linux LAN trust.");
+            using var deadline=CancellationTokenSource.CreateLinkedTokenSource(token);deadline.CancelAfter(TimeSpan.FromSeconds(10));
+            var output=p.StandardOutput.ReadToEndAsync(deadline.Token);var error=p.StandardError.ReadToEndAsync(deadline.Token);await p.WaitForExitAsync(deadline.Token);string text=await output;_=await error;
+            string? connection=null;foreach(string block in text.Split("\n\n")){if(!block.Contains(local+"/",StringComparison.Ordinal))continue;connection=block.Split('\n').FirstOrDefault(l=>l.StartsWith("GENERAL.CONNECTION:",StringComparison.Ordinal))?["GENERAL.CONNECTION:".Length..];}
+            if(p.ExitCode!=0||string.IsNullOrWhiteSpace(connection))throw new InvalidOperationException("Select an active trusted Linux LAN connection.");
+            var verify=new System.Diagnostics.ProcessStartInfo("nmcli"){UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true,CreateNoWindow=true};foreach(string arg in new[]{"-g","connection.zone","connection","show",connection})verify.ArgumentList.Add(arg);
+            using var v=System.Diagnostics.Process.Start(verify)??throw new InvalidOperationException("Cannot verify Linux LAN trust.");var zone=v.StandardOutput.ReadToEndAsync(deadline.Token);var zoneError=v.StandardError.ReadToEndAsync(deadline.Token);await v.WaitForExitAsync(deadline.Token);string trust=(await zone).Trim();_=await zoneError;
+            if(v.ExitCode!=0||trust is not ("home" or "internal" or "trusted"))throw new InvalidOperationException("Phone sharing requires a Linux LAN explicitly assigned to home, internal or trusted. No network settings were changed.");
+            return;
+        }
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         var start = new System.Diagnostics.ProcessStartInfo("powershell.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (string argument in new[] { "-NoProfile", "-NonInteractive", "-Command", "$i=(Get-NetIPAddress -IPAddress '" + local + "' -ErrorAction Stop).InterfaceIndex; if ((Get-NetConnectionProfile -InterfaceIndex $i -ErrorAction Stop).NetworkCategory -eq 'Private') { 'Private' }" }) start.ArgumentList.Add(argument);

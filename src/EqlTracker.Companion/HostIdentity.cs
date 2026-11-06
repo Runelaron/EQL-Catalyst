@@ -37,12 +37,12 @@ public sealed class HostIdentity : IDisposable
     }
     public static HostIdentity Load(string directory, IPAddress address)
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("The desktop host uses Windows credential protection.");
-        Directory.CreateDirectory(directory); string idPath = Path.Combine(directory, "server-id.txt"), certPath = Path.Combine(directory, "identity.dpapi");
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux()) throw new PlatformNotSupportedException();
+        Directory.CreateDirectory(directory); if(OperatingSystem.IsLinux())File.SetUnixFileMode(directory,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute); string idPath = Path.Combine(directory, "server-id.txt"), certPath = Path.Combine(directory, OperatingSystem.IsWindows()?"identity.dpapi":"identity.encrypted");
         string id = File.Exists(idPath) ? File.ReadAllText(idPath) : Guid.NewGuid().ToString("N");
         if (File.Exists(certPath))
         {
-            var certificate = X509CertificateLoader.LoadPkcs12(ProtectedData.Unprotect(File.ReadAllBytes(certPath), null, DataProtectionScope.CurrentUser), null);
+            var certificate = X509CertificateLoader.LoadPkcs12(LocalSecretProtection.Unprotect(directory, File.ReadAllBytes(certPath)), null);
             // Identity is stable when the LAN address changes; QR trust explicitly scopes this certificate.
             return new(id, certificate);
         }
@@ -51,20 +51,20 @@ public sealed class HostIdentity : IDisposable
         request.CertificateExtensions.Add(new X509BasicConstraintsExtension(false, false, 0, true)); request.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment, true));
         request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new System.Security.Cryptography.OidCollection { new("1.3.6.1.5.5.7.3.1") }, true));
         using var created = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddYears(2));
-        byte[] bytes = created.Export(X509ContentType.Pkcs12); Atomic(certPath, ProtectedData.Protect(bytes, null, DataProtectionScope.CurrentUser)); File.WriteAllText(idPath, id);
+        byte[] bytes = created.Export(X509ContentType.Pkcs12); Atomic(certPath, LocalSecretProtection.Protect(directory, bytes)); File.WriteAllText(idPath, id);
         return new(id, X509CertificateLoader.LoadPkcs12(bytes, null));
     }
     private sealed record DeviceRegistry(string Identity,IReadOnlyList<CompanionDevice> Devices);
     public static List<CompanionDevice> ReadDevices(string directory,string identity)
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(); string path = Path.Combine(directory, "devices.dpapi");
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux()) throw new PlatformNotSupportedException(); string path = Path.Combine(directory, OperatingSystem.IsWindows()?"devices.dpapi":"devices.encrypted");
         if(!File.Exists(path))return [];
-        var registry=JsonSerializer.Deserialize<DeviceRegistry>(ProtectedData.Unprotect(File.ReadAllBytes(path),null,DataProtectionScope.CurrentUser));return registry?.Identity==identity?registry.Devices.ToList():[];
+        var registry=JsonSerializer.Deserialize<DeviceRegistry>(LocalSecretProtection.Unprotect(directory,File.ReadAllBytes(path)));return registry?.Identity==identity?registry.Devices.ToList():[];
     }
     public static void SaveDevices(string directory, IReadOnlyList<CompanionDevice> devices,string identity)
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(); Atomic(Path.Combine(directory, "devices.dpapi"), ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(new DeviceRegistry(identity,devices)), null, DataProtectionScope.CurrentUser));
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux()) throw new PlatformNotSupportedException(); Atomic(Path.Combine(directory, OperatingSystem.IsWindows()?"devices.dpapi":"devices.encrypted"), LocalSecretProtection.Protect(directory,JsonSerializer.SerializeToUtf8Bytes(new DeviceRegistry(identity,devices))));
     }
-    private static void Atomic(string path, byte[] bytes) { string temp = path + ".tmp"; File.WriteAllBytes(temp, bytes); File.Move(temp, path, true); }
+    private static void Atomic(string path, byte[] bytes) { string temp = path + ".tmp"; File.WriteAllBytes(temp, bytes); if(OperatingSystem.IsLinux())File.SetUnixFileMode(temp,UnixFileMode.UserRead|UnixFileMode.UserWrite); File.Move(temp, path, true); }
     public void Dispose() => Certificate.Dispose();
 }

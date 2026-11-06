@@ -13,7 +13,7 @@ public static class UI
     public static void SetPressed(Button button, bool pressed) => Usability.SetIsPressed(button, pressed);
     public static SolidColorBrush Brush(string resource) => (SolidColorBrush)Application.Current.Resources[resource];
     public static TextBlock Text(string text, double size = 14, string color = "Foreground", bool bold = false)
-    { var t = new TextBlock { Text = text, FontSize = size, FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal, TextWrapping = TextWrapping.Wrap, Margin = new(0, 0, 0, 4) }; t.SetResourceReference(TextBlock.ForegroundProperty, color); return t; }
+    { var t = new TextBlock { Text = text, FontSize = size, FontWeight = bold ? FontWeights.SemiBold : FontWeights.Normal, TextWrapping = TextWrapping.Wrap, Margin = new(0, 0, 0, 4) }; t.SetResourceReference(TextBlock.ForegroundProperty, color); if(bold && size>=17){t.SetResourceReference(TextBlock.FontFamilyProperty,"OptionalDisplayFont");t.SetResourceReference(TextBlock.FontWeightProperty,"OptionalDisplayWeight");} return t; }
     public static TextBlock Label(string text) => Text(text.ToUpperInvariant(), 11, "SecondaryText", true);
     public static UIElement Field(string title, FrameworkElement control)
     {

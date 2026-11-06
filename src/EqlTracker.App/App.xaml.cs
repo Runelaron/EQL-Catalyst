@@ -33,6 +33,7 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        DesktopSignals.Notification=()=>System.Media.SystemSounds.Exclamation.Play();
         EventManager.RegisterClassHandler(typeof(System.Windows.Controls.ContextMenu), FrameworkElement.LoadedEvent, new RoutedEventHandler((sender, _) => OverlayMenus.AutoDismiss((System.Windows.Controls.ContextMenu)sender)));
         string? Value(string flag) { int i = Array.IndexOf(e.Args, flag); return i >= 0 && i + 1 < e.Args.Length ? e.Args[i + 1] : null; }
         var benchmark = Value("--benchmark"); var preview = Value("--preview"); var smoke = Value("--smoke");
@@ -122,12 +123,14 @@ public partial class App : Application
         Updates = new(diagnostic?Path.Combine(preview??benchmark??smoke!,".update-state"):DataRoot, ReleaseInfo.Version, !diagnostic && !e.Args.Contains("--offline"));
         if (!diagnostic) _ = UpdateCommands();
         IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork,Controller.ArtworkPreferences);
+        CatalystHeading.Use(Controller.HeadingStyle);
         RefreshShortcutHints();
         CatalystBranding.SelectedId = CatalystBranding.Resolve(Controller.Profile.AppIconId).Id;
         CatalystBranding.SelectedStyle = IconArtwork.Style;
         DispatcherUnhandledException += (_, args) => { File.AppendAllText(Path.Combine(Controller.DataFolder, "errors.log"), args.Exception + Environment.NewLine); args.Handled = true; if (preview != null) { Json.Write(Path.Combine(preview, "validation-failure.json"), new { Error = args.Exception.ToString() }); Shutdown(1); } else MessageBox.Show("Tracker error: " + args.Exception.Message); };
         if (preview == null && (Controller.Profile.Character != character || Controller.Profile.Server != server)) { Controller.Profile.Character = character; Controller.Profile.Server = server; Controller.Profile.CurrentClasses = []; Controller.Profile.OptionalClasses = ["WAR"]; Controller.Profile.ActiveLoadout.Classes = []; }
         if (selectedGame is { } gameFolder) Controller.Profile.GameFolder = gameFolder;
+        if(benchmark!=null&&e.Args.Contains("--bard-backfill-only")){try{await Controller.AuditBardBackfill(benchmark);}catch(Exception error){Json.Write(Path.Combine(benchmark,"bard-backfill-failure.json"),new{Error=error.ToString()});}ExitTracker();return;}
         if (benchmark != null)
         { ApplyTheme(); try { await PerformanceChecks.Run(Controller, benchmark); } catch (Exception error) { Json.Write(Path.Combine(benchmark, "benchmark-failure.json"), new { Error = error.ToString() }); } ExitTracker(); return; }
         if (smoke != null)
@@ -184,6 +187,8 @@ public partial class App : Application
             try
             {
                 if (e.Args.Contains("--cascade-pointer")) { CascadingResizeReview.OpenPointer(preview,Controller); return; }
+                if(e.Args.Contains("--eq-font-only")){EqFontReview.Run(preview,Controller,quests,dps);ExitTracker();return;}
+                if(e.Args.Contains("--heading-rewards-only")){await quests.ReviewHeadingRewards(preview,dps);ExitTracker();return;}
                 if(e.Args.Contains("--workspace-toolbar-only")){await WorkspaceToolbarReview.Run(Controller,quests,dps,DpsOverlay,preview);ExitTracker();return;}
                 if(e.Args.Contains("--pet-art-only")){await PetArtworkReview.Run(Controller,DpsOverlay,preview);ExitTracker();return;}
                 if(e.Args.Contains("--october-content-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await quests.ReviewOctoberContent(preview,DpsOverlay);ExitTracker();return; }
@@ -195,6 +200,10 @@ public partial class App : Application
                 if(e.Args.Contains("--pet-research-only")) { quests.Opacity=0;quests.Left=quests.Top=-15000;quests.ShowActivated=false;quests.Show();await quests.ReviewPetResearch(preview);ExitTracker();return; }
                 if(e.Args.Contains("--independent-displays-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();await DpsOverlay.ReviewIndependentDisplays(preview);ExitTracker();return; }
                 if(e.Args.Contains("--title-selector-only")) { DpsOverlay.Opacity=0;DpsOverlay.Left=DpsOverlay.Top=-15000;DpsOverlay.ShowActivated=false;DpsOverlay.Show();DpsOverlay.ReviewTitleSelector(preview);ExitTracker();return; }
+                if(e.Args.Contains("--bard-rotations-only")){await BardRotationsReview.Run(preview,Controller,dps,e.Args.Contains("--why-only"));ExitTracker();return;}
+                if(e.Args.Contains("--exaltation-charges-only")){quests.ReviewExaltationCharges(preview);ExitTracker();return;}
+                if(e.Args.Contains("--overview-gear-only")){OverviewPolishReview.Gear(preview,Controller,quests);ExitTracker();return;}
+                if(e.Args.Contains("--overview-polish-only")){await OverviewPolishReview.Run(preview,Controller,quests,dps,e.Args.Contains("--failed-surfaces-only"));ExitTracker();return;}
                 if(e.Args.Contains("--ui-repair-only")){await UiRepairReview.Run(preview,Controller,quests,dps);ExitTracker();return;}
                 if(e.Args.Contains("--integrated-companions-only")){await IntegratedReview.Run(preview,Controller,quests,dps);ExitTracker();return;}
                 if(e.Args.Contains("--beta16-review")) {await Beta16Review.Run(Controller,quests,dps,DpsOverlay,preview);ExitTracker();return;}
@@ -366,7 +375,7 @@ public partial class App : Application
         if (id == 2) DpsOverlay.RequestedVisible = !DpsOverlay.RequestedVisible;
         if (id == 3) { bool enabled = !Controller.Profile.Objectives.ClickThrough; Controller.Profile.Objectives.ClickThrough = Controller.Profile.Dps.ClickThrough = enabled; ApplySettings(); Controller.Save(); }
     }
-    public void ApplySettings() { IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork,Controller.ArtworkPreferences);workspaceToolbar?.ApplyMotionPreference();RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
+    public void ApplySettings() { CatalystHeading.Use(Controller.HeadingStyle);IconArtwork.Apply(Controller.Profile,Controller.UndeadArtwork,Controller.FireArtwork,Controller.ArtworkPreferences);workspaceToolbar?.ApplyMotionPreference();RefreshShortcutHints(); ObjectivesOverlay.ApplySettings(); DpsOverlay.ApplySettings(); ApplyTheme(true); ApplyIcon(); iconGallery?.RefreshIcons(); settings?.RefreshIconPresentation(); }
     internal string ShortcutLabel(OverlayShortcutAction action)=>OverlayShortcuts.Label(Controller.Profile,action);
     private static string ShortcutActionName(OverlayShortcutAction action)=>action switch{OverlayShortcutAction.Objectives=>"Toggle objectives",OverlayShortcutAction.Dps=>"Toggle DPS",_=>"Toggle click-through"};
     private void RefreshShortcutHints()

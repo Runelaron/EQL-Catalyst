@@ -5,7 +5,7 @@ namespace EqlTracker.Core;
 
 internal static class PublicContentNotes
 {
-    internal const string Version="content-notes-v17";
+    internal const string Version="content-notes-v18";
     private static readonly Lazy<Dictionary<string,List<string>>> bundled=new(()=>Read(Path.Combine(AppContext.BaseDirectory,"data","public-content-notes.json")));
     internal static IReadOnlyList<string> Item(string key)=>bundled.Value.GetValueOrDefault("item:"+key)??[];
     internal static IReadOnlyList<string> Zone(string name)=>bundled.Value.GetValueOrDefault("zone:"+Identity.ZoneKey(name))??[];

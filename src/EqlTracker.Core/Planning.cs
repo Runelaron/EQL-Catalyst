@@ -96,7 +96,7 @@ public sealed record ExaltationOption(string Id, ItemDefinition Source, string T
     public ExaltationOwnership OwnershipEvidence { get; init; } = new();
     public EffectPurpose Purpose => ItemEffects.Purpose(Effect, Type);
     public string Content => Source.ContentAvailability == ContentAvailability.Future ? "Future" : Source.ContentAvailability == ContentAvailability.Current ? "Current" : "Unverified";
-    public string State => Owned ? OwnershipEvidence.Summary.Length > 0 ? OwnershipEvidence.Summary : "Owned effect · quantity unknown" : SourceOwned ? OwnershipEvidence.SourceReady ? "Source ready to extract" : "Source owned · extraction rank required" : "Obtain source item";
+    public string State => !Owned&&ExaltationChargePolicy.IsChargedClick(this)?"Charged click · transfer unverified":Owned ? OwnershipEvidence.Summary.Length > 0 ? OwnershipEvidence.Summary : "Owned effect · quantity unknown" : SourceOwned ? OwnershipEvidence.SourceReady ? "Source ready to extract" : "Source owned · extraction rank required" : "Obtain source item";
     public string Name => Source.Name + " · " + Effect;
     public bool MatchesId(string id)
     {

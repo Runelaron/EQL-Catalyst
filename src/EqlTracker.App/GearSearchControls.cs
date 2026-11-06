@@ -17,7 +17,7 @@ public sealed partial class QuestWindow
         Grid.SetColumn(gearTheoryCheck, 1); heading.Children.Add(gearFindLabel); heading.Children.Add(gearTheoryCheck);
         var search = (FrameworkElement)FocusedLayout.Search(gearSearch, "Find a replacement…");
         gearSearch.Height = gearPosition.Height = 28; gearSearch.Margin = new(0); gearPosition.Margin = new(6, 0, 0, 0);
-        var fields = UI.Row(search, gearPosition); var main = UI.Stack(heading, fields); main.Margin = new(0, 0, 6, 4);
+        var fields = new WrapPanel();fields.Children.Add(search);fields.Children.Add(gearPosition);var main = UI.Stack(heading, fields); main.Margin = new(0, 0, 6, 4);
         wrap.Children.Add(main); wrap.Children.Add(GearExpansionControl());
         void Fit()
         {
@@ -25,8 +25,7 @@ public sealed partial class QuestWindow
             double pixels = VisualTreeHelper.GetDpi(gearPosition).PixelsPerDip;
             double Measure(string text) => new FormattedText(text, System.Globalization.CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, font, gearPosition.FontSize, Brushes.White, pixels).WidthIncludingTrailingWhitespace;
             gearPosition.Width = Math.Ceiling(gearPosition.Items.OfType<EqlTracker.Core.EquipmentPosition>().Select(p => Measure(p.Label)).Append(Measure("All slots")).DefaultIfEmpty(70).Max() + 34);
-            double preferred = 220 - Measure("          ");
-            gearSearch.Width = Math.Max(140, Math.Min(preferred, wrap.ActualWidth - gearPosition.Width - 108));
+            gearSearch.Width = 170;
         }
         wrap.Loaded += (_, _) => Fit(); wrap.SizeChanged += (_, _) => Fit();
         gearPosition.SourceUpdated += (_, _) => Fit();

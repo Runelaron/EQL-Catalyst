@@ -1,37 +1,37 @@
 {
-  "Version": "nektropos-routes-v17",
+  "Version": "nektropos-routes-v18",
   "ReviewedPages": {
     "Hate, Betrayal, and Trust": {
-      "Revision": 199712,
-      "Timestamp": "2026-10-25T11:52:50Z"
+      "Revision": 200308,
+      "Timestamp": "2026-11-05T13:50:29Z"
     },
     "The Tragic Tale of House Everling": {
       "Revision": 199713,
       "Timestamp": "2026-10-25T11:53:00Z"
     },
     "The Betrayer": {
-      "Revision": 199714,
-      "Timestamp": "2026-10-25T11:53:00Z"
+      "Revision": 200014,
+      "Timestamp": "2026-10-26T20:46:52Z"
     },
     "Something Fishy": {
-      "Revision": 199300,
-      "Timestamp": "2026-10-23T20:56:01Z"
+      "Revision": 200272,
+      "Timestamp": "2026-11-05T00:15:11Z"
     },
     "Alchemical Solution": {
-      "Revision": 199336,
-      "Timestamp": "2026-10-24T00:40:10Z"
+      "Revision": 200300,
+      "Timestamp": "2026-11-05T02:51:03Z"
     },
     "What's going on here": {
-      "Revision": 199700,
-      "Timestamp": "2026-10-25T10:10:33Z"
+      "Revision": 200150,
+      "Timestamp": "2026-10-30T18:50:31Z"
     },
     "Call for Aid": {
       "Revision": 199614,
       "Timestamp": "2026-10-25T04:12:39Z"
     },
     "Unfortunate News": {
-      "Revision": 199699,
-      "Timestamp": "2026-10-25T10:04:56Z"
+      "Revision": 200322,
+      "Timestamp": "2026-11-05T16:19:23Z"
     }
   },
   "Quests": {
@@ -127,7 +127,7 @@
       {
         "Key": "obtain-blessing",
         "Name": "Obtain Blessing of the Betrayer",
-        "Instructions": "In the normal, non-instanced Plane of Hate, find High Priestess of Ulkorruuk on the second floor near (-90, 287, 127). Hail and say \"swear\" without hiding or sneaking; put the blessing in your bags.",
+        "Instructions": "In the normal Plane of Hate or a solo/multiplayer non-raid personal instance, find High Priestess of Ulkorruuk on the second floor near (-90, 287, 127). Hail and say \"swear\" without hiding or sneaking; put the blessing in your bags. Raid instances are excluded.",
         "PriorId": "nektropos-hate-betrayal-and-trust:7B86633C40CD",
         "Inputs": {},
         "Outputs": {
@@ -136,14 +136,14 @@
         "Terms": [
           "Blessing of the Betrayer",
           "-90,287,127",
-          "not in an instance"
+          "raid-instance"
         ],
         "Container": ""
       },
       {
         "Key": "deliver-blessing",
         "Name": "Deliver the blessing and enter the castle",
-        "Instructions": "Give Blessing of the Betrayer to Retainer Ozval, then follow the road north and click the castle gates.",
+        "Instructions": "At level 46 or higher, give Blessing of the Betrayer to Retainer Ozval, then follow the road north and click the castle gates.",
         "PriorId": "nektropos-hate-betrayal-and-trust:52FBB40675FF",
         "Inputs": {
           "Blessing of the Betrayer": 1
@@ -151,7 +151,8 @@
         "Outputs": {},
         "Terms": [
           "Blessing of the Betrayer",
-          "click the gates"
+          "click the gates",
+          "level 46"
         ],
         "Container": ""
       }
@@ -346,30 +347,27 @@
       {
         "Key": "handmaiden",
         "Name": "Speak to Alexa's Handmaiden",
-        "Instructions": "Hail Alexa's Handmaiden in the southeast second-floor area near (172, -178).",
+        "Instructions": "Hail Alexa's Handmaiden in the southeast second-floor area near (172, -178, 17).",
         "PriorId": "",
         "Inputs": {},
         "Outputs": {},
         "Terms": [
           "Handmaiden",
-          "172, -178"
+          "172, -178, 17"
         ],
         "Container": ""
       },
       {
         "Key": "sisters",
         "Name": "Defeat the six sisters",
-        "Instructions": "Defeat Jenni, Melanie, Crysta, Shelia, Elise and Deirdre Everling. Recorded locations: Jenni (342, -423, 17); Crysta (859, 311, 18); Shelia (352, 428, 17); Elise (-157, 321, 17). Exact Melanie/Deirdre coordinates remain undocumented.",
+        "Instructions": "Defeat Jenni, Melanie, Crysta, Shelia, Elise and Deirdre Everling. Recorded locations: Jenni (342, -423, 17); Melanie (821, -311, 17); Crysta (859, 311, 18); Shelia (352, 428, 17); Elise (-157, 321, 17); Deirdre (-185, -313, 17).",
         "PriorId": "",
         "Inputs": {},
         "Outputs": {},
         "Terms": [
           "Jenni Everling",
-          "Melanie Everling",
-          "Crysta Everling",
-          "Shelia Everling",
-          "Elise Everling",
-          "Deirdre Everling"
+          "821, -311, 17",
+          "-185, -313, 17"
         ],
         "Container": ""
       },
@@ -390,7 +388,7 @@
       {
         "Key": "alexa",
         "Name": "Defeat Alexa Everling",
-        "Instructions": "Defeat Alexa in the southwest second-floor great room to obtain Nektropos Private Chamber Key. Her exact coordinates remain undocumented.",
+        "Instructions": "Defeat Alexa Everling at (26, 150, 15), in the southwest second-floor great room, to obtain Nektropos Private Chamber Key.",
         "PriorId": "",
         "Inputs": {},
         "Outputs": {
@@ -398,20 +396,21 @@
         },
         "Terms": [
           "Nektropos Private Chamber Key",
-          "southwest great room"
+          "26, 150, 15"
         ],
         "Container": ""
       },
       {
         "Key": "bookshelf",
         "Name": "Find the basement entrance",
-        "Instructions": "Use the secret entrance behind the bookshelf in the Guard Captain's northwest second-floor room. Exact captain coordinates remain undocumented.",
+        "Instructions": "Use the secret entrance behind the bookshelf in the Guard Captain's northwest second-floor room, near (600, 201, 15), to descend into the basement.",
         "PriorId": "",
         "Inputs": {},
         "Outputs": {},
         "Terms": [
           "bookshelf",
-          "Guard Captain"
+          "Guard Captain",
+          "600, 201, 15"
         ],
         "Container": ""
       },

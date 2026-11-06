@@ -51,7 +51,7 @@ public sealed partial class QuestWindow
         var monster=comparison.Rows.Single(r=>r.Pet=="Monster");comparison.Results.SelectedItem=monster;comparison.ShowSelected();comparison.UpdateLayout();
         Check(monster.Definition.Classes.Contains("BER")&&monster.DisplayDps==null&&monster.Hp==null,"Monster comparison distinguishes WAR BER equipment from unknown predictions");
         comparison.SelectedDetails.IsExpanded=true;
-        foreach(var e in comparison.Details.Children.OfType<Expander>())if(e.Header?.ToString()=="October 22 mechanics")e.IsExpanded=true;
+        foreach(var e in comparison.Details.Children.OfType<Expander>())if(e.Header?.ToString()=="Patch mechanics")e.IsExpanded=true;
         comparison.UpdateLayout();
         Check(Usability.Tree(comparison).OfType<TextBlock>().Any(t=>t.Text.Contains("Summoned pet HP depends on STA")),"Comparison retains current-patch mechanics evidence");
         foreach(var e in Usability.Tree(comparison).OfType<Expander>())if(e.Header?.ToString()=="Encounter & buff assumptions")e.IsExpanded=true;
@@ -66,3 +66,4 @@ public sealed partial class QuestWindow
         Json.Write(Path.Combine(folder,"october-smoke-checks.json"),new{Passed=checks.Count,Checks=checks,AppSha256=Sha(typeof(App).Assembly.Location),CoreSha256=Sha(typeof(CharacterProfile).Assembly.Location),Scope="Focused synthetic review; broad theme/DPI matrices deferred."});
     }
 }
+

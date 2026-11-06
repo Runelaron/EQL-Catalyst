@@ -101,7 +101,7 @@ public sealed partial class DpsWindow : FrostWindow
         comparisons.Columns[1].MinWidth = 80; history.Columns[6].MinWidth = 80;
         comparisons.SelectionChanged += (_, _) => UpdateComparisonDetail();
         Tab(CombatLabTab.History, "ENCOUNTER HISTORY", historySplit);
-        Tab(CombatLabTab.Comparison, "LOADOUT COMPARISON", new ResponsiveCombatSplit(ComparisonTable(), UI.Card(UI.Scroll(comparisonDetails)), controller.Profile, "combat-comparison-v2"));
+        Tab(CombatLabTab.Comparison, "LOADOUT COMPARISON", SongComparisonWorkspace(new ResponsiveCombatSplit(ComparisonTable(), UI.Card(UI.Scroll(comparisonDetails)), controller.Profile, "combat-comparison-v2")));
         var root = new Grid(); root.RowDefinitions.Add(new() { Height = GridLength.Auto }); root.RowDefinitions.Add(new() { Height = new(1, GridUnitType.Star) }); root.RowDefinitions.Add(new() { Height = GridLength.Auto });
         filterSlot = new Grid(); filterSlot.Children.Add(controls); filterSlot.Children.Add(healing.FilterControls);
         var sharedFilters=new WrapPanel();sharedFilters.Children.Add(UI.Field("Zone",zoneFilter));sharedFilters.Children.Add(UI.ActionField(namesOnly));
@@ -119,7 +119,7 @@ public sealed partial class DpsWindow : FrostWindow
         damageMode = CombatModeButtons.Create("Damage", "Physical", () => SetMode(CombatLabMode.Damage)); healingMode = CombatModeButtons.Create("Healing", "Healing", () => SetMode(CombatLabMode.Healing));
         damageMode.ToolTip = "Inspect damage with its saved filters and selected subtab. Personal totals do not include group members."; healingMode.ToolTip = "Inspect restored HP with independent filters. Healing never extends encounter timing.";
         var modes = UI.Row(damageMode, healingMode); modes.Margin = new(0, 0, 0, 3);
-        var overview = new AdaptiveCombatOverview(UI.Stack(metricSlot, timeline), controller);
+        var overview = new AdaptiveCombatOverview(UI.Stack(metricSlot, timeline), controller);comparisonCombatOverview=overview;
         var top = UI.Stack(modes, actions, dates, filterError, filters, overview); root.Children.Add(top); Grid.SetRow(tabs, 1); root.Children.Add(tabs);
         healing.Presented += view => { healingStats.SetHealing(view,healing.StatusLine.Text);if (mode == CombatLabMode.Healing) { timeline.Set(view.Chart); timeline.Highlight = null; peakInfo.Text = "Select a healing ability to mark its largest heal."; } };
         healing.AbilitySelected += row => { if (row != null) { selectedAbility = row; MarkHealing(row); } };
@@ -197,10 +197,11 @@ public sealed partial class DpsWindow : FrostWindow
     }
     public void Refresh()
     {
+        ApplySongPresentation();
         if (Monitor.IsEntered(Controller.Sync)) { Dispatcher.BeginInvoke(Refresh); return; }
         if (updating) return;
         RefreshSessionControls(); RefreshScopeContext(); RefreshHistorySelection(); group.RefreshPeriods();
-        if (mode == CombatLabMode.Healing) { Controller.HealingVisible = IsVisible && !IsCollapsed; updating = true; from.Text = Controller.Profile.Meter.From?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; until.Text = Controller.Profile.Meter.Until?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; UpdateDateState(); updating = false; healing.Refresh(); RefreshInspection(); if (SelectedTab == CombatLabTab.Comparison) QueueComparisons(Controller.LabHistory(Controller.Published?.History ?? Controller.DpsView().Fights).ToList(), Controller.Profile.Meter); return; }
+        if (mode == CombatLabMode.Healing) { Controller.HealingVisible = IsVisible && !IsCollapsed; updating = true; from.Text = Controller.Profile.Meter.From?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; until.Text = Controller.Profile.Meter.Until?.ToString("yyyy-MM-dd HH:mm:ss") ?? ""; UpdateDateState(); updating = false; healing.Refresh(); RefreshInspection(); if (SelectedTab == CombatLabTab.Comparison && !SongsSelected) QueueComparisons(Controller.LabHistory(Controller.Published?.History ?? Controller.DpsView().Fights).ToList(), Controller.Profile.Meter); return; }
         updating = true;
         try
         {
@@ -234,13 +235,14 @@ public sealed partial class DpsWindow : FrostWindow
                 if (SelectedTab == CombatLabTab.Breakdown) damageRows.SetRows(Controller.Profile.ShowLinkedHealing ? view.Rows : view.Rows.Select(r => r with { LinkedHealing = null }).ToList(), context + Controller.Profile.ShowLinkedHealing, smooth);
                 if (SelectedTab == CombatLabTab.Breakdown) { string? selectedTarget = (targetTable.SelectedItem as TargetRow)?.Target; UI.SetRows(targetTable, view.Targets); if (selectedTarget != null) targetTable.SelectedItem = view.Targets.FirstOrDefault(x => x.Target == selectedTarget); }
 
-                max.SetNumber(view.MaxHit, smooth, snap); UpdateMaxHit(view); max.Visibility = view.DetailComplete ? Visibility.Visible : Visibility.Hidden;
+                max.SetNumber(view.MaxHit, smooth, snap); UpdateMaxHit(view); max.Visibility = view.Peaks.Count>0 ? Visibility.Visible : Visibility.Collapsed;
+                if(p.Actor=="Unknown")owner.ToolTip=CombatAttributionHelp.Unknown;else owner.ToolTip="Choose Self, verified Pet, Combined, or Unknown attribution.";
                 damageStats.SetDamage(view,(p.Scope == "Session" ? $"{fights.Count} encounters · " : "") + $"{(p.Actor == "Player" ? "Self" : p.Actor)} · existing filtered totals and combat duration" + (Controller.Profile.GroupRosterIncomplete && Controller.Profile.InGroup ? " · Group log coverage incomplete" : "") + (!view.DetailComplete ? " · Summary only; target/breakdown details incomplete; filtered totals unavailable when detail is required" : ""));
                 var identity = Controller.Profile.PetIdentities.LastOrDefault(x => x.Until == null);
                 Subtitle.Text = $"{Controller.Profile.EffectivePetElement} pet · {identity?.Name ?? Controller.Profile.ActiveLoadout.PetName} · {Controller.Profile.Zone}" + (Controller.Profile.ActiveLoadout.Name is "" or "Current" ? "" : " · " + Controller.Profile.ActiveLoadout.Name);
                 timeline.Set(view.Chart);
                 RefreshPeak();
-                if (SelectedTab == CombatLabTab.Comparison) QueueComparisons(all, p);
+                if (SelectedTab == CombatLabTab.Comparison && !SongsSelected) QueueComparisons(all, p);
             }
         }
         finally { updating = false; }

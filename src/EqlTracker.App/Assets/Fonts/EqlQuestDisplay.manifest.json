@@ -1,0 +1,978 @@
+{
+  "Family": "EQL Quest Display",
+  "Version": "1.001",
+  "UnitsPerEm": 1000,
+  "ReconstructedCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@$%^&*()-=+_~[]{};':,.<>/?",
+  "ConstructedAscii": [
+    "\"",
+    "#",
+    "\\",
+    "`",
+    "|"
+  ],
+  "PrintableAscii": 95,
+  "MappedCharacters": 106,
+  "KerningPairs": {
+    "AV": -50,
+    "AW": -40,
+    "AY": -40,
+    "AT": -30,
+    "FA": -25,
+    "LT": -30,
+    "PA": -25,
+    "TA": -40,
+    "To": -35,
+    "Ta": -30,
+    "Te": -25,
+    "Tr": -20,
+    "VA": -45,
+    "Va": -30,
+    "Vo": -30,
+    "WA": -35,
+    "Wa": -25,
+    "Wo": -20,
+    "YA": -40,
+    "Yo": -35,
+    "Ya": -35
+  },
+  "Sources": [
+    {
+      "File": "eqfont_letters.png",
+      "Sha256": "68f4c123d10ae3f226a9b28b41c6a4781e5eec24d44259d694669cc26033c6e7",
+      "Glyphs": [
+        {
+          "Character": "A",
+          "Bounds": [
+            3,
+            13,
+            51,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "B",
+          "Bounds": [
+            71,
+            13,
+            118,
+            82
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "C",
+          "Bounds": [
+            144,
+            13,
+            182,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "D",
+          "Bounds": [
+            204,
+            13,
+            253,
+            82
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "E",
+          "Bounds": [
+            278,
+            13,
+            317,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "F",
+          "Bounds": [
+            341,
+            13,
+            378,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "G",
+          "Bounds": [
+            401,
+            13,
+            442,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "H",
+          "Bounds": [
+            466,
+            13,
+            513,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "I",
+          "Bounds": [
+            539,
+            13,
+            558,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "J",
+          "Bounds": [
+            582,
+            14,
+            611,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "K",
+          "Bounds": [
+            639,
+            12,
+            688,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "L",
+          "Bounds": [
+            708,
+            13,
+            748,
+            82
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "M",
+          "Bounds": [
+            768,
+            14,
+            826,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "N",
+          "Bounds": [
+            850,
+            13,
+            898,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "O",
+          "Bounds": [
+            926,
+            12,
+            972,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "P",
+          "Bounds": [
+            997,
+            13,
+            1041,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "Q",
+          "Bounds": [
+            1064,
+            11,
+            1113,
+            91
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "R",
+          "Bounds": [
+            1134,
+            13,
+            1182,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "S",
+          "Bounds": [
+            1202,
+            13,
+            1238,
+            84
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "T",
+          "Bounds": [
+            1261,
+            13,
+            1305,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "U",
+          "Bounds": [
+            1326,
+            13,
+            1374,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "V",
+          "Bounds": [
+            1391,
+            11,
+            1440,
+            82
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "W",
+          "Bounds": [
+            1455,
+            11,
+            1525,
+            82
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "X",
+          "Bounds": [
+            1548,
+            12,
+            1597,
+            85
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "Y",
+          "Bounds": [
+            1612,
+            3,
+            1656,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "Z",
+          "Bounds": [
+            1677,
+            13,
+            1715,
+            83
+          ],
+          "Baseline": 82
+        },
+        {
+          "Character": "a",
+          "Bounds": [
+            1739,
+            28,
+            1776,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "b",
+          "Bounds": [
+            1798,
+            7,
+            1839,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "c",
+          "Bounds": [
+            1863,
+            28,
+            1891,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "d",
+          "Bounds": [
+            1914,
+            7,
+            1955,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "e",
+          "Bounds": [
+            1979,
+            28,
+            2007,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "f",
+          "Bounds": [
+            2028,
+            7,
+            2058,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "g",
+          "Bounds": [
+            2072,
+            20,
+            2113,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "h",
+          "Bounds": [
+            2131,
+            7,
+            2171,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "i",
+          "Bounds": [
+            2195,
+            9,
+            2212,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "j",
+          "Bounds": [
+            2236,
+            9,
+            2251,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "k",
+          "Bounds": [
+            2277,
+            7,
+            2317,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "l",
+          "Bounds": [
+            2337,
+            7,
+            2356,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "m",
+          "Bounds": [
+            2378,
+            28,
+            2438,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "n",
+          "Bounds": [
+            2462,
+            28,
+            2502,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "o",
+          "Bounds": [
+            2527,
+            27,
+            2563,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "p",
+          "Bounds": [
+            2586,
+            28,
+            2628,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "q",
+          "Bounds": [
+            2652,
+            28,
+            2689,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "r",
+          "Bounds": [
+            2715,
+            28,
+            2746,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "s",
+          "Bounds": [
+            2764,
+            27,
+            2791,
+            83
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "t",
+          "Bounds": [
+            2814,
+            16,
+            2841,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "u",
+          "Bounds": [
+            2862,
+            29,
+            2903,
+            84
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "v",
+          "Bounds": [
+            2922,
+            22,
+            2962,
+            82
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "w",
+          "Bounds": [
+            2980,
+            22,
+            3039,
+            82
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "x",
+          "Bounds": [
+            3061,
+            28,
+            3103,
+            85
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "y",
+          "Bounds": [
+            3119,
+            22,
+            3158,
+            106
+          ],
+          "Baseline": 83
+        },
+        {
+          "Character": "z",
+          "Bounds": [
+            3180,
+            28,
+            3209,
+            105
+          ],
+          "Baseline": 83
+        }
+      ]
+    },
+    {
+      "File": "eqfont(2).png",
+      "Sha256": "91751870df9d8a4fff47dbc35bdbe6701482f44fc7f9ec76d644fce35a71ad83",
+      "Glyphs": [
+        {
+          "Character": "1",
+          "Bounds": [
+            4,
+            6,
+            27,
+            70
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "2",
+          "Bounds": [
+            31,
+            5,
+            66,
+            70
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "3",
+          "Bounds": [
+            69,
+            5,
+            99,
+            74
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "4",
+          "Bounds": [
+            104,
+            5,
+            145,
+            70
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "5",
+          "Bounds": [
+            146,
+            3,
+            176,
+            74
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "6",
+          "Bounds": [
+            181,
+            4,
+            213,
+            70
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "7",
+          "Bounds": [
+            218,
+            5,
+            249,
+            72
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "8",
+          "Bounds": [
+            252,
+            5,
+            286,
+            70
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "9",
+          "Bounds": [
+            289,
+            5,
+            323,
+            71
+          ],
+          "Baseline": 70
+        },
+        {
+          "Character": "0",
+          "Bounds": [
+            329,
+            5,
+            367,
+            70
+          ],
+          "Baseline": 70
+        }
+      ]
+    },
+    {
+      "File": "eqfont(3).png",
+      "Sha256": "b979067d6cd56e6feb5e4c1864c8b9c44aebe2fe3efd000fdec841a180b720e2",
+      "Glyphs": [
+        {
+          "Character": "!",
+          "Bounds": [
+            4,
+            10,
+            17,
+            79
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "@",
+          "Bounds": [
+            26,
+            7,
+            88,
+            80
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "$",
+          "Bounds": [
+            93,
+            9,
+            124,
+            86
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "%",
+          "Bounds": [
+            133,
+            13,
+            180,
+            82
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "^",
+          "Bounds": [
+            180,
+            7,
+            235,
+            49
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "&",
+          "Bounds": [
+            235,
+            9,
+            296,
+            81
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "*",
+          "Bounds": [
+            301,
+            9,
+            325,
+            34
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": "(",
+          "Bounds": [
+            335,
+            4,
+            353,
+            102
+          ],
+          "Baseline": 79
+        },
+        {
+          "Character": ")",
+          "Bounds": [
+            360,
+            4,
+            379,
+            102
+          ],
+          "Baseline": 79
+        }
+      ]
+    },
+    {
+      "File": "eqfont(4).png",
+      "Sha256": "9d25092709048ab02188d274f00bd24c2d7ddd580d4b2070ad63e5f4b3283aec",
+      "Glyphs": [
+        {
+          "Character": "-",
+          "Bounds": [
+            4,
+            43,
+            28,
+            50
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "=",
+          "Bounds": [
+            52,
+            38,
+            88,
+            56
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "+",
+          "Bounds": [
+            115,
+            27,
+            151,
+            67
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "_",
+          "Bounds": [
+            176,
+            87,
+            223,
+            92
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "~",
+          "Bounds": [
+            260,
+            4,
+            302,
+            15
+          ],
+          "Baseline": 80
+        }
+      ]
+    },
+    {
+      "File": "eqfont(5).png",
+      "Sha256": "962753b70df5799fa5463e650c2f444aaebc677d27193e8b4292120d1fd6900c",
+      "Glyphs": [
+        {
+          "Character": "[",
+          "Bounds": [
+            3,
+            4,
+            26,
+            102
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "]",
+          "Bounds": [
+            37,
+            4,
+            59,
+            102
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "{",
+          "Bounds": [
+            73,
+            4,
+            102,
+            102
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "}",
+          "Bounds": [
+            108,
+            4,
+            136,
+            102
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": ";",
+          "Bounds": [
+            148,
+            38,
+            160,
+            93
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "'",
+          "Bounds": [
+            173,
+            14,
+            183,
+            39
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": ":",
+          "Bounds": [
+            196,
+            38,
+            208,
+            80
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": ",",
+          "Bounds": [
+            220,
+            67,
+            232,
+            93
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": ".",
+          "Bounds": [
+            245,
+            67,
+            257,
+            80
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "<",
+          "Bounds": [
+            264,
+            22,
+            303,
+            72
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": ">",
+          "Bounds": [
+            307,
+            22,
+            345,
+            72
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "/",
+          "Bounds": [
+            345,
+            4,
+            378,
+            102
+          ],
+          "Baseline": 80
+        },
+        {
+          "Character": "?",
+          "Bounds": [
+            388,
+            9,
+            417,
+            79
+          ],
+          "Baseline": 80
+        }
+      ]
+    }
+  ],
+  "Outputs": {
+    "EqlQuestDisplay-Regular.ttf": {
+      "Bytes": 50520,
+      "Sha256": "937d82f1f0ecbda642186f15a16b51acb2575256a26a6a1981bee481bd7948d6"
+    },
+    "EqlQuestDisplay-Regular.woff2": {
+      "Bytes": 22652,
+      "Sha256": "a03732e829a1fa4dbda065220c9de44b9e5d090c441e321f36149cb2ae427d65"
+    }
+  },
+  "License": "OFL-1.1 (contributor rights only)",
+  "PriorFiles": {
+    "EqlQuestDisplay-NOTICE.txt": "7723967b5adc3ca14954fa3fd8cdbfdfbd40c57ae8110b6eaaef725aebfc553a",
+    "EqlQuestDisplay-Regular.ttf": "f4acd7db80ff0ec90cc8b9448e26e5bef9051edfe44327d43bfd20be4d239c81",
+    "EqlQuestDisplay-Regular.woff2": "519e491feaf923591c0346aa79906d82f3723215762cc564fa7ff493be725614",
+    "EqlQuestDisplay.manifest.json": "dc30aed58003c84039f003b5b70c385c1db06949499846f0b034b362feadd98f"
+  },
+  "MetadataOnlyRevision": true
+}

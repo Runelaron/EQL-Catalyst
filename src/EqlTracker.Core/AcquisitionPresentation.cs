@@ -5,10 +5,12 @@ namespace EqlTracker.Core;
 
 internal static class AcquisitionPresentation
 {
+    internal static bool LocationTemplate(string value)=>Regex.IsMatch(value,@"^\s*\{\{Loc\|[^{}]+\}\}\s*$",RegexOptions.IgnoreCase);
     internal static string ActorKey(string value) => Regex.Replace(Regex.Replace(value.Trim(),@"^(?:an?|the)\s+","",RegexOptions.IgnoreCase),@"[^\p{L}\p{N}]","").ToUpperInvariant();
     internal static string Method(ItemSource source)
     {
         string method=QuestPresentation.Normalize(source.Method);
+        if(LocationTemplate(source.Mob))return "Ground spawn";
         if(method=="GROUND SPAWN"||QuestPresentation.Normalize(source.Mob)=="GROUND SPAWN")return "Ground spawn";
         if(method is "VENDOR" or "MERCHANT" or "SOLD BY" or "PURCHASE" or "PURCHASED" or "BUY")return "Purchase";
         return method=="DROP"?"Drop":source.Method.Length>0?source.Method:"Acquisition method unverified";
@@ -54,7 +56,7 @@ internal static class AcquisitionPresentation
         foreach(string coordinates in block.Evidence.Select(CoordinateKey).Where(c=>c.Length>0).Distinct())rows.Add("Coordinates: "+coordinates);
         foreach(var source in block.Evidence)
         {
-            if(block.Method=="Ground spawn"&&source.Mob.Length>0&&!Regex.IsMatch(source.Mob,@"^(?:Pick\s*up|Collect|Ground spawn)\b",RegexOptions.IgnoreCase))rows.Add(source.Mob);
+            if(block.Method=="Ground spawn"&&source.Mob.Length>0&&!LocationTemplate(source.Mob)&&!Regex.IsMatch(source.Mob,@"^(?:Pick\s*up|Collect|Ground spawn)\b",RegexOptions.IgnoreCase))rows.Add(source.Mob);
             string note=source.Notes;
             if(Regex.IsMatch(note,@"\braid\b",RegexOptions.IgnoreCase))rows.Add("Raid target");
             var level=Regex.Match(note,@"\[(\d+)\]");if(level.Success)rows.Add("Mob level: "+level.Groups[1].Value);

@@ -44,6 +44,7 @@ public static class Appearance
             ["Selection"] = classic ? "#806A567D" : warm ? "#80614B3B" : black ? "#80514D63" : "#604A3C79",
             ["Edge"] = classic ? "#A08F859B" : warm ? "#907C674A" : black ? "#805A626D" : "#805A7180",
             ["Melee"] = "#E9B94F", ["Spell"] = "#64BDEE", ["Healing"] = "#79D45C",
+            ["OverviewSelfDamage"]="#FF8C88",["OverviewPetDamage"]="#F2A6B3",
             ["PetHP"]="#FF8C88",["PetMana"]="#64BDEE",["PetEndurance"]="#F1D16A",
             ["ButtonFace"] = classic ? "#D0C5A7" : warm ? "#796044" : black ? "#363B45" : "#345563",
             ["ButtonText"] = classic ? "#201E20" : "#F5ECD6", ["ButtonLight"] = classic ? "#F4EAD0" : warm ? "#BE9E72" : "#78959D",
@@ -63,6 +64,7 @@ public static class Appearance
         }
         foreach (string name in new[] { "InnerSurface", "DetailSurface" }) palette[name] = "#BF" + palette[name][^6..];
         PhoneTokens = new Dictionary<string,string> { ["background"]="#"+palette["Surface"][^6..], ["surface"]="#"+palette["InnerSurface"][^6..], ["text"]="#"+palette["Foreground"][^6..], ["secondary"]="#"+palette["ReadableNote"][^6..], ["accent"]="#"+palette["Accent"][^6..], ["line"]="#"+palette["Edge"][^6..], ["mint"]="#"+palette["Mint"][^6..] };
+        TrackerController.PhoneThemeTokens=PhoneTokens;
         foreach (string name in new[] { "Surface", "InnerSurface", "DetailSurface", "Selection" }) palette["Solid" + name] = "#FF" + palette[name][^6..];
         foreach (var (name, hex) in palette)
         {
@@ -77,7 +79,8 @@ public static class Appearance
         }
     }
     public static void SolidResources(FrameworkElement window)
-    { foreach (string name in new[] { "Surface", "InnerSurface", "DetailSurface", "Selection" }) window.Resources[name] = UI.Brush("Solid" + name); }
+    { TrackerController.PhoneThemeTokens=PhoneTokens;
+        foreach (string name in new[] { "Surface", "InnerSurface", "DetailSurface", "Selection" }) window.Resources[name] = UI.Brush("Solid" + name); }
     public static void RaisedButtons(FrameworkElement body)
     {
         var style = (Style)XamlReader.Parse("""

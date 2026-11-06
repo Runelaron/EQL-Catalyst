@@ -85,14 +85,14 @@ public sealed partial class QuestWindow
         top.Children.Add(UI.ActionField(details));
         var header = UI.Stack(top, petTheoryNote);
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
-        petSearch.Width=170;petSearch.Height=28;petSearch.Margin=new(0);
+        petSearch.Width=170;petSearch.Height=28;petSearch.Margin=new(0);foreach(var field in new Control[]{petSlot,petOwnership,petRank,petReplacement})field.Height=28;
         var left = new DockPanel(); var searchControls = new WrapPanel();
         var searchField=(Grid)UI.Field("Search",(FrameworkElement)FocusedLayout.Search(petSearch, "Find pet equipment…"));
         var searchTitle=new DockPanel();var searchLabel=(TextBlock)searchField.Children[0];searchField.Children.Remove(searchLabel);
         petTheoryCheck.FontSize=11;petTheoryCheck.Margin=new(3,0,0,0);petTheoryCheck.VerticalAlignment=VerticalAlignment.Center;petTheoryCheck.HorizontalAlignment=HorizontalAlignment.Right;
         DockPanel.SetDock(petTheoryCheck,Dock.Right);searchTitle.Children.Add(petTheoryCheck);searchTitle.Children.Add(searchLabel);searchField.Children.Add(searchTitle);
-        searchControls.Children.Add(searchField);searchControls.Children.Add(BuildPetExpansionFilter());
-        var filters = new WrapPanel(); foreach (var control in new UIElement[] { UI.Field("Ownership", petOwnership), UI.Field("Slot", petSlot), UI.Field("Set Rank", petRank), UI.Field("Current item", petReplacement) }) filters.Children.Add(control);
+        searchControls.Children.Add(searchField);searchControls.Children.Add(UI.Field("Slot",petSlot));
+        var filters = new WrapPanel(); foreach (var control in new UIElement[] { UI.Field("Ownership", petOwnership), BuildPetExpansionFilter(), UI.Field("Set Rank", petRank), UI.Field("Current item", petReplacement) }) filters.Children.Add(control);
         petCandidateFilterNote.Visibility = Visibility.Collapsed;
         filters.Visibility=Visibility.Collapsed;
         var filterToggle=PetFilterToggle.Create();filterToggle.ToolTip="Filter items by ownership, slot, rank, and current equipment.";
@@ -156,7 +156,7 @@ public sealed partial class QuestWindow
         petInnerSplit = split; petOuterSplit = outer;
         void Adapt()
         {
-            petSearch.Width = ActualWidth < 800 ? 120 : 165;
+            petSearch.Width = 170;
             note.Visibility = ActualHeight < 540 ? Visibility.Collapsed : Visibility.Visible;
             petDraftSummary.Visibility=ActualHeight<540||petDraftSummary.Text.Length==0?Visibility.Collapsed:Visibility.Visible;
             petTotals.TextTrimming = TextTrimming.CharacterEllipsis;

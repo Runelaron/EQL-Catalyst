@@ -48,7 +48,7 @@ public sealed partial class TrackerController : IDisposable
         if (demo) { if (character.Length == 0) character = "ExampleHero"; if (server.Length == 0) server = "example"; }
         var launch = new LaunchProfile(character, server, gameFolder ?? "");
         if (!launch.Valid) throw new InvalidDataException("Choose a character and server before opening a tracker.");
-        Demo = demo; DataFolder = dataFolder ?? launch.DataFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EQLTracker"));
+        Demo = demo; DataFolder = dataFolder ?? launch.DataFolder(DesktopPaths.DataRoot());
         store = new TrackerStore(Path.Combine(DataFolder, "tracker.db"));
         var bundled = Json.Read<Catalog>(Path.Combine(AppContext.BaseDirectory, "data", "catalog.json"));
         var savedCatalog = store.Get<Catalog>("catalog");
@@ -219,7 +219,7 @@ public sealed partial class TrackerController : IDisposable
             {
                 try
                 {
-                    ReadSessions(parser); ReadGroups(); EnsureSessionLoaded(); BackfillElements(parser); BackfillItemRanks(parser); ReadStatEvidence(); if (following) { BackfillHealing(parser); BackfillAbilityOutcomes(); } LastReaderPoll = DateTime.Now;
+                    ReadSessions(parser); ReadPurchaseEvidence(parser); ReadGroups(); EnsureSessionLoaded(); BackfillElements(parser); BackfillItemRanks(parser); ReadStatEvidence(); ReadBardResearch(); if (following) { BackfillHealing(parser); BackfillAbilityOutcomes(); } LastReaderPoll = DateTime.Now;
                     var log = GameLogPath;
                     if (!File.Exists(log))
                     {
@@ -324,7 +324,7 @@ public sealed partial class TrackerController : IDisposable
     public void ReadInventory()
     {
         if (string.IsNullOrWhiteSpace(Profile.GameFolder)) return;
-        var path = Path.Combine(Profile.GameFolder, $"{Profile.Character}_{Profile.Server}-Inventory.txt");
+        var path = DesktopPaths.Resolve(Profile.GameFolder, $"{Profile.Character}_{Profile.Server}-Inventory.txt");
         if (!File.Exists(path)) return;
         var captured = File.GetLastWriteTime(path);
         bool newAnchor = latestExport is { } anchor && Math.Abs((anchor.Time - captured).TotalSeconds) < 10 && anchor.Id != Inventory.ExportLogId;
@@ -355,7 +355,7 @@ public sealed partial class TrackerController : IDisposable
         ThemeName = "coldain";
         try
         {
-            var path = Directory.Exists(Profile.GameFolder) ? Directory.GetFiles(Profile.GameFolder, $"UI_{Profile.Character}_{Profile.Server}_LO*.ini").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault() : null;
+            var path = Directory.Exists(Profile.GameFolder) ? DesktopPaths.GameFiles(Profile.GameFolder, $"UI_{Profile.Character}_{Profile.Server}_LO*.ini").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault() : null;
             if (path != null && GameSettingsReader.TryReadText(path, out var text))
             { var match = Regex.Match(text, @"^UISkin=(.+)$", RegexOptions.Multiline); if (match.Success && match.Groups[1].Value.Trim().Length > 0) ThemeName = match.Groups[1].Value.Trim(); }
         }
@@ -367,7 +367,7 @@ public sealed partial class TrackerController : IDisposable
         var resolved = Catalog.Find(item.Name);
         var matches = prior.Count > 0 ? prior : Objectives.Where(x => x.Remaining > 0 && (Identity.Key(x.Item) == Identity.Key(item.Name) || resolved?.Key == x.Key)).ToList();
         if (matches.Count > 0)
-        { Alert = $"KEEP · {item.Name} · {string.Join(" / ", matches.Select(x => x.Class).Distinct())} · {item.Action}"; if (item.Action is "Sold" or "Destroyed" or "Merged") Alert = "NEEDED ITEM " + item.Action.ToUpperInvariant() + " · " + item.Name; if (Profile.Sounds) System.Media.SystemSounds.Exclamation.Play(); }
+        { Alert = $"KEEP · {item.Name} · {string.Join(" / ", matches.Select(x => x.Class).Distinct())} · {item.Action}"; if (item.Action is "Sold" or "Destroyed" or "Merged") Alert = "NEEDED ITEM " + item.Action.ToUpperInvariant() + " · " + item.Name; if (Profile.Sounds) DesktopSignals.Notification(); }
         else if (Catalog.Find(item.Name) is { } definition && definition.Slots.Count > 0)
         {
             foreach (bool pet in new[] { false, true })

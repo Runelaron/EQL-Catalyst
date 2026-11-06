@@ -21,9 +21,9 @@ internal static class ReviewedComponents
         if(!complete||result.Count==0)result.Add(new(){Identity=identity,Family="Other unreviewed song components",Quality=EvidenceQuality.Unknown,Source=source}); return result;
     }
 }
-public sealed partial class CombatGroupPanel
+internal static class BardEvidenceReview
 {
-    private UIElement BuildCoverageReview(IEnumerable<CoverageObservation> observations)
+    internal static UIElement Build(TrackerController controller,IEnumerable<CoverageObservation> observations)
     {
         var body=new StackPanel();
         foreach(var observation in observations)

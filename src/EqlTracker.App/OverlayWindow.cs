@@ -282,7 +282,7 @@ public sealed partial class OverlayWindow : FrostWindow
                 if(p.Scope=="Session") petEvidence+="\n"+PetIdentityResolver.SessionEvidence(Controller.Profile,view.Fights);
                 string element = DisplayPetElement();
                 badge.Set(p.Actor, identity != null, p.Actor == "Combined" ? ActorBadge.TotalTooltip : $"{(petName.Length > 0 ? petName : "Unidentified pet")}\n{petEvidence}\n{element} · {(Controller.Profile.PetElementOverride.Length > 0 ? "Manual override" : identity?.ElementConfidence ?? "Unknown")}\n{identity?.ElementEvidence}", element);
-                HeadingTitle.Text = p.Actor switch { "Pet" => "Pet damage — " + (petName.Length > 0 ? petName : "not identified"), "Player" => "Self damage — " + Controller.Profile.Character, "Unknown" => "Unattributed damage", _ => "Combined damage" };
+                HeadingTitle.Text = p.Actor switch { "Pet" => "Pet damage — " + (petName.Length > 0 ? petName : "not identified"), "Player" => "Self damage — " + Controller.Profile.Character, "Unknown" => "Unknown damage", _ => "Combined damage" };
                 fullHeading = HeadingTitle.Text;
                 HeadingTitle.ToolTip = HeadingTitle.Text;
                 string zone = p.Scope == "Session" ? Controller.Profile.Zone : view.Fights.FirstOrDefault()?.Zone ?? Controller.Profile.Zone;
@@ -298,7 +298,8 @@ public sealed partial class OverlayWindow : FrostWindow
                 damageRows.SetRows(Controller.Profile.ShowLinkedHealing ? view.Rows : view.Rows.Select(r => r with { LinkedHealing = null }).ToList(), nextContext, smooth);
                 double live = rolling;
                 overview.Set(view.Damage, view.MaxHit, live, view.DetailComplete, smooth, snap, ActualWidth < 360 || ActualHeight < 240);
-                footer.Text = (p.Scope == "Session" ? $"{view.Fights.Count} encounters" : "") + (view.UnknownDamage > 0 ? $" · unattributed {view.UnknownDamage:N0}" : "");
+                footer.ToolTip=CombatAttributionHelp.Unknown;
+                footer.Text = (p.Scope == "Session" ? $"{view.Fights.Count} encounters" : "") + (view.UnknownDamage > 0 ? $" · Unknown {view.UnknownDamage:N0}" : "");
                 footer.Visibility = footer.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
                 foreach (var (style, item) in styleChoices) item.IsChecked = Controller.Profile.MeterStyle == style;
                 if (motionChoice != null) motionChoice.IsChecked = Controller.Profile.SmoothMeterMotion;

@@ -51,7 +51,7 @@ def main():
         shutil.copy2(ROOT/'docs/role-ratings.md',payload/'ROLE-RATINGS.md')
         shutil.copy2(ROOT/'docs/pet-comparison.md',payload/'PET-COMPARISON.md')
         shutil.copy2(ROOT/'docs/application-updates.md',payload/'APPLICATION-UPDATES.md')
-        shutil.copy2(ROOT/'docs/beta17.md',payload/'BETA-1.7.md')
+        shutil.copy2(ROOT/'docs/beta18.md',payload/'BETA-1.8.md')
         shutil.copy2(ROOT/'docs/overview.md',payload/'OVERVIEW.md')
         shutil.copy2(ROOT/'docs/phone-companion.md',payload/'PHONE-COMPANION.md')
         shutil.copy2(ROOT/'docs/progress-rewards.md',payload/'PROGRESS-REWARDS.md')

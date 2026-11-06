@@ -1,0 +1,35 @@
+name: Linux preview checks
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          global-json-file: global.json
+      - name: Core and package-policy tests
+        run: |
+          dotnet run --project tests/EqlTracker.Tests -c Release --no-launch-profile
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Publish isolated native preview
+        run: |
+          dotnet publish src/EqlTracker.Linux -c Release -r linux-x64 --self-contained true -p:EnablePrivatePetResearch=false -o "$RUNNER_TEMP/catalyst-linux"
+          find "$RUNNER_TEMP/catalyst-linux" -name '*.pdb' -delete
+          python3 scripts/privacy-audit.py "$RUNNER_TEMP/catalyst-linux" --exceptions scripts/privacy-exceptions.json --private-root "$GITHUB_WORKSPACE" --report "$RUNNER_TEMP/linux-privacy.json"
+          python3 scripts/build-linux.py --payload "$RUNNER_TEMP/catalyst-linux" --output "$RUNNER_TEMP/linux-packages"
+      - name: Synthetic X11 rendering
+        run: xvfb-run -a "$RUNNER_TEMP/catalyst-linux/EqlTracker.Linux" --smoke "$RUNNER_TEMP/linux-native"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: linux-preview-validation
+          path: |
+            ${{ runner.temp }}/linux-packages/*
+            ${{ runner.temp }}/linux-native/*.json
+            ${{ runner.temp }}/linux-privacy.json
+          if-no-files-found: error
+          retention-days: 14

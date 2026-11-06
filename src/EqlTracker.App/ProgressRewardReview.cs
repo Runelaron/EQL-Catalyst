@@ -12,7 +12,7 @@ namespace EqlTracker.App;
 
 public sealed partial class QuestWindow
 {
-    internal async Task ReviewProgressRewards(string folder)
+    internal async Task ReviewProgressRewards(string folder,bool rewardOnly=false)
     {
         if(!Controller.Demo)throw new InvalidOperationException("Synthetic review only");
         Directory.CreateDirectory(Path.Combine(folder,"qa"));var checks=new List<string>();var timings=new List<object>();var animation=new List<object>();
@@ -76,6 +76,8 @@ public sealed partial class QuestWindow
         var noReward=new QuestDefinition{Id="review:no-reward",Name="No documented reward",Class="MAG",WikiUrl="https://example.invalid/quest"};Controller.Catalog.Quests.Add(noReward);Controller.Profile.QuestTracking[noReward.Id]=true;FilterProgressQuests();ShowView(TrackerTab.Progress,noReward.Name);RefreshSteps();Flush();Check(rewardActions.Count==0&&Texts(progressReward).Contains("Reward not documented"),"A quest without documented rewards has an honest non-clickable empty state");
         Controller.Catalog.Quests.Remove(noReward);Controller.Profile.QuestTracking.Remove(noReward.Id);ShowView(TrackerTab.Progress,"Bard Epic Quest");RefreshSteps();Flush();Check(rewardActions.ContainsKey(singing.Key),"Returning from an empty reward quest restores normal reward actions");
         Controller.Inventory.Entries.Add(new(){Name="Singing Short Sword",Count=null,Location="Collection"});Controller.Inventory.Invalidate();Click(rewardActions[singing.Key]);Check(progressRewardSlide.Copies.Items.Count==3,"Collection presence never becomes a selectable physical copy");progressRewardSlide.Dismiss(true);
+
+        if(rewardOnly){Json.Write(Path.Combine(folder,"progress-reward-checks.json"),new{Passed=checks.Count,Checks=checks,Animation=animation,Scope="Focused existing reward interactions; acquisition/browsing surfaces are outside this typography pass."});return;}
 
         await ReviewProgressBrowse(checks,timings,Capture);
         await ReviewProgressActions(folder,checks,timings,Capture);

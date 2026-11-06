@@ -33,7 +33,7 @@ public sealed partial class SettingsWindow
     private void BuildPages()
     {
         HeadingTitle.Text = ""; HeadingTitle.Inlines.Clear();
-        HeadingTitle.FontSize = 22; var wordmark = new Run("EQL Catalyst") { FontFamily = new FontFamily("Georgia"), Foreground = new LinearGradientBrush(Color.FromRgb(255, 235, 168), Color.FromRgb(197, 142, 54), 90) }; wordmark.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding("FontSize") { Source = HeadingTitle }); HeadingTitle.Inlines.Add(wordmark);
+        HeadingTitle.FontSize = 22; var wordmark = CatalystHeading.Wordmark("EQL Catalyst"); wordmark.SetBinding(TextElement.FontSizeProperty, new System.Windows.Data.Binding("FontSize") { Source = HeadingTitle }); HeadingTitle.Inlines.Add(wordmark);
         HeadingTitle.Inlines.Add(new Run(" / Settings") { FontSize = 16 }); HeadingTitle.Visibility = Visibility.Visible;
         HeadingTitle.ToolTip = "EQL Catalyst settings · saved per character";
         foreach (var control in new Control[] { theme, petType, loadout, objectiveMode }) control.Width = 180;
@@ -52,7 +52,7 @@ public sealed partial class SettingsWindow
             var scroll = UI.Scroll(content); scroll.Padding = new(0, 0, 4, 0); pages[id] = scroll; pageHost.Children.Add(scroll);
         }
         var icon = UI.Row(iconPreview, iconName, UI.Button("Choose icon…", () => ((App)Application.Current).OpenIcons())); iconName.VerticalAlignment = VerticalAlignment.Center; iconName.Margin = new(0, 0, 8, 0);
-        var look=UI.Stack(Flow(Field("Theme",theme,"Auto follows the saved game skin; manual themes update every open panel immediately."),Field("Secondary text",secondaryText,"Helper text for this theme family. Coldain defaults to Candlelight Cream; Sunstrider to Warm Gold; Shadowman to Ash Silver. Status and combat colors stay unchanged.")),BuildIconStyleControls(),BuildVisualAppearanceControls(),UI.Label("App icon · per character"),icon);
+        var look=UI.Stack(Flow(Field("Theme",theme,"Auto follows the saved game skin; manual themes update every open panel immediately."),Field("Secondary text",secondaryText,"Helper text for this theme family. Coldain defaults to Candlelight Cream; Sunstrider to Warm Gold; Shadowman to Ash Silver. Status and combat colors stay unchanged.")),BuildHeadingStyleControls(),BuildIconStyleControls(),BuildVisualAppearanceControls(),UI.Label("App icon · per character"),icon);
         opacity.Width = 170; opacity.ToolTip = "Whole-overlay opacity; updates both overlays and the preview while dragging. Saved automatically.";
         var percent = UI.Text("", 12); void OpacityText() => percent.Text = $"{opacity.Value:P0}"; OpacityText(); opacity.ValueChanged += (_, _) => OpacityText();
         var behavior = new UniformGridEx(2); foreach (var box in new[] { hide, click, locked, sounds }) behavior.Children.Add(box);

@@ -1,0 +1,5 @@
+Pillow==12.3.0
+numpy==2.3.5
+fonttools==4.67.0
+vtracer==0.6.15
+brotli==1.2.1

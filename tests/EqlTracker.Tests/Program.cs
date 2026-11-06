@@ -16,6 +16,7 @@ if (args.Length == 2 && args[0] == "--refresh-item-display") { await ItemDisplay
 if (args.Length == 2 && args[0] == "--audit-item-display") { await ItemDisplayRefresh.Run(args[1], false); return; }
 
 var tests = new List<(string Name, Action Run)>();
+Beta18Tests.Register((name,run)=>tests.Add((name,run)));
 Beta17Tests.Register((name,run)=>tests.Add((name,run)));
 WorkspaceToolbarTests.Register((name,run)=>tests.Add((name,run)));
 UpdateTests.Register((name,run)=>tests.Add((name,run)));
@@ -148,8 +149,11 @@ PetDetailsPopupTests.Register(Test);
 PetWorkspaceTests.Register((name,run)=>tests.Add((name,run)));
 PetContributionTests.Register(Test);
 StandardPetBuffTests.Register(Test);
+OverviewPolishTests.Register(Test);
 OverviewTests.Register(Test);
 IntegratedCompanionTests.Register(Test);
+BardRotationTests.Register(Test);
+ExaltationChargeTests.Register(Test);
 BardCompatibilityAcceptance.Register(Test);
 CompanionTransportTests.Register(Test);
 var watch = Stopwatch.StartNew(); int failed = 0;

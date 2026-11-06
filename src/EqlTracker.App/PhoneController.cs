@@ -5,6 +5,7 @@ namespace EqlTracker.App;
 
 public sealed partial class TrackerController
 {
+    internal static IReadOnlyDictionary<string,string> PhoneThemeTokens {get;set;} = new Dictionary<string,string>();
     private readonly SemaphoreSlim phoneGate = new(1, 1);
     private CompanionHostSettings phoneSettings = new();
     private CompanionHost? phoneHost;
@@ -38,7 +39,7 @@ public sealed partial class TrackerController
                 string prior = "";
                 while (!token.IsCancellationRequested)
                 {
-                    string key;lock(Sync)key=$"{equipmentRevision}|{petRevision}|{statProfileRevision}|{research.Revision}|{standardPetBuffs.Revision}|{integrated.Revision}|{journalRevision}|{Sessions?.Revision}|{Published?.Revision}|{Profile.SelectedLoadout}|{Profile.ActiveLoadout.SelectedPetBuildId}|{PetComparisonEngine.Key(Appearance.PhoneTokens)}|{integrated.Camps.Timer?.Due<=DateTime.Now}|{string.Join(',',integrated.Coverage.Where(c=>c.Fresh(DateTime.Now,Profile.Character)).Select(c=>c.Id))}";
+                    string key;lock(Sync)key=$"{equipmentRevision}|{petRevision}|{statProfileRevision}|{research.Revision}|{standardPetBuffs.Revision}|{integrated.Revision}|{journalRevision}|{Sessions?.Revision}|{Published?.Revision}|{Profile.SelectedLoadout}|{Profile.ActiveLoadout.SelectedPetBuildId}|{PetComparisonEngine.Key(PhoneThemeTokens)}|{integrated.Camps.Timer?.Due<=DateTime.Now}|{string.Join(',',integrated.Coverage.Where(c=>c.Fresh(DateTime.Now,Profile.Character)).Select(c=>c.Id))}";
                     if (key != prior) { prior = key; var projection=BuildPhoneProjection(Interlocked.Increment(ref phoneRevision)); host.Publish(projection); }
                     await Task.Delay(500, token).ConfigureAwait(false);
                 }
@@ -95,7 +96,7 @@ public sealed partial class TrackerController
             if (integrated.Camps.Timer is {} timer) session.Add(new("Camp estimate · " + timer.Name, timer.Label(DateTime.Now), "Silent estimate; no automatic rearming"));
             var holdings = otherHoldings.SelectMany(s => s.Items.Select(i => new CompanionRow(s.Character + " · " + i.Name, i.Quantity?.ToString() ?? "Present", i.Location + " · rank " + i.Rank + " · snapshot " + s.CapturedAt.ToString("g"), PairingAuthority.Hash(s.Server.ToUpperInvariant() + "/" + s.Character.ToUpperInvariant())))).Take(500).ToArray();
             CompanionRow Trim(CompanionRow row)=>row with{Label=row.Label.Length>256?row.Label[..256]+"…":row.Label,Value=row.Value.Length>512?row.Value[..512]+"…":row.Value,Detail=row.Detail.Length>2048?row.Detail[..2048]+"…":row.Detail};
-            return new(revision, DateTimeOffset.UtcNow, SharingContext, Profile.Character + " · " + Profile.Server+" · "+build.Name+(recap!=null?" · session "+recap.Session.Start.ToString("MM/dd HH:mm"):""), Appearance.PhoneTokens, new("Build & song coverage", buildRows.Take(200).Select(Trim).ToArray()), new("Goals & session loot", goals.Select(Trim).ToArray()), new("Session recap", session.Take(100).Select(Trim).ToArray()), new("Other-character holdings", holdings.Take(200).Select(Trim).ToArray())) {History=new Dictionary<string,IReadOnlyList<CompanionRow>>{["goals"]=goalHistory.Select(Trim).ToArray(),["loot"]=lootHistory.Select(Trim).ToArray(),["session"]=session.Select(Trim).ToArray()}};
+            return new(revision, DateTimeOffset.UtcNow, SharingContext, Profile.Character + " · " + Profile.Server+" · "+build.Name+(recap!=null?" · session "+recap.Session.Start.ToString("MM/dd HH:mm"):""), PhoneThemeTokens, new("Build & song coverage", buildRows.Take(200).Select(Trim).ToArray()), new("Goals & session loot", goals.Select(Trim).ToArray()), new("Session recap", session.Take(100).Select(Trim).ToArray()), new("Other-character holdings", holdings.Take(200).Select(Trim).ToArray())) {History=new Dictionary<string,IReadOnlyList<CompanionRow>>{["goals"]=goalHistory.Select(Trim).ToArray(),["loot"]=lootHistory.Select(Trim).ToArray(),["session"]=session.Select(Trim).ToArray()}};
         }
     }
     internal IReadOnlyList<(string Id, string Name)> ShareableCharacters()

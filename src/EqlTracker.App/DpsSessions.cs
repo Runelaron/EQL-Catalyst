@@ -103,8 +103,8 @@ public sealed partial class DpsWindow
     private void UpdateMaxHit(DpsViewState view)
     {
         var peak = view.Peaks.OrderByDescending(p => p.Damage).ThenBy(p => p.Time).FirstOrDefault();
-        max.ToolTip = peak == null ? "Largest hit unavailable in this selection." : $"Max hit · {peak.Damage:N0} · {peak.Ability} · {(peak.Actor == "Player" ? "Self" : peak.Actor)} · {peak.Time:MMM/dd HH:mm:ss}";
-        maxCaption.Text=peak==null?"":peak.Ability+" · "+(peak.Actor=="Player"?"Self":peak.Actor);maxCaption.ToolTip=max.ToolTip;
+        max.ToolTip = peak == null ? "Enemy-hit details unavailable in this selection; older unverified summaries are excluded." : $"Max hit · {peak.Damage:N0} · {peak.Ability} · {(peak.Actor == "Player" ? "Self" : peak.Actor)} · {peak.Time:MMM/dd HH:mm:ss}\nAttacker: {(peak.Attacker.Length>0?peak.Attacker:peak.Actor)}\nEnemy target: {peak.Target}\nDamage type: {peak.Channel}\nOutgoing damage only; received healing and self/friendly-target events are excluded.";
+        maxCaption.Text=peak==null?"Unavailable":peak.Ability;maxCaption.ToolTip=max.ToolTip;
         if(max.Parent is FrameworkElement row&&row.Parent is FrameworkElement stack&&stack.Parent is Border card){card.ToolTip=max.ToolTip;foreach(var icon in Usability.Tree(card).OfType<MaxHitGlyph>())icon.ToolTip=max.ToolTip;}
     }
     private UIElement HistoryActions()

@@ -10,7 +10,7 @@ internal static class OctoberContentTests
         PetContextCatalog Summons()=>PetContextCatalog.Load(Path.Combine(AppContext.BaseDirectory,"data/pet-context.json"));
         CharacterProfile Profile()=>new(){Loadouts=[new(){Name="Synthetic",Classes=["MAG","CLR","MNK"],Level=50,Race="Ayr'Haeth",RaceLevel=7}],SelectedLoadout="Synthetic"};
         List<PetComparisonResult> Run(CharacterProfile p)=>PetComparisonEngine.Evaluate(p,new(){PetType="Monster",PetLevel=42},new(),Summons(),PetBuffCatalog.References(),[],PetEquipmentMode.IntendedSlots,CancellationToken.None);
-        Test("offline zones and source documents are idempotent",()=>{var c=new Catalog();OctoberContent.Apply(c);OctoberContent.Apply(c);Check(c.Zones.Count==3&&c.Documents.Count==2&&c.Quests.Count==0&&c.Items.Count==0);Check(OctoberContent.Zones.All(z=>z.Source==OctoberContent.Announcement&&z.Access.Length>0));});
+        Test("offline zones and source documents are idempotent",()=>{var c=new Catalog();OctoberContent.Apply(c);OctoberContent.Apply(c);Check(c.Zones.Count==3&&c.Documents.Count==6&&c.Documents.Select(d=>d.Url).Distinct().Count()==6&&c.Quests.Count==0&&c.Items.Count==0);Check(OctoberContent.Zones.All(z=>z.Source==OctoberContent.Announcement&&z.Access.Length>0));});
         Test("new zone aliases preserve distinct areas",()=>{Check(Identity.ZoneKey("The Nektropos Castle (Solo)")==Identity.ZoneKey("Nektropos Castle"));Check(Identity.ZoneKey("Nektropos Castle Undercroft")==Identity.ZoneKey("Nektropos Undercroft"));Check(Identity.ZoneKey("Lake Nerius Trading Center")==Identity.ZoneKey("Lake Nerius"));Check(Identity.ZoneKey("Nektropos Castle")!=Identity.ZoneKey("Nektropos Undercroft"));});
         Test("Classic-era inference does not manufacture item access",()=>{var item=new ItemDefinition{Sources=[new(){Zone="Lake Nerius"}]};ItemExpansionEvidence.Apply(item);Check(item.IntroducedExpansion=="Unknown"&&item.ExpansionProvenance.Inferred&&item.ExpansionProvenance.Expansion=="Classic");Check(OctoberContent.ZoneHelp("Nektropos Castle").Contains("inferred"));});
         foreach(string name in new[]{"Half Dark Elf","Half Dark Elves","Ayr’Haeth","ayr'haeth"})Test("race alias "+name,()=>Check(RaceNames.Canonical(name)=="Ayr'Haeth"));
@@ -31,3 +31,4 @@ internal static class OctoberContentTests
         Test("cancelled comparison cannot publish a result",()=>{using var cancel=new CancellationTokenSource();cancel.Cancel();bool rejected=false;try{PetComparisonEngine.Evaluate(Profile(),new(),new(),Summons(),PetBuffCatalog.References(),[],PetEquipmentMode.IntendedSlots,cancel.Token);}catch(OperationCanceledException){rejected=true;}Check(rejected);});
     }
 }
+

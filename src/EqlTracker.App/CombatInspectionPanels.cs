@@ -117,23 +117,23 @@ public sealed partial class CombatGroupPanel : Grid
         periods.SetValue(VirtualizingStackPanel.IsVirtualizingProperty,true);periods.SetValue(VirtualizingStackPanel.VirtualizationModeProperty,VirtualizationMode.Recycling);ScrollViewer.SetHorizontalScrollBarVisibility(periods,ScrollBarVisibility.Disabled);
         periods.ItemsSource=periodRows;
         periods.SelectionChanged+=(_,_)=>{if(!updating&&periods.SelectedItem is GroupPeriod period)PeriodSelected?.Invoke(period.Id);};
-        var history = new DockPanel();var label=UI.Label("Recent groups");DockPanel.SetDock(label,Dock.Top);history.Children.Add(label);history.Children.Add(periods);
+        var history = new DockPanel();var heading=new WrapPanel();var label=UI.Label("Recent groups");label.VerticalAlignment=VerticalAlignment.Center;label.Margin=new(0,0,8,0);heading.Children.Add(label);coverage.VerticalAlignment=VerticalAlignment.Center;coverage.Margin=new(0,0,4,0);heading.Children.Add(coverage);var songs=UI.Button("Song coverage",()=>ToggleSongCoverage(true));songs.Height=28;songs.Margin=new(0);heading.Children.Add(songs);DockPanel.SetDock(heading,Dock.Top);history.Children.Add(heading);history.Children.Add(periods);
         var detail = new Grid();for(int i=0;i<5;i++)detail.RowDefinitions.Add(new(){Height=GridLength.Auto});
         moreDestinations.Content=remainingDestinations;moreDestinations.ToolTip="Show the remaining target or recipient entries in this member inspector. The whole inspector scrolls; this list has no separate scrollbar.";
         moreDestinations.Expanded+=(_,_)=>moreDestinations.Header="View Less <";moreDestinations.Collapsed+=(_,_)=>moreDestinations.Header="View More >";
         detail.Children.Add(UI.Stack(title,evidence,splitTotals));var targetsLabel=UI.Label("Targets / recipients");Grid.SetRow(targetsLabel,1);detail.Children.Add(targetsLabel);var targets=UI.Stack(destinations,moreDestinations);Grid.SetRow(targets,2);detail.Children.Add(targets);Grid.SetRow(abilityTitle,3);detail.Children.Add(abilityTitle);Grid.SetRow(abilities,4);detail.Children.Add(abilities);
-        RowDefinitions.Add(new(){Height=GridLength.Auto});RowDefinitions.Add(new(){Height=new(1,GridUnitType.Star)});Children.Add(UI.Row(coverage,UI.Button("Song coverage",()=>ToggleSongCoverage(true))));
-        memberDetail = detail; var inspector = new Grid(); inspector.Children.Add(detail); inspector.Children.Add(songInspector);
+        RowDefinitions.Add(new(){Height=new(1,GridUnitType.Star)});
+        var inspector = new Grid(); inspector.Children.Add(detail);
         detail.MinHeight=330;detail.RowDefinitions[4].Height=new(220);var all = groupPanes = new GroupPaneLayout(history,members,UI.Card(UI.Scroll(inspector)),profile,controller.Save);
         var viewport=new ScrollViewer{Content=all,VerticalScrollBarVisibility=ScrollBarVisibility.Auto,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled,CanContentScroll=false};
         void FitPanes(){double width=viewport.ViewportWidth>0?viewport.ViewportWidth:viewport.ActualWidth;double min=width>=980?180:width>=620?260:380;double height=Math.Max(min,viewport.ViewportHeight);if(Math.Abs(all.Height-height)>.5||double.IsNaN(all.Height))all.Height=height;}
-        viewport.SizeChanged+=(_,_)=>FitPanes();viewport.ScrollChanged+=(_,e)=>{if(e.ViewportHeightChange!=0||e.ViewportWidthChange!=0)FitPanes();};Grid.SetRow(viewport,1);Children.Add(viewport);
+        viewport.SizeChanged+=(_,_)=>FitPanes();viewport.ScrollChanged+=(_,e)=>{if(e.ViewportHeightChange!=0||e.ViewportWidthChange!=0)FitPanes();};Grid.SetRow(viewport,0);Children.Add(viewport);
         members.SelectionChanged+=(_,_)=>{if(!updating)Select();};
         RefreshPeriods();
     }
     public void RefreshPeriods()
     {
-        if(songInspector.Visibility==Visibility.Visible)RefreshSongCoverage();
+
         if(ReferenceEquals(priorPeriods,controller.GroupPeriods)&&priorPeriodId==controller.Profile.Meter.GroupPeriodId)return;
         priorPeriods=controller.GroupPeriods;priorPeriodId=controller.Profile.Meter.GroupPeriodId;updating=true;
         string? prior=(periods.SelectedItem as GroupPeriod)?.Id;
@@ -149,7 +149,7 @@ public sealed partial class CombatGroupPanel : Grid
         RefreshPeriods();if(ReferenceEquals(shown,snapshot)&&this.healing==healing)return;shown=snapshot;this.healing=healing;updating=true;
         string? selected=(members.SelectedItem as GroupMemberRow)?.Id;members.Columns[1].Header=healing?"HP":"Damage";members.Columns[2].Header=healing?"HPS":"DPS";
         UI.SetRows(members,snapshot.Members.ToList());members.SelectedItem=snapshot.Members.FirstOrDefault(m=>m.Id==selected)??snapshot.Members.FirstOrDefault();
-        coverage.Text=snapshot.Members.Any(m=>m.Total.HasValue)?$"Known members: {snapshot.Members.Count} · {snapshot.Members.Sum(m=>m.Total??0):N0} {(healing?"HP restored":"damage")} · {snapshot.Members.Sum(m=>m.Rate??0):N1} {(healing?"HPS":"DPS")}":$"Known members: {snapshot.Members.Count} · totals unavailable";coverage.ToolTip=snapshot.Coverage;updating=false;Select();
+        coverage.Text=$"Known members: {snapshot.Members.Count}";coverage.ToolTip=snapshot.Coverage+"\n"+(snapshot.Members.Any(m=>m.Total.HasValue)?$"{snapshot.Members.Sum(m=>m.Total??0):N0} {(healing?"HP restored":"damage")} · {snapshot.Members.Sum(m=>m.Rate??0):N1} {(healing?"HPS":"DPS")}":"Totals unavailable");updating=false;Select();
     }
     private void Select()
     {

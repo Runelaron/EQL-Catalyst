@@ -187,7 +187,7 @@ public sealed class WikiClient : IDisposable
             links=links.Where(l=>!WikiContentQuality.Placeholder(l)).ToList();
             if (!line.TrimStart().StartsWith('*') && links.Count > 0) zone = links[0];
             else if (line.TrimStart().StartsWith('*')) foreach (var mob in links.Count > 0 ? links : [Plain(line).TrimStart('*', ' ')])
-                if(!WikiContentQuality.Placeholder(mob))item.Sources.Add(new() { Zone = zone, Mob = mob, Availability = "Wiki documented", Era = "Unverified",WikiUrl=item.WikiUrl,Revision=revision,EvidenceId=ItemAcquisitionEvidence.Version+":drop:"+Identity.Key(zone+" "+mob) });
+                if(!WikiContentQuality.Placeholder(mob))item.Sources.Add(new() { Zone = zone, Mob = AcquisitionPresentation.LocationTemplate(mob)?"Ground spawn":mob, Method=AcquisitionPresentation.LocationTemplate(mob)?"Ground spawn":"Drop", Coordinates=AcquisitionPresentation.LocationTemplate(mob)?AcquisitionPresentation.Coordinates(mob):"", Availability = "Wiki documented", Era = "Unverified",WikiUrl=item.WikiUrl,Revision=revision,EvidenceId=ItemAcquisitionEvidence.Version+":drop:"+Identity.Key(zone+" "+mob) });
         }
         string crafted = Field(text, "playercrafted");
         foreach (Match recipe in Regex.Matches(crafted, @"(?ms)^\*\s+\[\[(?<skill>Blacksmithing|Smithing|Tailoring|Baking|Brewing|Fletching|Jewelry Making|Jewelcraft|Pottery|Research)(?:\|[^]]*)?\]\].*?(?=^\*\s+\[\[|\z)"))

@@ -27,7 +27,7 @@ public sealed record DpsViewState(List<Encounter> Fights, CombatFilter Filter, L
     long UnknownDamage, long MeleeDamage, long SpellDamage, bool DetailComplete, bool InCombat)
 {
     public double Dps => Damage / Math.Max(1, Seconds);
-    public long MaxHit => Rows.Select(x => x.MaxHit).DefaultIfEmpty(0).Max();
+    public long MaxHit => Peaks.Select(x => x.Damage).DefaultIfEmpty(0).Max();
     public bool HasFilters => Filter.Target.Length > 0 || Filter.Ability.Length > 0 || Filter.Kind.Length > 0 || Filter.CriticalOnly || Filter.Until.HasValue;
     public List<string> TargetChoices { get; init; } = [];
     public List<TargetRow> Targets { get; init; } = [];

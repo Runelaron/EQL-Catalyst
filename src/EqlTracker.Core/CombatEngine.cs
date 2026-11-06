@@ -108,11 +108,11 @@ public sealed class CombatEngine(CharacterProfile profile)
         if (damage.Owner == "Player") Current.PlayerDamage += damage.Damage;
         else if (damage.Owner == "Pet") Current.PetDamage += damage.Damage;
         else if (!damage.ActivityOnly) Current.UnknownDamage += damage.Damage;
-        if (own && !damage.ActivityOnly && damage.Outcome == "Hit")
+        if (own && CombatMetrics.EnemyHit(damage,Current.Events))
         {
             string channel = DamageChannels.From(damage); var peak = Current.Peaks.FirstOrDefault(x => x.Actor == damage.Owner && x.Ability == damage.Ability && x.Channel == channel);
             if (peak == null || damage.Damage > peak.Damage || damage.Damage == peak.Damage && damage.Time < peak.Time)
-            { if (peak != null) Current.Peaks.Remove(peak); Current.Peaks.Add(new(damage.Owner, damage.Ability, channel, damage.Damage, damage.Time, Current.Id)); }
+            { if (peak != null) Current.Peaks.Remove(peak); Current.Peaks.Add(CombatMetrics.Peak(damage,Current.Id)); }
         }
         if (Current.HealingCoverage == "Unavailable") Current.HealingCoverage = "Complete";
         Healing.Attach(Current);
@@ -154,7 +154,13 @@ public sealed record DamageRow(string Ability, string Kind, long Damage, double 
 {
     public bool MonkKick { get; init; }
  public string Unit { get; init; } = "dps"; public string? CustomTooltip { get; init; } public long? LinkedHealing { get; init; } public int LinkedHealCount { get; init; } }
-public sealed record PeakHit(string Actor, string Ability, string Channel, long Damage, DateTime Time, string EncounterId);
+public sealed record PeakHit(string Actor, string Ability, string Channel, long Damage, DateTime Time, string EncounterId)
+{
+    public string Target {get;init;}="";
+    public string Attacker {get;init;}="";
+    public string Direction {get;init;}="";
+    public int EvidenceVersion {get;init;}
+}
 public sealed record TargetRow(string Target, long Damage, double Dps, double Percent, int Hits, long MaxHit, double Average, double CriticalPercent, long MeleeDamage, long SpellDamage)
 { public string Details => $"{Dps:N1} dps · {Percent:N1}% share\n{Hits:N0} hits · {CriticalPercent:N1}% crit · avg {Average:N1} · max {MaxHit:N0}\nMelee {MeleeDamage:N0} · Spells {SpellDamage:N0}"; }
 public static class DamageChannels
@@ -184,12 +190,23 @@ public static class CombatMetrics
         var list = fights.ToList(); double seconds = Math.Max(1, Duration(list, filter)); var events = SelectEvents(list, filter); long total = events.Sum(x => x.Damage);
         return events.GroupBy(x => x.Target, StringComparer.OrdinalIgnoreCase).Select(g => { var hits = g.Where(x => x.Outcome == "Hit").ToList(); long damage = g.Sum(x => x.Damage); return new TargetRow(g.Key, damage, damage / seconds, total > 0 ? damage * 100d / total : 0, hits.Count, hits.Select(x => x.Damage).DefaultIfEmpty(0).Max(), hits.Count > 0 ? hits.Average(x => x.Damage) : 0, hits.Count > 0 ? hits.Count(x => x.Critical) * 100d / hits.Count : 0, g.Where(x => x.Kind == "Melee").Sum(x => x.Damage), g.Where(x => x.Kind is "Spell" or "DoT").Sum(x => x.Damage)); }).OrderByDescending(x => x.Damage).ToList();
     }
+    internal const int PeakEvidenceVersion=2;
+    internal static bool EnemyHit(CombatEvent e,IEnumerable<CombatEvent>? context=null)
+    {
+        if(e.ActivityOnly||e.Outcome!="Hit"||e.Damage<=0||e.Kind is not ("Melee" or "Spell" or "DoT" or "Unknown")||e.Relevance is "Incoming" or "Group"||string.IsNullOrWhiteSpace(e.Target))return false;
+        if(CombatIdentity.Same(e.Actor,e.Target)||new[]{"you","yourself","self"}.Any(t=>CombatIdentity.Same(t,e.Target)))return false;
+        // Modern events already carry time-qualified party relevance. For older
+        // details, exclude recorded friendly actors rather than inventing a foe.
+        return e.Relevance.Length>0||context==null||!context.Any(x=>(x.Owner is "Player" or "Pet" or "Group")&&CombatIdentity.Same(x.Actor,e.Target));
+    }
+    internal static PeakHit Peak(CombatEvent e,string encounter)=>new(e.Owner,e.Ability,DamageChannels.From(e),e.Damage,e.Time,encounter){Target=e.Target,Attacker=e.Actor,Direction="Outgoing",EvidenceVersion=PeakEvidenceVersion};
     public static List<PeakHit> Peaks(IEnumerable<Encounter> fights, CombatFilter filter)
     {
-        var all = fights.ToList();
-        var peaks = all.Where(x => x.DetailAvailable).SelectMany(f => f.Events.Where(e => Matches(e, filter) && e.Outcome == "Hit").Select(e => new PeakHit(e.Owner, e.Ability, DamageChannels.From(e), e.Damage, e.Time, f.Id))).ToList();
-        if (filter.Target == "" && filter.Ability == "" && filter.Kind == "" && !filter.CriticalOnly)
-            peaks.AddRange(all.Where(x => !x.DetailAvailable && (!filter.From.HasValue || x.Start >= filter.From) && (!filter.Until.HasValue || x.End <= filter.Until)).SelectMany(x => x.Peaks).Where(x => filter.Owner == "Combined" ? x.Actor is "Pet" or "Player" : x.Actor == filter.Owner));
-        return peaks.GroupBy(x => (x.Actor, x.Ability, x.Channel)).Select(g => g.OrderByDescending(x => x.Damage).ThenBy(x => x.Time).First()).OrderByDescending(x => x.Damage).ToList();
+        var all=fights.ToList();
+        var peaks=all.Where(f=>f.DetailAvailable).SelectMany(f=>f.Events.Where(e=>Matches(e,filter)&&EnemyHit(e,f.Events)).Select(e=>Peak(e,f.Id))).ToList();
+        if(filter.Target==""&&filter.Ability==""&&filter.Kind==""&&!filter.CriticalOnly)
+            peaks.AddRange(all.Where(f=>!f.DetailAvailable).SelectMany(f=>f.Peaks).Where(p=>p.EvidenceVersion>=PeakEvidenceVersion&&p.Direction=="Outgoing"&&p.Target.Length>0&&p.Damage>0&&(!filter.From.HasValue||p.Time>=filter.From)&&(!filter.Until.HasValue||p.Time<=filter.Until)&&(filter.Owner=="Combined"?p.Actor is "Player" or "Pet":p.Actor==filter.Owner)));
+        return peaks.GroupBy(p=>(p.Actor,p.Ability,p.Channel)).Select(g=>g.OrderByDescending(p=>p.Damage).ThenBy(p=>p.Time).First()).OrderByDescending(p=>p.Damage).ToList();
     }
+
 }

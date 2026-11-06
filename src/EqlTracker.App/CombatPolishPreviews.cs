@@ -67,11 +67,4 @@ internal static class CombatPolishPreviews
         finally { fight.Events.Clear(); fight.Events.AddRange(events); fight.Heals.Clear(); fight.Heals.AddRange(heals); c.Profile.GroupMembers = group; c.Profile.Healing = savedHealing; c.Profile.Meter = meter; c.Profile.CombatLab = preferences; c.Profile.SecondaryText = tone; Appearance.ApplySecondaryText(tone); lab.ShowView(CombatLabMode.Damage, CombatLabTab.Breakdown); c.Save(); }
     }
 }
-public sealed partial class TrackerController
-{
-    internal void SeedPolishOutcomes(Encounter fight)
-    {
-        if (!Demo) throw new InvalidOperationException("Diagnostic fixtures require demo mode.");
-        for (int i = 0; i < 3; i++) abilityOutcomes["preview-resist-" + i] = new("preview-resist-" + i, fight.Start.AddSeconds(3 + i * 4), Profile.Character, "an ice giant", "Spirit Tap", "Full resist", "Illustrative verified-format fixture"); outcomeRevision++; outcomesCaughtUp = true;
-    }
-}
+

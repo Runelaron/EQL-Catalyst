@@ -34,5 +34,23 @@
         "Url": "https://github.com/Runelaron/EQL-Catalyst/releases/download/v1.6.0-beta.1/EQL-Catalyst-1.6.0-beta.1-win-x64-setup.exe"
       }
     ]
+  },
+  {
+    "Version": "1.7.0-beta.1",
+    "Tag": "v1.7.0-beta.1",
+    "Packages": [
+      {
+        "Name": "EQL-Catalyst-1.7.0-beta.1-win-x64.zip",
+        "Kind": "Portable",
+        "Sha256": "ead3ccd247a9c5c742d53dccee4f55a61fb3d78c8bba767d575120a15f119985",
+        "Url": "https://github.com/Runelaron/EQL-Catalyst/releases/download/v1.7.0-beta.1/EQL-Catalyst-1.7.0-beta.1-win-x64.zip"
+      },
+      {
+        "Name": "EQL-Catalyst-1.7.0-beta.1-win-x64-setup.exe",
+        "Kind": "Installer",
+        "Sha256": "d26a7444e19af1b23cd910f4c53b5c8014f0e9fbff7df98c5f48c388e1752873",
+        "Url": "https://github.com/Runelaron/EQL-Catalyst/releases/download/v1.7.0-beta.1/EQL-Catalyst-1.7.0-beta.1-win-x64-setup.exe"
+      }
+    ]
   }
 ]

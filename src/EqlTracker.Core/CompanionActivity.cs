@@ -138,11 +138,13 @@ public static class HoldingsIndex
 public sealed record SessionRecap(PlaySession Session, IReadOnlyList<LootReceiptGroup> Loot, IReadOnlyList<JournalActivity> Progress, IReadOnlyList<JournalActivity> Setup, long? Coin, long? MerchantIncome, long Damage, long PlayerDamage, long PetDamage, int Encounters)
 {
     public bool HistoryIncomplete { get; init; }
+    public long? Spent {get;init;}
+    public long? Earned {get{if(!Coin.HasValue&&!MerchantIncome.HasValue)return null;try{return checked((Coin??0)+(MerchantIncome??0));}catch(OverflowException){return null;}}}
     public static SessionRecap Build(PlaySession session, IEnumerable<JournalActivity> journal, IEnumerable<Encounter> encounters)
     {
         var activity = journal.Where(a => ActivityJournal.InSession(a, session)).DistinctBy(a => a.Id).ToArray();
         var fights = encounters.Where(f => f.Start >= session.Start && f.Start <= session.LastObserved && (!session.NextLogin.HasValue || f.Start < session.NextLogin)).DistinctBy(f => f.Id).ToArray();
-        long? Total(string kind) { var rows = activity.Where(a => a.Kind == kind && a.Copper.HasValue).ToArray(); return rows.Length > 0 ? rows.Sum(a => a.Copper!.Value) : null; }
-        return new(session, ActivityJournal.Loot(activity, session), activity.Where(a => a.Kind == "Progress").ToArray(), activity.Where(a => a.Kind is "Planned setup" or "Observed setup" or "Compatibility").ToArray(), Total("Coin"), Total("Merchant"), fights.Sum(f => f.Damage), fights.Sum(f => f.PlayerDamage), fights.Sum(f => f.PetDamage), fights.Length);
+        long? Total(string kind) { var rows = activity.Where(a => a.Kind == kind && a.Copper.HasValue).ToArray();try{return rows.Length > 0 ? rows.Sum(a => a.Copper!.Value) : null;}catch(OverflowException){return null;} }
+        return new(session, ActivityJournal.Loot(activity, session), activity.Where(a => a.Kind == "Progress").ToArray(), activity.Where(a => a.Kind is "Planned setup" or "Observed setup" or "Compatibility").ToArray(), Total("Coin"), Total("Merchant"), fights.Sum(f => f.Damage), fights.Sum(f => f.PlayerDamage), fights.Sum(f => f.PetDamage), fights.Length) {Spent=Total("Spent")};
     }
 }

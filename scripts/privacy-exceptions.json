@@ -9,9 +9,9 @@
   {
     "File": "src/EqlTracker.Companion/CompanionHost.cs",
     "Rule": "private-ip-literal",
-    "Sha256": "a97df33d7f474a419773d34985df0512f9be04d95bc1c77400d4812aae69a62d",
+    "Sha256": "d161d8cf469187fac2102d1d83732e1a8dc3df547b9e85cbdaf07d9a2499448c",
     "NormalizeLineEndings": true,
-    "Reason": "Loopback-only TLS fixture subnet-mask constant; no personal address."
+    "Reason": "Exact current bytes reviewed: the only IPv4-like literal is the unchanged loopback TLS fixture subnet mask. Linux LAN trust reads the selected interface dynamically; no recorded personal network address is present."
   },
   {
     "File": "tests/EqlTracker.Tests/CompanionFixtureServer.cs",

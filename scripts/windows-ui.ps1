@@ -13,6 +13,11 @@ $cases=@(
   @('summons','--pet-context-only','pet-details-popup-checks.json'),
   @('buffs','--standard-pet-buffs-only','standard-buffs-checks.json'),
   @('content','--october-content-only','october-smoke-checks.json'),
+  @('font','--heading-rewards-only','heading-rewards-checks.json'),
+  @('overview','--overview-polish-only','overview-polish-checks.json'),
+  @('songs','--bard-rotations-only','bard-rotations-checks.json'),
+  @('charges','--exaltation-charges-only','exaltation-charges-checks.json'),
+  @('progress','--progress-reward-only','progress-reward-checks.json'),
   @('selectors','--independent-displays-only','independent-display-checks.json')
 )
 $results=[Collections.Generic.List[object]]::new()

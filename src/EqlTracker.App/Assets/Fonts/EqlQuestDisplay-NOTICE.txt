@@ -1,0 +1,20 @@
+EQL Quest Display Regular, version 1.001
+
+Locally generated Font Software reconstructed from user-supplied lettering PNGs.
+Original reference hashes and glyph assignments are retained in
+EqlQuestDisplay.manifest.json. No downloaded commercial font binary was used.
+
+The EQL Catalyst contributors license their rights in the Font Software under
+the SIL Open Font License, Version 1.1, included as EqlQuestDisplay-OFL.txt.
+No Reserved Font Name is declared. This license grant covers only rights held
+by those contributors; it does not assert ownership of third-party source
+artwork, trademarks, or other rights, or permission from their owners.
+
+EverQuest and Daybreak names/trademarks remain their owners' property. This is
+not an official or endorsed EverQuest font. The Catalyst application wordmark
+uses its separate Classic treatment. Reference provenance is attribution, not
+an assertion of endorsement or an independent worldwide rights clearance.
+
+Outlines, spacing and kerning are unchanged from version 1.000. Version 1.001
+updates licensing metadata only. fontTools, VTracer, Pillow, numpy and Brotli
+are development tools, not embedded runtime components.

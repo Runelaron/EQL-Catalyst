@@ -41,7 +41,7 @@ public sealed partial class TrackerController
         try
         {
             if (string.IsNullOrWhiteSpace(folder)) return;
-            var log=Path.Combine(folder,"Logs",$"eqlog_{character}_{server}.txt");
+            var log=DesktopPaths.Resolve(folder,"Logs",$"eqlog_{character}_{server}.txt");
             if(!File.Exists(log)){lock(Sync){if(statEvidence.Status!="Character log missing · cached evidence retained")statEvidence.Revision++;statEvidence.Status="Character log missing · cached evidence retained";}return;}
             string names=Path.Combine(folder,"spells_us.txt"),messages=Path.Combine(folder,"spells_us_str.txt");
             DateTime messageWrite=File.GetLastWriteTimeUtc(messages),namesWrite=File.GetLastWriteTimeUtc(names);

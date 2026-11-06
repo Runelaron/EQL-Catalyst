@@ -13,7 +13,7 @@ internal sealed class AcquisitionEvidenceRecord
 }
 internal static class ItemAcquisitionEvidence
 {
-    internal const string Version = "acquisition-v3";
+    internal const string Version = "acquisition-v4";
     internal static string Plain(string text) => WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(Regex.Replace(text,
         @"\[\[(?:[^]|]+\|)?([^]]+)\]\]", "$1"), @"<[^>]+>|'{2,}", " "), @"\s+", " ")).Trim();
     internal static IReadOnlyList<QuestAcquisitionLink> Related(string text) => Regex.Matches(WikiTemplateFields.Value(text,"relatedquests"),@"\[\[([^]|]+)(?:\|([^]]+))?\]\]")

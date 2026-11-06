@@ -5,12 +5,12 @@ namespace EqlTracker.Core;
 
 internal sealed record ConnectedSpell(string Name,int? Id,int? UpgradeRank,string Source,string Effects,
     bool? Beneficial=null,bool? Instant=null,double? DirectHeal=null,IReadOnlyDictionary<string,int>? Levels=null,int? Target=null,bool? CombatSkill=null,
-    int? Mana=null,int? RecastMs=null,IReadOnlyList<PetSpellEffect>? Parameters=null);
+    int? Mana=null,int? RecastMs=null,IReadOnlyList<PetSpellEffect>? Parameters=null,string Skill="Unknown",bool? InstrumentEnhanced=null,string Duration="");
 internal sealed record ConnectedSpellIdentity(string Canonical,int? Rank,ConnectedSpell? Definition);
 
 internal sealed class ConnectedSpellIndex
 {
-    internal const string Version="connected-spells-v3-caster-qualified-bard";
+    internal const string Version="connected-spells-v4-bard-skill-context";
     internal string EvidenceVersion { get; private set; }=Version;
     private readonly Dictionary<string,ConnectedSpell> spells=new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string,string> aliases=new(StringComparer.OrdinalIgnoreCase);
@@ -19,7 +19,7 @@ internal sealed class ConnectedSpellIndex
         foreach(var spell in references)
         {
             string skill=spell.Fields.GetValueOrDefault("skill","");bool? combat=skill.Contains("Combat",StringComparison.OrdinalIgnoreCase)?true:new[]{"Alteration","Abjuration","Conjuration","Divination","Evocation"}.Contains(skill,StringComparer.OrdinalIgnoreCase)?false:null;
-            spells[spell.Name]=new(spell.Name,null,0,spell.Url+" · revision "+spell.Revision,spell.Effects,CombatSkill:combat);
+            spells[spell.Name]=new(spell.Name,null,0,spell.Url+" · revision "+spell.Revision,spell.Effects,CombatSkill:combat,Skill:skill,InstrumentEnhanced:spell.Fields.GetValueOrDefault("instrument","").StartsWith("Yes",StringComparison.OrdinalIgnoreCase)?true:null,Duration:spell.Fields.GetValueOrDefault("duration",""));
         }
         foreach(var spell in PetContextCatalog.Bundled.Spells)
         {
@@ -46,6 +46,7 @@ internal sealed class ConnectedSpellIndex
         }
         return new(raw,null,null);
     }
+    internal ConnectedSpell? FindId(int id)=>spells.Values.FirstOrDefault(s=>s.Id==id);
     internal IReadOnlyList<ConnectedSpell> BardSongs => spells.Values.Where(s=>s.Levels?.ContainsKey("BRD")==true).DistinctBy(s=>(s.Id,s.Name,s.UpgradeRank)).OrderBy(s=>s.Name).ToArray();
     private static int? Upgrade(string suffix)
     {
@@ -68,22 +69,34 @@ internal sealed class ConnectedSpellIndex
             foreach(string line in lines)
             {
                 token.ThrowIfCancellationRequested();if(string.IsNullOrWhiteSpace(line))continue;var fields=line.TrimEnd('\r').Split('^');
-                if(fields.Length is not (171 or 172)||fields[165]!="0"||fields[167]!="-1"||fields[168]!="-1"||fields[169]!="-1")return this;
+                if(!SupportedLayout(fields))return this;
                 int I(int i)=>int.Parse(fields[i],CultureInfo.InvariantCulture);
                 int id=I(0);var identity=Resolve(fields[1]);var effects=new List<PetSpellEffect>();
                 if(fields[^1].Length>0)foreach(string tuple in fields[^1].Split('$'))
                 {var cells=tuple.Split('|');if(cells.Length!=6)return this;var n=cells.Select(s=>double.Parse(s,CultureInfo.InvariantCulture)).ToArray();if(n.Any(v=>!double.IsFinite(v)))return this;effects.Add(new((int)n[0],(int)n[1],n[2],n[3],(int)n[4],n[5]));}
                 var levels=new Dictionary<string,int>();for(int i=0;i<16;i++)if(I(36+i) is >0 and <=100)levels[classes[i]]=I(36+i);
-                bool beneficial=I(28)>0,instant=I(12)==0;
+                double duration=double.Parse(fields[12],CultureInfo.InvariantCulture);if(!double.IsFinite(duration)||duration<0)return this;
+                bool beneficial=I(28)>0,instant=duration==0;
                 var healing=effects.Where(e=>e.Spa==0&&e.StaticValue>0).ToArray();
                 double? direct=beneficial&&instant&&healing.Length==1?healing[0].StaticValue:null;
                 pending[fields[1]]=new(identity.Canonical,id,identity.Rank,"Read-only client spell · SHA-256 "+fingerprint,
-                    string.Join("; ",effects.Select(e=>$"slot {e.Slot}: SPA {e.Spa}, base {e.Base}, formula {e.Formula}, max {e.Max}")),beneficial,instant,direct,levels,I(30),identity.Definition?.CombatSkill??spells.GetValueOrDefault(identity.Canonical)?.CombatSkill,I(14),I(10),effects);
+                    string.Join("; ",effects.Select(e=>$"slot {e.Slot}: SPA {e.Spa}, base {e.Base}, formula {e.Formula}, max {e.Max}")),beneficial,instant,direct,levels,I(30),identity.Definition?.CombatSkill??spells.GetValueOrDefault(identity.Canonical)?.CombatSkill,I(14),I(10),effects,I(32) switch{41=>"Singing",12=>"Brass",49=>"Stringed",54=>"Wind",70=>"Percussion",_=>"Unknown"},spells.GetValueOrDefault(identity.Canonical)?.InstrumentEnhanced,spells.GetValueOrDefault(identity.Canonical)?.Duration??"");
             }
         }
         catch(Exception error) when(error is FormatException or OverflowException or IndexOutOfRangeException){return this;}
         foreach(var pair in pending)spells[pair.Key]=pair.Value;
         EvidenceVersion+="/client:"+fingerprint;return this;
+    }
+    private static bool SupportedLayout(string[] fields)
+    {
+        if(fields.Length is 171 or 172)return fields[165]=="0"&&fields[167]=="-1"&&fields[168]=="-1"&&fields[169]=="-1";
+        // Current client adds numeric metadata before the final effect tuples. These
+        // offsets were checked against all records and known spell parameters.
+        if(fields.Length!=174||fields[167] is not ("0" or "1")||fields[172] is not ("0" or "1"))return false;
+        if(!double.TryParse(fields[165],NumberStyles.Float,CultureInfo.InvariantCulture,out double extra)||!double.IsFinite(extra))return false;
+        if(fields[166].Length>0&&!int.TryParse(fields[166],out _))return false;
+        for(int i=168;i<=171;i++)if(!int.TryParse(fields[i],out int value)||value< -1)return false;
+        return true;
     }
 }
 

@@ -69,7 +69,7 @@ public sealed class PetItemDialog : FrostDialog
         void FilterEffects()
         {
             string? selected = (options.SelectedItem as EffectChoice)?.Option.Id; int.TryParse(rank.Text, out int tier);
-            var rows = choices.Where(o => o.Name.Contains(effectSearch.Text, StringComparison.OrdinalIgnoreCase) && (effectType.SelectedIndex == 0 || o.Type == effectType.SelectedItem?.ToString()) && (effectOwnership.SelectedIndex == 0 || effectOwnership.SelectedIndex == 1 && o.Owned || effectOwnership.SelectedIndex == 2 && o.SourceOwned))
+            var rows = choices.Where(o => ExaltationChargePolicy.Visible(o,controller.IncludeChargedExaltations)&&o.Name.Contains(effectSearch.Text, StringComparison.OrdinalIgnoreCase) && (effectType.SelectedIndex == 0 || o.Type == effectType.SelectedItem?.ToString()) && (effectOwnership.SelectedIndex == 0 || effectOwnership.SelectedIndex == 1 && o.Owned || effectOwnership.SelectedIndex == 2 && o.SourceOwned))
                 .OrderBy(o => o.Source.Name, StringComparer.OrdinalIgnoreCase).ThenBy(o => o.Effect, StringComparer.OrdinalIgnoreCase).Select(o => new EffectChoice(o, definition.Key.Length == 0 ? "Configured · choose an item to validate" : ExaltationPlanner.Validate(o, definition, tier, slot.SelectedItem?.ToString() ?? "Storage", effectContext, true, controller.Catalog))).ToList();
             UI.SetRows(options, rows); options.SelectedItem = rows.FirstOrDefault(o => o.Option.Id == selected); RefreshEffects();
         }

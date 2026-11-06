@@ -9,10 +9,10 @@ public sealed partial class QuestWindow
 {
     private readonly DataGrid gearEquipment = UI.Table(("Slot", "Label", 86, null), ("Equipment", "Name", 170, null), ("Type", "Type", 100, null));
     private readonly ComboBox gearPosition = new() { Width = 210, DisplayMemberPath = "Label", SelectedValuePath = "Id" };
-    private readonly ComboBox gearOwnership = UI.Select(["All", "Inventory Only", "Have Drops", "Have Ingredients", "Quest rewards"], "All", 140);
-    private readonly ComboBox gearEligibility = UI.Select(["All", "Build", "Incompatible"], "All", 140);
-    private readonly ComboBox gearPositive = UI.Select(["All comparisons", "Positive in either", "Positive in both"], "All comparisons", 150);
-    private readonly ComboBox gearRankChoice = UI.Select(new[] { "Default" }.Concat(Enumerable.Range(0, 11).Select(r => "+" + r)), "Default", 105);
+    private readonly ComboBox gearOwnership = UI.Select(["All", "Inventory Only", "Have Drops", "Have Ingredients", "Quest rewards"], "All", 105);
+    private readonly ComboBox gearEligibility = UI.Select(["All", "Build", "Incompatible"], "All", 105);
+    private readonly ComboBox gearPositive = UI.Select(["All comparisons", "Positive in either", "Positive in both"], "All comparisons", 113);
+    private readonly ComboBox gearRankChoice = UI.Select(new[] { "Default" }.Concat(Enumerable.Range(0, 11).Select(r => "+" + r)), "Default", 79);
     private readonly ComboBox gearDestination = UI.Select(["Confirmed", "Planned build"], "Confirmed", 125);
     private readonly CheckBox gearWithoutAa = new() { Content = "Compare without AAs" };
     private readonly TextBlock gearDraftSummary = UI.Text("", 11, "Mint"), gearBreakEven = UI.Text("", 11, "Muted");
@@ -64,10 +64,11 @@ public sealed partial class QuestWindow
         var header = UI.Stack(controls, gearUpdateCurrent, gearTheoryNote);
         DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
         var search = GearSearchControls();
-        var filters = new WrapPanel(); foreach (var child in new UIElement[] { UI.Field("Items", gearOwnership), UI.Field("Compatibility", gearEligibility), UI.Field("Rank", gearRankChoice), UI.Field("Rating", gearPositive) }) filters.Children.Add(child);
+        foreach(var field in new Control[]{gearOwnership,gearEligibility,gearRankChoice,gearPositive})field.Height=28;
+        var filters = new WrapPanel(); foreach (var child in new UIElement[] { UI.Field("Show", gearOwnership), UI.Field("Compatibility", gearEligibility), UI.Field("Rank", gearRankChoice), UI.Field("Rating", gearPositive) }) filters.Children.Add(child);
         var candidatePane = new DockPanel();
-        var candidateHeader = UI.Stack(search, FocusedLayout.Disclosure("Filters & Rank", filters, "Filter candidates without editing inventory or other saved builds."), gearSearchStatus);
-        DockPanel.SetDock(candidateHeader, Dock.Top); candidatePane.Children.Add(candidateHeader);
+        var candidateHeader = UI.Stack(search, FocusedLayout.Disclosure("Filter", filters, "Filter candidates without editing inventory or other saved builds."), gearSearchStatus);
+        var boundedHeader=UI.BoundedHeader(candidateHeader,candidatePane);DockPanel.SetDock(boundedHeader, Dock.Top); candidatePane.Children.Add(boundedHeader);
         DockPanel.SetDock(gearChanges, Dock.Bottom); candidatePane.Children.Add(gearChanges);
         var actions = new WrapPanel(); gearAddToBuild = UI.Button("Add to build", () => TryGearDraft());
         gearAddToBuild.ToolTip="Replace a compatible slot in the selected build using the inspected rank. Uses the selected equipment slot, or offers a compatible-slot picker. Undo is available; ownership is unchanged.";

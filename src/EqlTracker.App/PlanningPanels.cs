@@ -40,6 +40,7 @@ public sealed partial class QuestWindow
     private readonly DataGrid exaltTable = UI.Table(("Source / effect", "Name", 0, null), ("Type", "Type", 65, null), ("Unlock Rank", "UnlockRank", 85, null), ("Ownership", "State", 190, null));
     private readonly StackPanel exaltDetail = new();
     private readonly ComboBox exaltCompatibility = UI.Select(["All", "Current Loadout", "Incompatible"], "All", 180);
+    private readonly CheckBox exaltChargedClicks=WorkspaceForms.Control(new CheckBox{Content="Include charged clicks",ToolTip=ExaltationChargePolicy.Limitation},"Include charged clicks");
     private readonly ComboBox exaltPurpose = UI.Select(new[] { "All" }.Concat(Enum.GetNames<EffectPurpose>()), "All", 100), exaltContent = UI.Select(["Current", "Future", "All"], "Current", 95);
     private readonly ComboBox exaltDestination = UI.Select([], "", 230);
     private List<ExaltationOption> exaltOptions = [];
@@ -196,11 +197,14 @@ public sealed partial class QuestWindow
     {
         exaltSearch.Height=28;exaltSearch.Margin=new(0);foreach(var control in new[]{exaltType,exaltPurpose,exaltOwnership,exaltContent,exaltExpansion,exaltTarget,exaltCompatibility})control.Height=28;
         var root = new DockPanel(); var filters = new WrapPanel(); foreach (var c in new UIElement[] { UI.Field("Search", (FrameworkElement)FocusedLayout.Search(exaltSearch, "Find an effect or source…")), UI.Field("Socket", exaltType), UI.Field("Purpose", exaltPurpose), UI.Field("Ownership", exaltOwnership), UI.Field("Content", exaltContent) }) filters.Children.Add(c);
-        var advanced = new WrapPanel(); foreach (var c in new UIElement[] { UI.Field("Expansion", exaltExpansion), UI.Field("Target", exaltTarget), UI.Field("Restrictions", exaltCompatibility) }) advanced.Children.Add(c);
+        exaltChargedClicks.IsChecked=Controller.IncludeChargedExaltations;
+        var advanced = new WrapPanel(); foreach (var c in new UIElement[] { UI.Field("Expansion", exaltExpansion), UI.Field("Target", exaltTarget), UI.Field("Restrictions", exaltCompatibility), UI.ActionField(exaltChargedClicks) }) advanced.Children.Add(c);
         var header = UI.Stack(filters, FocusedLayout.Disclosure("Expansion & compatibility", advanced, "Filter exact item expansion, intended loadout and class compatibility.")); DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
         root.Children.Add(UI.Split(TrackerLeftPane(exaltTable), FloatingEffectInspector(exaltDetail), 340, Controller.Profile, "exaltations", 280, 200));
         exaltTable.SelectionChanged += (_, _) => ShowExaltation(); exaltSearch.TextChanged += (_, _) => { exaltKey = ""; if (!initializing) RefreshExaltations(); };
-        foreach (var c in new[] { exaltType, exaltOwnership, exaltExpansion, exaltTarget, exaltCompatibility, exaltPurpose, exaltContent }) c.SelectionChanged += (_, _) => { exaltKey = ""; if (!initializing) RefreshExaltations(); }; return root;
+        foreach (var c in new[] { exaltType, exaltOwnership, exaltExpansion, exaltTarget, exaltCompatibility, exaltPurpose, exaltContent }) c.SelectionChanged += (_, _) => { exaltKey = ""; if (!initializing) RefreshExaltations(); };
+        RoutedEventHandler chargedChanged=(_,_)=>{Controller.IncludeChargedExaltations=exaltChargedClicks.IsChecked==true;exaltKey="";if(!initializing)RefreshExaltations();};
+        exaltChargedClicks.Checked+=chargedChanged;exaltChargedClicks.Unchecked+=chargedChanged;return root;
     }
     private void RefreshExaltations()
     {
@@ -223,8 +227,9 @@ public sealed partial class QuestWindow
             }
         }
         RefreshExaltationCompatibilityLabel();
-        string key = catalogKey + exaltSearch.Text + exaltType.SelectedItem + exaltOwnership.SelectedItem + exaltExpansion.SelectedItem + exaltTarget.SelectedItem + exaltCompatibility.SelectedItem + exaltPurpose.SelectedItem + exaltContent.SelectedItem; if (key == exaltKey) { RefreshSelectedEffectReference(); return; } exaltKey = key;
+        string key = catalogKey + exaltSearch.Text + exaltType.SelectedItem + exaltOwnership.SelectedItem + exaltExpansion.SelectedItem + exaltTarget.SelectedItem + exaltCompatibility.SelectedItem + exaltPurpose.SelectedItem + exaltContent.SelectedItem+Controller.IncludeChargedExaltations; if (key == exaltKey) { RefreshSelectedEffectReference(); return; } exaltKey = key;
         var rows = exaltOptions.Where(e => e.Name.Contains(exaltSearch.Text, StringComparison.OrdinalIgnoreCase)
+            && ExaltationChargePolicy.Visible(e,Controller.IncludeChargedExaltations)
             && (exaltType.SelectedIndex == 0 || e.Type == exaltType.SelectedItem?.ToString())
             && (exaltPurpose.SelectedIndex == 0 || e.Purpose.ToString() == exaltPurpose.SelectedItem?.ToString())
             && (exaltOwnership.SelectedIndex switch { 1 => e.Owned, 2 => e.SourceOwned, 3 => !e.Owned && !e.SourceOwned, _ => true })
@@ -246,8 +251,9 @@ public sealed partial class QuestWindow
         exaltDetail.Children.Clear(); if (exaltTable.SelectedItem is not ExaltationOption e) { exaltDetail.Children.Add(UI.Text("No matching effects. Unknown effect types remain visible.")); return; }
         var icons = new ItemHeaderIcons(UI.Text(e.Source.Name, 16, "Accent", true)); icons.Show(e.Source, e.Owned ? new(true, e.OwnershipEvidence.Details, false, null) : ItemOwnership.For(e.Source, Controller.Inventory));
         selectedEffectReferencePanel=new();
-        exaltDetail.Children.Add(UI.Card(UI.Stack(icons, UI.Text(e.Effect, 13, "Mint"), selectedEffectReferencePanel, UI.Text(e.Type == "Unknown" ? "Unlock rank unverified" : $"{e.Type} · extract/socket at +{e.UnlockRank}" + (e.Purpose == EffectPurpose.Unknown ? "" : " · " + e.Purpose), 12), UI.Text(e.State, 12), UI.Text("Class: " + string.Join(" / ", e.Source.Classes) + "\nSlots: " + ItemPresentation.Slots(e.Source.Slots), 11), UI.Text((e.Content == "Unverified" ? "Availability: unverified" : e.Content) + (e.Source.AvailabilityEvidence.Length > 0 ? " · " + e.Source.AvailabilityEvidence : ""), 10, "Muted"), UI.Text(ItemPresentation.ExpansionNote(e.Source), 10, "Muted"))));
+        exaltDetail.Children.Add(UI.Card(UI.Stack(icons, UI.Text(e.Effect, 13, "Mint"), selectedEffectReferencePanel, UI.Text(ExaltationChargePolicy.IsChargedClick(e)?"Charged click · transfer unverified":e.Type == "Unknown" ? "Unlock rank unverified" : $"{e.Type} · extract/socket at +{e.UnlockRank}" + (e.Purpose == EffectPurpose.Unknown ? "" : " · " + e.Purpose), 12), UI.Text(e.State, 12), UI.Text("Class: " + string.Join(" / ", e.Source.Classes) + "\nSlots: " + ItemPresentation.Slots(e.Source.Slots), 11), UI.Text((e.Content == "Unverified" ? "Availability: unverified" : e.Content) + (e.Source.AvailabilityEvidence.Length > 0 ? " · " + e.Source.AvailabilityEvidence : ""), 10, "Muted"), UI.Text(ItemPresentation.ExpansionNote(e.Source), 10, "Muted"))));
         RefreshSelectedEffectReference();
+        if(ExaltationChargePolicy.IsChargedClick(e))exaltDetail.Children.Add(UI.Text(ExaltationChargePolicy.Limitation,11,"SecondaryText"));
         exaltDetail.Children.Add(FocusedLayout.Disclosure("Ownership evidence", UI.Text(e.OwnershipEvidence.Details, 11), "Distinguishes source equipment, extracted storage, socketed effects and collection/keyring presence. No copies are invented."));
         exaltDetail.Children.Add(UI.CommitButton("Add to queue", PinExaltation));
         exaltDetail.Children.Add(FocusedLayout.Disclosure("Unlock rules", UI.Text("Ornamentation +0 · Focus +1 · Click +2 · Worn +3 · Proc +4. Source ownership is not an extracted effect. Collection entries prove presence, not quantity. Intrinsic effects remain separate from socketed and planned effects.", 11, "SecondaryText"), "Effect types unlock at different source and destination ranks; source ownership is not effect ownership."));

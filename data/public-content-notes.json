@@ -1,6 +1,10 @@
 {
   "item:schemer's guise": [
-    "Earlier wiki revision 199167 recorded ResistVoid 4; revision 199768 does not document it. Current catalog value is unknown, not zero. Earlier evidence: https://eqlwiki.com/Schemer%27s_Guise; latest: https://eqlwiki.com/Schemer%27s_Guise?oldid=199768"
+    "Earlier wiki revision 199167 recorded ResistVoid 4; revision 199768 does not document it. Current catalog value is unknown, not zero. Earlier evidence: https://eqlwiki.com/Schemer%27s_Guise; latest: https://eqlwiki.com/Schemer%27s_Guise?oldid=199768",
+    "Wiki AC changed from 9 (revision 199768) to 5 (revision 200074). Exact client/rank observations remain separate. https://eqlwiki.com/Schemer%27s_Guise?oldid=200074",
+    "Wiki Mana changed from 42 (revision 199768) to 30 (revision 200074). Exact client/rank observations remain separate. https://eqlwiki.com/Schemer%27s_Guise?oldid=200074",
+    "Wiki CHA changed from 18 (revision 199768) to 13 (revision 200074). Exact client/rank observations remain separate. https://eqlwiki.com/Schemer%27s_Guise?oldid=200074",
+    "Wiki ResistMagic changed from 14 (revision 199768) to 10 (revision 200074). Exact client/rank observations remain separate. https://eqlwiki.com/Schemer%27s_Guise?oldid=200074"
   ],
   "item:pestilence scythe": [
     "Wiki Damage changed from 10 (revision 144238) to 16 (revision 174300). Exact client/rank observations remain separate. https://eqlwiki.com/Pestilence_Scythe?oldid=174300",
@@ -10,13 +14,20 @@
   "item:blood's unity": [
     "Source disagreement: https://eqlwiki.com/Blood%27s_Unity revision 199411 lists Lord Rikantus Everling as a drop source, while explicit walkthroughs describe a quest reward. This drop claim is retained here for review and is not offered as a confirmed drop route.",
     "Source disagreement: https://eqlwiki.com/Lord_Rikantus_Everling?oldid=199795 revision 199795 lists Lord_Rikantus_Everling as a drop source, while explicit walkthroughs describe a quest reward. This drop claim is retained here for review and is not offered as a confirmed drop route.",
-    "Blood's Unity is the documented reward from The Betrayer during the House Everling chain, not two independently granted copies. The wiki reports a +0 reward even in a +4 instance. https://eqlwiki.com/The_Betrayer?oldid=199714"
+    "Blood's Unity is the documented reward from The Betrayer during the House Everling chain, not two independently granted copies. The wiki reports a +0 reward even in a +4 instance. https://eqlwiki.com/The_Betrayer?oldid=199714",
+    "Wiki WIS changed from 1 (revision 199411) to 15 (revision 200116). Exact client/rank observations remain separate. https://eqlwiki.com/Blood%27s_Unity?oldid=200116",
+    "Wiki ResistVoid changed from 30 (revision 199411) to 25 (revision 200116). Exact client/rank observations remain separate. https://eqlwiki.com/Blood%27s_Unity?oldid=200116",
+    "Source disagreement: https://eqlwiki.com/Lord_Rikantus_Everling?oldid=200045 revision 200045 lists Lord_Rikantus_Everling as a drop source, while explicit walkthroughs describe a quest reward. This drop claim is retained here for review and is not offered as a confirmed drop route.",
+    "Blood's Unity is the documented reward from The Betrayer during the House Everling chain, not two independently granted copies. The wiki reports a +0 reward even in a +4 instance. https://eqlwiki.com/The_Betrayer?oldid=200014"
   ],
   "zone:lake nerius": [
-    "Wiki quest starts and castle approach: Retainer Ozval begins Hate, Betrayal, and Trust. The normal, non-instanced Plane of Hate requirement applies to the blessing, not the Lake Nerius ring-mob suggestion. https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=199712"
+    "Wiki quest starts and castle approach: Retainer Ozval begins Hate, Betrayal, and Trust. The blessing supports normal zones and solo/multiplayer non-raid personal instances as of October 27; raid instances remain excluded. The final blessing hand-in requires level 46 in the current wiki walkthrough. https://eqlwiki.com/Hate%2C_Betrayal%2C_and_Trust?oldid=200308"
   ],
   "zone:nektropos castle": [
-    "Wiki access and routes: Hate, Betrayal, and Trust begins with Retainer Ozval in Lake Nerius; the library-key combine in The Tragic Tale of House Everling; then The Betrayer for door keys and the basement. Unknown NPC coordinates remain unknown. https://eqlwiki.com/Nektropos_Castle?oldid=199789"
+    "Wiki access and routes: Hate, Betrayal, and Trust begins with Retainer Ozval in Lake Nerius; the library-key combine in The Tragic Tale of House Everling; then The Betrayer for door keys and the basement. Unknown NPC coordinates remain unknown. https://eqlwiki.com/Nektropos_Castle?oldid=200257",
+    "November 4: Hailing Ollix to restart the quest now preserves earned tower access. Previously lost access is not restored retroactively. https://www.everquestlegends.com/patch-notes/eql-hotfix-notes-11-4-2026",
+    "November 4: Undead see normal invisibility; living NPCs see invisibility versus undead. Some rare/named creatures detect all invisibility. Shroud of Stealth is generally effective. https://www.everquestlegends.com/patch-notes/eql-hotfix-notes-11-4-2026",
+    "October 29: required quest items can be found in Equipment Storage; Alexa encounter debuffs end on her death. Respawn reductions were published without exact timers. https://www.everquestlegends.com/patch-notes/eql-update-notes-10-29-2026"
   ],
   "zone:nektropos undercroft": [
     "Wiki access: tunnel entrance (1620, -930, 0); cellar door (2435, -1155, -10) along the castle's south wall in Lake Nerius. https://eqlwiki.com/The_Nektropos_Undercroft?oldid=199480"
