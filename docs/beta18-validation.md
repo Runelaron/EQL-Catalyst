@@ -30,3 +30,5 @@ Mode overlays remain experimental. WSL was not restarted or reconfigured.
 The first hosted candidates stopped at privacy gates before publication. Release SDK resolution is now pinned exactly. One Linux dependency producer path is reviewed against its exact published package bytes and complete inner path; changed bytes remain blocked. ZIP, tar and Debian members and metadata are inspected without host extraction. Linux packages remain preview-only.
 
 The first complete Windows candidate was rejected by the final SBOM scan: CVE-2026-70197 affects its 10.0.13 Windows runtime. The replacement pins SDK 10.0.403 and bundles 10.0.14, with an explicit package-time runtime assertion. Initial findings remain recorded; they were not suppressed. Both platform SBOM app filenames and generated lock inputs are now checked.
+
+Privacy version reviews keep Microsoft.Data.Sqlite package metadata 10.0.13.0 separate from bundled framework 10.0.14.0. The SQLite package version is not a .NET runtime version; approving that vendor metadata does not relax the runtime security floor or suppress the CVE finding.
