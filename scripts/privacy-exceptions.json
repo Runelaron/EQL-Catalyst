@@ -37,5 +37,17 @@
     "Rule": "private-path-or-secret-pattern",
     "Sha256": "cac56e35128b55dd84291c7378aa3dfb52f1808d3f2c427b3dfe697f2d79c10b",
     "Reason": "Exact linux-x64 assembly bytes match the published Tmds.LibC 0.2.0 NuGet package. Its sole path finding is the upstream PE CodeView producer build path, not this workstation, a profile, address, credential or private key."
+  },
+  {
+    "File": "MicroCom.Runtime.dll",
+    "Rule": "private-path-or-secret-pattern",
+    "Sha256": "2538ec6f3c24e901a90e33c37788b9a4e4b6ae8158cab7328a00a00bb28eab9e",
+    "Reason": "Exact assembly bytes match the public MicroCom.Runtime 0.11.6 NuGet package. Its sole path is the upstream PE CodeView producer record, not this workstation, a profile or a credential."
+  },
+  {
+    "File": "usr/lib/eql-catalyst/MicroCom.Runtime.dll",
+    "Rule": "private-path-or-secret-pattern",
+    "Sha256": "2538ec6f3c24e901a90e33c37788b9a4e4b6ae8158cab7328a00a00bb28eab9e",
+    "Reason": "Exact assembly bytes match the public MicroCom.Runtime 0.11.6 NuGet package. Its sole path is the upstream PE CodeView producer record, not this workstation, a profile or a credential."
   }
 ]

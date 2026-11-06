@@ -21,15 +21,15 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory artifacts -Force | Out-Null
-          python scripts/privacy-audit.py . --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-source.json
+          python scripts/privacy-audit.py . --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.14.0 --report artifacts/privacy-source.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           @{Sdk=(dotnet --version);Assemblies=@(Get-ChildItem dist/EQL-Catalyst-*-win-x64/*.dll | Where-Object Name -in @('EQLTracker.dll','Microsoft.AspNetCore.Identity.dll','PresentationUI.dll') | ForEach-Object { @{Name=$_.Name;FileVersion=$_.VersionInfo.FileVersion;ProductVersion=$_.VersionInfo.ProductVersion} })} | ConvertTo-Json -Depth 6 | Set-Content artifacts/runtime-versions.json
           [xml]$versionXml=Get-Content Version.props
           $releaseVersion=$versionXml.Project.PropertyGroup.VersionPrefix+'-'+$versionXml.Project.PropertyGroup.VersionSuffix
-          python scripts/privacy-audit.py "dist/EQL-Catalyst-$releaseVersion-win-x64" --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report artifacts/privacy-payload.json
+          python scripts/privacy-audit.py "dist/EQL-Catalyst-$releaseVersion-win-x64" --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.14.0 --report artifacts/privacy-payload.json
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           foreach ($package in Get-ChildItem dist/*.zip,dist/*-setup.exe) {
-            python scripts/privacy-audit.py $package.FullName --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.13.0 --report ("artifacts/privacy-"+$package.Name+".json")
+            python scripts/privacy-audit.py $package.FullName --exceptions scripts/privacy-exceptions.json --private-root "$pwd" --software-version 10.0.0.0 --software-version 10.1.0.0 --software-version 10.0.14.0 --report ("artifacts/privacy-"+$package.Name+".json")
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Disposable-runner installer checks

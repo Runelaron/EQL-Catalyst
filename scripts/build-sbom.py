@@ -15,7 +15,7 @@ def add(name,version,purl,evidence=''):
     c={'type':'library','bom-ref':purl,'name':name,'version':version,'purl':purl}
     if evidence:c['properties']=[{'name':'eql:evidence','value':evidence}]
     s['components'].append(c);known.add((name.lower(),version))
-app='EQLTracker' if (a.payload/(app+'.deps.json')).exists() else 'EqlTracker.Linux'
+app='EQLTracker' if (a.payload/'EQLTracker.deps.json').exists() else 'EqlTracker.Linux'
 deps=json.loads((a.payload/(app+'.deps.json')).read_text())
 for identity,library in deps['libraries'].items():
     if library.get('type')=='package':

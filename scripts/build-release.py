@@ -4,6 +4,7 @@ from zipfile import ZipFile,ZIP_DEFLATED
 import argparse,hashlib,json,os,re,shutil,subprocess,urllib.request,uuid
 import xml.etree.ElementTree as ET
 from package_policy import forbidden,assert_tree,assert_archive
+from runtime_policy import verify_runtime
 
 ROOT=Path(__file__).resolve().parents[1]
 DIST=ROOT/'dist'; TOOLS=ROOT/'.tools/installer'
@@ -50,6 +51,7 @@ def main():
             shutil.rmtree(payload)
         temp.rename(payload)
         for p in payload.rglob('*.pdb'):p.unlink()
+
         for name in ['LICENSE','THIRD-PARTY-NOTICES.md','ASSET-NOTICES.md']:shutil.copy2(ROOT/name,payload/name)
         shutil.copy2(ROOT/'docs/installation.md',payload/'README.md')
         shutil.copy2(ROOT/'docs/role-ratings.md',payload/'ROLE-RATINGS.md')
@@ -78,12 +80,14 @@ def main():
         manifest={p.relative_to(payload).as_posix():sha(p) for p in sorted(payload.rglob('*')) if p.is_file()}
         (payload/'release-manifest.json').write_text(json.dumps({'Product':'EQL Catalyst','Version':props['VersionPrefix']+'-'+props['VersionSuffix'],'WindowsVersion':props['FileVersion'],'Signed':False,'SdkVersion':actual_sdk,'SourceCommit':run(['git','rev-parse','HEAD'],capture_output=True,text=True).stdout.strip(),'Files':manifest},indent=2),encoding='utf-8')
         assert_tree(payload)
+        verify_runtime(payload,'EQLTracker',props['BundledRuntimeVersion'])
         if args.payload_only:return
         compiler=Path(args.compiler) if args.compiler else bootstrap() if args.bootstrap_compiler else TOOLS/'compiler/ISCC.exe'
         if not compiler.exists() or '7.1.0' not in run([compiler,'--version'],capture_output=True,text=True).stdout:raise RuntimeError('Verified Inno Setup 7.1.0 required')
         run([compiler,f'--define=Payload={payload}',f'--define=ReleaseVersion={props["VersionPrefix"]}-{props["VersionSuffix"]}',f'--define=ReleaseLabel={props["ReleaseLabel"]}',f'--define=WindowsVersion={props["FileVersion"]}',f'--define=ReleaseOrder={props["VersionPrefix"]}.{stage[1]}','installer/EqlCatalyst.iss'])
     version=props['VersionPrefix']+'-'+props['VersionSuffix']
     assert_tree(payload)
+    verify_runtime(payload,'EQLTracker',props['BundledRuntimeVersion'])
     manifest=json.loads((payload/'release-manifest.json').read_text(encoding='utf-8'))
     for name,digest in manifest['Files'].items():
         if sha(payload/name)!=digest:raise RuntimeError('Payload changed: '+name)

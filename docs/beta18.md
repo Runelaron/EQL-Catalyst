@@ -22,7 +22,7 @@ notice distinguishes third-party rights and makes no endorsement claim. Catalyst
 branding uses its separate Classic font treatment. Reward names retain live,
 raised/inset display lettering.
 
-Windows installer and portable packages remain self-contained. Automatic checks
+Windows installer and portable packages remain self-contained and bundle the security-fixed .NET 10.0.14 runtime. Automatic checks
 and authenticated read-only LAN sharing remain opt-in. Public builds disable
 private research. Existing profiles, custom weights, gear, progress and evidence
 are preserved. Windows binaries remain unsigned; signed update metadata is a

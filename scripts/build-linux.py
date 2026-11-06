@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse, hashlib, json, os, shutil, subprocess, tarfile, tempfile
 import xml.etree.ElementTree as ET
 from package_policy import assert_tree, assert_archive
+from runtime_policy import verify_runtime
 
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument('--payload',type=Path,required=True);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
@@ -30,6 +31,7 @@ def main():
     manifest={p.relative_to(payload).as_posix():hashlib.file_digest(p.open('rb'),'sha256').hexdigest() for p in sorted(payload.rglob('*')) if p.is_file() and p.name!='release-manifest.json'}
     commit=subprocess.run(['git','rev-parse','HEAD'],cwd=root,capture_output=True,text=True,check=True).stdout.strip()
     (payload/'release-manifest.json').write_text(json.dumps(dict(Product='EQL Catalyst',Version=version,Runtime='linux-x64',SourceCommit=commit,Preview=True,ReleaseQualified=False,Files=manifest),indent=2))
+    verify_runtime(payload,'EqlTracker.Linux',props['BundledRuntimeVersion'])
     name='EQL-Catalyst-'+version+'-linux-x64-preview';archive=output/(name+'.tar.gz')
     with tarfile.open(archive,'w:gz') as tar:
         for p in sorted(payload.rglob('*')):

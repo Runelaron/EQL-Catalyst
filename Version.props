@@ -6,5 +6,5 @@
     <FileVersion>1.8.0.0</FileVersion>
     <ReleaseLabel>Beta 1.8</ReleaseLabel>
     <Company>EQL Catalyst</Company>
-  </PropertyGroup>
+  <BundledRuntimeVersion>10.0.14</BundledRuntimeVersion></PropertyGroup>
 </Project>
